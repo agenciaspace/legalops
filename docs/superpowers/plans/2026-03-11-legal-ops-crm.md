@@ -1415,6 +1415,8 @@ git commit -m "feat: add cron scrape endpoint and vercel.json schedule"
 
 ---
 
+> **Deferred endpoints:** The spec lists `GET /api/pipeline` (list entries) and `DELETE /api/pipeline/[entryId]` (remove from pipeline). These are NOT implemented in this plan — the pipeline page fetches directly via RSC, and there is no delete UI in v1. If needed in future, add them to `app/api/pipeline/route.ts` and `app/api/pipeline/[entryId]/route.ts` respectively.
+
 ### Task 10: POST /api/pipeline (Add to Pipeline)
 
 **Files:**
@@ -2065,6 +2067,8 @@ import type { Job } from '@/lib/types'
 export function DiscoverClient({ initialJobs }: { initialJobs: Job[] }) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs)
   const [loadingMore, setLoadingMore] = useState(false)
+  // Track whether a full page was returned (not current list length — list shrinks as user actions cards)
+  const [hasMore, setHasMore] = useState(initialJobs.length === 20)
   const router = useRouter()
 
   async function handleAction(jobId: string, action: 'add' | 'ignore') {
@@ -2092,6 +2096,7 @@ export function DiscoverClient({ initialJobs }: { initialJobs: Job[] }) {
     if (res.ok) {
       const { jobs: more } = await res.json()
       setJobs(prev => [...prev, ...more]) // append — does not replace existing cards
+      setHasMore(more.length === 20) // only show Load more if a full page was returned
     }
     setLoadingMore(false)
   }
@@ -2115,7 +2120,7 @@ export function DiscoverClient({ initialJobs }: { initialJobs: Job[] }) {
           <JobCard key={job.id} job={job} onAction={handleAction} />
         ))}
       </div>
-      {jobs.length === 20 && (
+      {hasMore && (
         <div className="mt-6 text-center">
           <button
             onClick={loadMore}
@@ -2753,9 +2758,9 @@ npm run dev
 Walk through:
 1. http://localhost:3000 → redirects to /login
 2. Create account → redirects to /discover
-3. Trigger cron manually to populate jobs:
+3. Trigger cron manually to populate jobs (GET request):
    ```bash
-   curl -X POST http://localhost:3000/api/cron/scrape \
+   curl http://localhost:3000/api/cron/scrape \
      -H "Authorization: Bearer $(grep CRON_SECRET .env.local | cut -d= -f2)"
    ```
 4. Refresh /discover → jobs appear
@@ -2832,7 +2837,7 @@ npm run dev
 
 ### Manually trigger cron (dev)
 ```bash
-curl -X POST http://localhost:3000/api/cron/scrape \
+curl http://localhost:3000/api/cron/scrape \
   -H "Authorization: Bearer YOUR_CRON_SECRET"
 ```
 
