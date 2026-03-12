@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { parseEnrichmentResponse, buildEnrichmentPrompt } from '@/lib/enrichment'
+import {
+  parseEnrichmentResponse,
+  buildEnrichmentPrompt,
+  extractKimiResponseText,
+} from '@/lib/enrichment'
 
 describe('parseEnrichmentResponse', () => {
   it('parses valid JSON response', () => {
@@ -65,5 +69,20 @@ describe('buildEnrichmentPrompt', () => {
     const prompt = buildEnrichmentPrompt('Legal Operations Manager at Acme Corp')
     expect(prompt).toContain('Legal Operations Manager at Acme Corp')
     expect(prompt).toContain('remote_reality')
+  })
+})
+
+describe('extractKimiResponseText', () => {
+  it('supports OpenAI-style string content', () => {
+    expect(extractKimiResponseText('{"ok":true}')).toBe('{"ok":true}')
+  })
+
+  it('supports array-based text content', () => {
+    expect(
+      extractKimiResponseText([
+        { type: 'text', text: '{"foo":' },
+        { type: 'text', text: '"bar"}' },
+      ])
+    ).toBe('{"foo":\n"bar"}')
   })
 })

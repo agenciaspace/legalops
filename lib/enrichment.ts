@@ -1,9 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk'
 import type { RemoteReality } from './types'
 
 const VALID_REMOTE_REALITY: RemoteReality[] = [
   'fully_remote', 'remote_with_travel', 'hybrid_disguised', 'onsite', 'unknown'
 ]
+
+const KIMI_API_URL = 'https://api.moonshot.cn/v1/chat/completions'
+const DEFAULT_KIMI_MODEL = 'moonshot-v1-8k'
 
 export interface EnrichmentResult {
   salary_min: number | null
@@ -72,16 +74,74 @@ export function parseEnrichmentResponse(text: string): EnrichmentResult | null {
   }
 }
 
+type KimiMessageContent =
+  | string
+  | Array<{ type?: string; text?: string }>
+  | null
+  | undefined
+
+interface KimiChatResponse {
+  choices?: Array<{
+    message?: {
+      content?: KimiMessageContent
+    }
+  }>
+}
+
+export function extractKimiResponseText(content: KimiMessageContent): string {
+  if (typeof content === 'string') return content
+  if (!Array.isArray(content)) return ''
+
+  return content
+    .map(part => (part?.type === 'text' && typeof part.text === 'string' ? part.text : ''))
+    .join('\n')
+}
+
 export async function enrichJob(description: string): Promise<EnrichmentResult | null> {
-  const client = new Anthropic()
+  const apiKey = process.env.KIMI_API_KEY
+  if (!apiKey) {
+    console.error('[enrichment] KIMI_API_KEY is not configured')
+    return null
+  }
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    system: 'You are a structured data extractor for job postings. Return only valid JSON, no explanation.',
-    messages: [{ role: 'user', content: buildEnrichmentPrompt(description) }],
-  })
+  try {
+    const response = await fetch(KIMI_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: process.env.KIMI_MODEL ?? DEFAULT_KIMI_MODEL,
+        temperature: 0,
+        max_tokens: 1024,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a structured data extractor for job postings. Return only valid JSON, no explanation.',
+          },
+          {
+            role: 'user',
+            content: buildEnrichmentPrompt(description),
+          },
+        ],
+      }),
+      signal: AbortSignal.timeout(30000),
+    })
 
-  const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return parseEnrichmentResponse(text)
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => '')
+      console.error(
+        `[enrichment] Kimi request failed with ${response.status}: ${errorBody.slice(0, 500)}`
+      )
+      return null
+    }
+
+    const data = (await response.json()) as KimiChatResponse
+    const text = extractKimiResponseText(data.choices?.[0]?.message?.content)
+    return parseEnrichmentResponse(text)
+  } catch (error) {
+    console.error('[enrichment] Kimi request failed:', error)
+    return null
+  }
 }
