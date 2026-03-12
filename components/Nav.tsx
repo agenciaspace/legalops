@@ -11,9 +11,9 @@ interface NavProps {
 export function Nav({ discoverCount }: NavProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = createClient()
 
   async function handleSignOut() {
+    const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/login')
     router.refresh()
