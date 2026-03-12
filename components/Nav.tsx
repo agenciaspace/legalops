@@ -50,6 +50,7 @@ export function Nav({ discoverCount }: NavProps) {
           {navLink('/dashboard', 'Dashboard')}
           {navLink('/discover', 'Descobrir', discoverCount)}
           {navLink('/pipeline', 'Pipeline')}
+          {navLink('/settings', 'Config')}
         </div>
         <button
           onClick={handleSignOut}

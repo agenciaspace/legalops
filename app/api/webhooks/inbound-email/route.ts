@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { parsePlusAddress } from '@/lib/tracking-email'
 
 /**
  * Webhook for receiving inbound emails.
  *
- * Supports two payload formats:
+ * Routes emails by two strategies:
+ *   1. Random tracking email (vaga-xxx@inbound.legalops.work) → lookup by tracking_email
+ *   2. Custom plus-address (leon+nubank-sre@legalops.work)    → lookup by custom_email
  *
- * 1. Resend Inbound (recommended):
- *    { type: "email.received", data: { to: ["email"], from: "sender", subject: "...", text: "...", html: "..." } }
- *
- * 2. Generic / Mailgun-style:
- *    { to: "email", from: "sender", subject: "...", text: "...", html: "..." }
- *
+ * Supports Resend and generic payload formats.
  * Secured via INBOUND_EMAIL_SECRET bearer token.
  */
 export async function POST(req: NextRequest) {
@@ -26,7 +24,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // Normalize payload from different providers
   const payload = normalizePayload(raw)
   if (!payload) {
     return NextResponse.json({ error: 'Missing required fields: to, from' }, { status: 400 })
@@ -39,14 +36,10 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminClient()
 
-  // Find the pipeline entry by tracking_email
-  const { data: entry, error: lookupError } = await supabase
-    .from('user_pipeline_entries')
-    .select('id, user_id')
-    .eq('tracking_email', recipientEmail)
-    .single()
+  // Try to find pipeline entry by either tracking_email or custom_email
+  const entry = await findPipelineEntry(supabase, recipientEmail)
 
-  if (lookupError || !entry) {
+  if (!entry) {
     return NextResponse.json({ error: 'Unknown tracking email' }, { status: 404 })
   }
 
@@ -76,6 +69,35 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true })
 }
 
+/** Find pipeline entry by tracking_email (random) or custom_email (plus-address) */
+async function findPipelineEntry(
+  supabase: ReturnType<typeof createAdminClient>,
+  email: string
+): Promise<{ id: string; user_id: string } | null> {
+  // Strategy 1: exact match on tracking_email (random vaga-xxx@ addresses)
+  const { data: byTracking } = await supabase
+    .from('user_pipeline_entries')
+    .select('id, user_id')
+    .eq('tracking_email', email)
+    .maybeSingle()
+
+  if (byTracking) return byTracking
+
+  // Strategy 2: match on custom_email (plus-addressed leon+tag@ addresses)
+  const plusInfo = parsePlusAddress(email)
+  if (plusInfo) {
+    const { data: byCustom } = await supabase
+      .from('user_pipeline_entries')
+      .select('id, user_id')
+      .eq('custom_email', email)
+      .maybeSingle()
+
+    if (byCustom) return byCustom
+  }
+
+  return null
+}
+
 interface NormalizedEmail {
   to: string
   from: string
@@ -86,7 +108,7 @@ interface NormalizedEmail {
 
 /** Normalize payloads from Resend, Mailgun, or generic format */
 function normalizePayload(raw: Record<string, unknown>): NormalizedEmail | null {
-  // Resend Inbound format: { type: "email.received", data: { to: [...], from, subject, text, html } }
+  // Resend Inbound: { type: "email.received", data: { to: [...], from, subject, text, html } }
   if (raw.type === 'email.received' && raw.data) {
     const d = raw.data as Record<string, unknown>
     const toArr = d.to as string[] | undefined
@@ -102,7 +124,7 @@ function normalizePayload(raw: Record<string, unknown>): NormalizedEmail | null 
     }
   }
 
-  // Generic / Mailgun format: { to, from, subject, text, html }
+  // Generic / Mailgun: { to, from, subject, text, html }
   const to = raw.to as string | undefined
   const from = raw.from as string | undefined
   if (!to || !from) return null

@@ -95,9 +95,12 @@ export function JobDetailClient({ entry, leader, notes, contacts, events }: Prop
         </div>
       </div>
 
-      {/* Tracking Email */}
+      {/* Tracking Emails */}
       {entry.tracking_email && (
-        <TrackingEmailBadge email={entry.tracking_email} />
+        <TrackingEmailBadge
+          trackingEmail={entry.tracking_email}
+          customEmail={entry.custom_email}
+        />
       )}
 
       {/* Quick Stats Bar */}
