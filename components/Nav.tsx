@@ -24,7 +24,7 @@ export function Nav({ discoverCount }: NavProps) {
       href={href}
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
         pathname === href
-          ? 'bg-slate-100 text-slate-900'
+          ? 'bg-blue-50 text-blue-700'
           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
       }`}
     >
@@ -38,18 +38,24 @@ export function Nav({ discoverCount }: NavProps) {
   )
 
   return (
-    <header className="bg-white border-b border-slate-200 px-6 py-3">
+    <header className="bg-white border-b border-slate-200 px-6 py-3 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-1">
-          <span className="text-sm font-bold text-slate-900 mr-4">Legal Ops CRM</span>
-          {navLink('/discover', 'Discover', discoverCount)}
+          <Link href="/dashboard" className="flex items-center gap-2 mr-6">
+            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white text-xs font-bold">LO</span>
+            </div>
+            <span className="text-sm font-bold text-slate-900">LegalOps</span>
+          </Link>
+          {navLink('/dashboard', 'Dashboard')}
+          {navLink('/discover', 'Descobrir', discoverCount)}
           {navLink('/pipeline', 'Pipeline')}
         </div>
         <button
           onClick={handleSignOut}
-          className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
+          className="text-xs text-slate-500 hover:text-slate-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-50"
         >
-          Sign out
+          Sair
         </button>
       </div>
     </header>

@@ -18,23 +18,25 @@ export default async function JobDetailPage({
 
   if (!entry) notFound()
 
-  const { data: leader } = await supabase
-    .from('leaders')
-    .select('*')
-    .eq('entry_id', id)
-    .maybeSingle()
-
-  const { data: notes } = await supabase
-    .from('job_notes')
-    .select('*')
-    .eq('entry_id', id)
-    .order('created_at', { ascending: false })
+  const [
+    { data: leader },
+    { data: notes },
+    { data: contacts },
+    { data: events },
+  ] = await Promise.all([
+    supabase.from('leaders').select('*').eq('entry_id', id).maybeSingle(),
+    supabase.from('job_notes').select('*').eq('entry_id', id).order('created_at', { ascending: false }),
+    supabase.from('contacts').select('*').eq('entry_id', id).order('created_at', { ascending: false }),
+    supabase.from('application_events').select('*').eq('entry_id', id).order('event_date', { ascending: false }),
+  ])
 
   return (
     <JobDetailClient
       entry={entry as never}
       leader={leader ?? null}
       notes={notes ?? []}
+      contacts={contacts ?? []}
+      events={events ?? []}
     />
   )
 }

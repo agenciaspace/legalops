@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Legal Ops CRM',
-  description: 'Track Legal Operations job opportunities',
+  title: 'LegalOps - Job Hunting Inteligente para Legal Operations',
+  description: 'Plataforma de job hunting com IA para profissionais de Legal Operations',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
