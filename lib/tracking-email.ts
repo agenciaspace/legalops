@@ -11,6 +11,6 @@ function randomSlug(length = 8): string {
 }
 
 export function generateTrackingEmail(): string {
-  const domain = process.env.TRACKING_EMAIL_DOMAIN || 'inbound.legalops.app'
+  const domain = process.env.TRACKING_EMAIL_DOMAIN || 'inbound.legalops.work'
   return `vaga-${randomSlug()}@${domain}`
 }

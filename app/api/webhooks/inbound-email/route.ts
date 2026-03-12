@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 
 /**
- * Webhook endpoint for inbound email providers (Resend, Mailgun, etc.).
- * Receives emails sent to tracking addresses and stores them as inbound_emails
- * + creates an application_event on the timeline.
+ * Webhook for receiving inbound emails.
  *
- * Expected JSON payload:
- *   { to: string, from: string, subject: string, text: string, html?: string }
+ * Supports two payload formats:
+ *
+ * 1. Resend Inbound (recommended):
+ *    { type: "email.received", data: { to: ["email"], from: "sender", subject: "...", text: "...", html: "..." } }
+ *
+ * 2. Generic / Mailgun-style:
+ *    { to: "email", from: "sender", subject: "...", text: "...", html: "..." }
  *
  * Secured via INBOUND_EMAIL_SECRET bearer token.
  */
@@ -18,12 +21,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await req.json().catch(() => null)
-  if (!body?.to || !body?.from) {
+  const raw = await req.json().catch(() => null)
+  if (!raw) {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+
+  // Normalize payload from different providers
+  const payload = normalizePayload(raw)
+  if (!payload) {
     return NextResponse.json({ error: 'Missing required fields: to, from' }, { status: 400 })
   }
 
-  const recipientEmail = extractEmail(body.to)
+  const recipientEmail = extractEmail(payload.to)
   if (!recipientEmail) {
     return NextResponse.json({ error: 'Invalid recipient' }, { status: 400 })
   }
@@ -45,10 +54,10 @@ export async function POST(req: NextRequest) {
   const { error: insertError } = await supabase.from('inbound_emails').insert({
     entry_id: entry.id,
     user_id: entry.user_id,
-    sender: body.from,
-    subject: body.subject ?? '',
-    body_text: body.text ?? '',
-    body_html: body.html ?? null,
+    sender: payload.from,
+    subject: payload.subject,
+    body_text: payload.text,
+    body_html: payload.html,
   })
 
   if (insertError) {
@@ -60,11 +69,50 @@ export async function POST(req: NextRequest) {
     entry_id: entry.id,
     user_id: entry.user_id,
     event_type: 'email_received',
-    title: `E-mail recebido: ${body.subject || '(sem assunto)'}`,
-    description: `De: ${body.from}`,
+    title: `E-mail recebido: ${payload.subject || '(sem assunto)'}`,
+    description: `De: ${payload.from}`,
   })
 
   return NextResponse.json({ ok: true })
+}
+
+interface NormalizedEmail {
+  to: string
+  from: string
+  subject: string
+  text: string
+  html: string | null
+}
+
+/** Normalize payloads from Resend, Mailgun, or generic format */
+function normalizePayload(raw: Record<string, unknown>): NormalizedEmail | null {
+  // Resend Inbound format: { type: "email.received", data: { to: [...], from, subject, text, html } }
+  if (raw.type === 'email.received' && raw.data) {
+    const d = raw.data as Record<string, unknown>
+    const toArr = d.to as string[] | undefined
+    const to = Array.isArray(toArr) ? toArr[0] : undefined
+    const from = d.from as string | undefined
+    if (!to || !from) return null
+    return {
+      to,
+      from,
+      subject: (d.subject as string) ?? '',
+      text: (d.text as string) ?? '',
+      html: (d.html as string) ?? null,
+    }
+  }
+
+  // Generic / Mailgun format: { to, from, subject, text, html }
+  const to = raw.to as string | undefined
+  const from = raw.from as string | undefined
+  if (!to || !from) return null
+  return {
+    to: Array.isArray(to) ? to[0] : to,
+    from,
+    subject: (raw.subject as string) ?? '',
+    text: (raw.text as string) ?? '',
+    html: (raw.html as string) ?? null,
+  }
 }
 
 /** Extract a bare email from formats like "Name <email@example.com>" or plain "email@example.com" */
