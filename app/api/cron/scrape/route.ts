@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { scrapeAllBoards, fetchJobDescription } from '@/lib/scraper'
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
+import { sendNotification } from '@/lib/notifications'
 
 export const maxDuration = 60
 
@@ -106,6 +107,24 @@ export async function GET(req: NextRequest) {
       summary.leadersBackfilled++
     } catch (e) {
       console.error(`[cron] backfill leader for job ${job.id} failed:`, e)
+    }
+  }
+
+  // Notify all users about new jobs if any were inserted
+  if (summary.inserted > 0) {
+    const { data: allPrefs } = await supabase
+      .from('notification_preferences')
+      .select('user_id')
+      .eq('notify_new_jobs', true)
+
+    for (const pref of allPrefs ?? []) {
+      sendNotification({
+        userId: pref.user_id,
+        eventType: 'new_jobs',
+        title: `${summary.inserted} nova${summary.inserted > 1 ? 's' : ''} vaga${summary.inserted > 1 ? 's' : ''} descoberta${summary.inserted > 1 ? 's' : ''}`,
+        body: `Encontramos ${summary.inserted} vaga${summary.inserted > 1 ? 's' : ''} nova${summary.inserted > 1 ? 's' : ''} de Legal Operations. Confira agora!`,
+        url: '/discover',
+      }).catch(() => {})
     }
   }
 
