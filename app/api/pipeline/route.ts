@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { generateTrackingEmail } from '@/lib/tracking-email'
 import type { PipelineStatus } from '@/lib/types'
 
 const VALID_STATUSES: PipelineStatus[] = ['researching', 'discarded']
@@ -16,9 +17,11 @@ export async function POST(req: NextRequest) {
 
   const status: PipelineStatus = VALID_STATUSES.includes(body.status) ? body.status : 'researching'
 
+  const tracking_email = generateTrackingEmail()
+
   const { data: entry, error } = await supabase
     .from('user_pipeline_entries')
-    .insert({ user_id: user.id, job_id: body.job_id, status })
+    .insert({ user_id: user.id, job_id: body.job_id, status, tracking_email })
     .select()
     .single()
 

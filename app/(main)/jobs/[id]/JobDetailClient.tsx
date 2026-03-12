@@ -11,6 +11,7 @@ import { ContactsSection } from '@/components/ContactsSection'
 import { TimelineSection } from '@/components/TimelineSection'
 import { InterviewPrepSection } from '@/components/InterviewPrepSection'
 import { CoverLetterSection } from '@/components/CoverLetterSection'
+import { TrackingEmailBadge } from '@/components/TrackingEmailBadge'
 import type { PipelineEntryWithJob, Leader, JobNote, Contact, ApplicationEvent } from '@/lib/types'
 
 interface Props {
@@ -93,6 +94,11 @@ export function JobDetailClient({ entry, leader, notes, contacts, events }: Prop
           </div>
         </div>
       </div>
+
+      {/* Tracking Email */}
+      {entry.tracking_email && (
+        <TrackingEmailBadge email={entry.tracking_email} />
+      )}
 
       {/* Quick Stats Bar */}
       <div className="grid grid-cols-3 gap-3">
