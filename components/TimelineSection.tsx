@@ -14,6 +14,7 @@ const EVENT_ICONS: Record<EventType, { icon: string; color: string }> = {
   contact_added: { icon: '👤', color: 'bg-purple-100 text-purple-700' },
   interview_scheduled: { icon: '📅', color: 'bg-green-100 text-green-700' },
   follow_up: { icon: '↩', color: 'bg-yellow-100 text-yellow-700' },
+  email_received: { icon: '✉', color: 'bg-amber-100 text-amber-700' },
   custom: { icon: '•', color: 'bg-slate-100 text-slate-600' },
 }
 
@@ -23,6 +24,7 @@ const EVENT_TYPE_LABELS: Record<EventType, string> = {
   contact_added: 'Contato adicionado',
   interview_scheduled: 'Entrevista agendada',
   follow_up: 'Follow-up',
+  email_received: 'E-mail recebido',
   custom: 'Outro',
 }
 

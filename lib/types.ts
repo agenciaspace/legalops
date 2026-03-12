@@ -22,6 +22,7 @@ export type EventType =
   | 'contact_added'
   | 'interview_scheduled'
   | 'follow_up'
+  | 'email_received'
   | 'custom'
 
 export interface Job {
@@ -47,11 +48,21 @@ export interface Job {
   created_at: string
 }
 
+export interface UserProfile {
+  id: string
+  user_id: string
+  email_alias: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface PipelineEntry {
   id: string
   user_id: string
   job_id: string
   status: PipelineStatus
+  tracking_email: string | null
+  custom_email: string | null
   created_at: string
   updated_at: string
   applied_at: string | null
@@ -102,6 +113,18 @@ export interface ApplicationEvent {
   title: string
   description: string | null
   event_date: string
+  created_at: string
+}
+
+export interface InboundEmail {
+  id: string
+  entry_id: string
+  user_id: string
+  sender: string
+  subject: string
+  body_text: string
+  body_html: string | null
+  received_at: string
   created_at: string
 }
 
