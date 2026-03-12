@@ -106,7 +106,7 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
         {leader!.confirmed ? (
           <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Confirmed</span>
         ) : (
-          <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">AI Suggestion</span>
+          <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Suggested</span>
         )}
       </div>
       {leader!.title && <p className="text-xs text-slate-500">{leader!.title}</p>}

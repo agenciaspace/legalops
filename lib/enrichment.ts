@@ -1,3 +1,4 @@
+import { researchSuggestedLeader } from './leader-research'
 import type { RemoteReality } from './types'
 
 const VALID_REMOTE_REALITY: RemoteReality[] = [
@@ -21,6 +22,26 @@ export interface EnrichmentResult {
   suggested_leader_linkedin: string | null
 }
 
+interface EnrichJobParams {
+  company: string
+  description: string
+  jobTitle?: string | null
+}
+
+type KimiMessageContent =
+  | string
+  | Array<{ type?: string; text?: string }>
+  | null
+  | undefined
+
+interface KimiChatResponse {
+  choices?: Array<{
+    message?: {
+      content?: KimiMessageContent
+    }
+  }>
+}
+
 export function buildEnrichmentPrompt(description: string): string {
   return `Extract the following from this job posting and return as JSON only, no explanation:
 {
@@ -40,7 +61,7 @@ export function buildEnrichmentPrompt(description: string): string {
 Rules:
 - salary: monthly for BRL, annual for USD/EUR/GBP
 - remote_reality: "hybrid_disguised" if posting says remote but requires office presence
-- suggested_leader: the likely direct manager based on job content
+- suggested_leader_*: only fill these fields if the posting explicitly names the reporting line or manager. If the manager is not explicitly named in the posting, return null because public web research happens separately.
 
 Job posting:
 ${description}`
@@ -74,20 +95,6 @@ export function parseEnrichmentResponse(text: string): EnrichmentResult | null {
   }
 }
 
-type KimiMessageContent =
-  | string
-  | Array<{ type?: string; text?: string }>
-  | null
-  | undefined
-
-interface KimiChatResponse {
-  choices?: Array<{
-    message?: {
-      content?: KimiMessageContent
-    }
-  }>
-}
-
 export function extractKimiResponseText(content: KimiMessageContent): string {
   if (typeof content === 'string') return content
   if (!Array.isArray(content)) return ''
@@ -97,51 +104,101 @@ export function extractKimiResponseText(content: KimiMessageContent): string {
     .join('\n')
 }
 
-export async function enrichJob(description: string): Promise<EnrichmentResult | null> {
-  const apiKey = process.env.KIMI_API_KEY
-  if (!apiKey) {
-    console.error('[enrichment] KIMI_API_KEY is not configured')
-    return null
+function emptyEnrichmentResult(): EnrichmentResult {
+  return {
+    salary_min: null,
+    salary_max: null,
+    salary_currency: null,
+    benefits: [],
+    remote_label: null,
+    remote_reality: 'unknown',
+    remote_notes: null,
+    posted_at: null,
+    suggested_leader_name: null,
+    suggested_leader_title: null,
+    suggested_leader_linkedin: null,
   }
+}
+
+function mergeSuggestedLeader(
+  enrichment: EnrichmentResult,
+  leaderSuggestion: {
+    suggested_leader_name: string | null
+    suggested_leader_title: string | null
+    suggested_leader_linkedin: string | null
+  } | null
+): EnrichmentResult {
+  if (!leaderSuggestion?.suggested_leader_name) return enrichment
+
+  return {
+    ...enrichment,
+    suggested_leader_name: leaderSuggestion.suggested_leader_name,
+    suggested_leader_title: leaderSuggestion.suggested_leader_title,
+    suggested_leader_linkedin: leaderSuggestion.suggested_leader_linkedin,
+  }
+}
+
+export async function enrichJob({
+  company,
+  description,
+  jobTitle,
+}: EnrichJobParams): Promise<EnrichmentResult | null> {
+  const apiKey = process.env.KIMI_API_KEY
+  let enrichment = apiKey ? null : emptyEnrichmentResult()
+
+  if (!apiKey) {
+    console.error('[enrichment] KIMI_API_KEY is not configured, skipping description extraction')
+  }
+
+  if (apiKey) {
+    try {
+      const response = await fetch(KIMI_API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: process.env.KIMI_MODEL ?? DEFAULT_KIMI_MODEL,
+          temperature: 0,
+          max_tokens: 1024,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a structured data extractor for job postings. Return only valid JSON, no explanation.',
+            },
+            {
+              role: 'user',
+              content: buildEnrichmentPrompt(description),
+            },
+          ],
+        }),
+        signal: AbortSignal.timeout(30000),
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.text().catch(() => '')
+        console.error(
+          `[enrichment] Kimi request failed with ${response.status}: ${errorBody.slice(0, 500)}`
+        )
+      } else {
+        const data = (await response.json()) as KimiChatResponse
+        const text = extractKimiResponseText(data.choices?.[0]?.message?.content)
+        enrichment = parseEnrichmentResponse(text)
+      }
+    } catch (error) {
+      console.error('[enrichment] Kimi request failed:', error)
+    }
+  }
+
+  let publicLeaderSuggestion = null
 
   try {
-    const response = await fetch(KIMI_API_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: process.env.KIMI_MODEL ?? DEFAULT_KIMI_MODEL,
-        temperature: 0,
-        max_tokens: 1024,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a structured data extractor for job postings. Return only valid JSON, no explanation.',
-          },
-          {
-            role: 'user',
-            content: buildEnrichmentPrompt(description),
-          },
-        ],
-      }),
-      signal: AbortSignal.timeout(30000),
-    })
-
-    if (!response.ok) {
-      const errorBody = await response.text().catch(() => '')
-      console.error(
-        `[enrichment] Kimi request failed with ${response.status}: ${errorBody.slice(0, 500)}`
-      )
-      return null
-    }
-
-    const data = (await response.json()) as KimiChatResponse
-    const text = extractKimiResponseText(data.choices?.[0]?.message?.content)
-    return parseEnrichmentResponse(text)
+    publicLeaderSuggestion = await researchSuggestedLeader({ company, jobTitle })
   } catch (error) {
-    console.error('[enrichment] Kimi request failed:', error)
-    return null
+    console.error('[leader-research] public search failed:', error)
   }
+
+  if (!enrichment && !publicLeaderSuggestion) return null
+  return mergeSuggestedLeader(enrichment ?? emptyEnrichmentResult(), publicLeaderSuggestion)
 }

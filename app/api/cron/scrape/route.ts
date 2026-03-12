@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { scrapeAllBoards, fetchJobDescription } from '@/lib/scraper'
 import { enrichJob } from '@/lib/enrichment'
+import { researchSuggestedLeader } from '@/lib/leader-research'
 
 export const maxDuration = 60
 
@@ -12,7 +13,7 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = createAdminClient()
-  const summary = { scraped: 0, inserted: 0, enriched: 0, failed: 0 }
+  const summary = { scraped: 0, inserted: 0, enriched: 0, leadersBackfilled: 0, failed: 0 }
 
   try {
     const jobs = await scrapeAllBoards()
@@ -42,14 +43,18 @@ export async function GET(req: NextRequest) {
 
   const { data: pendingJobs } = await supabase
     .from('jobs')
-    .select('id, raw_description, enrichment_attempts')
+    .select('id, company, title, raw_description, enrichment_attempts')
     .in('enrichment_status', ['pending', 'failed'])
     .lt('enrichment_attempts', 5)
     .limit(20)
 
   for (const job of pendingJobs ?? []) {
     try {
-      const result = await enrichJob(job.raw_description)
+      const result = await enrichJob({
+        company: job.company,
+        description: job.raw_description,
+        jobTitle: job.title,
+      })
       if (result) {
         await supabase
           .from('jobs')
@@ -70,6 +75,37 @@ export async function GET(req: NextRequest) {
         .update({ enrichment_status: 'failed', enrichment_attempts: job.enrichment_attempts + 1 })
         .eq('id', job.id)
       summary.failed++
+    }
+  }
+
+  const { data: jobsMissingLeader } = await supabase
+    .from('jobs')
+    .select('id, company, title')
+    .eq('enrichment_status', 'done')
+    .is('suggested_leader_name', null)
+    .limit(10)
+
+  for (const job of jobsMissingLeader ?? []) {
+    try {
+      const leader = await researchSuggestedLeader({
+        company: job.company,
+        jobTitle: job.title,
+      })
+
+      if (!leader?.suggested_leader_name) continue
+
+      await supabase
+        .from('jobs')
+        .update({
+          suggested_leader_name: leader.suggested_leader_name,
+          suggested_leader_title: leader.suggested_leader_title,
+          suggested_leader_linkedin: leader.suggested_leader_linkedin,
+        })
+        .eq('id', job.id)
+
+      summary.leadersBackfilled++
+    } catch (e) {
+      console.error(`[cron] backfill leader for job ${job.id} failed:`, e)
     }
   }
 
