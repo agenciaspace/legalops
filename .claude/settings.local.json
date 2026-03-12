@@ -19,7 +19,20 @@
       "Bash(/Users/leonhatori/legalops-work/legal-ops-crm/tsconfig.json:*)",
       "Bash(/Users/leonhatori/legalops-work/legal-ops-crm/tailwind.config.js:*)",
       "Bash(/Users/leonhatori/legalops-work/legal-ops-crm/next.config.mjs:*)",
-      "Bash(npx next info:*)"
+      "Bash(npx next info:*)",
+      "Bash(ls:*)",
+      "Bash(python3:*)",
+      "Bash(git -C /Users/leonhatori/legalops-work/legal-ops-crm log --oneline -3)",
+      "Bash(git ls-tree:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(printf:*)",
+      "Bash(/Users/leonhatori/legalops-work/legal-ops-crm/__tests__/types.test.ts:*)",
+      "Bash(npm test:*)",
+      "Bash(/Users/leonhatori/legalops-work/legal-ops-crm/lib/types.ts:*)",
+      "Bash(git -C /Users/leonhatori/legalops-work/legal-ops-crm add lib/types.ts __tests__/types.test.ts)",
+      "Bash(git -C:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
