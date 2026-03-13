@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import Anthropic from '@anthropic-ai/sdk'
-
-const client = new Anthropic()
+import { generateKimiText } from '@/lib/kimi'
 
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabaseClient()
@@ -23,12 +21,10 @@ export async function POST(req: NextRequest) {
 
   const job = entry.job as { title: string; company: string; raw_description: string; benefits: string[] }
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2000,
-    messages: [{
-      role: 'user',
-      content: `You are an expert career coach specializing in Legal Operations roles. Based on this job posting, generate interview preparation materials in Portuguese (BR).
+  try {
+    const text = await generateKimiText({
+      systemPrompt: 'You are an expert career coach specializing in Legal Operations roles. Return practical Portuguese (BR) interview preparation in clean markdown.',
+      userPrompt: `Based on this job posting, generate interview preparation materials in Portuguese (BR).
 
 Job Title: ${job.title}
 Company: ${job.company}
@@ -41,12 +37,23 @@ Please provide:
 4. **Pontos-chave sobre a empresa** que voce deve pesquisar antes da entrevista
 5. **Red flags** para ficar atento durante o processo
 
-Format your response in clean markdown.`
-    }],
-  })
+Format your response in clean markdown.`,
+      maxTokens: 2000,
+      temperature: 0.4,
+    })
 
-  const content = message.content[0]
-  const text = content.type === 'text' ? content.text : ''
+    return NextResponse.json({ prep: text })
+  } catch (error) {
+    console.error('[ai/interview-prep] Kimi request failed:', error)
 
-  return NextResponse.json({ prep: text })
+    const status =
+      error instanceof Error && error.message.includes('KIMI_API_KEY')
+        ? 503
+        : 502
+
+    return NextResponse.json(
+      { error: 'Failed to generate interview preparation.' },
+      { status }
+    )
+  }
 }
