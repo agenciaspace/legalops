@@ -9,18 +9,20 @@ type LandingLocale = 'pt' | 'en'
 
 const content = {
   pt: {
+    brandSubtitle: 'Vagas de Legal Ops, CLM e operações jurídicas',
     languageHref: '/en',
     languageLabel: 'English',
     languageCompact: 'EN',
     signIn: 'Entrar',
-    heroEyebrow: 'Grátis de verdade',
-    heroTitle: 'Pesquisar vagas, aplicar e acompanhar. Sem pagar pelo básico.',
+    heroEyebrow: 'Para profissionais de Legal Ops',
+    heroTitle: 'Encontre vagas de Legal Ops, candidate-se e acompanhe tudo sem pagar pelo básico.',
     heroDescription:
-      'O gratuito já cobre busca, filtros, pipeline, notas, contatos, timeline, dashboard e 1 alias de email. O Pro só adiciona IA e mais alcance para outreach.',
+      'A plataforma foi pensada para Legal Ops, CLM, contract operations e operações jurídicas. No gratuito você já cobre busca, filtros, pipeline, notas, contatos, timeline, dashboard e 1 alias de email. O Pro só adiciona IA e mais alcance para outreach.',
+    heroFocus: 'Legal Ops, CLM, Contract Ops, Legal Tech Ops',
     heroPrimaryCta: 'Criar conta grátis',
     heroSecondaryCta: 'Ver comparação',
     heroBullets: [
-      'Pesquisar vagas e filtrar rápido',
+      'Pesquisar vagas de Legal Ops e filtrar rápido',
       'Aplicar e mover status no pipeline',
       'Subir para o Pro só se quiser IA e extras',
     ],
@@ -28,7 +30,7 @@ const content = {
       freeLabel: 'Grátis',
       freeTitle: 'O essencial já está liberado.',
       freeItems: [
-        'Busca, filtros e aplicação',
+        'Busca focada em vagas de Legal Ops',
         'Pipeline com notas, timeline e contatos',
         'Dashboard e 1 alias de email',
       ],
@@ -49,7 +51,7 @@ const content = {
       pro: 'Pro',
     },
     comparisonRows: [
-      ['Busca de vagas por cargo e empresa', 'Incluído', 'Incluído'],
+      ['Busca de vagas de Legal Ops por cargo e empresa', 'Incluído', 'Incluído'],
       ['Filtros por remoto, salário e prioridade', 'Incluído', 'Incluído'],
       ['Aplicar pela vaga e atualizar status', 'Incluído', 'Incluído'],
       ['Pipeline com dashboard, notas e timeline', 'Incluído', 'Incluído'],
@@ -64,18 +66,20 @@ const content = {
     closingPrimaryCta: 'Começar grátis',
   },
   en: {
+    brandSubtitle: 'Jobs for Legal Ops, CLM, and legal operations teams',
     languageHref: '/',
     languageLabel: 'Português',
     languageCompact: 'PT',
     signIn: 'Sign in',
-    heroEyebrow: 'Actually free',
-    heroTitle: 'Search jobs, apply, and track. No paywall on the core flow.',
+    heroEyebrow: 'Built for Legal Ops professionals',
+    heroTitle: 'Find Legal Ops jobs, apply, and track everything without a paywall on the core flow.',
     heroDescription:
-      'The free plan already covers search, filters, pipeline, notes, contacts, timeline, dashboard, and 1 email alias. Pro only adds AI and stronger outreach.',
+      'The product is designed for Legal Ops, CLM, contract operations, and legal operations adjacent roles. The free plan already covers search, filters, pipeline, notes, contacts, timeline, dashboard, and 1 email alias. Pro only adds AI and stronger outreach.',
+    heroFocus: 'Legal Ops, CLM, Contract Ops, Legal Tech Ops',
     heroPrimaryCta: 'Create free account',
     heroSecondaryCta: 'See comparison',
     heroBullets: [
-      'Search jobs and filter fast',
+      'Search Legal Ops jobs and filter fast',
       'Apply and move status in the pipeline',
       'Upgrade only if AI and extras matter',
     ],
@@ -83,7 +87,7 @@ const content = {
       freeLabel: 'Free',
       freeTitle: 'The essential product is already unlocked.',
       freeItems: [
-        'Search, filters, and apply flow',
+        'Search focused on Legal Ops roles',
         'Pipeline with notes, timeline, and contacts',
         'Dashboard and 1 email alias',
       ],
@@ -104,7 +108,7 @@ const content = {
       pro: 'Pro',
     },
     comparisonRows: [
-      ['Job search by title and company', 'Included', 'Included'],
+      ['Legal Ops job search by title and company', 'Included', 'Included'],
       ['Filters for remote setup, salary, and priority', 'Included', 'Included'],
       ['Apply from the role page and update status', 'Included', 'Included'],
       ['Pipeline with dashboard, notes, and timeline', 'Included', 'Included'],
@@ -136,7 +140,12 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
       <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <Link href={locale === 'pt' ? '/' : '/en'}>
-            <BrandLogo className="flex items-center gap-3" markClassName="h-10 w-10 text-slate-950" />
+            <BrandLogo
+              className="flex items-center gap-3"
+              markClassName="h-10 w-10 text-slate-950"
+              subtitle={copy.brandSubtitle}
+              subtitleClassName="hidden text-xs text-slate-500 sm:block"
+            />
           </Link>
 
           <div className="flex items-center gap-3">
@@ -177,6 +186,10 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
               {copy.heroDescription}
+            </p>
+
+            <p className="mt-4 text-xs font-medium uppercase tracking-[0.22em] text-slate-500">
+              {copy.heroFocus}
             </p>
 
             <div className="mt-8 space-y-3">
