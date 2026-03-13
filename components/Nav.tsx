@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { BrandLogo } from '@/components/BrandLogo'
 
 interface NavProps {
   discoverCount: number
@@ -42,16 +43,17 @@ export function Nav({ discoverCount }: NavProps) {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-1">
           <Link href="/dashboard" className="flex items-center gap-2 mr-6">
-            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">LO</span>
-            </div>
-            <span className="text-sm font-bold text-slate-900">LegalOps</span>
+            <BrandLogo
+              className="flex items-center gap-2"
+              markClassName="h-7 w-7 text-slate-950"
+              titleClassName="text-sm font-semibold tracking-[0.18em] text-slate-900 uppercase"
+            />
           </Link>
           {navLink('/dashboard', 'Dashboard')}
           {navLink('/discover', 'Descobrir', discoverCount)}
           {navLink('/pipeline', 'Pipeline')}
           {navLink('/emails', 'Emails')}
-          {navLink('/settings', 'Alertas')}
+          {navLink('/settings', 'Configurações')}
         </div>
         <button
           onClick={handleSignOut}

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { BrandLogo, BrandMark } from '@/components/BrandLogo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -35,17 +36,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 p-4">
       <div className="w-full max-w-sm">
-        {/* Logo & Branding */}
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-200">
-            <span className="text-white text-xl font-bold">LO</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900">LegalOps</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Plataforma inteligente de job hunting para Legal Operations
-          </p>
+        <div className="mb-8 text-center">
+          <BrandLogo
+            className="flex flex-col items-center gap-4"
+            markClassName="h-14 w-14 text-slate-950"
+            titleClassName="text-2xl font-semibold tracking-[0.18em] text-slate-950 uppercase"
+            subtitle="Plataforma inteligente de job hunting para Legal Operations"
+            subtitleClassName="max-w-xs text-sm leading-6 text-slate-500"
+          />
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
@@ -89,11 +89,10 @@ export default function LoginPage() {
             onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
             className="w-full text-slate-500 text-xs hover:text-slate-700 transition-colors"
           >
-            {mode === 'login' ? 'Nao tem conta? Cadastre-se' : 'Ja tem conta? Entre'}
+            {mode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre'}
           </button>
         </form>
 
-        {/* Features Preview */}
         <div className="mt-6 grid grid-cols-3 gap-3">
           <div className="bg-white/80 rounded-xl p-3 text-center border border-slate-100">
             <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center mx-auto mb-1.5">
@@ -102,7 +101,7 @@ export default function LoginPage() {
               </svg>
             </div>
             <p className="text-xs font-medium text-slate-700">Descoberta</p>
-            <p className="text-xs text-slate-400">Vagas automaticas</p>
+            <p className="text-xs text-slate-400">Vagas automáticas</p>
           </div>
           <div className="bg-white/80 rounded-xl p-3 text-center border border-slate-100">
             <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center mx-auto mb-1.5">
@@ -115,9 +114,7 @@ export default function LoginPage() {
           </div>
           <div className="bg-white/80 rounded-xl p-3 text-center border border-slate-100">
             <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center mx-auto mb-1.5">
-              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+              <BrandMark className="h-4 w-4 text-green-600" />
             </div>
             <p className="text-xs font-medium text-slate-700">Pipeline</p>
             <p className="text-xs text-slate-400">Kanban visual</p>
