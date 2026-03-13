@@ -15,7 +15,6 @@ export type PipelineStatus =
   | 'discarded'
 
 export type SourceBoard = 'greenhouse' | 'lever' | 'gupy' | 'workable' | 'indeed'
-
 export type EventType =
   | 'status_change'
   | 'note_added'
@@ -23,6 +22,9 @@ export type EventType =
   | 'interview_scheduled'
   | 'follow_up'
   | 'custom'
+export type UserTier = 'free' | 'paid'
+export type EmailAliasSource = 'random' | 'custom'
+export type EmailAliasStatus = 'active' | 'disabled'
 
 export interface Job {
   id: string
@@ -115,4 +117,38 @@ export interface DashboardStats {
   applied_this_week: number
   interviews_this_week: number
   response_rate: number
+}
+
+export interface AccountProfile {
+  user_id: string
+  tier: UserTier
+  created_at: string
+  updated_at: string
+}
+
+export interface EmailDomain {
+  id: string
+  domain: string
+  label: string
+  is_active: boolean
+  allow_random: boolean
+  allow_custom: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface UserEmailAlias {
+  id: string
+  user_id: string
+  domain_id: string
+  local_part: string
+  address: string
+  source: EmailAliasSource
+  status: EmailAliasStatus
+  is_primary: boolean
+  provider: string | null
+  provider_alias_id: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
 }
