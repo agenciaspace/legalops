@@ -1,27 +1,43 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   getEmailTierPolicy,
   getRemainingAliasSlots,
   sortEmailAliases,
 } from '@/lib/email-aliases'
+import type { EmailMessageWithAlias } from '@/lib/email-types'
+import { getEmailMessageOccurredAt, getEmailMessagePreview } from '@/lib/email-messages'
 import type { UserEmailAlias, UserTier } from '@/lib/types'
 
 interface EmailAliasesClientProps {
   initialAliases: UserEmailAlias[]
+  initialMessages: EmailMessageWithAlias[]
   initialTier: UserTier
+  senderEmail: string
+  replyDomain: string
 }
 
 export function EmailAliasesClient({
   initialAliases,
+  initialMessages,
   initialTier,
+  senderEmail,
+  replyDomain,
 }: EmailAliasesClientProps) {
   const [aliases, setAliases] = useState(() => sortEmailAliases(initialAliases))
+  const [messages, setMessages] = useState(() => initialMessages)
   const [customLocalPart, setCustomLocalPart] = useState('')
+  const [composer, setComposer] = useState({
+    aliasId: '',
+    to: '',
+    subject: '',
+    body: '',
+  })
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState<'random' | 'custom' | null>(null)
   const [updatingAliasId, setUpdatingAliasId] = useState<string | null>(null)
+  const [sending, setSending] = useState(false)
 
   const policy = getEmailTierPolicy(initialTier)
   const activeAliases = useMemo(
@@ -29,6 +45,25 @@ export function EmailAliasesClient({
     [aliases]
   )
   const remainingSlots = getRemainingAliasSlots(initialTier, activeAliases.length)
+
+  useEffect(() => {
+    if (activeAliases.length === 0) {
+      setComposer(current => (current.aliasId ? { ...current, aliasId: '' } : current))
+      return
+    }
+
+    setComposer(current => {
+      if (activeAliases.some(alias => alias.id === current.aliasId)) {
+        return current
+      }
+
+      const nextAlias = activeAliases.find(alias => alias.is_primary) ?? activeAliases[0]
+      return {
+        ...current,
+        aliasId: nextAlias.id,
+      }
+    })
+  }, [activeAliases])
 
   async function createAlias(source: 'random' | 'custom') {
     setError(null)
@@ -85,16 +120,50 @@ export function EmailAliasesClient({
     )
   }
 
+  async function sendMessage() {
+    if (!composer.aliasId) {
+      setError('Create or reactivate an alias before sending email.')
+      return
+    }
+
+    setError(null)
+    setSending(true)
+
+    const res = await fetch('/api/email-messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(composer),
+    })
+
+    const payload = await res.json().catch(() => null)
+    setSending(false)
+
+    if (!res.ok) {
+      setError(payload?.error ?? 'Failed to send email.')
+      return
+    }
+
+    setMessages(current => [payload.message, ...current])
+    setComposer(current => ({
+      ...current,
+      to: '',
+      subject: '',
+      body: '',
+    }))
+  }
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold text-slate-900">Email Aliases</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">Email aliases</h1>
         <p className="text-sm text-slate-500">
-          Provision random aliases for free users and unlock custom aliases for paid tiers.
+          Outbound emails go through <span className="font-medium text-slate-700">{senderEmail}</span>{' '}
+          and route replies back into your mailbox aliases on{' '}
+          <span className="font-medium text-slate-700">{replyDomain}</span>.
         </p>
       </div>
 
-      <section className="grid gap-4 lg:grid-cols-[1.1fr_1.4fr]">
+      <section className="grid gap-4 xl:grid-cols-[0.9fr_1fr_1.2fr]">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-900">Plan rules</h2>
           <div className="mt-4 space-y-3 text-sm text-slate-600">
@@ -131,7 +200,7 @@ export function EmailAliasesClient({
             Remaining active slots: {remainingSlots}
           </p>
 
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-4 flex flex-col gap-3">
             <button
               onClick={() => createAlias('random')}
               disabled={submitting !== null || remainingSlots === 0}
@@ -140,7 +209,7 @@ export function EmailAliasesClient({
               {submitting === 'random' ? 'Creating random alias...' : 'Create random alias'}
             </button>
 
-            <div className="flex flex-1 flex-col gap-2 sm:flex-row">
+            <div className="flex flex-col gap-2">
               <input
                 type="text"
                 placeholder="your-team"
@@ -164,14 +233,103 @@ export function EmailAliasesClient({
               Free users can provision a single random alias. Paid users can create branded custom aliases.
             </p>
           )}
+        </div>
 
-          {error && (
-            <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-              {error}
-            </p>
-          )}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900">Send email</h2>
+              <p className="mt-1 text-xs text-slate-500">
+                Messages are sent from {senderEmail} with replies pointed back to the selected alias.
+              </p>
+            </div>
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+              {activeAliases.length} active
+            </span>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            <label className="block text-xs font-medium uppercase tracking-wide text-slate-500">
+              From alias
+              <select
+                value={composer.aliasId}
+                onChange={event =>
+                  setComposer(current => ({ ...current, aliasId: event.target.value }))
+                }
+                disabled={activeAliases.length === 0 || sending}
+                className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+              >
+                {activeAliases.length === 0 ? (
+                  <option value="">No active aliases</option>
+                ) : (
+                  activeAliases.map(alias => (
+                    <option key={alias.id} value={alias.id}>
+                      {alias.address}
+                      {alias.is_primary ? ' (primary)' : ''}
+                    </option>
+                  ))
+                )}
+              </select>
+            </label>
+
+            <label className="block text-xs font-medium uppercase tracking-wide text-slate-500">
+              To
+              <input
+                type="email"
+                placeholder="gc@company.com"
+                value={composer.to}
+                onChange={event =>
+                  setComposer(current => ({ ...current, to: event.target.value }))
+                }
+                disabled={sending}
+                className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+              />
+            </label>
+
+            <label className="block text-xs font-medium uppercase tracking-wide text-slate-500">
+              Subject
+              <input
+                type="text"
+                placeholder="Following up on the Legal Ops role"
+                value={composer.subject}
+                onChange={event =>
+                  setComposer(current => ({ ...current, subject: event.target.value }))
+                }
+                disabled={sending}
+                className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+              />
+            </label>
+
+            <label className="block text-xs font-medium uppercase tracking-wide text-slate-500">
+              Message
+              <textarea
+                value={composer.body}
+                onChange={event =>
+                  setComposer(current => ({ ...current, body: event.target.value }))
+                }
+                rows={7}
+                disabled={sending}
+                placeholder="Hi team, I just applied and wanted to introduce myself..."
+                className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+              />
+            </label>
+
+            <button
+              onClick={() => void sendMessage()}
+              disabled={sending || activeAliases.length === 0}
+              className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {sending ? 'Sending...' : 'Send email'}
+            </button>
+          </div>
         </div>
       </section>
+
+      {error && (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 px-5 py-4">
@@ -180,7 +338,7 @@ export function EmailAliasesClient({
 
         {aliases.length === 0 ? (
           <div className="px-5 py-8 text-sm text-slate-500">
-            No aliases provisioned yet. Create one to start routing outbound communication.
+            No aliases provisioned yet. Create one to start routing replies into your inbox.
           </div>
         ) : (
           <div className="divide-y divide-slate-200">
@@ -244,6 +402,79 @@ export function EmailAliasesClient({
                   </button>
                 </div>
               </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="border-b border-slate-200 px-5 py-4">
+          <h2 className="text-sm font-semibold text-slate-900">Recent mailbox activity</h2>
+        </div>
+
+        {messages.length === 0 ? (
+          <div className="px-5 py-8 text-sm text-slate-500">
+            No inbound or outbound messages yet.
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-200">
+            {messages.map(message => (
+              <details key={message.id} className="group px-5 py-4">
+                <summary className="cursor-pointer list-none">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                            message.direction === 'inbound'
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-blue-50 text-blue-700'
+                          }`}
+                        >
+                          {message.direction}
+                        </span>
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                          {message.status}
+                        </span>
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                          {message.alias.address}
+                        </span>
+                      </div>
+                      <p className="font-medium text-slate-900">
+                        {message.subject || '(no subject)'}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        {message.direction === 'inbound'
+                          ? `From ${message.from_name ? `${message.from_name} <${message.from_address}>` : message.from_address}`
+                          : `From ${message.from_address} to ${message.to_addresses.join(', ')}`}
+                      </p>
+                      {message.reply_to_address && message.direction === 'outbound' && (
+                        <p className="text-xs text-slate-500">
+                          Reply-To: {message.reply_to_address}
+                        </p>
+                      )}
+                      <p className="text-sm text-slate-500">
+                        {getEmailMessagePreview(message)}
+                      </p>
+                    </div>
+
+                    <p className="text-xs text-slate-500">
+                      {new Date(getEmailMessageOccurredAt(message)).toLocaleString()}
+                    </p>
+                  </div>
+                </summary>
+
+                <div className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
+                  <pre className="whitespace-pre-wrap font-sans leading-6">
+                    {message.text_body || getEmailMessagePreview(message, 4000)}
+                  </pre>
+                  {message.error_message && (
+                    <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                      {message.error_message}
+                    </p>
+                  )}
+                </div>
+              </details>
             ))}
           </div>
         )}

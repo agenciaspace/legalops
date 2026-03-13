@@ -92,6 +92,11 @@ export async function POST(req: NextRequest) {
         source,
         status: 'active',
         is_primary: activeAliases.length === 0,
+        provider: 'brevo',
+        metadata: {
+          provisioning: 'brevo-inbound',
+          source,
+        },
       })
       .select('*')
       .single()

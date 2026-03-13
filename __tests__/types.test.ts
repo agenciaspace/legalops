@@ -1,5 +1,6 @@
 // __tests__/types.test.ts
 import { describe, it, expect } from 'vitest'
+import type { EmailMessage, EmailMessageWithAlias } from '@/lib/email-types'
 import type {
   AccountProfile,
   ApplicationEvent,
@@ -141,8 +142,8 @@ describe('types', () => {
   it('EmailDomain has required fields', () => {
     const domain: EmailDomain = {
       id: 'domain-uuid',
-      domain: 'mail.legalops.test',
-      label: 'Managed domain',
+      domain: 'reply.legalops.work',
+      label: 'Brevo reply aliases',
       is_active: true,
       allow_random: true,
       allow_custom: true,
@@ -159,7 +160,7 @@ describe('types', () => {
       user_id: 'user-uuid',
       domain_id: 'domain-uuid',
       local_part: 'ana-lima',
-      address: 'ana-lima@mail.legalops.test',
+      address: 'ana-lima@reply.legalops.work',
       source: 'custom',
       status: 'active',
       is_primary: true,
@@ -171,5 +172,80 @@ describe('types', () => {
     }
 
     expect(alias.is_primary).toBe(true)
+  })
+
+  it('EmailMessage has required fields', () => {
+    const message: EmailMessage = {
+      id: 'message-uuid',
+      user_id: 'user-uuid',
+      alias_id: 'alias-uuid',
+      provider: 'brevo',
+      provider_message_id: 'provider-message',
+      direction: 'inbound',
+      status: 'received',
+      from_name: 'Ana Lima',
+      from_address: 'ana@example.com',
+      reply_to_address: null,
+      to_addresses: ['ana-lima@reply.legalops.work'],
+      cc_addresses: [],
+      bcc_addresses: [],
+      subject: 'Hello there',
+      text_body: 'Testing inbound message',
+      html_body: null,
+      error_message: null,
+      headers: {},
+      provider_payload: {},
+      sent_at: null,
+      received_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+
+    expect(message.direction).toBe('inbound')
+  })
+
+  it('EmailMessageWithAlias has the alias relation', () => {
+    const message: EmailMessageWithAlias = {
+      id: 'message-uuid',
+      user_id: 'user-uuid',
+      alias_id: 'alias-uuid',
+      provider: 'brevo',
+      provider_message_id: null,
+      direction: 'outbound',
+      status: 'sent',
+      from_name: 'Legal Ops',
+      from_address: 'hello@mail.legalops.work',
+      reply_to_address: 'ana-lima@reply.legalops.work',
+      to_addresses: ['gc@example.com'],
+      cc_addresses: [],
+      bcc_addresses: [],
+      subject: 'Follow-up',
+      text_body: 'Quick follow-up',
+      html_body: '<p>Quick follow-up</p>',
+      error_message: null,
+      headers: {},
+      provider_payload: {},
+      sent_at: new Date().toISOString(),
+      received_at: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      alias: {
+        id: 'alias-uuid',
+        user_id: 'user-uuid',
+        domain_id: 'domain-uuid',
+        local_part: 'ana-lima',
+        address: 'ana-lima@reply.legalops.work',
+        source: 'custom',
+        status: 'active',
+        is_primary: true,
+        provider: 'brevo',
+        provider_alias_id: null,
+        metadata: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    }
+
+    expect(message.alias.address).toContain('reply.legalops.work')
   })
 })
