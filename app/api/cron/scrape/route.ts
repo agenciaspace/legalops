@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { scrapeAllBoards, fetchJobDescription } from '@/lib/scraper'
+import { buildJobDiscoverySeed, fetchJobDescription, scrapeAllBoards } from '@/lib/scraper'
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
 
-export const maxDuration = 60
+export const maxDuration = 180
 
 export async function GET(req: NextRequest) {
   const auth = req.headers.get('authorization')
@@ -13,32 +13,79 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = createAdminClient()
-  const summary = { scraped: 0, inserted: 0, enriched: 0, leadersBackfilled: 0, failed: 0 }
+  const startedAt = new Date().toISOString()
+  const summary = {
+    scraped: 0,
+    inserted: 0,
+    duplicates: 0,
+    enriched: 0,
+    leadersBackfilled: 0,
+    failed: 0,
+    discoverySource: 'legacy' as 'firecrawl' | 'legacy',
+    fallbackReason: null as string | null,
+  }
 
   try {
-    const jobs = await scrapeAllBoards()
+    const scrapeResult = await scrapeAllBoards()
+    const jobs = scrapeResult.jobs
     summary.scraped = jobs.length
+    summary.discoverySource = scrapeResult.discoverySource
+    summary.fallbackReason = scrapeResult.fallbackReason
 
-    for (const job of jobs) {
-      const description = await fetchJobDescription(job.url)
+    const uniqueUrls = Array.from(new Set(jobs.map(job => job.url)))
+    const existingUrlSet = new Set<string>()
+
+    if (uniqueUrls.length > 0) {
+      const { data: existingJobs } = await supabase
+        .from('jobs')
+        .select('url')
+        .in('url', uniqueUrls)
+
+      for (const existingJob of existingJobs ?? []) {
+        if (typeof existingJob.url === 'string') {
+          existingUrlSet.add(existingJob.url.toLowerCase())
+        }
+      }
+    }
+
+    const newJobs = jobs.filter(job => !existingUrlSet.has(job.url.toLowerCase()))
+    summary.duplicates = jobs.length - newJobs.length
+
+    for (const job of newJobs) {
+      const pageDescription = await fetchJobDescription(job.url)
+      const discoverySeed = buildJobDiscoverySeed(job)
+      const description = [discoverySeed, pageDescription]
+        .filter(Boolean)
+        .join('\n\n')
+        .slice(0, 8000)
       const { error } = await supabase
         .from('jobs')
-        .upsert(
-          {
-            title: job.title,
-            company: job.company,
-            url: job.url,
-            source_board: job.source_board,
-            raw_description: description,
-            enrichment_status: 'pending',
-            enrichment_attempts: 0,
-          },
-          { onConflict: 'url', ignoreDuplicates: true }
-        )
-      if (!error) summary.inserted++
+        .insert({
+          title: job.title,
+          company: job.company,
+          url: job.url,
+          source_board: job.source_board,
+          raw_description: description,
+          enrichment_status: 'pending',
+          enrichment_attempts: 0,
+        })
+
+      if (!error) {
+        summary.inserted++
+        continue
+      }
+
+      if (error.code === '23505') {
+        summary.duplicates++
+        continue
+      }
+
+      console.error(`[cron] insert job ${job.url} failed:`, error)
+      summary.failed++
     }
   } catch (e) {
     console.error('[cron] scrape step failed:', e)
+    summary.failed++
   }
 
   const { data: pendingJobs } = await supabase
@@ -108,6 +155,22 @@ export async function GET(req: NextRequest) {
       console.error(`[cron] backfill leader for job ${job.id} failed:`, e)
     }
   }
+
+  await supabase.from('crawler_runs').insert({
+    provider: 'firecrawl',
+    discovery_source: summary.discoverySource,
+    scraped_count: summary.scraped,
+    inserted_count: summary.inserted,
+    duplicate_count: summary.duplicates,
+    enriched_count: summary.enriched,
+    failed_count: summary.failed,
+    leaders_backfilled: summary.leadersBackfilled,
+    notes: {
+      fallbackReason: summary.fallbackReason,
+    },
+    started_at: startedAt,
+    completed_at: new Date().toISOString(),
+  })
 
   return NextResponse.json({ ok: true, summary })
 }

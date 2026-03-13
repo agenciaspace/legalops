@@ -2,6 +2,11 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import {
+  formatCrawlerDiscoverySource,
+  getCrawlerRunHeadline,
+  type CrawlerStats,
+} from '@/lib/crawler-runs'
 import { JobCard } from '@/components/JobCard'
 import type { Job, RemoteReality } from '@/lib/types'
 
@@ -19,8 +24,15 @@ const SALARY_OPTIONS = [
   { value: 'high', label: 'Alto (100k+)' },
 ]
 
-export function DiscoverClient({ initialJobs }: { initialJobs: Job[] }) {
+export function DiscoverClient({
+  initialJobs,
+  crawlerStats,
+}: {
+  initialJobs: Job[]
+  crawlerStats: CrawlerStats
+}) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs)
+  const [stats, setStats] = useState<CrawlerStats>(crawlerStats)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(initialJobs.length === 20)
   const [search, setSearch] = useState('')
@@ -56,6 +68,10 @@ export function DiscoverClient({ initialJobs }: { initialJobs: Job[] }) {
 
     return result
   }, [jobs, search, remoteFilter, salaryFilter, sortBy])
+  const fallbackReason =
+    typeof stats.latestRun?.notes?.fallbackReason === 'string'
+      ? stats.latestRun.notes.fallbackReason
+      : null
 
   async function handleAction(jobId: string, action: 'add' | 'ignore') {
     const res = await fetch('/api/pipeline', {
@@ -80,15 +96,77 @@ export function DiscoverClient({ initialJobs }: { initialJobs: Job[] }) {
       `/api/jobs/undiscovered?before=${encodeURIComponent(last.created_at)}`
     )
     if (res.ok) {
-      const { jobs: more } = await res.json()
+      const { jobs: more, crawlerStats: refreshedStats } = await res.json()
       setJobs(prev => [...prev, ...more])
       setHasMore(more.length === 20)
+      if (refreshedStats) {
+        setStats(refreshedStats)
+      }
     }
     setLoadingMore(false)
   }
 
   return (
     <div className="p-6">
+      <div className="mb-6 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 via-white to-emerald-50 p-4 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">
+              Crawler monitor
+            </p>
+            <h1 className="mt-1 text-lg font-semibold text-slate-900">
+              {getCrawlerRunHeadline(stats)}
+            </h1>
+            <p className="mt-1 text-sm text-slate-600">
+              {stats.latestRun
+                ? `Ultima execucao em ${new Date(stats.latestRun.completed_at).toLocaleString('pt-BR')} usando ${formatCrawlerDiscoverySource(stats.latestRun.discovery_source)}.`
+                : 'Ainda nao ha execucoes registradas do crawler.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-xl bg-white/80 px-4 py-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                Novas
+              </p>
+              <p className="mt-1 text-2xl font-bold text-emerald-600">
+                {stats.latestRun?.inserted_count ?? 0}
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/80 px-4 py-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                Duplicadas
+              </p>
+              <p className="mt-1 text-2xl font-bold text-amber-600">
+                {stats.latestRun?.duplicate_count ?? 0}
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/80 px-4 py-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                Varridas
+              </p>
+              <p className="mt-1 text-2xl font-bold text-slate-900">
+                {stats.latestRun?.scraped_count ?? 0}
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/80 px-4 py-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                Ultimos 7 dias
+              </p>
+              <p className="mt-1 text-2xl font-bold text-blue-600">
+                {stats.insertedLast7Days}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {fallbackReason && (
+          <p className="mt-3 text-xs text-slate-500">
+            Fallback: {fallbackReason}
+          </p>
+        )}
+      </div>
+
       {/* Search & Filters Bar */}
       <div className="mb-6 space-y-3">
         <div className="flex items-center gap-3">
