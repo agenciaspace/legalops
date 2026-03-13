@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildHtmlEmail,
   normalizeBrevoInboundPayload,
+  normalizeBrevoInboundPayloads,
   parseBrevoInboundFormData,
 } from '@/lib/brevo'
 
@@ -64,5 +65,30 @@ describe('brevo helpers', () => {
     expect(buildHtmlEmail('Hello <team>\n\nThanks')).toBe(
       '<p>Hello &lt;team&gt;</p><p>Thanks</p>'
     )
+  })
+
+  it('supports the official items[] webhook payload shape', () => {
+    const items = normalizeBrevoInboundPayloads({
+      items: [
+        {
+          MessageId: '<message-id@example.com>',
+          From: {
+            Address: 'ana@example.com',
+            Name: 'Ana Lima',
+          },
+          To: [
+            {
+              Address: 'lo-abcd12@reply.legalops.work',
+            },
+          ],
+          Subject: 'Reply from recruiter',
+          RawTextBody: 'Thanks for applying',
+        },
+      ],
+    })
+
+    expect(items).toHaveLength(1)
+    expect(items[0].subject).toBe('Reply from recruiter')
+    expect(items[0].toAddresses).toEqual(['lo-abcd12@reply.legalops.work'])
   })
 })

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { PipelineStatus } from '@/lib/types'
 
 const OPTIONS: { value: PipelineStatus; label: string }[] = [
@@ -17,6 +18,7 @@ interface StatusDropdownProps {
 }
 
 export function StatusDropdown({ entryId, currentStatus }: StatusDropdownProps) {
+  const router = useRouter()
   const [status, setStatus] = useState(currentStatus)
   const [saving, setSaving] = useState(false)
 
@@ -27,7 +29,10 @@ export function StatusDropdown({ entryId, currentStatus }: StatusDropdownProps) 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
     })
-    if (res.ok) setStatus(newStatus)
+    if (res.ok) {
+      setStatus(newStatus)
+      router.refresh()
+    }
     setSaving(false)
   }
 

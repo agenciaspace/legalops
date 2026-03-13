@@ -1,7 +1,6 @@
 import { EmailAliasesClient } from '@/components/EmailAliasesClient'
 import { sortEmailAliases } from '@/lib/email-aliases'
 import { getUserTier, listUserEmailAliases, listUserEmailMessages } from '@/lib/email-alias-store'
-import { getBrevoReplyDomain, getBrevoSenderIdentity } from '@/lib/brevo'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 export default async function EmailsPage() {
@@ -13,15 +12,12 @@ export default async function EmailsPage() {
     listUserEmailAliases(supabase, user!.id),
     listUserEmailMessages(supabase, user!.id),
   ])
-  const sender = getBrevoSenderIdentity()
 
   return (
     <EmailAliasesClient
       initialTier={tier}
       initialAliases={sortEmailAliases(aliases)}
       initialMessages={messages}
-      senderEmail={sender.email}
-      replyDomain={getBrevoReplyDomain()}
     />
   )
 }

@@ -18,6 +18,10 @@ export interface BrevoNormalizedInboundMessage {
   rawPayload: Record<string, unknown>
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
 interface BrevoParticipant {
   Address?: unknown
   Name?: unknown
@@ -250,9 +254,9 @@ function toIsoDate(value: unknown): string | null {
 }
 
 export function normalizeBrevoInboundPayload(
-  input: FormData | Record<string, unknown>
+  input: Record<string, unknown>
 ): BrevoNormalizedInboundMessage {
-  const rawPayload = input instanceof FormData ? parseBrevoInboundFormData(input) : input
+  const rawPayload = input
   const recipients = extractAddressList(rawPayload.Recipients)
   const toAddresses = extractAddressList(rawPayload.To)
   const uniqueToAddresses = Array.from(new Set([...toAddresses, ...recipients]))
@@ -289,4 +293,22 @@ export function normalizeBrevoInboundPayload(
     sentAt: toIsoDate(rawPayload.SentAtDate),
     rawPayload,
   }
+}
+
+export function normalizeBrevoInboundPayloads(
+  input: FormData | Record<string, unknown>
+): BrevoNormalizedInboundMessage[] {
+  const rawPayload = input instanceof FormData ? parseBrevoInboundFormData(input) : input
+
+  if (Array.isArray(rawPayload.items)) {
+    return rawPayload.items
+      .filter(isRecord)
+      .map(item => normalizeBrevoInboundPayload(item))
+  }
+
+  if (isRecord(rawPayload)) {
+    return [normalizeBrevoInboundPayload(rawPayload)]
+  }
+
+  return []
 }

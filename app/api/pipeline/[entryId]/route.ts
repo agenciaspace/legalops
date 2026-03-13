@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import {
+  ensureUserApplicationAlias,
+  pipelineStatusUsesApplicationAlias,
+} from '@/lib/application-email-alias'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import type { PipelineStatus } from '@/lib/types'
 
@@ -18,16 +22,48 @@ export async function PATCH(
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
   }
 
-  const { data: entry, error } = await supabase
+  const { data: currentEntry } = await supabase
     .from('user_pipeline_entries')
-    .update({ status: body.status })
+    .select('id, status, applied_at, email_alias_id')
     .eq('id', entryId)
     .eq('user_id', user.id)
-    .select()
+    .maybeSingle()
+
+  if (!currentEntry) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
+  const updates: Record<string, unknown> = {
+    status: body.status,
+  }
+
+  if (pipelineStatusUsesApplicationAlias(body.status) && !currentEntry.email_alias_id) {
+    try {
+      const alias = await ensureUserApplicationAlias(supabase as never, user.id)
+      updates.email_alias_id = alias.id
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to assign an application email alias.'
+
+      return NextResponse.json({ error: message }, { status: 503 })
+    }
+  }
+
+  if (pipelineStatusUsesApplicationAlias(body.status) && !currentEntry.applied_at) {
+    updates.applied_at = new Date().toISOString()
+  }
+
+  const { data: entry, error } = await supabase
+    .from('user_pipeline_entries')
+    .update(updates)
+    .eq('id', entryId)
+    .eq('user_id', user.id)
+    .select('*, email_alias:user_email_aliases(*)')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  if (!entry) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   return NextResponse.json({ entry })
 }

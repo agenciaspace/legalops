@@ -11,7 +11,16 @@ import { ContactsSection } from '@/components/ContactsSection'
 import { TimelineSection } from '@/components/TimelineSection'
 import { InterviewPrepSection } from '@/components/InterviewPrepSection'
 import { CoverLetterSection } from '@/components/CoverLetterSection'
-import type { PipelineEntryWithJob, Leader, JobNote, Contact, ApplicationEvent } from '@/lib/types'
+import { PaidPlanAgentsSection } from '@/components/PaidPlanAgentsSection'
+import type { PaidAgentSettings } from '@/lib/paid-agent-settings'
+import type {
+  PipelineEntryWithJob,
+  Leader,
+  JobNote,
+  Contact,
+  ApplicationEvent,
+  UserTier,
+} from '@/lib/types'
 
 interface Props {
   entry: PipelineEntryWithJob
@@ -19,24 +28,50 @@ interface Props {
   notes: JobNote[]
   contacts: Contact[]
   events: ApplicationEvent[]
+  userTier: UserTier
+  agentSettings: PaidAgentSettings
 }
 
 type Tab = 'overview' | 'ai-tools' | 'networking'
 
-export function JobDetailClient({ entry, leader, notes, contacts, events }: Props) {
+export function JobDetailClient({
+  entry,
+  leader,
+  notes,
+  contacts,
+  events,
+  userTier,
+  agentSettings,
+}: Props) {
   const router = useRouter()
   const job = entry.job
   const [activeTab, setActiveTab] = useState<Tab>('overview')
+  const [copiedAlias, setCopiedAlias] = useState(false)
+
+  async function copyApplicationAlias() {
+    if (!entry.email_alias?.address) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(entry.email_alias.address)
+      setCopiedAlias(true)
+      window.setTimeout(() => setCopiedAlias(false), 2000)
+    } catch {}
+  }
 
   async function handleApply() {
     window.open(job.url, '_blank', 'noopener')
-    if (entry.status === 'researching') {
-      await fetch(`/api/pipeline/${entry.id}`, {
+    if (entry.status === 'researching' || !entry.email_alias_id) {
+      const res = await fetch(`/api/pipeline/${entry.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'applied' }),
       })
-      router.refresh()
+
+      if (res.ok) {
+        router.refresh()
+      }
     }
   }
 
@@ -164,6 +199,32 @@ export function JobDetailClient({ entry, leader, notes, contacts, events }: Prop
             <LeaderSection entryId={entry.id} initialLeader={leader} />
           </section>
 
+          <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+              Email da candidatura
+            </h2>
+            {entry.email_alias?.address ? (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">{entry.email_alias.address}</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Use este alias em formulários e replies desta vaga. O histórico chega na aba Emails.
+                  </p>
+                </div>
+                <button
+                  onClick={() => void copyApplicationAlias()}
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                >
+                  {copiedAlias ? 'Copiado' : 'Copiar alias'}
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500">
+                O alias será atribuído automaticamente quando a vaga for marcada como aplicada.
+              </p>
+            )}
+          </section>
+
           {/* Notes */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Notas</h2>
@@ -180,6 +241,18 @@ export function JobDetailClient({ entry, leader, notes, contacts, events }: Prop
 
       {activeTab === 'ai-tools' && (
         <div className="space-y-4">
+          <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+              Agentes especialistas
+            </h2>
+            <PaidPlanAgentsSection
+              entryId={entry.id}
+              userTier={userTier}
+              currentStage={entry.status}
+              settings={agentSettings}
+            />
+          </section>
+
           {/* Interview Prep */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
@@ -191,7 +264,7 @@ export function JobDetailClient({ entry, leader, notes, contacts, events }: Prop
           {/* Cover Letter */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-              Cover letter
+              Cover letter rapida
             </h2>
             <CoverLetterSection entryId={entry.id} />
           </section>

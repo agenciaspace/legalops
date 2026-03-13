@@ -46,6 +46,7 @@ describe('types', () => {
       id: 'entry-uuid',
       user_id: 'user-uuid',
       job_id: 'job-uuid',
+      email_alias_id: null,
       status: 'researching',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

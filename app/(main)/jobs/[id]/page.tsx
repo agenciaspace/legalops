@@ -1,3 +1,5 @@
+import { getUserTier } from '@/lib/email-alias-store'
+import { getUserPaidAgentSettings } from '@/lib/paid-agent-settings-store'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { notFound } from 'next/navigation'
 import { JobDetailClient } from './JobDetailClient'
@@ -9,12 +11,19 @@ export default async function JobDetailPage({
 }) {
   const { id } = await params
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) notFound()
 
-  const { data: entry } = await supabase
-    .from('user_pipeline_entries')
-    .select('*, job:jobs(*)')
-    .eq('id', id)
-    .single()
+  const [tier, agentSettings, { data: entry }] = await Promise.all([
+    getUserTier(supabase, user.id),
+    getUserPaidAgentSettings(supabase, user.id),
+    supabase
+      .from('user_pipeline_entries')
+      .select('*, job:jobs(*), email_alias:user_email_aliases(*)')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single(),
+  ])
 
   if (!entry) notFound()
 
@@ -37,6 +46,8 @@ export default async function JobDetailPage({
       notes={notes ?? []}
       contacts={contacts ?? []}
       events={events ?? []}
+      userTier={tier}
+      agentSettings={agentSettings}
     />
   )
 }

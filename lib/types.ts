@@ -14,7 +14,19 @@ export type PipelineStatus =
   | 'offer'
   | 'discarded'
 
-export type SourceBoard = 'greenhouse' | 'lever' | 'gupy' | 'workable' | 'indeed'
+export type SourceBoard =
+  | 'greenhouse'
+  | 'lever'
+  | 'gupy'
+  | 'workable'
+  | 'indeed'
+  | 'linkedin'
+  | 'cloc'
+  | 'legalio'
+  | 'legaloperators'
+  | 'goinhouse'
+  | 'company_site'
+  | 'firecrawl'
 export type EventType =
   | 'status_change'
   | 'note_added'
@@ -53,6 +65,7 @@ export interface PipelineEntry {
   id: string
   user_id: string
   job_id: string
+  email_alias_id: string | null
   status: PipelineStatus
   created_at: string
   updated_at: string
@@ -61,6 +74,7 @@ export interface PipelineEntry {
 
 export interface PipelineEntryWithJob extends PipelineEntry {
   job: Job
+  email_alias?: UserEmailAlias | null
 }
 
 export interface Leader {
@@ -122,6 +136,7 @@ export interface DashboardStats {
 export interface AccountProfile {
   user_id: string
   tier: UserTier
+  paid_agent_settings?: Record<string, unknown>
   created_at: string
   updated_at: string
 }
