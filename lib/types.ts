@@ -35,6 +35,7 @@ export type EventType =
   | 'follow_up'
   | 'custom'
 export type UserTier = 'free' | 'paid'
+export type ProfessionalType = 'law_firm' | 'legal_dept' | 'public_sector' | 'freelance' | 'other'
 export type EmailAliasSource = 'random' | 'custom'
 export type EmailAliasStatus = 'active' | 'disabled'
 
@@ -133,10 +134,30 @@ export interface DashboardStats {
   response_rate: number
 }
 
+export interface LinkedInInsight {
+  category: 'headline' | 'photo' | 'about' | 'experience' | 'skills' | 'recommendations' | 'activity' | 'keywords' | 'other'
+  priority: 'high' | 'medium' | 'low'
+  title: string
+  description: string
+  action: string
+}
+
 export interface AccountProfile {
   user_id: string
   tier: UserTier
   paid_agent_settings?: Record<string, unknown>
+  full_name: string | null
+  current_role: string | null
+  professional_type: ProfessionalType | null
+  years_experience: number | null
+  areas_of_expertise: string[]
+  linkedin_url: string | null
+  linkedin_data: {
+    scraped_at?: string
+    raw_text?: string
+    insights?: LinkedInInsight[]
+  } | null
+  onboarding_completed: boolean
   created_at: string
   updated_at: string
 }

@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
   const publicPaths = new Set(['/', '/en', '/login'])
+  const { pathname } = request.nextUrl
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,7 +24,6 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  const { pathname } = request.nextUrl
 
   if (!user) {
     if (pathname.startsWith('/api/')) {
@@ -32,9 +32,29 @@ export async function middleware(request: NextRequest) {
     if (!publicPaths.has(pathname)) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
+    return supabaseResponse
   }
-  if (user && pathname === '/login') {
+
+  // Authenticated user on login → redirect to app
+  if (pathname === '/login') {
     return NextResponse.redirect(new URL('/discover', request.url))
+  }
+
+  // Check onboarding completion for non-onboarding, non-API routes
+  if (
+    pathname !== '/onboard' &&
+    !pathname.startsWith('/api/') &&
+    !publicPaths.has(pathname)
+  ) {
+    const { data: profile } = await supabase
+      .from('account_profiles')
+      .select('onboarding_completed')
+      .eq('user_id', user.id)
+      .single()
+
+    if (profile && profile.onboarding_completed === false) {
+      return NextResponse.redirect(new URL('/onboard', request.url))
+    }
   }
 
   return supabaseResponse
