@@ -319,9 +319,9 @@ function extractSalaryPattern(html: string): ExtractedSalary | null {
     return buildRangeResult(labeledMatch[1].trim(), labeledMatch[2].trim(), labeledMatch[3] ?? null)
   }
 
-  // Pattern 5: Currency symbol + amount + period — "$150,000 per year", "R$15.000/mês", "£45k annually"
+  // Pattern 5: Currency symbol + amount + period — "$150,000 per year", "$250,000 a year", "R$15.000/mês", "£45k annually", "$18 an hour"
   // (must run before labeled single to capture period info)
-  const singlePeriod = /((?:R\$|A\$|C\$|S\$|HK\$|NZ\$|\$|€|£|₹|¥|₪|zł|kr|CHF)\s*[\d.,]+\s*(?:k|K|mil)?)\s*(?:per\s+(?:year|annum|month|hour|yr|mo|hr|ano|mês|mes|hora)|\/(?:yr|mo|year|month|hour|hr|ano|mês|mes|hora)|(?:annual(?:ly)?|yearly|monthly|mensal|hourly|p\.?a\.?|p\.?m\.?))\b/i
+  const singlePeriod = /((?:R\$|A\$|C\$|S\$|HK\$|NZ\$|\$|€|£|₹|¥|₪|zł|kr|CHF)\s*[\d.,]+\s*(?:k|K|mil)?)\s*(?:(?:per|an?)\s+(?:year|annum|month|hour|yr|mo|hr|ano|mês|mes|hora)|\/(?:yr|mo|year|month|hour|hr|ano|mês|mes|hora)|(?:annual(?:ly)?|yearly|monthly|mensal|hourly|p\.?a\.?|p\.?m\.?))\b/i
   const singlePeriodMatch = text.match(singlePeriod)
   if (singlePeriodMatch) {
     const val = singlePeriodMatch[1].trim()
