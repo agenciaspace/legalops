@@ -30,81 +30,57 @@ interface FirecrawlJobListing {
   applicationLink_citation?: string
 }
 
-interface FirecrawlAgentCreateResponse {
+interface FirecrawlScrapeResponse {
   success?: boolean
-  id?: string
-  error?: string
-}
-
-interface FirecrawlAgentStatusResponse {
-  success?: boolean
-  status?: string
   data?: {
-    jobListings?: FirecrawlJobListing[]
-  } | null
-  jobListings?: FirecrawlJobListing[]
+    metadata?: { creditsUsed?: number }
+    extract?: {
+      jobListings?: FirecrawlJobListing[]
+    }
+  }
   error?: string
 }
 
-const FIRECRAWL_AGENT_URL = 'https://api.firecrawl.dev/v2/agent'
-const DEFAULT_FIRECRAWL_MODEL = 'spark-1-mini'
-const DEFAULT_FIRECRAWL_TIMEOUT_MS = 45_000
-const DEFAULT_FIRECRAWL_POLL_INTERVAL_MS = 2_000
-const DEFAULT_FIRECRAWL_MAX_CREDITS = 80
-const DEFAULT_FIRECRAWL_PROMPT =
-  "Extract only job listings where the job title explicitly includes 'Legal Operations' or 'Legal Ops'. Exclude general legal roles like 'Paralegal', 'Attorney', 'Counsel', or 'Compliance' unless they are specifically for a Legal Operations function. Search globally across all platforms, including LinkedIn, CLOC, Legal.io, LegalOperators, and Goinhouse. For each listing, include the job title, company name, location, salary range (if available), and the direct application link."
+const FIRECRAWL_SCRAPE_URL = 'https://api.firecrawl.dev/v1/scrape'
 
-const FIRECRAWL_JOB_SCHEMA = {
+const FIRECRAWL_SCRAPE_TARGETS = [
+  'https://www.indeed.com/jobs?q=%22Legal+Operations%22&sort=date',
+  'https://www.indeed.com/jobs?q=%22Legal+Ops%22&sort=date',
+  'https://www.goinhouse.com/jobs/search?q=Legal+Operations',
+  'https://jobs.cloc.org/jobs?keywords=Legal+Operations',
+]
+
+const FIRECRAWL_EXTRACT_SCHEMA = {
   type: 'object',
   properties: {
     jobListings: {
       type: 'array',
-      description: 'List of specific Legal Operations job listings',
+      description: 'List of job listings found on this page',
       items: {
         type: 'object',
         properties: {
           jobTitle: {
             type: 'string',
-            description: "Job title (must contain 'Legal Operations' or 'Legal Ops')",
-          },
-          jobTitle_citation: {
-            type: 'string',
-            description: 'Source URL for jobTitle',
+            description: 'Job title',
           },
           companyName: {
             type: 'string',
             description: 'Company name',
           },
-          companyName_citation: {
-            type: 'string',
-            description: 'Source URL for companyName',
-          },
           location: {
             type: 'string',
-            description: 'Job location',
-          },
-          location_citation: {
-            type: 'string',
-            description: 'Source URL for location',
+            description: 'Job location (city, state/country)',
           },
           salaryRange: {
             type: 'string',
-            description: 'Salary range (if provided)',
-          },
-          salaryRange_citation: {
-            type: 'string',
-            description: 'Source URL for salaryRange',
+            description: 'Salary or compensation range if shown on the page (e.g. "$120,000 - $180,000/year")',
           },
           applicationLink: {
             type: 'string',
-            description: 'Link to apply for the job',
-          },
-          applicationLink_citation: {
-            type: 'string',
-            description: 'Source URL for applicationLink',
+            description: 'Direct link to apply or view the full job posting',
           },
         },
-        required: ['jobTitle', 'companyName', 'location', 'applicationLink'],
+        required: ['jobTitle', 'companyName', 'applicationLink'],
       },
     },
   },
@@ -144,10 +120,6 @@ function getFirstUrl(...values: unknown[]): string | null {
   return null
 }
 
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 export function matchesLegalOpsTitle(title: string): boolean {
   return /\blegal\s+(operations|ops)\b/i.test(title)
 }
@@ -178,6 +150,23 @@ export function inferSourceBoardFromUrl(url: string): SourceBoard {
   }
 }
 
+function cleanSalary(value: unknown): string | null {
+  const text = cleanString(value)
+  if (!text) return null
+  const lower = text.toLowerCase()
+  if (
+    lower === 'not specified' ||
+    lower === 'not listed' ||
+    lower === 'n/a' ||
+    lower === 'full-time' ||
+    lower === 'part-time' ||
+    lower.startsWith('pay information not')
+  ) {
+    return null
+  }
+  return text
+}
+
 export function normalizeFirecrawlJobListing(listing: FirecrawlJobListing): RawJob | null {
   const title = cleanString(listing.jobTitle)
   const company = cleanString(listing.companyName)
@@ -201,7 +190,7 @@ export function normalizeFirecrawlJobListing(listing: FirecrawlJobListing): RawJ
     url: applicationLink,
     source_board: inferSourceBoardFromUrl(listingUrl ?? applicationLink),
     location: cleanString(listing.location),
-    salary_range: cleanString(listing.salaryRange),
+    salary_range: cleanSalary(listing.salaryRange),
     listing_url: listingUrl,
   }
 }
@@ -411,74 +400,61 @@ export async function scrapeLegacyBoards(): Promise<RawJob[]> {
   return dedupeJobsByUrl(results)
 }
 
-export async function scrapeJobsWithFirecrawl(): Promise<RawJob[]> {
-  const apiKey = cleanString(process.env.FIRECRAWL_API_KEY)
-  if (!apiKey) return []
-
-  const response = await fetch(FIRECRAWL_AGENT_URL, {
+async function scrapeOneBoard(apiKey: string, url: string): Promise<FirecrawlJobListing[]> {
+  const response = await fetch(FIRECRAWL_SCRAPE_URL, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      prompt: cleanString(process.env.FIRECRAWL_JOB_PROMPT) ?? DEFAULT_FIRECRAWL_PROMPT,
-      schema: FIRECRAWL_JOB_SCHEMA,
-      model: cleanString(process.env.FIRECRAWL_MODEL) ?? DEFAULT_FIRECRAWL_MODEL,
-      maxCredits:
-        Number.parseInt(process.env.FIRECRAWL_AGENT_MAX_CREDITS ?? '', 10) ||
-        DEFAULT_FIRECRAWL_MAX_CREDITS,
+      url,
+      formats: ['extract'],
+      extract: { schema: FIRECRAWL_EXTRACT_SCHEMA },
     }),
-    signal: AbortSignal.timeout(15_000),
+    signal: AbortSignal.timeout(30_000),
   })
 
   if (!response.ok) {
     const body = await response.text().catch(() => '')
-    throw new Error(`Firecrawl create agent failed with ${response.status}: ${body.slice(0, 500)}`)
+    console.error(`[firecrawl] scrape failed for ${url}: HTTP ${response.status} ${body.slice(0, 300)}`)
+    return []
   }
 
-  const created = (await response.json()) as FirecrawlAgentCreateResponse
-  if (!created.id) {
-    throw new Error(created.error ?? 'Firecrawl create agent response did not include an id')
+  const result = (await response.json()) as FirecrawlScrapeResponse
+
+  if (!result.success) {
+    console.error(`[firecrawl] scrape error for ${url}: ${result.error}`)
+    return []
   }
 
-  const timeoutMs =
-    Number.parseInt(process.env.FIRECRAWL_AGENT_TIMEOUT_MS ?? '', 10) ||
-    DEFAULT_FIRECRAWL_TIMEOUT_MS
-  const pollIntervalMs =
-    Number.parseInt(process.env.FIRECRAWL_AGENT_POLL_INTERVAL_MS ?? '', 10) ||
-    DEFAULT_FIRECRAWL_POLL_INTERVAL_MS
-  const deadline = Date.now() + timeoutMs
+  const credits = result.data?.metadata?.creditsUsed ?? 0
+  const listings = result.data?.extract?.jobListings ?? []
+  console.info(`[firecrawl] ${url} → ${listings.length} listings (${credits} credits)`)
+  return listings
+}
 
-  while (Date.now() < deadline) {
-    await sleep(pollIntervalMs)
+export async function scrapeJobsWithFirecrawl(): Promise<RawJob[]> {
+  const apiKey = cleanString(process.env.FIRECRAWL_API_KEY)
+  if (!apiKey) return []
 
-    const statusResponse = await fetch(`${FIRECRAWL_AGENT_URL}/${created.id}`, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
-      signal: AbortSignal.timeout(15_000),
-    })
+  const targets = (cleanString(process.env.FIRECRAWL_SCRAPE_URLS) ?? '')
+    .split(',')
+    .map(u => u.trim())
+    .filter(Boolean)
 
-    if (!statusResponse.ok) {
-      const body = await statusResponse.text().catch(() => '')
-      throw new Error(
-        `Firecrawl get agent failed with ${statusResponse.status}: ${body.slice(0, 500)}`
-      )
-    }
+  const urls = targets.length > 0 ? targets : FIRECRAWL_SCRAPE_TARGETS
 
-    const status = (await statusResponse.json()) as FirecrawlAgentStatusResponse
+  const allListings = await Promise.all(
+    urls.map(url => scrapeOneBoard(apiKey, url).catch(err => {
+      console.error(`[firecrawl] ${url} threw:`, err)
+      return [] as FirecrawlJobListing[]
+    }))
+  )
 
-    if (status.status === 'completed') {
-      return extractFirecrawlJobsFromPayload(status)
-    }
-
-    if (status.status === 'failed' || status.status === 'cancelled') {
-      throw new Error(status.error ?? `Firecrawl agent ended with status ${status.status}`)
-    }
-  }
-
-  throw new Error(`Firecrawl agent timed out after ${timeoutMs}ms`)
+  return extractFirecrawlJobsFromPayload({
+    jobListings: allListings.flat(),
+  })
 }
 
 export async function scrapeAllBoards(): Promise<ScrapeAllBoardsResult> {
