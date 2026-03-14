@@ -1,12 +1,13 @@
 'use client'
 
 import Link from 'next/link'
+import { formatSalary, hasSalary } from '@/lib/format-salary'
 import type { DashboardStats, PipelineStatus } from '@/lib/types'
 
 interface ActivityItem {
   id: string
   status: string
-  job: { title: string; company: string; remote_reality: string }
+  job: { title: string; company: string; remote_reality: string; salary_min: number | null; salary_max: number | null; salary_currency: string | null }
   created_at: string
 }
 
@@ -111,7 +112,14 @@ export function DashboardClient({ stats, recentActivity }: Props) {
                   <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-slate-900 truncate">{item.job.title}</p>
-                      <p className="text-xs text-slate-500 truncate">{item.job.company}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-slate-500 truncate">{item.job.company}</p>
+                        {hasSalary(item.job) && (
+                          <span className="text-xs font-medium text-emerald-600 flex-shrink-0">
+                            {formatSalary(item.job)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <span className={`px-2 py-0.5 rounded text-xs font-medium flex-shrink-0 ${STATUS_COLORS[item.status as PipelineStatus] ?? ''}`}>
                       {STATUS_LABELS[item.status as PipelineStatus] ?? item.status}

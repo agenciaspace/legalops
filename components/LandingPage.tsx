@@ -4,6 +4,7 @@ import { ArrowRight, Globe, ExternalLink } from 'lucide-react'
 import { createServerClient } from '@supabase/ssr'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { BrandLogo } from '@/components/BrandLogo'
+import { formatSalary as formatSalaryUtil } from '@/lib/format-salary'
 import type { RemoteReality } from '@/lib/types'
 
 type LandingLocale = 'pt' | 'en'
@@ -50,10 +51,7 @@ const content = {
 } as const
 
 function formatSalary(min: number | null, max: number | null, currency: string | null, fallback: string): string {
-  if (!min && !max) return fallback
-  const cur = currency ?? ''
-  if (min && max) return `${cur} ${min.toLocaleString()} – ${max.toLocaleString()}`
-  return `${cur} ${(min ?? max)!.toLocaleString()}`
+  return formatSalaryUtil({ salary_min: min, salary_max: max, salary_currency: currency }, fallback)
 }
 
 async function fetchPublicJobs() {

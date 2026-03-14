@@ -2,20 +2,12 @@
 
 import { useState } from 'react'
 import { RemoteBadge } from './RemoteBadge'
+import { formatSalary, hasSalary } from '@/lib/format-salary'
 import type { Job } from '@/lib/types'
 
 interface JobCardProps {
   job: Job
   onAction: (jobId: string, action: 'add' | 'ignore') => void
-}
-
-function formatSalary(job: Job): string {
-  if (!job.salary_min && !job.salary_max) return 'Nao divulgado'
-  const currency = job.salary_currency ?? ''
-  if (job.salary_min && job.salary_max) {
-    return `${currency} ${job.salary_min.toLocaleString()} – ${job.salary_max.toLocaleString()}`
-  }
-  return `${currency} ${(job.salary_min ?? job.salary_max)!.toLocaleString()}`
 }
 
 function daysAgo(dateStr: string): string {
@@ -45,8 +37,10 @@ export function JobCard({ job, onAction }: JobCardProps) {
         <RemoteBadge reality={job.remote_reality} />
       </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-xs text-slate-500">{formatSalary(job)}</span>
+      <div className={`flex items-center justify-between mb-4 ${hasSalary(job) ? 'bg-emerald-50 -mx-2 px-2 py-1.5 rounded-lg' : ''}`}>
+        <span className={`text-xs font-medium ${hasSalary(job) ? 'text-emerald-700' : 'text-slate-400'}`}>
+          {formatSalary(job)}
+        </span>
         <span className="text-xs text-slate-400">{daysAgo(job.created_at)}</span>
       </div>
 
