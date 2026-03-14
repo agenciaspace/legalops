@@ -49,7 +49,7 @@ export function extractJobMetaFromHtml(html: string): ExtractedJobMeta {
     location: jsonLdMeta.location ?? embeddedMeta.location ?? textMeta.location,
     remote_status: embeddedMeta.remote_status ?? textMeta.remote_status,
     employment_type: jsonLdMeta.employment_type ?? embeddedMeta.employment_type ?? textMeta.employment_type,
-    benefits: [...new Set([...embeddedMeta.benefits, ...textMeta.benefits])],
+    benefits: Array.from(new Set([...embeddedMeta.benefits, ...textMeta.benefits])),
     posted_at: jsonLdMeta.posted_at ?? embeddedMeta.posted_at,
     department: embeddedMeta.department ?? textMeta.department,
   }
