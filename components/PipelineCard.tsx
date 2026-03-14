@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { RemoteBadge } from './RemoteBadge'
+import { formatSalary, hasSalary } from '@/lib/format-salary'
 import type { PipelineEntryWithJob } from '@/lib/types'
 
 interface PipelineCardProps {
@@ -7,14 +8,6 @@ interface PipelineCardProps {
   canMoveLeft: boolean
   canMoveRight: boolean
   onMove: (entryId: string, direction: 'left' | 'right') => void
-}
-
-function formatSalary(entry: PipelineEntryWithJob): string {
-  const { salary_min, salary_max, salary_currency } = entry.job
-  if (!salary_min && !salary_max) return ''
-  const cur = salary_currency ?? ''
-  if (salary_min && salary_max) return `${cur} ${salary_min.toLocaleString()}–${salary_max.toLocaleString()}`
-  return `${cur} ${(salary_min ?? salary_max)!.toLocaleString()}`
 }
 
 export function PipelineCard({ entry, canMoveLeft, canMoveRight, onMove }: PipelineCardProps) {
@@ -28,8 +21,8 @@ export function PipelineCard({ entry, canMoveLeft, canMoveRight, onMove }: Pipel
         <div className="flex items-center gap-1.5 mb-2">
           <RemoteBadge reality={entry.job.remote_reality} />
         </div>
-        {formatSalary(entry) && (
-          <p className="text-xs text-slate-400 mb-2">{formatSalary(entry)}</p>
+        {hasSalary(entry.job) && (
+          <p className="text-xs text-emerald-600 font-medium mb-2">{formatSalary(entry.job)}</p>
         )}
         <div
           className="flex gap-1 pt-2 border-t border-slate-100"

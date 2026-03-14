@@ -7,7 +7,7 @@ export default async function DashboardPage() {
 
   const { data: entries } = await supabase
     .from('user_pipeline_entries')
-    .select('id, status, created_at, applied_at, job:jobs(title, company, remote_reality)')
+    .select('id, status, created_at, applied_at, job:jobs(title, company, remote_reality, salary_min, salary_max, salary_currency)')
     .eq('user_id', user!.id)
     .order('created_at', { ascending: false })
 
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
   const recentActivity = all.slice(0, 10).map(e => ({
     id: e.id,
     status: e.status,
-    job: e.job as unknown as { title: string; company: string; remote_reality: string },
+    job: e.job as unknown as { title: string; company: string; remote_reality: string; salary_min: number | null; salary_max: number | null; salary_currency: string | null },
     created_at: e.created_at,
   }))
 

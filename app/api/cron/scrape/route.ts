@@ -3,6 +3,39 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { buildJobDiscoverySeed, fetchJobDescription, scrapeAllBoards } from '@/lib/scraper'
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
+import type { ExtractedSalary } from '@/lib/utils'
+
+function parseSalaryValues(extracted: ExtractedSalary | null): {
+  salary_min: number | null
+  salary_max: number | null
+  salary_currency: string | null
+} {
+  if (!extracted) return { salary_min: null, salary_max: null, salary_currency: null }
+
+  const parseNum = (val: string | null): number | null => {
+    if (!val) return null
+    // Remove currency symbols and whitespace
+    let cleaned = val.replace(/[R$€£₹¥A$C$S$HK$NZ$CHFkrzł₪,\s]/g, '')
+    // Handle "k" notation (e.g. "120k" → 120000)
+    if (/k$/i.test(val.replace(/\s+/g, ''))) {
+      cleaned = cleaned.replace(/k$/i, '')
+      const num = parseFloat(cleaned)
+      return isNaN(num) ? null : Math.round(num * 1000)
+    }
+    // Handle Brazilian notation (dots as thousands separator)
+    if (/^\d{1,3}(\.\d{3})+$/.test(cleaned)) {
+      cleaned = cleaned.replace(/\./g, '')
+    }
+    const num = parseFloat(cleaned)
+    return isNaN(num) ? null : Math.round(num)
+  }
+
+  return {
+    salary_min: parseNum(extracted.min),
+    salary_max: parseNum(extracted.max),
+    salary_currency: extracted.currency ?? null,
+  }
+}
 
 export const maxDuration = 180
 
@@ -52,12 +85,16 @@ export async function GET(req: NextRequest) {
     summary.duplicates = jobs.length - newJobs.length
 
     for (const job of newJobs) {
-      const pageDescription = await fetchJobDescription(job.url)
+      const { description: pageDescription, extractedSalary } = await fetchJobDescription(job.url)
       const discoverySeed = buildJobDiscoverySeed(job)
       const description = [discoverySeed, pageDescription]
         .filter(Boolean)
         .join('\n\n')
         .slice(0, 8000)
+
+      // Pre-populate salary from HTML extraction so it's available even if AI enrichment fails
+      const htmlSalary = parseSalaryValues(extractedSalary)
+
       const { error } = await supabase
         .from('jobs')
         .insert({
@@ -68,6 +105,7 @@ export async function GET(req: NextRequest) {
           raw_description: description,
           enrichment_status: 'pending',
           enrichment_attempts: 0,
+          ...htmlSalary,
         })
 
       if (!error) {
@@ -90,7 +128,7 @@ export async function GET(req: NextRequest) {
 
   const { data: pendingJobs } = await supabase
     .from('jobs')
-    .select('id, company, title, raw_description, enrichment_attempts')
+    .select('id, company, title, raw_description, enrichment_attempts, salary_min, salary_max, salary_currency')
     .in('enrichment_status', ['pending', 'failed'])
     .lt('enrichment_attempts', 5)
     .limit(20)
@@ -103,6 +141,12 @@ export async function GET(req: NextRequest) {
         jobTitle: job.title,
       })
       if (result) {
+        // Preserve HTML-extracted salary when AI enrichment returns null
+        if (!result.salary_min && !result.salary_max && (job.salary_min || job.salary_max)) {
+          result.salary_min = job.salary_min
+          result.salary_max = job.salary_max
+          result.salary_currency = job.salary_currency
+        }
         await supabase
           .from('jobs')
           .update({ ...result, enrichment_status: 'done' })

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { RemoteBadge } from '@/components/RemoteBadge'
+import { formatSalary } from '@/lib/format-salary'
 import { StatusDropdown } from '@/components/StatusDropdown'
 import { LeaderSection } from '@/components/LeaderSection'
 import { NotesSection } from '@/components/NotesSection'
@@ -75,14 +76,6 @@ export function JobDetailClient({
     }
   }
 
-  function formatSalary(): string {
-    if (!job.salary_min && !job.salary_max) return 'Nao divulgado'
-    const cur = job.salary_currency ?? ''
-    if (job.salary_min && job.salary_max)
-      return `${cur} ${job.salary_min.toLocaleString()} – ${job.salary_max.toLocaleString()}`
-    return `${cur} ${(job.salary_min ?? job.salary_max)!.toLocaleString()}`
-  }
-
   function formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -133,7 +126,7 @@ export function JobDetailClient({
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-sm text-center">
           <p className="text-xs text-slate-500">Salario</p>
-          <p className="text-sm font-semibold text-slate-900 mt-0.5">{formatSalary()}</p>
+          <p className="text-sm font-semibold text-slate-900 mt-0.5">{formatSalary(job)}</p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-sm text-center">
           <p className="text-xs text-slate-500">Contatos</p>
