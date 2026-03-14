@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { buildJobDiscoverySeed, fetchJobDescription, scrapeAllBoards } from '@/lib/scraper'
+import { buildJobDiscoverySeed, fetchJobHtml, buildDescriptionFromHtml, scrapeAllBoards } from '@/lib/scraper'
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
+import { extractJobMetaFromHtml, parseSalaryToInteger } from '@/lib/utils'
 
 export const maxDuration = 180
 
@@ -52,12 +53,27 @@ export async function GET(req: NextRequest) {
     summary.duplicates = jobs.length - newJobs.length
 
     for (const job of newJobs) {
-      const pageDescription = await fetchJobDescription(job.url)
+      const html = await fetchJobHtml(job.url)
+      const pageDescription = buildDescriptionFromHtml(html)
       const discoverySeed = buildJobDiscoverySeed(job)
       const description = [discoverySeed, pageDescription]
         .filter(Boolean)
         .join('\n\n')
         .slice(0, 8000)
+
+      // Extract salary directly from HTML for immediate availability
+      const meta = html ? extractJobMetaFromHtml(html) : null
+      const salaryFields: Record<string, unknown> = {}
+      if (meta?.salary) {
+        const min = parseSalaryToInteger(meta.salary.min)
+        const max = parseSalaryToInteger(meta.salary.max)
+        if (min || max) {
+          salaryFields.salary_min = min
+          salaryFields.salary_max = max
+          salaryFields.salary_currency = meta.salary.currency ?? null
+        }
+      }
+
       const { error } = await supabase
         .from('jobs')
         .insert({
@@ -68,6 +84,7 @@ export async function GET(req: NextRequest) {
           raw_description: description,
           enrichment_status: 'pending',
           enrichment_attempts: 0,
+          ...salaryFields,
         })
 
       if (!error) {
@@ -122,6 +139,41 @@ export async function GET(req: NextRequest) {
         .update({ enrichment_status: 'failed', enrichment_attempts: job.enrichment_attempts + 1 })
         .eq('id', job.id)
       summary.failed++
+    }
+  }
+
+  // Backfill salary for existing jobs that have enrichment_status='done' but no salary
+  const { data: jobsMissingSalary } = await supabase
+    .from('jobs')
+    .select('id, url')
+    .eq('enrichment_status', 'done')
+    .is('salary_min', null)
+    .is('salary_max', null)
+    .limit(10)
+
+  for (const job of jobsMissingSalary ?? []) {
+    try {
+      const html = await fetchJobHtml(job.url)
+      if (!html) continue
+      const meta = extractJobMetaFromHtml(html)
+      if (!meta.salary) continue
+
+      const min = parseSalaryToInteger(meta.salary.min)
+      const max = parseSalaryToInteger(meta.salary.max)
+      if (!min && !max) continue
+
+      await supabase
+        .from('jobs')
+        .update({
+          salary_min: min,
+          salary_max: max,
+          salary_currency: meta.salary.currency ?? null,
+        })
+        .eq('id', job.id)
+
+      summary.enriched++
+    } catch (e) {
+      console.error(`[cron] salary backfill for job ${job.id} failed:`, e)
     }
   }
 

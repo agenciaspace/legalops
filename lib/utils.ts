@@ -571,6 +571,76 @@ export function buildMetadataBlock(meta: ExtractedJobMeta): string {
   return lines.join('\n')
 }
 
+/**
+ * Parses a salary string like "$122,000", "R$8.000", "150000", "120k" into an integer.
+ * Returns null if parsing fails.
+ */
+export function parseSalaryToInteger(value: string | null | undefined): number | null {
+  if (!value) return null
+
+  // Remove currency symbols, spaces
+  let cleaned = value.replace(/[R$€£₹¥₪A$C$S$HK$NZ$CHFkrzł\s]/gi, '')
+
+  // Check if original had "k" or "K" suffix (before cleaning removed it)
+  const hasK = /[\d.,]\s*[kK]\b/.test(value) || /[\d.,]\s*mil\b/i.test(value)
+
+  // Handle different decimal separators
+  // "122,000" (US) vs "8.000" (BR) vs "122000"
+  if (cleaned.includes(',') && cleaned.includes('.')) {
+    // Both separators: determine which is decimal
+    const lastComma = cleaned.lastIndexOf(',')
+    const lastDot = cleaned.lastIndexOf('.')
+    if (lastComma > lastDot) {
+      // European: 1.000,50 → remove dots, replace comma with dot
+      cleaned = cleaned.replace(/\./g, '').replace(',', '.')
+    } else {
+      // US: 1,000.50 → remove commas
+      cleaned = cleaned.replace(/,/g, '')
+    }
+  } else if (cleaned.includes(',')) {
+    // Only commas: if 3 digits after comma, it's a thousands separator
+    const parts = cleaned.split(',')
+    if (parts.length > 1 && parts[parts.length - 1].length === 3) {
+      cleaned = cleaned.replace(/,/g, '')
+    } else {
+      // Decimal comma
+      cleaned = cleaned.replace(',', '.')
+    }
+  } else if (cleaned.includes('.')) {
+    // Only dots: if 3 digits after dot, it's a thousands separator (BR style)
+    const parts = cleaned.split('.')
+    if (parts.length > 1 && parts[parts.length - 1].length === 3) {
+      cleaned = cleaned.replace(/\./g, '')
+    }
+    // else it's a decimal dot, keep it
+  }
+
+  const num = parseFloat(cleaned)
+  if (isNaN(num)) return null
+
+  const result = hasK ? num * 1000 : num
+  return Math.round(result)
+}
+
+/**
+ * Infers currency code from a salary string.
+ */
+export function inferCurrency(value: string | null | undefined): string | null {
+  if (!value) return null
+  if (value.startsWith('R$')) return 'BRL'
+  if (value.startsWith('A$')) return 'AUD'
+  if (value.startsWith('C$')) return 'CAD'
+  if (value.startsWith('S$')) return 'SGD'
+  if (value.startsWith('HK$')) return 'HKD'
+  if (value.startsWith('NZ$')) return 'NZD'
+  if (value.startsWith('$')) return 'USD'
+  if (value.startsWith('€')) return 'EUR'
+  if (value.startsWith('£')) return 'GBP'
+  if (value.startsWith('₹')) return 'INR'
+  if (value.startsWith('¥')) return 'JPY'
+  return null
+}
+
 export const KEYWORDS = [
   'legal operations',
   'legal ops',

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { stripHtml, matchesKeywords, extractSalaryFromHtml, extractJobMetaFromHtml, buildMetadataBlock } from '@/lib/utils'
+import { stripHtml, matchesKeywords, extractSalaryFromHtml, extractJobMetaFromHtml, buildMetadataBlock, parseSalaryToInteger } from '@/lib/utils'
 
 describe('stripHtml', () => {
   it('removes HTML tags', () => {
@@ -452,5 +452,63 @@ describe('buildMetadataBlock', () => {
     expect(block).not.toContain('LOCATION')
     expect(block).not.toContain('EMPLOYMENT TYPE')
     expect(block).not.toContain('BENEFITS')
+  })
+})
+
+// ─── parseSalaryToInteger tests ───
+
+describe('parseSalaryToInteger', () => {
+  it('returns null for null/undefined/empty', () => {
+    expect(parseSalaryToInteger(null)).toBeNull()
+    expect(parseSalaryToInteger(undefined)).toBeNull()
+    expect(parseSalaryToInteger('')).toBeNull()
+  })
+
+  it('parses US format: $122,000', () => {
+    expect(parseSalaryToInteger('$122,000')).toBe(122000)
+  })
+
+  it('parses US format: $238,000', () => {
+    expect(parseSalaryToInteger('$238,000')).toBe(238000)
+  })
+
+  it('parses BR format: R$8.000', () => {
+    expect(parseSalaryToInteger('R$8.000')).toBe(8000)
+  })
+
+  it('parses BR format: R$15.000', () => {
+    expect(parseSalaryToInteger('R$15.000')).toBe(15000)
+  })
+
+  it('parses plain number: 150000', () => {
+    expect(parseSalaryToInteger('150000')).toBe(150000)
+  })
+
+  it('parses k notation: $120k', () => {
+    expect(parseSalaryToInteger('$120k')).toBe(120000)
+  })
+
+  it('parses K notation: $120K', () => {
+    expect(parseSalaryToInteger('$120K')).toBe(120000)
+  })
+
+  it('parses EUR: €50,000', () => {
+    expect(parseSalaryToInteger('€50,000')).toBe(50000)
+  })
+
+  it('parses GBP: £45,000', () => {
+    expect(parseSalaryToInteger('£45,000')).toBe(45000)
+  })
+
+  it('parses European format: 1.000,50', () => {
+    expect(parseSalaryToInteger('€1.000,50')).toBe(1001)
+  })
+
+  it('parses decimal US: 150,000.50', () => {
+    expect(parseSalaryToInteger('$150,000.50')).toBe(150001)
+  })
+
+  it('parses hourly: $75', () => {
+    expect(parseSalaryToInteger('$75')).toBe(75)
   })
 })

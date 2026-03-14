@@ -112,7 +112,7 @@ const FIRECRAWL_JOB_SCHEMA = {
 }
 
 export const COMPANY_SLUGS = {
-  greenhouse: ['nubank', 'ifood', 'totvs', 'vtex', 'loft', 'gympass', 'creditas'],
+  greenhouse: ['nubank', 'ifood', 'totvs', 'vtex', 'loft', 'gympass', 'creditas', 'figma'],
   lever: ['stone', 'pagarme', 'dock', 'ebanx', 'nuvemshop'],
   workable: ['jusbrasil', 'lalamove-brazil'],
   gupy: ['itau', 'bradesco', 'ambev', 'embraer', 'raizen'],
@@ -514,7 +514,7 @@ export async function scrapeAllBoards(): Promise<ScrapeAllBoardsResult> {
   }
 }
 
-export async function fetchJobDescription(url: string): Promise<string> {
+export async function fetchJobHtml(url: string): Promise<string> {
   try {
     const response = await fetch(url, {
       headers: { 'User-Agent': 'LegalOpsCRM/1.0' },
@@ -522,20 +522,27 @@ export async function fetchJobDescription(url: string): Promise<string> {
     })
 
     if (!response.ok) return ''
-
-    const html = await response.text()
-
-    // Extract all structured metadata before stripping HTML
-    const meta = extractJobMetaFromHtml(html)
-    const metaBlock = buildMetadataBlock(meta)
-    const text = stripHtml(html)
-
-    if (metaBlock) {
-      return `${metaBlock}\n\n${text}`.slice(0, 8_000)
-    }
-
-    return text.slice(0, 8_000)
+    return response.text()
   } catch {
     return ''
   }
+}
+
+export function buildDescriptionFromHtml(html: string): string {
+  if (!html) return ''
+
+  const meta = extractJobMetaFromHtml(html)
+  const metaBlock = buildMetadataBlock(meta)
+  const text = stripHtml(html)
+
+  if (metaBlock) {
+    return `${metaBlock}\n\n${text}`.slice(0, 8_000)
+  }
+
+  return text.slice(0, 8_000)
+}
+
+export async function fetchJobDescription(url: string): Promise<string> {
+  const html = await fetchJobHtml(url)
+  return buildDescriptionFromHtml(html)
 }
