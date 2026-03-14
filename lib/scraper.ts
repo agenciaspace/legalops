@@ -1,4 +1,4 @@
-import { stripHtml, extractJobMetaFromHtml, buildMetadataBlock } from './utils'
+import { stripHtml, extractJobMetaFromHtml, buildMetadataBlock, type ExtractedSalary } from './utils'
 import type { SourceBoard } from './types'
 
 export type RawJob = {
@@ -514,14 +514,19 @@ export async function scrapeAllBoards(): Promise<ScrapeAllBoardsResult> {
   }
 }
 
-export async function fetchJobDescription(url: string): Promise<string> {
+export interface FetchJobResult {
+  description: string
+  extractedSalary: ExtractedSalary | null
+}
+
+export async function fetchJobDescription(url: string): Promise<FetchJobResult> {
   try {
     const response = await fetch(url, {
       headers: { 'User-Agent': 'LegalOpsCRM/1.0' },
       signal: AbortSignal.timeout(15_000),
     })
 
-    if (!response.ok) return ''
+    if (!response.ok) return { description: '', extractedSalary: null }
 
     const html = await response.text()
 
@@ -530,12 +535,12 @@ export async function fetchJobDescription(url: string): Promise<string> {
     const metaBlock = buildMetadataBlock(meta)
     const text = stripHtml(html)
 
-    if (metaBlock) {
-      return `${metaBlock}\n\n${text}`.slice(0, 8_000)
-    }
+    const description = metaBlock
+      ? `${metaBlock}\n\n${text}`.slice(0, 8_000)
+      : text.slice(0, 8_000)
 
-    return text.slice(0, 8_000)
+    return { description, extractedSalary: meta.salary }
   } catch {
-    return ''
+    return { description: '', extractedSalary: null }
   }
 }
