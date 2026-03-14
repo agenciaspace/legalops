@@ -96,22 +96,27 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
     redirect('/dashboard')
   }
 
-  const { data: rawJobs } = await supabase
-    .from('jobs')
-    .select('id, title, company, remote_reality, salary_min, salary_max, salary_currency')
-    .eq('enrichment_status', 'done')
-    .order('created_at', { ascending: false })
-    .limit(6)
+  let jobs: LandingJob[] = []
+  try {
+    const { data: rawJobs } = await supabase
+      .from('jobs')
+      .select('id, title, company, remote_reality, salary_min, salary_max, salary_currency')
+      .eq('enrichment_status', 'done')
+      .order('created_at', { ascending: false })
+      .limit(6)
 
-  const jobs: LandingJob[] = (rawJobs ?? []).map(j => ({
-    id: j.id,
-    title: j.title,
-    company: j.company,
-    remote_reality: j.remote_reality,
-    salary_min: j.salary_min,
-    salary_max: j.salary_max,
-    salary_currency: j.salary_currency,
-  }))
+    jobs = (rawJobs ?? []).map(j => ({
+      id: j.id,
+      title: j.title,
+      company: j.company,
+      remote_reality: j.remote_reality,
+      salary_min: j.salary_min,
+      salary_max: j.salary_max,
+      salary_currency: j.salary_currency,
+    }))
+  } catch {
+    // Falls back to mock data in LandingJobCards
+  }
 
   return (
     <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-stone-50 text-slate-950">

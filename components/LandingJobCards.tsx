@@ -34,13 +34,26 @@ function formatSalary(job: LandingJob): string | null {
   return `${cur} ${fmt((job.salary_min ?? job.salary_max)!)}`
 }
 
+const FALLBACK_JOBS: Record<Locale, LandingJob[]> = {
+  pt: [
+    { id: 'f1', title: 'Legal Operations Manager', company: 'Stripe', remote_reality: 'fully_remote', salary_min: 130000, salary_max: 160000, salary_currency: 'USD' },
+    { id: 'f2', title: 'CLM Implementation Lead', company: 'Notion', remote_reality: 'remote_with_travel', salary_min: 115000, salary_max: 145000, salary_currency: 'USD' },
+    { id: 'f3', title: 'Contract Operations Analyst', company: 'Figma', remote_reality: 'fully_remote', salary_min: 95000, salary_max: 120000, salary_currency: 'USD' },
+  ],
+  en: [
+    { id: 'f1', title: 'Legal Operations Manager', company: 'Stripe', remote_reality: 'fully_remote', salary_min: 130000, salary_max: 160000, salary_currency: 'USD' },
+    { id: 'f2', title: 'CLM Implementation Lead', company: 'Notion', remote_reality: 'remote_with_travel', salary_min: 115000, salary_max: 145000, salary_currency: 'USD' },
+    { id: 'f3', title: 'Contract Operations Analyst', company: 'Figma', remote_reality: 'fully_remote', salary_min: 95000, salary_max: 120000, salary_currency: 'USD' },
+  ],
+}
+
 const labels = {
   pt: { cta: 'Entre para ver detalhes' },
   en: { cta: 'Sign in to see details' },
 }
 
 export function LandingJobCards({ locale, jobs }: { locale: Locale; jobs: LandingJob[] }) {
-  const items = jobs.slice(0, 6)
+  const items = jobs.length > 0 ? jobs.slice(0, 6) : FALLBACK_JOBS[locale]
 
   return (
     <div className="animate-subtle-float">
