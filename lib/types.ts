@@ -188,3 +188,97 @@ export interface UserEmailAlias {
   created_at: string
   updated_at: string
 }
+
+export type CompanyPlan = 'free' | 'basic' | 'premium' | 'enterprise'
+export type CompanySize = 'startup' | 'small' | 'medium' | 'large' | 'enterprise'
+export type CompanyJobStatus = 'draft' | 'active' | 'paused' | 'closed' | 'expired'
+export type RemotePolicy = 'fully_remote' | 'remote_with_travel' | 'hybrid' | 'onsite' | 'unknown'
+export type Seniority = 'junior' | 'mid' | 'senior' | 'lead' | 'head'
+export type ContractType = 'clt' | 'pj' | 'intern' | 'temporary' | 'freelance'
+export type MatchStatus = 'new' | 'viewed' | 'interested' | 'applied' | 'dismissed'
+export type ApplicationStatus = 'pending' | 'reviewed' | 'shortlisted' | 'interview' | 'rejected' | 'hired'
+
+export interface CompanyProfile {
+  id: string
+  user_id: string
+  company_name: string
+  cnpj: string | null
+  sector: string | null
+  size: CompanySize | null
+  website: string | null
+  logo_url: string | null
+  description: string | null
+  plan: CompanyPlan
+  plan_expires_at: string | null
+  jobs_posted_count: number
+  jobs_limit: number
+  created_at: string
+  updated_at: string
+}
+
+export interface CompanyJob {
+  id: string
+  company_id: string
+  title: string
+  description: string
+  location: string | null
+  remote_policy: RemotePolicy
+  salary_min: number | null
+  salary_max: number | null
+  salary_currency: string | null
+  benefits: string[]
+  required_experience_years: number | null
+  professional_type: ProfessionalType | null
+  areas_of_expertise: string[]
+  seniority: Seniority | null
+  contract_type: ContractType
+  status: CompanyJobStatus
+  featured: boolean
+  expires_at: string | null
+  views_count: number
+  applications_count: number
+  created_at: string
+  updated_at: string
+}
+
+export interface CompanyJobWithCompany extends CompanyJob {
+  company: Pick<CompanyProfile, 'company_name' | 'logo_url' | 'sector' | 'size'>
+}
+
+export interface ScoreBreakdown {
+  expertise_overlap: number
+  experience_fit: number
+  professional_type_match: number
+  remote_preference: number
+  title_relevance: number
+}
+
+export interface JobMatch {
+  id: string
+  user_id: string
+  company_job_id: string | null
+  crawled_job_id: string | null
+  score: number
+  score_breakdown: ScoreBreakdown
+  status: MatchStatus
+  notified: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface JobMatchWithDetails extends JobMatch {
+  company_job?: CompanyJobWithCompany | null
+  crawled_job?: Job | null
+}
+
+export interface JobApplication {
+  id: string
+  user_id: string
+  company_job_id: string
+  match_id: string | null
+  cover_letter: string | null
+  status: ApplicationStatus
+  company_notes: string | null
+  created_at: string
+  updated_at: string
+}

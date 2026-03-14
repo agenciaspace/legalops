@@ -51,6 +51,7 @@ export function Nav({ discoverCount }: NavProps) {
           </Link>
           {navLink('/dashboard', 'Dashboard')}
           {navLink('/discover', 'Descobrir', discoverCount)}
+          {navLink('/matches', 'Matches')}
           {navLink('/pipeline', 'Pipeline')}
           {navLink('/emails', 'Emails')}
           {navLink('/settings', 'Configurações')}
