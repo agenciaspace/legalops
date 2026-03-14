@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
 
   // Authenticated user on login → redirect to app
   if (pathname === '/login') {
-    return NextResponse.redirect(new URL('/discover', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   // Check onboarding completion for non-onboarding, non-API routes
