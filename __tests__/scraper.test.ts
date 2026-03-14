@@ -47,7 +47,7 @@ describe('inferSourceBoardFromUrl', () => {
 })
 
 describe('extractFirecrawlJobsFromPayload', () => {
-  it('normalizes the current Firecrawl response shape and excludes non-matching titles', () => {
+  it('normalizes the Firecrawl response shape and keeps all valid listings', () => {
     const payload = {
       jobListings: [
         {
@@ -63,14 +63,14 @@ describe('extractFirecrawlJobsFromPayload', () => {
           applicationLink_citation: 'https://jobs.cloc.org/job/legal-operations-billing-manager-chicago-illinois-0311',
         },
         {
-          jobTitle: 'Operations Manager, Legal',
-          jobTitle_citation: 'https://www.legaloperators.com/jobs/operations-manager-legal-cohere-hn0',
-          companyName: 'Cohere',
-          companyName_citation: 'https://www.legaloperators.com/jobs/operations-manager-legal-cohere-hn0',
-          location: 'San Francisco, CA',
-          location_citation: 'https://www.legaloperators.com/jobs/operations-manager-legal-cohere-hn0',
-          applicationLink: 'https://www.legaloperators.com/jobs/operations-manager-legal-cohere-hn0',
-          applicationLink_citation: 'https://www.legaloperators.com/jobs/operations-manager-legal-cohere-hn0',
+          jobTitle: 'Head of Legal',
+          jobTitle_citation: 'https://www.goinhouse.com/jobs/123-head-of-legal-at-acme',
+          companyName: 'Acme',
+          companyName_citation: 'https://www.goinhouse.com/jobs/123-head-of-legal-at-acme',
+          location: 'Remote',
+          salaryRange: '$195,000 to $250,000 Annually',
+          applicationLink: 'https://www.goinhouse.com/jobs/123-head-of-legal-at-acme',
+          applicationLink_citation: 'https://www.goinhouse.com/jobs/123-head-of-legal-at-acme',
         },
         {
           jobTitle: 'Head of Legal Operations',
@@ -89,7 +89,7 @@ describe('extractFirecrawlJobsFromPayload', () => {
 
     const result = extractFirecrawlJobsFromPayload(payload)
 
-    expect(result).toHaveLength(2)
+    expect(result).toHaveLength(3)
     expect(result[0]).toMatchObject({
       title: 'Legal Operations Billing, Manager',
       company: 'Mondelez International, Inc',
@@ -98,10 +98,16 @@ describe('extractFirecrawlJobsFromPayload', () => {
       salary_range: '$95,100 to $130,790 per year',
     })
     expect(result[1]).toMatchObject({
+      title: 'Head of Legal',
+      company: 'Acme',
+      source_board: 'goinhouse',
+      salary_range: '$195,000 to $250,000 Annually',
+    })
+    expect(result[2]).toMatchObject({
       title: 'Head of Legal Operations',
       company: 'Brex',
       source_board: 'goinhouse',
-      location: 'San Francisco, CA',
+      salary_range: '$220,000 to $261,000 Annually',
     })
   })
 })
@@ -163,7 +169,7 @@ describe('extractFirecrawlJobsFromPayload (scrape format)', () => {
 
     const result = extractFirecrawlJobsFromPayload(payload)
 
-    expect(result).toHaveLength(2)
+    expect(result).toHaveLength(3)
     expect(result[0]).toMatchObject({
       title: 'Legal Operations Assistant',
       salary_range: '$27 - $29 an hour',
@@ -173,6 +179,11 @@ describe('extractFirecrawlJobsFromPayload (scrape format)', () => {
       title: 'Head of Legal Operations',
       salary_range: '$210,000 to $250,000 Annually',
       source_board: 'goinhouse',
+    })
+    expect(result[2]).toMatchObject({
+      title: 'Software Engineer',
+      salary_range: '$200,000 a year',
+      source_board: 'company_site',
     })
   })
 })

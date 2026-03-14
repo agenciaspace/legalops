@@ -172,7 +172,7 @@ export function normalizeFirecrawlJobListing(listing: FirecrawlJobListing): RawJ
   const company = cleanString(listing.companyName)
   const applicationLink = cleanUrl(listing.applicationLink)
 
-  if (!title || !company || !applicationLink || !matchesLegalOpsTitle(title)) {
+  if (!title || !company || !applicationLink) {
     return null
   }
 
