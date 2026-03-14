@@ -1,4 +1,4 @@
-import { stripHtml } from './utils'
+import { stripHtml, extractSalaryFromHtml } from './utils'
 import type { SourceBoard } from './types'
 
 export type RawJob = {
@@ -490,7 +490,17 @@ export async function fetchJobDescription(url: string): Promise<string> {
     if (!response.ok) return ''
 
     const html = await response.text()
-    return stripHtml(html).slice(0, 8_000)
+
+    // Extract structured salary data before stripping HTML
+    const salary = extractSalaryFromHtml(html)
+    const text = stripHtml(html)
+
+    // Prepend salary clearly so AI enrichment always finds it
+    if (salary) {
+      return `SALARY INFORMATION FOUND: ${salary.raw}\n\n${text}`.slice(0, 8_000)
+    }
+
+    return text.slice(0, 8_000)
   } catch {
     return ''
   }
