@@ -5,6 +5,7 @@ import {
   filterByKeywords,
   inferSourceBoardFromUrl,
   matchesLegalOpsTitle,
+  normalizeFirecrawlJobListing,
   parseGreenhouseJobs,
   parseLeverJobs,
 } from '@/lib/scraper'
@@ -101,6 +102,77 @@ describe('extractFirecrawlJobsFromPayload', () => {
       company: 'Brex',
       source_board: 'goinhouse',
       location: 'San Francisco, CA',
+    })
+  })
+})
+
+describe('normalizeFirecrawlJobListing salary cleaning', () => {
+  it('strips "Not specified" and similar non-salary values', () => {
+    const base = {
+      jobTitle: 'Legal Operations Manager',
+      companyName: 'Acme',
+      applicationLink: 'https://example.com/apply',
+    }
+
+    expect(normalizeFirecrawlJobListing({ ...base, salaryRange: 'Not specified' })?.salary_range).toBeNull()
+    expect(normalizeFirecrawlJobListing({ ...base, salaryRange: 'Not listed' })?.salary_range).toBeNull()
+    expect(normalizeFirecrawlJobListing({ ...base, salaryRange: 'N/A' })?.salary_range).toBeNull()
+    expect(normalizeFirecrawlJobListing({ ...base, salaryRange: 'Full-time' })?.salary_range).toBeNull()
+    expect(normalizeFirecrawlJobListing({ ...base, salaryRange: 'Pay information not provided' })?.salary_range).toBeNull()
+  })
+
+  it('keeps real salary values', () => {
+    const base = {
+      jobTitle: 'Legal Operations Manager',
+      companyName: 'Acme',
+      applicationLink: 'https://example.com/apply',
+    }
+
+    expect(normalizeFirecrawlJobListing({ ...base, salaryRange: '$120,000 - $180,000 a year' })?.salary_range).toBe('$120,000 - $180,000 a year')
+    expect(normalizeFirecrawlJobListing({ ...base, salaryRange: '$195,000 to $250,000 Annually' })?.salary_range).toBe('$195,000 to $250,000 Annually')
+  })
+})
+
+describe('extractFirecrawlJobsFromPayload (scrape format)', () => {
+  it('handles the /v1/scrape extract format', () => {
+    const payload = {
+      jobListings: [
+        {
+          jobTitle: 'Legal Operations Assistant',
+          companyName: 'Deckers Brands',
+          location: 'Goleta, CA',
+          salaryRange: '$27 - $29 an hour',
+          applicationLink: 'https://www.indeed.com/viewjob?jk=abc123',
+        },
+        {
+          jobTitle: 'Head of Legal Operations',
+          companyName: 'NGEN',
+          location: 'Remote',
+          salaryRange: '$210,000 to $250,000 Annually',
+          applicationLink: 'https://www.goinhouse.com/jobs/123',
+        },
+        {
+          jobTitle: 'Software Engineer',
+          companyName: 'Google',
+          location: 'Mountain View, CA',
+          salaryRange: '$200,000 a year',
+          applicationLink: 'https://google.com/careers/123',
+        },
+      ],
+    }
+
+    const result = extractFirecrawlJobsFromPayload(payload)
+
+    expect(result).toHaveLength(2)
+    expect(result[0]).toMatchObject({
+      title: 'Legal Operations Assistant',
+      salary_range: '$27 - $29 an hour',
+      source_board: 'indeed',
+    })
+    expect(result[1]).toMatchObject({
+      title: 'Head of Legal Operations',
+      salary_range: '$210,000 to $250,000 Annually',
+      source_board: 'goinhouse',
     })
   })
 })
