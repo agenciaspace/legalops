@@ -1,4 +1,4 @@
-import { stripHtml, extractSalaryFromHtml } from './utils'
+import { stripHtml, extractJobMetaFromHtml, buildMetadataBlock } from './utils'
 import type { SourceBoard } from './types'
 
 export type RawJob = {
@@ -272,12 +272,16 @@ export function dedupeJobsByUrl(jobs: RawJob[]): RawJob[] {
 export function parseGreenhouseJobs(data: any, slug: string): RawJob[] {
   if (!data?.jobs) return []
   return data.jobs
-    .map((job: { title: string; absolute_url: string }) => ({
-      title: job.title,
-      url: job.absolute_url,
-      source_board: 'greenhouse' as const,
-      company: slug,
-    }))
+    .map((job: { title: string; absolute_url: string; location?: { name?: string }; content?: string }) => {
+      const raw: RawJob = {
+        title: job.title,
+        url: job.absolute_url,
+        source_board: 'greenhouse' as const,
+        company: slug,
+      }
+      if (job.location?.name) raw.location = job.location.name
+      return raw
+    })
     .filter((job: RawJob) => matchesLegalOpsTitle(job.title))
 }
 
@@ -285,12 +289,21 @@ export function parseGreenhouseJobs(data: any, slug: string): RawJob[] {
 export function parseLeverJobs(data: any[], slug: string): RawJob[] {
   if (!Array.isArray(data)) return []
   return data
-    .map((job: { text: string; hostedUrl: string }) => ({
-      title: job.text,
-      url: job.hostedUrl,
-      source_board: 'lever' as const,
-      company: slug,
-    }))
+    .map((job: { text: string; hostedUrl: string; categories?: { location?: string; commitment?: string }; salaryRange?: { min?: number; max?: number; currency?: string } }) => {
+      const raw: RawJob = {
+        title: job.text,
+        url: job.hostedUrl,
+        source_board: 'lever' as const,
+        company: slug,
+      }
+      if (job.categories?.location) raw.location = job.categories.location
+      if (job.salaryRange?.min || job.salaryRange?.max) {
+        const parts = [job.salaryRange?.min, job.salaryRange?.max].filter(Boolean)
+        const currency = job.salaryRange?.currency ?? ''
+        raw.salary_range = currency ? `${parts.join(' - ')} ${currency}` : parts.join(' - ')
+      }
+      return raw
+    })
     .filter((job: RawJob) => matchesLegalOpsTitle(job.title))
 }
 
@@ -298,12 +311,24 @@ export function parseLeverJobs(data: any[], slug: string): RawJob[] {
 export function parseWorkableJobs(data: any, slug: string): RawJob[] {
   if (!data?.results) return []
   return data.results
-    .map((job: { title: string; url: string }) => ({
-      title: job.title,
-      url: job.url,
-      source_board: 'workable' as const,
-      company: slug,
-    }))
+    .map((job: { title: string; url: string; location?: { city?: string; region?: string; country?: string }; salary?: { salary_from?: number; salary_to?: number; currency?: string } }) => {
+      const raw: RawJob = {
+        title: job.title,
+        url: job.url,
+        source_board: 'workable' as const,
+        company: slug,
+      }
+      if (job.location) {
+        const locParts = [job.location.city, job.location.region, job.location.country].filter(Boolean)
+        if (locParts.length > 0) raw.location = locParts.join(', ')
+      }
+      if (job.salary?.salary_from || job.salary?.salary_to) {
+        const parts = [job.salary.salary_from, job.salary.salary_to].filter(Boolean)
+        const currency = job.salary.currency ?? ''
+        raw.salary_range = currency ? `${parts.join(' - ')} ${currency}` : String(parts.join(' - '))
+      }
+      return raw
+    })
     .filter((job: RawJob) => matchesLegalOpsTitle(job.title))
 }
 
@@ -311,12 +336,21 @@ export function parseWorkableJobs(data: any, slug: string): RawJob[] {
 export function parseGupyJobs(data: any, slug: string): RawJob[] {
   if (!Array.isArray(data)) return []
   return data
-    .map((job: { name: string; jobUrl: string }) => ({
-      title: job.name,
-      url: job.jobUrl,
-      source_board: 'gupy' as const,
-      company: slug,
-    }))
+    .map((job: { name: string; jobUrl: string; city?: string; state?: string; country?: string; type?: string; salaryFrom?: number; salaryTo?: number }) => {
+      const raw: RawJob = {
+        title: job.name,
+        url: job.jobUrl,
+        source_board: 'gupy' as const,
+        company: slug,
+      }
+      const locParts = [job.city, job.state, job.country].filter(Boolean)
+      if (locParts.length > 0) raw.location = locParts.join(', ')
+      if (job.salaryFrom || job.salaryTo) {
+        const parts = [job.salaryFrom, job.salaryTo].filter(Boolean).map(v => `R$${v}`)
+        raw.salary_range = parts.join(' - ')
+      }
+      return raw
+    })
     .filter((job: RawJob) => matchesLegalOpsTitle(job.title))
 }
 
@@ -338,7 +372,7 @@ export async function scrapeLegacyBoards(): Promise<RawJob[]> {
 
   for (const slug of COMPANY_SLUGS.greenhouse) {
     try {
-      const data = await fetchJson(`https://boards-api.greenhouse.io/v1/boards/${slug}/jobs`)
+      const data = await fetchJson(`https://boards-api.greenhouse.io/v1/boards/${slug}/jobs?content=true`)
       results.push(...parseGreenhouseJobs(data, slug))
     } catch (error) {
       console.error(`[scraper] greenhouse/${slug} failed:`, error)
@@ -491,13 +525,13 @@ export async function fetchJobDescription(url: string): Promise<string> {
 
     const html = await response.text()
 
-    // Extract structured salary data before stripping HTML
-    const salary = extractSalaryFromHtml(html)
+    // Extract all structured metadata before stripping HTML
+    const meta = extractJobMetaFromHtml(html)
+    const metaBlock = buildMetadataBlock(meta)
     const text = stripHtml(html)
 
-    // Prepend salary clearly so AI enrichment always finds it
-    if (salary) {
-      return `SALARY INFORMATION FOUND: ${salary.raw}\n\n${text}`.slice(0, 8_000)
+    if (metaBlock) {
+      return `${metaBlock}\n\n${text}`.slice(0, 8_000)
     }
 
     return text.slice(0, 8_000)
