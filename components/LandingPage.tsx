@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ArrowRight, Check, Globe } from 'lucide-react'
+import { ArrowRight, Globe } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { BrandLogo } from '@/components/BrandLogo'
-import { LandingMotionCanvas } from '@/components/LandingMotionCanvas'
+import { LandingJobCards } from '@/components/LandingJobCards'
+import { LandingPipeline } from '@/components/LandingPipeline'
 
 type LandingLocale = 'pt' | 'en'
 
@@ -17,34 +18,12 @@ const content = {
     heroEyebrow: 'Legal Ops',
     heroTitle: 'Legal Ops merece um lugar só seu.',
     heroDescription:
-      'Você não deveria procurar vaga de Legal Ops no mesmo lugar que todo mundo procura vaga de tudo. A gente construiu o que faltava: busca, pipeline e acompanhamento feitos pra quem vive operações jurídicas.',
-    heroFocus: 'Legal Ops · CLM · Contract Ops',
-    heroPrimaryCta: 'Criar conta grátis',
-    heroSecondaryCta: 'Ver o que está incluído',
-    heroBullets: [
-      'Vagas filtradas pra Legal Ops de verdade',
-      'Seu processo organizado do início ao fim',
-      'Grátis no que importa. Pro só se fizer sentido.',
-    ],
-    panel: {
-      freeLabel: 'Grátis',
-      freeTitle: 'O essencial não deveria custar nada.',
-      freeItems: [
-        'Busca e filtros dedicados',
-        'Pipeline, notas e contatos',
-        'Dashboard completo',
-      ],
-      proLabel: 'Pro',
-      proTitle: 'Pra quem quer ir mais longe.',
-      proItems: [
-        'Prep de entrevista com IA',
-        'Cover letter com IA',
-        'Gestão avançada de comunicação',
-      ],
-    },
+      'Você não deveria procurar vaga de Legal Ops no mesmo lugar que todo mundo procura vaga de tudo. A gente construiu o que faltava.',
+    heroPrimaryCta: 'Começar agora',
+    pipelineTitle: 'Seu processo, visível.',
+    pipelineDescription:
+      'Do primeiro interesse à oferta. Tudo organizado.',
     comparisonTitle: 'O que você leva em cada plano',
-    comparisonDescription:
-      'Sem truque. O grátis funciona de verdade.',
     comparisonHeaders: {
       feature: 'Funcionalidade',
       free: 'Grátis',
@@ -74,34 +53,12 @@ const content = {
     heroEyebrow: 'Legal Ops',
     heroTitle: 'Legal Ops deserves its own place.',
     heroDescription:
-      'You shouldn\'t be searching for Legal Ops roles in the same place everyone searches for everything. We built what was missing: search, pipeline, and tracking made for people in legal operations.',
-    heroFocus: 'Legal Ops · CLM · Contract Ops',
-    heroPrimaryCta: 'Create free account',
-    heroSecondaryCta: 'See what\'s included',
-    heroBullets: [
-      'Jobs filtered for real Legal Ops roles',
-      'Your process organized end to end',
-      'Free where it matters. Pro only if it makes sense.',
-    ],
-    panel: {
-      freeLabel: 'Free',
-      freeTitle: 'The essentials should cost nothing.',
-      freeItems: [
-        'Dedicated search and filters',
-        'Pipeline, notes, and contacts',
-        'Full dashboard',
-      ],
-      proLabel: 'Pro',
-      proTitle: 'For those who want to go further.',
-      proItems: [
-        'AI interview prep',
-        'AI cover letters',
-        'Advanced communication management',
-      ],
-    },
+      'You shouldn\'t be searching for Legal Ops roles in the same place everyone searches for everything. We built what was missing.',
+    heroPrimaryCta: 'Get started',
+    pipelineTitle: 'Your process, visible.',
+    pipelineDescription:
+      'From first interest to offer. Everything organized.',
     comparisonTitle: 'What you get in each plan',
-    comparisonDescription:
-      'No tricks. Free actually works.',
     comparisonHeaders: {
       feature: 'Feature',
       free: 'Free',
@@ -123,6 +80,10 @@ const content = {
     closingPrimaryCta: 'Get started',
   },
 } as const
+
+const serifFont = {
+  fontFamily: '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
+}
 
 export async function LandingPage({ locale }: { locale: LandingLocale }) {
   const copy = content[locale]
@@ -168,40 +129,25 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
-        <section className="grid gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
+        {/* Hero */}
+        <section className="grid gap-10 lg:grid-cols-2 lg:items-center">
           <div>
             <span className="inline-flex rounded-full border border-stone-300 px-3 py-1 text-sm text-slate-600">
               {copy.heroEyebrow}
             </span>
 
             <h1
-              className="mt-6 max-w-4xl text-5xl leading-tight text-slate-950 sm:text-6xl"
-              style={{
-                fontFamily:
-                  '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-              }}
+              className="mt-6 max-w-xl text-5xl leading-tight text-slate-950 sm:text-6xl"
+              style={serifFont}
             >
               {copy.heroTitle}
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+            <p className="mt-6 max-w-lg text-lg leading-8 text-slate-600">
               {copy.heroDescription}
             </p>
 
-            <p className="mt-4 text-xs font-medium uppercase tracking-[0.22em] text-slate-500">
-              {copy.heroFocus}
-            </p>
-
-            <div className="mt-8 space-y-3">
-              {copy.heroBullets.map(item => (
-                <div key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-700">
-                  <Check className="mt-1 h-4 w-4 flex-shrink-0 text-slate-950" />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8">
               <Link
                 href="/login"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
@@ -209,72 +155,30 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
                 {copy.heroPrimaryCta}
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <a
-                href="#compare"
-                className="inline-flex items-center justify-center rounded-full border border-stone-300 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950 hover:text-slate-950"
-              >
-                {copy.heroSecondaryCta}
-              </a>
             </div>
           </div>
 
-          <section className="relative min-h-[420px] overflow-hidden rounded-[32px] border border-stone-200 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.9),_rgba(244,241,235,0.9))]">
-            <LandingMotionCanvas />
-            <div className="relative z-10 flex h-full flex-col justify-between p-6">
-              <div className="grid gap-3">
-                <article className="ml-auto max-w-sm rounded-[28px] border border-white/70 bg-white/82 p-5 backdrop-blur">
-                  <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-                    {copy.panel.freeLabel}
-                  </span>
-                  <h2 className="mt-3 text-xl font-semibold text-slate-950">
-                    {copy.panel.freeTitle}
-                  </h2>
-                  <div className="mt-4 space-y-2">
-                    {copy.panel.freeItems.map(item => (
-                      <div key={item} className="flex gap-3 text-sm leading-6 text-slate-700">
-                        <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-600" />
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </article>
-
-                <article className="max-w-sm rounded-[28px] bg-slate-950 p-5 text-white shadow-[0_20px_50px_-35px_rgba(15,23,42,0.8)]">
-                  <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">
-                    {copy.panel.proLabel}
-                  </span>
-                  <h2 className="mt-3 text-xl font-semibold">
-                    {copy.panel.proTitle}
-                  </h2>
-                  <div className="mt-4 space-y-2">
-                    {copy.panel.proItems.map(item => (
-                      <div key={item} className="flex gap-3 text-sm leading-6 text-slate-200">
-                        <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-sky-300" />
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </article>
-              </div>
-            </div>
-          </section>
+          <LandingJobCards locale={locale} />
         </section>
 
-        <section id="compare" className="mt-20">
-          <div className="max-w-3xl">
-            <h2
-              className="text-4xl text-slate-950 sm:text-5xl"
-              style={{
-                fontFamily:
-                  '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-              }}
-            >
-              {copy.comparisonTitle}
+        {/* Pipeline */}
+        <section className="mt-20">
+          <div className="mx-auto mb-8 max-w-2xl text-center">
+            <h2 className="text-4xl text-slate-950 sm:text-5xl" style={serifFont}>
+              {copy.pipelineTitle}
             </h2>
             <p className="mt-4 text-lg leading-8 text-slate-600">
-              {copy.comparisonDescription}
+              {copy.pipelineDescription}
             </p>
           </div>
+          <LandingPipeline locale={locale} />
+        </section>
+
+        {/* Comparison */}
+        <section id="compare" className="mt-20">
+          <h2 className="text-4xl text-slate-950 sm:text-5xl" style={serifFont}>
+            {copy.comparisonTitle}
+          </h2>
 
           <div className="mt-8 overflow-hidden rounded-[28px] border border-stone-200 bg-white">
             <div className="grid gap-4 border-b border-stone-200 px-6 py-4 text-sm font-medium text-slate-500 sm:grid-cols-[1.5fr_0.7fr_0.7fr]">
@@ -298,16 +202,11 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
           </div>
         </section>
 
+        {/* Closing CTA */}
         <section className="mt-20 rounded-[32px] border border-stone-200 bg-white px-6 py-10 sm:px-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
-              <h2
-                className="text-4xl text-slate-950 sm:text-5xl"
-                style={{
-                  fontFamily:
-                    '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-                }}
-              >
+              <h2 className="text-4xl text-slate-950 sm:text-5xl" style={serifFont}>
                 {copy.closingTitle}
               </h2>
               <p className="mt-4 text-base leading-8 text-slate-600">
