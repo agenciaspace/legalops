@@ -3,80 +3,32 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { BrandLogo } from '@/components/BrandLogo'
+import { useLocale } from '@/components/LocaleProvider'
 import type { LinkedInInsight, ProfessionalType } from '@/lib/types'
 
 type Step = 'basics' | 'professional' | 'expertise' | 'linkedin' | 'insights'
 
-const PROFESSIONAL_TYPES: { value: ProfessionalType; label: string; description: string }[] = [
-  {
-    value: 'law_firm',
-    label: 'Escritório de advocacia',
-    description: 'Atuo ou quero atuar em escritório de advocacia (societário, consultivo ou contencioso)',
-  },
-  {
-    value: 'legal_dept',
-    label: 'Departamento jurídico (in-house)',
-    description: 'Atuo ou quero atuar no jurídico de uma empresa (in-house counsel / Legal Ops)',
-  },
-  {
-    value: 'public_sector',
-    label: 'Cargo público / concurso',
-    description: 'Busco ou já ocupo cargo em órgão público, autarquia, tribunal ou MP',
-  },
-  {
-    value: 'freelance',
-    label: 'Freelance / autônomo(a)',
-    description: 'Trabalho de forma independente prestando serviços jurídicos',
-  },
-  {
-    value: 'other',
-    label: 'Outro',
-    description: 'LegalTech, consultoria, academia ou outra área do setor jurídico',
-  },
+const PROFESSIONAL_TYPE_KEYS: ProfessionalType[] = [
+  'law_firm', 'legal_dept', 'public_sector', 'freelance', 'other',
 ]
 
-const AREAS_OPTIONS = [
-  'Legal Operations',
-  'Contratos / CLM',
-  'Compliance e Governança',
-  'M&A e Corporate',
-  'Trabalhista',
-  'Tributário',
-  'Regulatório',
-  'Propriedade Intelectual',
-  'Proteção de Dados / LGPD',
-  'Tecnologia Jurídica',
-  'Contencioso',
-  'Terceiro Setor / ESG',
-  'Mercado de Capitais',
-  'Direito Bancário',
-]
-
-const PRIORITY_CONFIG = {
-  high: { label: 'Alta prioridade', color: 'bg-red-50 border-red-200 text-red-800', dot: 'bg-red-500' },
-  medium: { label: 'Média prioridade', color: 'bg-amber-50 border-amber-200 text-amber-800', dot: 'bg-amber-500' },
-  low: { label: 'Baixa prioridade', color: 'bg-blue-50 border-blue-200 text-blue-800', dot: 'bg-blue-500' },
-}
+const AREAS_KEYS = [
+  'legalOps', 'contracts', 'compliance', 'ma', 'labor', 'tax', 'regulatory',
+  'ip', 'dataProtection', 'legalTech', 'litigation', 'esg', 'capitalMarkets', 'banking',
+] as const
 
 const CATEGORY_ICONS: Record<LinkedInInsight['category'], string> = {
-  headline: '✏️',
-  photo: '📷',
-  about: '📝',
-  experience: '💼',
-  skills: '🔧',
-  recommendations: '⭐',
-  activity: '📢',
-  keywords: '🔍',
-  other: '💡',
+  headline: '✏️', photo: '📷', about: '📝', experience: '💼',
+  skills: '🔧', recommendations: '⭐', activity: '📢', keywords: '🔍', other: '💡',
 }
 
 export default function OnboardPage() {
   const router = useRouter()
+  const { t } = useLocale()
   const [step, setStep] = useState<Step>('basics')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Form state
   const [fullName, setFullName] = useState('')
   const [currentRole, setCurrentRole] = useState('')
   const [professionalType, setProfessionalType] = useState<ProfessionalType | null>(null)
@@ -100,119 +52,93 @@ export default function OnboardPage() {
     })
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
-      throw new Error(data.error ?? 'Erro ao salvar dados')
+      throw new Error(data.error ?? t.onboard.errorSaving)
     }
   }
 
   async function handleBasicsNext() {
-    if (!fullName.trim()) { setError('Por favor, informe seu nome completo.'); return }
-    setError(null)
-    setSaving(true)
+    if (!fullName.trim()) { setError(t.onboard.errorFullName); return }
+    setError(null); setSaving(true)
     try {
       await saveStep({ full_name: fullName.trim(), current_role: currentRole.trim() })
       setStep('professional')
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
-    } finally {
-      setSaving(false)
-    }
+    } catch (e) { setError(e instanceof Error ? e.message : t.onboard.errorUnknown) }
+    finally { setSaving(false) }
   }
 
   async function handleProfessionalNext() {
-    if (!professionalType) { setError('Selecione seu tipo de atuação.'); return }
-    setError(null)
-    setSaving(true)
+    if (!professionalType) { setError(t.onboard.errorProfessionalType); return }
+    setError(null); setSaving(true)
     try {
-      await saveStep({
-        professional_type: professionalType,
-        years_experience: yearsExperience === '' ? null : Number(yearsExperience),
-      })
+      await saveStep({ professional_type: professionalType, years_experience: yearsExperience === '' ? null : Number(yearsExperience) })
       setStep('expertise')
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
-    } finally {
-      setSaving(false)
-    }
+    } catch (e) { setError(e instanceof Error ? e.message : t.onboard.errorUnknown) }
+    finally { setSaving(false) }
   }
 
   async function handleExpertiseNext() {
-    setError(null)
-    setSaving(true)
+    setError(null); setSaving(true)
     try {
       await saveStep({ areas_of_expertise: selectedAreas })
       setStep('linkedin')
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
-    } finally {
-      setSaving(false)
-    }
+    } catch (e) { setError(e instanceof Error ? e.message : t.onboard.errorUnknown) }
+    finally { setSaving(false) }
   }
 
   async function handleLinkedInAnalyze() {
     if (!linkedinUrl.trim() || !linkedinUrl.includes('linkedin.com')) {
-      setError('Informe uma URL válida do LinkedIn (ex: https://linkedin.com/in/seuperfil)')
-      return
+      setError(t.onboard.linkedinError); return
     }
-    setError(null)
-    setSaving(true)
+    setError(null); setSaving(true)
     try {
-      // Save linkedin_url first
       await saveStep({ linkedin_url: linkedinUrl.trim() })
-
-      // Generate insights
       const res = await fetch('/api/profile/linkedin-insights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ linkedin_url: linkedinUrl.trim() }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Erro ao analisar LinkedIn')
-
+      if (!res.ok) throw new Error(data.error ?? t.onboard.errorUnknown)
       setInsights(data.insights ?? [])
       setInsightsScrapeSuccess(!!data.scraped)
       setStep('insights')
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
-    } finally {
-      setSaving(false)
-    }
+    } catch (e) { setError(e instanceof Error ? e.message : t.onboard.errorUnknown) }
+    finally { setSaving(false) }
   }
 
   async function handleSkipLinkedIn() {
-    setError(null)
-    setSaving(true)
+    setError(null); setSaving(true)
     try {
       await saveStep({ onboarding_completed: true })
       router.push('/discover')
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
-    } finally {
-      setSaving(false)
-    }
+    } catch (e) { setError(e instanceof Error ? e.message : t.onboard.errorUnknown) }
+    finally { setSaving(false) }
   }
 
   async function handleFinish() {
-    setError(null)
-    setSaving(true)
+    setError(null); setSaving(true)
     try {
       await saveStep({ onboarding_completed: true })
       router.push('/discover')
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
-    } finally {
-      setSaving(false)
-    }
+    } catch (e) { setError(e instanceof Error ? e.message : t.onboard.errorUnknown) }
+    finally { setSaving(false) }
   }
 
   const STEP_LABELS: Record<Step, string> = {
-    basics: 'Dados básicos',
-    professional: 'Tipo de atuação',
-    expertise: 'Especialidades',
-    linkedin: 'LinkedIn',
-    insights: 'Quick wins',
+    basics: t.onboard.stepBasics,
+    professional: t.onboard.stepProfessional,
+    expertise: t.onboard.stepExpertise,
+    linkedin: t.onboard.stepLinkedIn,
+    insights: t.onboard.stepInsights,
   }
   const STEPS: Step[] = ['basics', 'professional', 'expertise', 'linkedin', 'insights']
   const currentStepIndex = STEPS.indexOf(step)
+
+  const PRIORITY_CONFIG = {
+    high: { label: t.onboard.priorityHigh, color: 'bg-red-50 border-red-200 text-red-800', dot: 'bg-red-500' },
+    medium: { label: t.onboard.priorityMedium, color: 'bg-amber-50 border-amber-200 text-amber-800', dot: 'bg-amber-500' },
+    low: { label: t.onboard.priorityLow, color: 'bg-blue-50 border-blue-200 text-blue-800', dot: 'bg-blue-500' },
+  }
 
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col items-center py-10 px-4">
@@ -221,7 +147,7 @@ export default function OnboardPage() {
           className="flex flex-col items-center gap-3"
           markClassName="h-10 w-10 text-slate-950"
           titleClassName="text-xl font-semibold tracking-[0.18em] text-slate-950 uppercase"
-          subtitle="Vamos configurar seu perfil profissional"
+          subtitle={t.onboard.subtitle}
           subtitleClassName="text-sm text-slate-500"
         />
       </div>
@@ -252,231 +178,167 @@ export default function OnboardPage() {
       </div>
 
       <div className="w-full max-w-lg">
-
-        {/* ─── STEP: BASICS ─────────────────────────────────────────────── */}
+        {/* BASICS */}
         {step === 'basics' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Dados básicos</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Como devemos te chamar e qual é seu cargo atual?</p>
+              <h2 className="text-lg font-semibold text-slate-900">{t.onboard.basicsTitle}</h2>
+              <p className="text-sm text-slate-500 mt-0.5">{t.onboard.basicsSubtitle}</p>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Nome completo <span className="text-red-500">*</span>
+                {t.onboard.fullName} <span className="text-red-500">{t.onboard.required}</span>
               </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={e => setFullName(e.target.value)}
-                placeholder="Ex: Maria Clara Souza"
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
+                placeholder={t.onboard.fullNamePlaceholder}
+                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Cargo atual
-              </label>
-              <input
-                type="text"
-                value={currentRole}
-                onChange={e => setCurrentRole(e.target.value)}
-                placeholder="Ex: Legal Operations Specialist, Advogada Sênior..."
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="text-xs text-slate-400 mt-1">Se estiver em transição, informe o cargo que deseja ou o mais recente.</p>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.onboard.currentRole}</label>
+              <input type="text" value={currentRole} onChange={e => setCurrentRole(e.target.value)}
+                placeholder={t.onboard.currentRolePlaceholder}
+                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <p className="text-xs text-slate-400 mt-1">{t.onboard.currentRoleHint}</p>
             </div>
-
             {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
-
-            <button
-              onClick={handleBasicsNext}
-              disabled={saving}
-              className="w-full bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              {saving ? 'Salvando...' : 'Continuar →'}
+            <button onClick={handleBasicsNext} disabled={saving}
+              className="w-full bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
+              {saving ? t.common.saving : t.common.continue}
             </button>
           </div>
         )}
 
-        {/* ─── STEP: PROFESSIONAL TYPE ──────────────────────────────────── */}
+        {/* PROFESSIONAL TYPE */}
         {step === 'professional' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Tipo de atuação</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Onde você atua ou quer atuar profissionalmente?</p>
+              <h2 className="text-lg font-semibold text-slate-900">{t.onboard.professionalTitle}</h2>
+              <p className="text-sm text-slate-500 mt-0.5">{t.onboard.professionalSubtitle}</p>
             </div>
-
             <div className="space-y-2">
-              {PROFESSIONAL_TYPES.map(pt => (
-                <button
-                  key={pt.value}
-                  type="button"
-                  onClick={() => setProfessionalType(pt.value)}
+              {PROFESSIONAL_TYPE_KEYS.map(ptKey => (
+                <button key={ptKey} type="button" onClick={() => setProfessionalType(ptKey)}
                   className={`w-full text-left rounded-xl border p-4 transition-all ${
-                    professionalType === pt.value
+                    professionalType === ptKey
                       ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
                       : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                  }`}
-                >
-                  <p className="text-sm font-medium text-slate-900">{pt.label}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{pt.description}</p>
+                  }`}>
+                  <p className="text-sm font-medium text-slate-900">{t.onboard.professionalTypes[ptKey]}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{t.onboard.professionalTypes[`${ptKey}_desc` as keyof typeof t.onboard.professionalTypes]}</p>
                 </button>
               ))}
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Anos de experiência jurídica
-              </label>
-              <input
-                type="number"
-                min={0}
-                max={50}
-                value={yearsExperience}
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.onboard.yearsExperience}</label>
+              <input type="number" min={0} max={50} value={yearsExperience}
                 onChange={e => setYearsExperience(e.target.value === '' ? '' : Number(e.target.value))}
-                placeholder="Ex: 5"
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+                placeholder={t.onboard.yearsPlaceholder}
+                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
-
             {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
-
             <div className="flex gap-3">
-              <button
-                onClick={() => setStep('basics')}
-                className="flex-1 border border-slate-300 text-slate-700 rounded-xl py-2.5 text-sm font-medium hover:bg-slate-50 transition-colors"
-              >
-                ← Voltar
+              <button onClick={() => setStep('basics')}
+                className="flex-1 border border-slate-300 text-slate-700 rounded-xl py-2.5 text-sm font-medium hover:bg-slate-50 transition-colors">
+                {t.onboard.back}
               </button>
-              <button
-                onClick={handleProfessionalNext}
-                disabled={saving}
-                className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-              >
-                {saving ? 'Salvando...' : 'Continuar →'}
+              <button onClick={handleProfessionalNext} disabled={saving}
+                className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                {saving ? t.common.saving : t.common.continue}
               </button>
             </div>
           </div>
         )}
 
-        {/* ─── STEP: EXPERTISE ─────────────────────────────────────────── */}
+        {/* EXPERTISE */}
         {step === 'expertise' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Áreas de especialização</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Selecione as áreas em que você atua ou tem interesse. Isso melhora as sugestões de vagas.</p>
+              <h2 className="text-lg font-semibold text-slate-900">{t.onboard.expertiseTitle}</h2>
+              <p className="text-sm text-slate-500 mt-0.5">{t.onboard.expertiseSubtitle}</p>
             </div>
-
             <div className="flex flex-wrap gap-2">
-              {AREAS_OPTIONS.map(area => (
-                <button
-                  key={area}
-                  type="button"
-                  onClick={() => toggleArea(area)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                    selectedAreas.includes(area)
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600'
-                  }`}
-                >
-                  {area}
-                </button>
-              ))}
+              {AREAS_KEYS.map(key => {
+                const label = t.onboard.areas[key]
+                return (
+                  <button key={key} type="button" onClick={() => toggleArea(label)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                      selectedAreas.includes(label)
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600'
+                    }`}>
+                    {label}
+                  </button>
+                )
+              })}
             </div>
-
             {selectedAreas.length > 0 && (
-              <p className="text-xs text-slate-400">{selectedAreas.length} área{selectedAreas.length > 1 ? 's' : ''} selecionada{selectedAreas.length > 1 ? 's' : ''}</p>
+              <p className="text-xs text-slate-400">
+                {t.onboard.areasSelected
+                  .replace('{count}', String(selectedAreas.length))
+                  .replace('{plural}', selectedAreas.length > 1 ? 's' : '')}
+              </p>
             )}
-
             {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
-
             <div className="flex gap-3">
-              <button
-                onClick={() => setStep('professional')}
-                className="flex-1 border border-slate-300 text-slate-700 rounded-xl py-2.5 text-sm font-medium hover:bg-slate-50 transition-colors"
-              >
-                ← Voltar
+              <button onClick={() => setStep('professional')}
+                className="flex-1 border border-slate-300 text-slate-700 rounded-xl py-2.5 text-sm font-medium hover:bg-slate-50 transition-colors">
+                {t.onboard.back}
               </button>
-              <button
-                onClick={handleExpertiseNext}
-                disabled={saving}
-                className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-              >
-                {saving ? 'Salvando...' : 'Continuar →'}
+              <button onClick={handleExpertiseNext} disabled={saving}
+                className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                {saving ? t.common.saving : t.common.continue}
               </button>
             </div>
           </div>
         )}
 
-        {/* ─── STEP: LINKEDIN ───────────────────────────────────────────── */}
+        {/* LINKEDIN */}
         {step === 'linkedin' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Perfil LinkedIn</h2>
-              <p className="text-sm text-slate-500 mt-0.5">
-                Informe o link do seu LinkedIn. Vamos analisar seu perfil e sugerir <strong>quick wins</strong> para você conquistar mais vagas na área jurídica.
-              </p>
+              <h2 className="text-lg font-semibold text-slate-900">{t.onboard.linkedinTitle}</h2>
+              <p className="text-sm text-slate-500 mt-0.5" dangerouslySetInnerHTML={{ __html: t.onboard.linkedinSubtitle }} />
             </div>
-
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-1.5">
-              <p className="text-xs font-medium text-blue-800">O que você vai receber:</p>
+              <p className="text-xs font-medium text-blue-800">{t.onboard.linkedinBenefitsTitle}</p>
               <ul className="text-xs text-blue-700 space-y-1">
-                <li>✓ Análise do headline e visibilidade nos recrutadores</li>
-                <li>✓ Gaps de keywords relevantes para Legal Ops</li>
-                <li>✓ Sugestões de seções em falta (Sobre, Skills, etc.)</li>
-                <li>✓ Dicas para aumentar o alcance orgânico do perfil</li>
+                <li>{t.onboard.linkedinBenefit1}</li>
+                <li>{t.onboard.linkedinBenefit2}</li>
+                <li>{t.onboard.linkedinBenefit3}</li>
+                <li>{t.onboard.linkedinBenefit4}</li>
               </ul>
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">URL do LinkedIn</label>
-              <input
-                type="url"
-                value={linkedinUrl}
-                onChange={e => setLinkedinUrl(e.target.value)}
-                placeholder="https://linkedin.com/in/seuperfil"
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="text-xs text-slate-400 mt-1">Certifique-se de que seu perfil está público para melhor análise.</p>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.onboard.linkedinUrlLabel}</label>
+              <input type="url" value={linkedinUrl} onChange={e => setLinkedinUrl(e.target.value)}
+                placeholder={t.onboard.linkedinUrlPlaceholder}
+                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <p className="text-xs text-slate-400 mt-1">{t.onboard.linkedinUrlHint}</p>
             </div>
-
             {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
-
-            <button
-              onClick={handleLinkedInAnalyze}
-              disabled={saving || !linkedinUrl.trim()}
-              className="w-full bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              {saving ? 'Analisando perfil...' : 'Analisar meu LinkedIn →'}
+            <button onClick={handleLinkedInAnalyze} disabled={saving || !linkedinUrl.trim()}
+              className="w-full bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
+              {saving ? t.onboard.linkedinAnalyzing : t.onboard.linkedinAnalyze}
             </button>
-
-            <button
-              onClick={handleSkipLinkedIn}
-              disabled={saving}
-              className="w-full text-slate-400 text-xs hover:text-slate-600 transition-colors"
-            >
-              Pular por agora — adicionar depois nas configurações
+            <button onClick={handleSkipLinkedIn} disabled={saving}
+              className="w-full text-slate-400 text-xs hover:text-slate-600 transition-colors">
+              {t.onboard.linkedinSkip}
             </button>
           </div>
         )}
 
-        {/* ─── STEP: INSIGHTS ───────────────────────────────────────────── */}
+        {/* INSIGHTS */}
         {step === 'insights' && (
           <div className="space-y-4">
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">Seus quick wins do LinkedIn</h2>
+              <h2 className="text-lg font-semibold text-slate-900">{t.onboard.insightsTitle}</h2>
               <p className="text-sm text-slate-500 mt-0.5">
-                {insightsScrapeSuccess
-                  ? 'Analisamos seu perfil e identificamos as principais oportunidades de melhoria.'
-                  : 'Geramos recomendações baseadas no seu contexto profissional para impulsionar seu perfil.'}
+                {insightsScrapeSuccess ? t.onboard.insightsSubtitleSuccess : t.onboard.insightsSubtitleFallback}
               </p>
             </div>
-
             {insights.length === 0 ? (
               <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center shadow-sm">
-                <p className="text-slate-500 text-sm">Não foi possível gerar insights agora. Você pode tentar novamente nas configurações.</p>
+                <p className="text-slate-500 text-sm">{t.onboard.insightsEmpty}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -488,10 +350,8 @@ export default function OnboardPage() {
                   .map((insight, i) => {
                     const cfg = PRIORITY_CONFIG[insight.priority]
                     return (
-                      <div
-                        key={i}
-                        className={`bg-white rounded-xl border p-4 shadow-sm ${cfg.color.includes('red') ? 'border-red-100' : cfg.color.includes('amber') ? 'border-amber-100' : 'border-blue-100'}`}
-                      >
+                      <div key={i}
+                        className={`bg-white rounded-xl border p-4 shadow-sm ${cfg.color.includes('red') ? 'border-red-100' : cfg.color.includes('amber') ? 'border-amber-100' : 'border-blue-100'}`}>
                         <div className="flex items-start gap-3">
                           <span className="text-xl leading-none mt-0.5">{CATEGORY_ICONS[insight.category]}</span>
                           <div className="flex-1 min-w-0">
@@ -505,7 +365,7 @@ export default function OnboardPage() {
                             <p className="text-xs text-slate-600 mt-1">{insight.description}</p>
                             <div className="mt-2 bg-slate-50 rounded-lg px-3 py-2">
                               <p className="text-xs font-medium text-slate-700">
-                                <span className="text-green-600">Ação: </span>
+                                <span className="text-green-600">{t.onboard.actionLabel}</span>
                                 {insight.action}
                               </p>
                             </div>
@@ -516,17 +376,12 @@ export default function OnboardPage() {
                   })}
               </div>
             )}
-
             {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
-
-            <button
-              onClick={handleFinish}
-              disabled={saving}
-              className="w-full bg-blue-600 text-white rounded-xl py-3 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
-            >
-              {saving ? 'Finalizando...' : 'Ir para a plataforma →'}
+            <button onClick={handleFinish} disabled={saving}
+              className="w-full bg-blue-600 text-white rounded-xl py-3 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm">
+              {saving ? t.onboard.insightsFinishing : t.onboard.insightsFinish}
             </button>
-            <p className="text-center text-xs text-slate-400">Esses insights ficam salvos nas suas configurações de perfil.</p>
+            <p className="text-center text-xs text-slate-400">{t.onboard.insightsSaved}</p>
           </div>
         )}
       </div>

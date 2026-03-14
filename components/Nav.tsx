@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { Globe } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { BrandLogo } from '@/components/BrandLogo'
+import { useLocale } from '@/components/LocaleProvider'
 
 interface NavProps {
   discoverCount: number
@@ -12,6 +14,7 @@ interface NavProps {
 export function Nav({ discoverCount }: NavProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const { locale, t, setLocale } = useLocale()
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -49,18 +52,28 @@ export function Nav({ discoverCount }: NavProps) {
               titleClassName="text-sm font-semibold tracking-[0.18em] text-slate-900 uppercase"
             />
           </Link>
-          {navLink('/dashboard', 'Dashboard')}
-          {navLink('/discover', 'Descobrir', discoverCount)}
-          {navLink('/pipeline', 'Pipeline')}
-          {navLink('/emails', 'Emails')}
-          {navLink('/settings', 'Configurações')}
+          {navLink('/dashboard', t.nav.dashboard)}
+          {navLink('/discover', t.nav.discover, discoverCount)}
+          {navLink('/pipeline', t.nav.pipeline)}
+          {navLink('/emails', t.nav.emails)}
+          {navLink('/settings', t.nav.settings)}
         </div>
-        <button
-          onClick={handleSignOut}
-          className="text-xs text-slate-500 hover:text-slate-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-50"
-        >
-          Sair
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setLocale(locale === 'pt' ? 'en' : 'pt')}
+            className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors px-2 py-1.5 rounded-lg hover:bg-slate-50"
+            title={locale === 'pt' ? 'Switch to English' : 'Mudar para Português'}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            {locale === 'pt' ? 'EN' : 'PT'}
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="text-xs text-slate-500 hover:text-slate-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-50"
+          >
+            {t.nav.signOut}
+          </button>
+        </div>
       </div>
     </header>
   )

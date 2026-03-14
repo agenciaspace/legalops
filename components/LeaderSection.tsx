@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useLocale } from '@/components/LocaleProvider'
 import type { Leader } from '@/lib/types'
 
 interface LeaderSectionProps {
@@ -19,6 +20,14 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useLocale()
+
+  const FIELD_LABELS: Record<string, string> = {
+    name: t.leader.fieldName,
+    title: t.leader.fieldTitle,
+    linkedin_url: t.leader.fieldLinkedin,
+    notes: t.leader.fieldNotes,
+  }
 
   async function handleConfirm() {
     setSaving(true)
@@ -52,12 +61,12 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
   if (!leader && !editing) {
     return (
       <div className="text-xs text-slate-400">
-        No leader found.{' '}
+        {t.leader.noLeader}{' '}
         <button
           onClick={() => setEditing(true)}
           className="text-blue-600 hover:underline"
         >
-          Add
+          {t.leader.add}
         </button>
       </div>
     )
@@ -68,8 +77,8 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
       <div className="space-y-2">
         {(['name', 'title', 'linkedin_url', 'notes'] as const).map(field => (
           <div key={field}>
-            <label className="block text-xs font-medium text-slate-600 mb-0.5 capitalize">
-              {field.replace('_', ' ')}
+            <label className="block text-xs font-medium text-slate-600 mb-0.5">
+              {FIELD_LABELS[field]}
             </label>
             <input
               value={form[field]}
@@ -86,13 +95,13 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
             disabled={saving}
             className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? t.leader.saving : t.leader.save}
           </button>
           <button
             onClick={() => setEditing(false)}
             className="px-3 py-1 text-slate-500 text-xs rounded hover:bg-slate-100"
           >
-            Cancel
+            {t.leader.cancel}
           </button>
         </div>
       </div>
@@ -104,9 +113,9 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-slate-900">{leader!.name}</span>
         {leader!.confirmed ? (
-          <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Confirmed</span>
+          <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">{t.leader.confirmed}</span>
         ) : (
-          <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Suggested</span>
+          <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">{t.leader.suggested}</span>
         )}
       </div>
       {leader!.title && <p className="text-xs text-slate-500">{leader!.title}</p>}
@@ -124,7 +133,7 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
             disabled={saving}
             className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 disabled:opacity-50"
           >
-            Confirm
+            {t.leader.confirm}
           </button>
         )}
         <button
@@ -134,7 +143,7 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
           }}
           className="px-2 py-1 text-xs text-slate-500 rounded hover:bg-slate-100"
         >
-          Edit
+          {t.leader.edit}
         </button>
       </div>
     </div>

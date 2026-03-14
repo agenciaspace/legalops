@@ -2,14 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLocale } from '@/components/LocaleProvider'
 import type { PipelineStatus } from '@/lib/types'
 
-const OPTIONS: { value: PipelineStatus; label: string }[] = [
-  { value: 'researching', label: 'Pesquisando' },
-  { value: 'applied', label: 'Aplicada' },
-  { value: 'interview', label: 'Entrevista' },
-  { value: 'offer', label: 'Oferta' },
-  { value: 'discarded', label: 'Descartada' },
+const STATUSES: PipelineStatus[] = [
+  'researching', 'applied', 'interview', 'offer', 'discarded',
 ]
 
 interface StatusDropdownProps {
@@ -19,6 +16,7 @@ interface StatusDropdownProps {
 
 export function StatusDropdown({ entryId, currentStatus }: StatusDropdownProps) {
   const router = useRouter()
+  const { t } = useLocale()
   const [status, setStatus] = useState(currentStatus)
   const [saving, setSaving] = useState(false)
 
@@ -43,8 +41,8 @@ export function StatusDropdown({ entryId, currentStatus }: StatusDropdownProps) 
       disabled={saving}
       className="text-sm border border-slate-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
     >
-      {OPTIONS.map(opt => (
-        <option key={opt.value} value={opt.value}>{opt.label}</option>
+      {STATUSES.map(s => (
+        <option key={s} value={s}>{t.statuses[s]}</option>
       ))}
     </select>
   )

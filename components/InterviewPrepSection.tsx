@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useLocale } from '@/components/LocaleProvider'
 
 interface InterviewPrepSectionProps {
   entryId: string
@@ -10,6 +11,7 @@ export function InterviewPrepSection({ entryId }: InterviewPrepSectionProps) {
   const [prep, setPrep] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useLocale()
 
   async function handleGenerate() {
     setLoading(true)
@@ -23,7 +25,7 @@ export function InterviewPrepSection({ entryId }: InterviewPrepSectionProps) {
       const data = await res.json()
       setPrep(data.prep)
     } else {
-      setError('Erro ao gerar preparacao. Tente novamente.')
+      setError(t.interviewPrep.error)
     }
     setLoading(false)
   }
@@ -36,15 +38,13 @@ export function InterviewPrepSection({ entryId }: InterviewPrepSectionProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
           </svg>
         </div>
-        <p className="text-sm text-slate-600 font-medium mb-1">Preparacao com IA</p>
-        <p className="text-xs text-slate-400 mb-3">
-          Gere perguntas de entrevista personalizadas para esta vaga usando inteligencia artificial.
-        </p>
+        <p className="text-sm text-slate-600 font-medium mb-1">{t.interviewPrep.title}</p>
+        <p className="text-xs text-slate-400 mb-3">{t.interviewPrep.description}</p>
         <button
           onClick={handleGenerate}
           className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
         >
-          Gerar preparacao
+          {t.interviewPrep.generate}
         </button>
         {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
       </div>
@@ -55,8 +55,8 @@ export function InterviewPrepSection({ entryId }: InterviewPrepSectionProps) {
     return (
       <div className="text-center py-8">
         <div className="animate-spin w-8 h-8 border-2 border-purple-200 border-t-purple-600 rounded-full mx-auto mb-3" />
-        <p className="text-sm text-slate-500">Gerando preparacao com IA...</p>
-        <p className="text-xs text-slate-400 mt-1">Isso pode levar alguns segundos.</p>
+        <p className="text-sm text-slate-500">{t.interviewPrep.generating}</p>
+        <p className="text-xs text-slate-400 mt-1">{t.interviewPrep.generatingHint}</p>
       </div>
     )
   }
@@ -64,12 +64,12 @@ export function InterviewPrepSection({ entryId }: InterviewPrepSectionProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-green-600 font-medium">Gerado com sucesso</span>
+        <span className="text-xs text-green-600 font-medium">{t.interviewPrep.success}</span>
         <button
           onClick={handleGenerate}
           className="text-xs text-purple-600 hover:underline"
         >
-          Regenerar
+          {t.interviewPrep.regenerate}
         </button>
       </div>
       <div

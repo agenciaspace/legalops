@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useLocale } from '@/components/LocaleProvider'
 import type { ApplicationEvent, EventType } from '@/lib/types'
 
 interface TimelineSectionProps {
@@ -17,14 +18,9 @@ const EVENT_ICONS: Record<EventType, { icon: string; color: string }> = {
   custom: { icon: '•', color: 'bg-slate-100 text-slate-600' },
 }
 
-const EVENT_TYPE_LABELS: Record<EventType, string> = {
-  status_change: 'Mudanca de status',
-  note_added: 'Nota adicionada',
-  contact_added: 'Contato adicionado',
-  interview_scheduled: 'Entrevista agendada',
-  follow_up: 'Follow-up',
-  custom: 'Outro',
-}
+const EVENT_TYPES: EventType[] = [
+  'status_change', 'note_added', 'contact_added', 'interview_scheduled', 'follow_up', 'custom',
+]
 
 export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps) {
   const [events, setEvents] = useState<ApplicationEvent[]>(initialEvents)
@@ -36,6 +32,7 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
     description: '',
     event_date: new Date().toISOString().split('T')[0],
   })
+  const { locale, t } = useLocale()
 
   async function handleAdd() {
     if (!form.title.trim()) return
@@ -57,6 +54,8 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
     setSaving(false)
   }
 
+  const dateFmtLocale = locale === 'pt' ? 'pt-BR' : 'en-US'
+
   return (
     <div className="space-y-3">
       {!adding ? (
@@ -64,25 +63,25 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
           onClick={() => setAdding(true)}
           className="text-xs text-blue-600 hover:underline font-medium"
         >
-          + Adicionar evento
+          {t.timeline.addEvent}
         </button>
       ) : (
         <div className="space-y-2 bg-slate-50 rounded-lg p-3">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-0.5">Tipo</label>
+              <label className="block text-xs font-medium text-slate-600 mb-0.5">{t.timeline.fieldType}</label>
               <select
                 value={form.event_type}
                 onChange={e => setForm(p => ({ ...p, event_type: e.target.value as EventType }))}
                 className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                {(Object.keys(EVENT_TYPE_LABELS) as EventType[]).map(type => (
-                  <option key={type} value={type}>{EVENT_TYPE_LABELS[type]}</option>
+                {EVENT_TYPES.map(type => (
+                  <option key={type} value={type}>{t.timeline.eventTypes[type]}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-0.5">Data</label>
+              <label className="block text-xs font-medium text-slate-600 mb-0.5">{t.timeline.fieldDate}</label>
               <input
                 type="date"
                 value={form.event_date}
@@ -92,16 +91,16 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-0.5">Titulo *</label>
+            <label className="block text-xs font-medium text-slate-600 mb-0.5">{t.timeline.fieldTitle}</label>
             <input
               value={form.title}
               onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
-              placeholder="Ex: Enviou candidatura pelo site"
+              placeholder={t.timeline.fieldTitlePlaceholder}
               className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-0.5">Descricao</label>
+            <label className="block text-xs font-medium text-slate-600 mb-0.5">{t.timeline.fieldDescription}</label>
             <textarea
               value={form.description}
               onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
@@ -115,13 +114,13 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
               disabled={saving || !form.title.trim()}
               className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50"
             >
-              {saving ? 'Salvando...' : 'Salvar'}
+              {saving ? t.timeline.saving : t.timeline.save}
             </button>
             <button
               onClick={() => setAdding(false)}
               className="px-3 py-1 text-slate-500 text-xs rounded hover:bg-slate-100"
             >
-              Cancelar
+              {t.timeline.cancel}
             </button>
           </div>
         </div>
@@ -142,7 +141,7 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
                     <div className="flex items-baseline gap-2">
                       <p className="text-sm font-medium text-slate-900">{event.title}</p>
                       <span className="text-xs text-slate-400">
-                        {new Date(event.event_date).toLocaleDateString('pt-BR')}
+                        {new Date(event.event_date).toLocaleDateString(dateFmtLocale)}
                       </span>
                     </div>
                     {event.description && (
@@ -155,7 +154,7 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
           </div>
         </div>
       ) : !adding ? (
-        <p className="text-xs text-slate-400">Nenhum evento registrado ainda.</p>
+        <p className="text-xs text-slate-400">{t.timeline.noEvents}</p>
       ) : null}
     </div>
   )

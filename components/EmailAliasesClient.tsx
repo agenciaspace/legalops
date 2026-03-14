@@ -9,6 +9,7 @@ import {
 import type { EmailMessageWithAlias } from '@/lib/email-types'
 import { getEmailMessageOccurredAt, getEmailMessagePreview } from '@/lib/email-messages'
 import type { UserEmailAlias, UserTier } from '@/lib/types'
+import { useLocale } from '@/components/LocaleProvider'
 
 interface EmailAliasesClientProps {
   initialAliases: UserEmailAlias[]
@@ -27,6 +28,7 @@ export function EmailAliasesClient({
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState<'random' | 'custom' | null>(null)
   const [updatingAliasId, setUpdatingAliasId] = useState<string | null>(null)
+  const { t } = useLocale()
 
   const policy = getEmailTierPolicy(initialTier)
   const activeAliases = useMemo(
@@ -52,7 +54,7 @@ export function EmailAliasesClient({
     setSubmitting(null)
 
     if (!res.ok) {
-      setError(payload?.error ?? 'Failed to create email alias.')
+      setError(payload?.error ?? t.common.noResults)
       return
     }
 
@@ -74,7 +76,7 @@ export function EmailAliasesClient({
     setUpdatingAliasId(null)
 
     if (!res.ok) {
-      setError(payload?.error ?? 'Failed to update email alias.')
+      setError(payload?.error ?? t.common.noResults)
       return
     }
 
@@ -93,47 +95,45 @@ export function EmailAliasesClient({
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold text-slate-900">Email aliases</h1>
-        <p className="text-sm text-slate-500">
-          Gerencie os aliases de candidatura e acompanhe aqui as respostas recebidas em cada vaga aplicada.
-        </p>
+        <h1 className="text-2xl font-semibold text-slate-900">{t.emailAliases.title}</h1>
+        <p className="text-sm text-slate-500">{t.emailAliases.subtitle}</p>
       </div>
 
       <section className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">Plan rules</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{t.emailAliases.planRules}</h2>
           <div className="mt-4 space-y-3 text-sm text-slate-600">
             <div className="flex items-center justify-between">
-              <span>Current tier</span>
+              <span>{t.emailAliases.currentTier}</span>
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700">
                 {initialTier}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Active aliases</span>
+              <span>{t.emailAliases.activeAliases}</span>
               <span className="font-medium text-slate-900">
                 {activeAliases.length} / {policy.maxActiveAliases}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Random aliases</span>
+              <span>{t.emailAliases.randomAliases}</span>
               <span className="font-medium text-slate-900">
-                {policy.allowsRandomAliases ? 'Enabled' : 'Unavailable'}
+                {policy.allowsRandomAliases ? t.emailAliases.enabled : t.emailAliases.unavailable}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Custom aliases</span>
+              <span>{t.emailAliases.customAliases}</span>
               <span className="font-medium text-slate-900">
-                {policy.allowsCustomAliases ? 'Enabled' : 'Paid only'}
+                {policy.allowsCustomAliases ? t.emailAliases.enabled : t.emailAliases.paidOnly}
               </span>
             </div>
           </div>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">Create alias</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{t.emailAliases.createAlias}</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Remaining active slots: {remainingSlots}
+            {t.emailAliases.remainingSlots.replace('{count}', String(remainingSlots))}
           </p>
 
           <div className="mt-4 flex flex-col gap-3">
@@ -142,7 +142,7 @@ export function EmailAliasesClient({
               disabled={submitting !== null || remainingSlots === 0}
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {submitting === 'random' ? 'Creating random alias...' : 'Create random alias'}
+              {submitting === 'random' ? t.emailAliases.creatingRandom : t.emailAliases.createRandom}
             </button>
 
             <div className="flex flex-col gap-2">
@@ -159,15 +159,13 @@ export function EmailAliasesClient({
                 disabled={!policy.allowsCustomAliases || submitting !== null || remainingSlots === 0}
                 className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {submitting === 'custom' ? 'Creating custom alias...' : 'Create custom alias'}
+                {submitting === 'custom' ? t.emailAliases.creatingCustom : t.emailAliases.createCustom}
               </button>
             </div>
           </div>
 
           {!policy.allowsCustomAliases && (
-            <p className="mt-3 text-xs text-amber-700">
-              Free users can provision a single random alias. Paid users can create branded custom aliases.
-            </p>
+            <p className="mt-3 text-xs text-amber-700">{t.emailAliases.freeTierNote}</p>
           )}
         </div>
       </section>
@@ -180,13 +178,11 @@ export function EmailAliasesClient({
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 px-5 py-4">
-          <h2 className="text-sm font-semibold text-slate-900">Provisioned aliases</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{t.emailAliases.provisionedAliases}</h2>
         </div>
 
         {aliases.length === 0 ? (
-          <div className="px-5 py-8 text-sm text-slate-500">
-            No aliases provisioned yet. Create one to start routing replies into your inbox.
-          </div>
+          <div className="px-5 py-8 text-sm text-slate-500">{t.emailAliases.noAliases}</div>
         ) : (
           <div className="divide-y divide-slate-200">
             {aliases.map(alias => (
@@ -211,12 +207,12 @@ export function EmailAliasesClient({
                     </span>
                     {alias.is_primary && (
                       <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
-                        primary
+                        {t.emailAliases.primary}
                       </span>
                     )}
                   </div>
                   <p className="text-xs text-slate-500">
-                    Created {new Date(alias.created_at).toLocaleString()}
+                    {new Date(alias.created_at).toLocaleString()}
                   </p>
                 </div>
 
@@ -230,7 +226,7 @@ export function EmailAliasesClient({
                     }
                     className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Make primary
+                    {t.emailAliases.makePrimary}
                   </button>
                   <button
                     onClick={() =>
@@ -242,10 +238,10 @@ export function EmailAliasesClient({
                     className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {updatingAliasId === alias.id
-                      ? 'Saving...'
+                      ? t.emailAliases.saving
                       : alias.status === 'active'
-                        ? 'Disable'
-                        : 'Reactivate'}
+                        ? t.emailAliases.disable
+                        : t.emailAliases.reactivate}
                   </button>
                 </div>
               </div>
@@ -256,13 +252,11 @@ export function EmailAliasesClient({
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 px-5 py-4">
-          <h2 className="text-sm font-semibold text-slate-900">Recent mailbox activity</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{t.emailAliases.recentActivity}</h2>
         </div>
 
         {messages.length === 0 ? (
-          <div className="px-5 py-8 text-sm text-slate-500">
-            No inbound or outbound messages yet.
-          </div>
+          <div className="px-5 py-8 text-sm text-slate-500">{t.emailAliases.noMessages}</div>
         ) : (
           <div className="divide-y divide-slate-200">
             {messages.map(message => (
@@ -288,7 +282,7 @@ export function EmailAliasesClient({
                         </span>
                       </div>
                       <p className="font-medium text-slate-900">
-                        {message.subject || '(no subject)'}
+                        {message.subject || t.emailAliases.noSubject}
                       </p>
                       <p className="text-sm text-slate-600">
                         {message.direction === 'inbound'

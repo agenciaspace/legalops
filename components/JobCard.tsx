@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { RemoteBadge } from './RemoteBadge'
+import { useLocale } from '@/components/LocaleProvider'
 import type { Job } from '@/lib/types'
 
 interface JobCardProps {
@@ -9,24 +10,25 @@ interface JobCardProps {
   onAction: (jobId: string, action: 'add' | 'ignore') => void
 }
 
-function formatSalary(job: Job): string {
-  if (!job.salary_min && !job.salary_max) return 'Nao divulgado'
-  const currency = job.salary_currency ?? ''
-  if (job.salary_min && job.salary_max) {
-    return `${currency} ${job.salary_min.toLocaleString()} – ${job.salary_max.toLocaleString()}`
-  }
-  return `${currency} ${(job.salary_min ?? job.salary_max)!.toLocaleString()}`
-}
-
-function daysAgo(dateStr: string): string {
-  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
-  if (days === 0) return 'hoje'
-  if (days === 1) return 'ontem'
-  return `ha ${days} dias`
-}
-
 export function JobCard({ job, onAction }: JobCardProps) {
   const [loading, setLoading] = useState<'add' | 'ignore' | null>(null)
+  const { t } = useLocale()
+
+  function formatSalary(): string {
+    if (!job.salary_min && !job.salary_max) return t.common.salaryNotDisclosed
+    const currency = job.salary_currency ?? ''
+    if (job.salary_min && job.salary_max) {
+      return `${currency} ${job.salary_min.toLocaleString()} – ${job.salary_max.toLocaleString()}`
+    }
+    return `${currency} ${(job.salary_min ?? job.salary_max)!.toLocaleString()}`
+  }
+
+  function daysAgo(dateStr: string): string {
+    const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
+    if (days === 0) return t.common.today
+    if (days === 1) return t.common.yesterday
+    return t.common.daysAgo.replace('{n}', String(days))
+  }
 
   async function handleAction(action: 'add' | 'ignore') {
     setLoading(action)
@@ -46,7 +48,7 @@ export function JobCard({ job, onAction }: JobCardProps) {
       </div>
 
       <div className="flex items-center justify-between mb-4">
-        <span className="text-xs text-slate-500">{formatSalary(job)}</span>
+        <span className="text-xs text-slate-500">{formatSalary()}</span>
         <span className="text-xs text-slate-400">{daysAgo(job.created_at)}</span>
       </div>
 
@@ -67,14 +69,14 @@ export function JobCard({ job, onAction }: JobCardProps) {
           disabled={loading !== null}
           className="flex-1 bg-blue-600 text-white text-xs font-medium py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
-          {loading === 'add' ? '...' : 'Adicionar'}
+          {loading === 'add' ? '...' : t.jobCard.add}
         </button>
         <button
           onClick={() => handleAction('ignore')}
           disabled={loading !== null}
           className="flex-1 bg-slate-100 text-slate-600 text-xs font-medium py-2 rounded-lg hover:bg-slate-200 disabled:opacity-50 transition-colors"
         >
-          {loading === 'ignore' ? '...' : 'Ignorar'}
+          {loading === 'ignore' ? '...' : t.jobCard.ignore}
         </button>
       </div>
     </div>
