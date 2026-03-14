@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { ArrowRight, Globe } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { BrandLogo } from '@/components/BrandLogo'
-import { LandingJobCards } from '@/components/LandingJobCards'
+import { LandingJobCards, type LandingJob } from '@/components/LandingJobCards'
 import { LandingPipeline } from '@/components/LandingPipeline'
 
 type LandingLocale = 'pt' | 'en'
@@ -96,6 +96,23 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
     redirect('/dashboard')
   }
 
+  const { data: rawJobs } = await supabase
+    .from('jobs')
+    .select('id, title, company, remote_reality, salary_min, salary_max, salary_currency')
+    .eq('enrichment_status', 'done')
+    .order('created_at', { ascending: false })
+    .limit(6)
+
+  const jobs: LandingJob[] = (rawJobs ?? []).map(j => ({
+    id: j.id,
+    title: j.title,
+    company: j.company,
+    remote_reality: j.remote_reality,
+    salary_min: j.salary_min,
+    salary_max: j.salary_max,
+    salary_currency: j.salary_currency,
+  }))
+
   return (
     <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-stone-50 text-slate-950">
       <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
@@ -158,7 +175,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
             </div>
           </div>
 
-          <LandingJobCards locale={locale} />
+          <LandingJobCards locale={locale} jobs={jobs} />
         </section>
 
         {/* Pipeline */}

@@ -1,59 +1,46 @@
 'use client'
 
+import Link from 'next/link'
+import type { RemoteReality } from '@/lib/types'
+
 type Locale = 'pt' | 'en'
 
-interface MockJob {
+export interface LandingJob {
+  id: string
   title: string
   company: string
-  remote: { label: string; color: string }
-  salary: string
+  remote_reality: RemoteReality
+  salary_min: number | null
+  salary_max: number | null
+  salary_currency: string | null
 }
 
-const jobs: Record<Locale, MockJob[]> = {
-  pt: [
-    {
-      title: 'Legal Operations Manager',
-      company: 'Stripe',
-      remote: { label: '100% Remoto', color: 'bg-green-100 text-green-800' },
-      salary: 'USD 130k – 160k',
-    },
-    {
-      title: 'CLM Implementation Lead',
-      company: 'Notion',
-      remote: { label: 'Remoto + Viagem', color: 'bg-blue-100 text-blue-800' },
-      salary: 'USD 115k – 145k',
-    },
-    {
-      title: 'Contract Operations Analyst',
-      company: 'Figma',
-      remote: { label: '100% Remoto', color: 'bg-green-100 text-green-800' },
-      salary: 'USD 95k – 120k',
-    },
-  ],
-  en: [
-    {
-      title: 'Legal Operations Manager',
-      company: 'Stripe',
-      remote: { label: '100% Remote', color: 'bg-green-100 text-green-800' },
-      salary: 'USD 130k – 160k',
-    },
-    {
-      title: 'CLM Implementation Lead',
-      company: 'Notion',
-      remote: { label: 'Remote + Travel', color: 'bg-blue-100 text-blue-800' },
-      salary: 'USD 115k – 145k',
-    },
-    {
-      title: 'Contract Operations Analyst',
-      company: 'Figma',
-      remote: { label: '100% Remote', color: 'bg-green-100 text-green-800' },
-      salary: 'USD 95k – 120k',
-    },
-  ],
+const REMOTE_CONFIG: Record<RemoteReality, { pt: string; en: string; className: string }> = {
+  fully_remote: { pt: '100% Remoto', en: '100% Remote', className: 'bg-green-100 text-green-800' },
+  remote_with_travel: { pt: 'Remoto + Viagem', en: 'Remote + Travel', className: 'bg-blue-100 text-blue-800' },
+  hybrid_disguised: { pt: 'Híbrido', en: 'Hybrid', className: 'bg-yellow-100 text-yellow-800' },
+  onsite: { pt: 'Presencial', en: 'On-site', className: 'bg-slate-100 text-slate-600' },
+  unknown: { pt: 'Remoto?', en: 'Remote?', className: 'bg-slate-100 text-slate-500' },
 }
 
-export function LandingJobCards({ locale }: { locale: Locale }) {
-  const items = jobs[locale]
+function formatSalary(job: LandingJob): string | null {
+  if (!job.salary_min && !job.salary_max) return null
+  const cur = job.salary_currency ?? ''
+  const fmt = (n: number) => {
+    if (n >= 1000) return `${Math.round(n / 1000)}k`
+    return n.toLocaleString()
+  }
+  if (job.salary_min && job.salary_max) return `${cur} ${fmt(job.salary_min)} – ${fmt(job.salary_max)}`
+  return `${cur} ${fmt((job.salary_min ?? job.salary_max)!)}`
+}
+
+const labels = {
+  pt: { cta: 'Entre para ver detalhes' },
+  en: { cta: 'Sign in to see details' },
+}
+
+export function LandingJobCards({ locale, jobs }: { locale: Locale; jobs: LandingJob[] }) {
+  const items = jobs.slice(0, 6)
 
   return (
     <div className="animate-subtle-float">
@@ -68,12 +55,11 @@ export function LandingJobCards({ locale }: { locale: Locale }) {
         {/* Job cards grid */}
         <div className="grid grid-cols-2 gap-3">
           {items.map((job, i) => (
-            <div
-              key={job.company}
-              className={`animate-fade-slide-up rounded-xl border border-slate-200 p-3 ${
-                i === 2 ? 'col-span-2 sm:col-span-1' : ''
-              }`}
-              style={{ animationDelay: `${i * 0.15}s` }}
+            <Link
+              key={job.id}
+              href="/login"
+              className="animate-fade-slide-up rounded-xl border border-slate-200 p-3 transition-colors hover:border-blue-200 hover:shadow-sm"
+              style={{ animationDelay: `${i * 0.1}s` }}
             >
               <p className="text-xs font-semibold text-slate-900 truncate">
                 {job.title}
@@ -81,15 +67,25 @@ export function LandingJobCards({ locale }: { locale: Locale }) {
               <p className="mt-0.5 text-[11px] text-slate-500">{job.company}</p>
               <div className="mt-2 flex items-center gap-2">
                 <span
-                  className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-medium ${job.remote.color}`}
+                  className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-medium ${REMOTE_CONFIG[job.remote_reality]?.className ?? REMOTE_CONFIG.unknown.className}`}
                 >
-                  {job.remote.label}
+                  {REMOTE_CONFIG[job.remote_reality]?.[locale] ?? REMOTE_CONFIG.unknown[locale]}
                 </span>
               </div>
-              <p className="mt-1.5 text-[11px] text-slate-500">{job.salary}</p>
-            </div>
+              {formatSalary(job) && (
+                <p className="mt-1.5 text-[11px] text-slate-500">{formatSalary(job)}</p>
+              )}
+            </Link>
           ))}
         </div>
+
+        {/* Login gate */}
+        <Link
+          href="/login"
+          className="mt-4 flex items-center justify-center rounded-xl bg-slate-50 py-2.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+        >
+          {labels[locale].cta} →
+        </Link>
       </div>
     </div>
   )
