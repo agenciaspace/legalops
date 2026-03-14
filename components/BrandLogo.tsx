@@ -18,9 +18,11 @@ export function BrandMark({ className }: BrandMarkProps) {
       aria-hidden="true"
       className={className ?? 'h-10 w-10'}
     >
-      <rect x="4.5" y="4.5" width="31" height="31" rx="10" className="stroke-current" strokeWidth="2.5" />
-      <path d="M14 11.5v17h11" className="stroke-current" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="27" cy="13" r="2.5" className="fill-current" />
+      <path
+        d="M16 4H10A4 4 0 0 0 6 8V30A4 4 0 0 0 10 34H30A4 4 0 0 0 34 30V28A4 4 0 0 0 30 24H18A2 2 0 0 1 16 22V8A4 4 0 0 0 12 4H16Z"
+        className="fill-current"
+      />
+      <circle cx="27" cy="12" r="4" className="fill-current" />
     </svg>
   )
 }
