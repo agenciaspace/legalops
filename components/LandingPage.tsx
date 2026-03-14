@@ -175,11 +175,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
             </span>
 
             <h1
-              className="mt-6 max-w-4xl text-5xl leading-tight text-slate-950 sm:text-6xl"
-              style={{
-                fontFamily:
-                  '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-              }}
+              className="mt-6 max-w-4xl font-display text-5xl font-bold leading-[1.1] text-slate-950 sm:text-6xl"
             >
               {copy.heroTitle}
             </h1>
@@ -226,7 +222,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
                   <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
                     {copy.panel.freeLabel}
                   </span>
-                  <h2 className="mt-3 text-xl font-semibold text-slate-950">
+                  <h2 className="mt-3 font-display text-xl font-bold text-slate-950">
                     {copy.panel.freeTitle}
                   </h2>
                   <div className="mt-4 space-y-2">
@@ -243,7 +239,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
                   <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-200">
                     {copy.panel.proLabel}
                   </span>
-                  <h2 className="mt-3 text-xl font-semibold">
+                  <h2 className="mt-3 font-display text-xl font-bold">
                     {copy.panel.proTitle}
                   </h2>
                   <div className="mt-4 space-y-2">
@@ -263,11 +259,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
         <section id="compare" className="mt-20">
           <div className="max-w-3xl">
             <h2
-              className="text-4xl text-slate-950 sm:text-5xl"
-              style={{
-                fontFamily:
-                  '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-              }}
+              className="font-display text-4xl font-bold leading-[1.1] text-slate-950 sm:text-5xl"
             >
               {copy.comparisonTitle}
             </h2>
@@ -302,11 +294,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <h2
-                className="text-4xl text-slate-950 sm:text-5xl"
-                style={{
-                  fontFamily:
-                    '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-                }}
+                className="font-display text-4xl font-bold leading-[1.1] text-slate-950 sm:text-5xl"
               >
                 {copy.closingTitle}
               </h2>

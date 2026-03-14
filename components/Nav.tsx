@@ -46,7 +46,7 @@ export function Nav({ discoverCount }: NavProps) {
             <BrandLogo
               className="flex items-center gap-2"
               markClassName="h-7 w-7 text-slate-950"
-              titleClassName="text-sm font-semibold tracking-[0.18em] text-slate-900 uppercase"
+              titleClassName="font-display text-sm font-bold tracking-[0.18em] text-slate-900 uppercase"
             />
           </Link>
           {navLink('/dashboard', 'Dashboard')}

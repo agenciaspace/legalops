@@ -220,7 +220,7 @@ export default function OnboardPage() {
         <BrandLogo
           className="flex flex-col items-center gap-3"
           markClassName="h-10 w-10 text-slate-950"
-          titleClassName="text-xl font-semibold tracking-[0.18em] text-slate-950 uppercase"
+          titleClassName="font-display text-xl font-bold tracking-[0.18em] text-slate-950 uppercase"
           subtitle="Vamos configurar seu perfil profissional"
           subtitleClassName="text-sm text-slate-500"
         />
@@ -257,7 +257,7 @@ export default function OnboardPage() {
         {step === 'basics' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Dados básicos</h2>
+              <h2 className="font-display text-lg font-bold text-slate-900">Dados básicos</h2>
               <p className="text-sm text-slate-500 mt-0.5">Como devemos te chamar e qual é seu cargo atual?</p>
             </div>
 
@@ -304,7 +304,7 @@ export default function OnboardPage() {
         {step === 'professional' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Tipo de atuação</h2>
+              <h2 className="font-display text-lg font-bold text-slate-900">Tipo de atuação</h2>
               <p className="text-sm text-slate-500 mt-0.5">Onde você atua ou quer atuar profissionalmente?</p>
             </div>
 
@@ -365,7 +365,7 @@ export default function OnboardPage() {
         {step === 'expertise' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Áreas de especialização</h2>
+              <h2 className="font-display text-lg font-bold text-slate-900">Áreas de especialização</h2>
               <p className="text-sm text-slate-500 mt-0.5">Selecione as áreas em que você atua ou tem interesse. Isso melhora as sugestões de vagas.</p>
             </div>
 
@@ -414,7 +414,7 @@ export default function OnboardPage() {
         {step === 'linkedin' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Perfil LinkedIn</h2>
+              <h2 className="font-display text-lg font-bold text-slate-900">Perfil LinkedIn</h2>
               <p className="text-sm text-slate-500 mt-0.5">
                 Informe o link do seu LinkedIn. Vamos analisar seu perfil e sugerir <strong>quick wins</strong> para você conquistar mais vagas na área jurídica.
               </p>
@@ -466,7 +466,7 @@ export default function OnboardPage() {
         {step === 'insights' && (
           <div className="space-y-4">
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">Seus quick wins do LinkedIn</h2>
+              <h2 className="font-display text-lg font-bold text-slate-900">Seus quick wins do LinkedIn</h2>
               <p className="text-sm text-slate-500 mt-0.5">
                 {insightsScrapeSuccess
                   ? 'Analisamos seu perfil e identificamos as principais oportunidades de melhoria.'
