@@ -3,7 +3,10 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { buildJobDiscoverySeed, fetchJobDescription, scrapeAllBoards } from '@/lib/scraper'
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
+import { extractSalaryFromHtml } from '@/lib/utils'
 import type { ExtractedSalary } from '@/lib/utils'
+
+const SALARY_BACKFILL_LIMIT = 20
 
 function parseSalaryValues(extracted: ExtractedSalary | null): {
   salary_min: number | null
@@ -53,6 +56,7 @@ export async function GET(req: NextRequest) {
     duplicates: 0,
     enriched: 0,
     leadersBackfilled: 0,
+    salaryBackfilled: 0,
     failed: 0,
     discoverySource: 'legacy' as 'firecrawl' | 'legacy',
     fallbackReason: null as string | null,
@@ -92,8 +96,10 @@ export async function GET(req: NextRequest) {
         .join('\n\n')
         .slice(0, 8000)
 
-      // Pre-populate salary from HTML extraction so it's available even if AI enrichment fails
-      const htmlSalary = parseSalaryValues(extractedSalary)
+      // Pre-populate salary from HTML extraction, falling back to Firecrawl's salary_range
+      const htmlSalary = parseSalaryValues(
+        extractedSalary ?? (job.salary_range ? extractSalaryFromHtml(job.salary_range) : null)
+      )
 
       const { error } = await supabase
         .from('jobs')
@@ -198,6 +204,30 @@ export async function GET(req: NextRequest) {
     } catch (e) {
       console.error(`[cron] backfill leader for job ${job.id} failed:`, e)
     }
+  }
+
+  // Backfill salary for existing jobs that have raw_description but no salary
+  const { data: jobsMissingSalary } = await supabase
+    .from('jobs')
+    .select('id, raw_description')
+    .is('salary_min', null)
+    .is('salary_max', null)
+    .neq('raw_description', '')
+    .limit(SALARY_BACKFILL_LIMIT)
+
+  for (const job of jobsMissingSalary ?? []) {
+    const extracted = extractSalaryFromHtml(job.raw_description)
+    const parsed = parseSalaryValues(extracted)
+    if (parsed.salary_min || parsed.salary_max) {
+      await supabase
+        .from('jobs')
+        .update(parsed)
+        .eq('id', job.id)
+      summary.salaryBackfilled++
+    }
+  }
+  if (summary.salaryBackfilled > 0) {
+    console.info(`[cron] backfilled salary for ${summary.salaryBackfilled} existing jobs`)
   }
 
   await supabase.from('crawler_runs').insert({
