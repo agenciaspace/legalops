@@ -1,10 +1,10 @@
 /**
- * Test script for Firecrawl /v1/scrape endpoint with salary extraction.
+ * Test script for Firecrawl /v2/scrape endpoint with salary extraction.
  * Usage: FIRECRAWL_API_KEY=fc-xxx npx tsx scripts/test-firecrawl.ts
  */
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY ?? ''
-const FIRECRAWL_SCRAPE_URL = 'https://api.firecrawl.dev/v1/scrape'
+const FIRECRAWL_SCRAPE_URL = 'https://api.firecrawl.dev/v2/scrape'
 
 const TARGETS = [
   'https://www.indeed.com/jobs?q=%22Legal+Operations%22&sort=date',
@@ -44,8 +44,7 @@ async function scrapeBoard(url: string) {
     },
     body: JSON.stringify({
       url,
-      formats: ['extract'],
-      extract: { schema: EXTRACT_SCHEMA },
+      formats: [{ type: 'json', schema: EXTRACT_SCHEMA }],
     }),
     signal: AbortSignal.timeout(30_000),
   })
@@ -62,7 +61,7 @@ async function scrapeBoard(url: string) {
   }
 
   const credits = data.data?.metadata?.creditsUsed ?? '?'
-  const listings = data.data?.extract?.jobListings ?? []
+  const listings = data.data?.json?.jobListings ?? []
   console.log(`  Credits used: ${credits} | Listings found: ${listings.length}`)
   return listings
 }

@@ -140,7 +140,7 @@ describe('normalizeFirecrawlJobListing salary cleaning', () => {
 })
 
 describe('extractFirecrawlJobsFromPayload (scrape format)', () => {
-  it('handles the /v1/scrape extract format', () => {
+  it('handles the /v2/scrape json format', () => {
     const payload = {
       jobListings: [
         {

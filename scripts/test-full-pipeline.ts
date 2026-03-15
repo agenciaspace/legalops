@@ -38,7 +38,7 @@ function parseSalaryValues(extracted: { min: string | null; max: string | null; 
 
 async function main() {
   console.log('=== FULL PIPELINE TEST ===\n')
-  console.log('1. Scraping job boards via Firecrawl /v1/scrape...\n')
+  console.log('1. Scraping job boards via Firecrawl /v2/scrape...\n')
 
   const jobs = await scrapeJobsWithFirecrawl()
 

@@ -34,14 +34,14 @@ interface FirecrawlScrapeResponse {
   success?: boolean
   data?: {
     metadata?: { creditsUsed?: number }
-    extract?: {
+    json?: {
       jobListings?: FirecrawlJobListing[]
     }
   }
   error?: string
 }
 
-const FIRECRAWL_SCRAPE_URL = 'https://api.firecrawl.dev/v1/scrape'
+const FIRECRAWL_SCRAPE_URL = 'https://api.firecrawl.dev/v2/scrape'
 
 const FIRECRAWL_SCRAPE_TARGETS = [
   'https://www.indeed.com/jobs?q=%22Legal+Operations%22&sort=date',
@@ -409,8 +409,7 @@ async function scrapeOneBoard(apiKey: string, url: string): Promise<FirecrawlJob
     },
     body: JSON.stringify({
       url,
-      formats: ['extract'],
-      extract: { schema: FIRECRAWL_EXTRACT_SCHEMA },
+      formats: [{ type: 'json', schema: FIRECRAWL_EXTRACT_SCHEMA }],
     }),
     signal: AbortSignal.timeout(30_000),
   })
@@ -429,7 +428,7 @@ async function scrapeOneBoard(apiKey: string, url: string): Promise<FirecrawlJob
   }
 
   const credits = result.data?.metadata?.creditsUsed ?? 0
-  const listings = result.data?.extract?.jobListings ?? []
+  const listings = result.data?.json?.jobListings ?? []
   console.info(`[firecrawl] ${url} → ${listings.length} listings (${credits} credits)`)
   return listings
 }
