@@ -87,6 +87,33 @@ const FIRECRAWL_EXTRACT_SCHEMA = {
   required: ['jobListings'],
 }
 
+const FIRECRAWL_JOB_PAGE_SCHEMA = {
+  type: 'object',
+  properties: {
+    salaryMin: {
+      type: 'string',
+      description: 'Minimum salary/compensation amount (e.g. "$120,000", "R$15.000")',
+    },
+    salaryMax: {
+      type: 'string',
+      description: 'Maximum salary/compensation amount (e.g. "$180,000", "R$25.000")',
+    },
+    salaryCurrency: {
+      type: 'string',
+      description: 'Currency code (USD, BRL, EUR, GBP, etc.)',
+    },
+    salaryPeriod: {
+      type: 'string',
+      description: 'Pay period: "year", "month", or "hour"',
+    },
+    salaryRaw: {
+      type: 'string',
+      description: 'The full salary/compensation text as shown on the page (e.g. "$120,000 - $180,000 per year")',
+    },
+  },
+  required: [],
+}
+
 export const COMPANY_SLUGS = {
   greenhouse: ['nubank', 'ifood', 'totvs', 'vtex', 'loft', 'gympass', 'creditas'],
   lever: ['stone', 'pagarme', 'dock', 'ebanx', 'nuvemshop'],
@@ -495,6 +522,18 @@ export interface FetchJobResult {
 }
 
 export async function fetchJobDescription(url: string): Promise<FetchJobResult> {
+  // Try Firecrawl first (handles JS rendering and anti-bot)
+  const apiKey = cleanString(process.env.FIRECRAWL_API_KEY)
+  if (apiKey) {
+    try {
+      const result = await fetchJobDescriptionWithFirecrawl(apiKey, url)
+      if (result.description) return result
+    } catch (err) {
+      console.error(`[firecrawl] job page fetch failed for ${url}:`, err)
+    }
+  }
+
+  // Fallback to direct fetch
   try {
     const response = await fetch(url, {
       headers: { 'User-Agent': 'LegalOpsCRM/1.0' },
@@ -505,7 +544,6 @@ export async function fetchJobDescription(url: string): Promise<FetchJobResult> 
 
     const html = await response.text()
 
-    // Extract all structured metadata before stripping HTML
     const meta = extractJobMetaFromHtml(html)
     const metaBlock = buildMetadataBlock(meta)
     const text = stripHtml(html)
@@ -518,4 +556,74 @@ export async function fetchJobDescription(url: string): Promise<FetchJobResult> 
   } catch {
     return { description: '', extractedSalary: null }
   }
+}
+
+async function fetchJobDescriptionWithFirecrawl(apiKey: string, url: string): Promise<FetchJobResult> {
+  const response = await fetch(FIRECRAWL_SCRAPE_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      url,
+      formats: [
+        'markdown',
+        'html',
+        { type: 'json', schema: FIRECRAWL_JOB_PAGE_SCHEMA },
+      ],
+    }),
+    signal: AbortSignal.timeout(30_000),
+  })
+
+  if (!response.ok) {
+    console.error(`[firecrawl] job page HTTP ${response.status} for ${url}`)
+    return { description: '', extractedSalary: null }
+  }
+
+  const result = await response.json() as {
+    success?: boolean
+    data?: {
+      markdown?: string
+      html?: string
+      json?: {
+        salaryMin?: string
+        salaryMax?: string
+        salaryCurrency?: string
+        salaryPeriod?: string
+        salaryRaw?: string
+      }
+    }
+  }
+
+  if (!result.success || !result.data) {
+    return { description: '', extractedSalary: null }
+  }
+
+  // Extract salary from structured JSON extraction
+  const json = result.data.json
+  let extractedSalary: ExtractedSalary | null = null
+
+  if (json?.salaryMin || json?.salaryMax || json?.salaryRaw) {
+    extractedSalary = {
+      min: json.salaryMin ?? null,
+      max: json.salaryMax ?? null,
+      currency: json.salaryCurrency ?? null,
+      period: json.salaryPeriod ?? null,
+      raw: json.salaryRaw ?? [json.salaryMin, json.salaryMax].filter(Boolean).join(' - '),
+    }
+  }
+
+  // Also try extracting salary from raw HTML (Greenhouse, JSON-LD, etc.)
+  const html = result.data.html ?? ''
+  if (!extractedSalary && html) {
+    extractedSalary = extractSalaryFromHtml(html)
+  }
+
+  const markdown = result.data.markdown ?? ''
+  const description = markdown.slice(0, 8_000)
+
+  console.info(`[firecrawl] job page ${url} → ${description.length} chars, salary: ${extractedSalary ? 'yes' : 'no'}`)
+
+  return { description, extractedSalary }
 }
