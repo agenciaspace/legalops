@@ -88,8 +88,19 @@ const FIRECRAWL_EXTRACT_SCHEMA = {
 }
 
 export const COMPANY_SLUGS = {
-  greenhouse: ['nubank', 'ifood', 'totvs', 'vtex', 'loft', 'gympass', 'creditas'],
-  lever: ['stone', 'pagarme', 'dock', 'ebanx', 'nuvemshop'],
+  greenhouse: [
+    'nubank', 'ifood', 'totvs', 'vtex', 'loft', 'gympass', 'creditas',
+    'stripe', 'coinbase', 'cloudflare', 'notion', 'databricks', 'brex',
+    'verkada', 'cohere-health', 'cerebras-systems', 'applied-intuition',
+    'highlevel', 'hive', 'match-group', 'skylo', 'harbor',
+    'neros-technologies', 'ipx', 'thinking-machines-lab',
+    'airtable', 'plaid', 'figma', 'anduril', 'ramp',
+  ],
+  lever: [
+    'stone', 'pagarme', 'dock', 'ebanx', 'nuvemshop',
+    'netflix', 'affirm', 'nerdwallet', 'ironclad',
+    'linktr.ee', 'drata', 'abridge',
+  ],
   workable: ['jusbrasil', 'lalamove-brazil'],
   gupy: ['itau', 'bradesco', 'ambev', 'embraer', 'raizen'],
 } as const
@@ -121,7 +132,7 @@ function getFirstUrl(...values: unknown[]): string | null {
 }
 
 export function matchesLegalOpsTitle(title: string): boolean {
-  return /\blegal\s+(operations|ops)\b/i.test(title)
+  return /\b(?:legal\s+(?:operations?|ops)|contracts?\s*&\s*legal|legal\s+project|law\s+department\s+.*(?:operations?|strategy)|CLM\s+(?:manager|director|specialist|analyst|lead)|head\s+of\s+legal|general\s+counsel|chief\s+legal\s+officer)\b/i.test(title)
 }
 
 export function filterByKeywords(jobs: { title: string; url: string }[]): typeof jobs {
