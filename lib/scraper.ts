@@ -1,4 +1,4 @@
-import { stripHtml, extractJobMetaFromHtml, buildMetadataBlock, type ExtractedSalary } from './utils'
+import { stripHtml, extractJobMetaFromHtml, extractSalaryFromHtml, buildMetadataBlock, type ExtractedSalary } from './utils'
 import type { SourceBoard } from './types'
 
 export type RawJob = {
