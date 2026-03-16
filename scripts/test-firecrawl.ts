@@ -1,17 +1,10 @@
 /**
- * Test script for Firecrawl /v1/scrape endpoint with salary extraction.
+ * Test script for Firecrawl /v2/agent endpoint.
  * Usage: FIRECRAWL_API_KEY=fc-xxx npx tsx scripts/test-firecrawl.ts
  */
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY ?? ''
-const FIRECRAWL_SCRAPE_URL = 'https://api.firecrawl.dev/v1/scrape'
-
-const TARGETS = [
-  'https://www.indeed.com/jobs?q=%22Legal+Operations%22&sort=date',
-  'https://www.indeed.com/jobs?q=%22Legal+Ops%22&sort=date',
-  'https://www.goinhouse.com/jobs/search?q=Legal+Operations',
-  'https://jobs.cloc.org/jobs?keywords=Legal+Operations',
-]
+const FIRECRAWL_AGENT_URL = 'https://api.firecrawl.dev/v2/agent'
 
 const EXTRACT_SCHEMA = {
   type: 'object',
@@ -34,37 +27,10 @@ const EXTRACT_SCHEMA = {
   required: ['jobListings'],
 }
 
-async function scrapeBoard(url: string) {
-  console.log(`\n--- Scraping: ${url}`)
-  const res = await fetch(FIRECRAWL_SCRAPE_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      url,
-      formats: ['extract'],
-      extract: { schema: EXTRACT_SCHEMA },
-    }),
-    signal: AbortSignal.timeout(30_000),
-  })
+const AGENT_PROMPT = `Find current job listings for Legal Operations roles. Search job boards like Indeed, GoInhouse, CLOC Jobs, Legal.io, and LegalOperators for positions with titles containing "Legal Operations", "Legal Ops", "Head of Legal", "General Counsel", "Chief Legal Officer", or "CLM Manager". Return all matching job listings with their title, company, location, salary range (if available), and application link.`
 
-  if (!res.ok) {
-    console.error(`  HTTP ${res.status}: ${await res.text()}`)
-    return []
-  }
-
-  const data = await res.json()
-  if (!data.success) {
-    console.error(`  Error: ${data.error}`)
-    return []
-  }
-
-  const credits = data.data?.metadata?.creditsUsed ?? '?'
-  const listings = data.data?.extract?.jobListings ?? []
-  console.log(`  Credits used: ${credits} | Listings found: ${listings.length}`)
-  return listings
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 async function main() {
@@ -73,15 +39,81 @@ async function main() {
     process.exit(1)
   }
 
-  console.log('=== Firecrawl Scrape Test ===')
+  console.log('=== Firecrawl Agent Test ===\n')
 
-  const allListings = (await Promise.all(TARGETS.map(scrapeBoard))).flat()
+  // Start agent
+  console.log('Starting agent...')
+  const startRes = await fetch(FIRECRAWL_AGENT_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      prompt: AGENT_PROMPT,
+      schema: EXTRACT_SCHEMA,
+      model: 'spark-1-mini',
+      maxCredits: 500,
+    }),
+    signal: AbortSignal.timeout(30_000),
+  })
+
+  if (!startRes.ok) {
+    console.error(`Agent start failed: HTTP ${startRes.status} ${await startRes.text()}`)
+    process.exit(1)
+  }
+
+  const startData = await startRes.json()
+  if (!startData.success || !startData.id) {
+    console.error('Agent start error:', startData.error ?? 'no job id')
+    process.exit(1)
+  }
+
+  const jobId = startData.id
+  console.log(`Agent job started: ${jobId}`)
+
+  // Poll for completion
+  const deadline = Date.now() + 120_000
+  let result: { data?: { jobListings?: Array<Record<string, string>> }; creditsUsed?: number } | null = null
+
+  while (Date.now() < deadline) {
+    await sleep(5_000)
+    process.stdout.write('.')
+
+    const statusRes = await fetch(`${FIRECRAWL_AGENT_URL}/${jobId}`, {
+      headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}` },
+      signal: AbortSignal.timeout(15_000),
+    })
+
+    if (!statusRes.ok) continue
+
+    const statusData = await statusRes.json()
+
+    if (statusData.status === 'completed') {
+      result = statusData
+      break
+    }
+
+    if (statusData.status === 'failed') {
+      console.error(`\nAgent failed: ${statusData.error ?? 'unknown'}`)
+      process.exit(1)
+    }
+  }
+
+  if (!result) {
+    console.error('\nAgent timed out after 120s')
+    process.exit(1)
+  }
+
+  const listings = result.data?.jobListings ?? []
+  const credits = result.creditsUsed ?? '?'
+  console.log(`\nCredits used: ${credits} | Listings found: ${listings.length}`)
 
   let withSalary = 0
   const legalOpsRe = /\blegal\s+(operations|ops)\b/i
 
   console.log('\n=== ALL RESULTS ===\n')
-  for (const job of allListings) {
+  for (const job of listings) {
     const isLegalOps = legalOpsRe.test(job.jobTitle ?? '')
     const salary = job.salaryRange || '(none)'
     const hasSalary = salary !== '(none)' &&
@@ -95,12 +127,12 @@ async function main() {
     console.log(`       Location: ${job.location ?? '?'} | Salary: ${salary}`)
   }
 
-  const legalOpsCount = allListings.filter((j: { jobTitle?: string }) => legalOpsRe.test(j.jobTitle ?? '')).length
+  const legalOpsCount = listings.filter(j => legalOpsRe.test(j.jobTitle ?? '')).length
   console.log('\n=== SUMMARY ===')
-  console.log(`Total listings:       ${allListings.length}`)
+  console.log(`Total listings:       ${listings.length}`)
   console.log(`Legal Ops matches:    ${legalOpsCount}`)
   console.log(`With salary data:     ${withSalary}`)
-  console.log(`Salary hit rate:      ${allListings.length > 0 ? Math.round(withSalary / allListings.length * 100) : 0}%`)
+  console.log(`Salary hit rate:      ${listings.length > 0 ? Math.round(withSalary / listings.length * 100) : 0}%`)
 }
 
 main().catch(err => {
