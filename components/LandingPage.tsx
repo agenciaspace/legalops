@@ -5,7 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { BrandLogo } from '@/components/BrandLogo'
 import { formatSalary as formatSalaryUtil } from '@/lib/format-salary'
-import type { RemoteReality } from '@/lib/types'
+import type { RemoteReality, UrlStatus } from '@/lib/types'
 
 type LandingLocale = 'pt' | 'en'
 
@@ -32,6 +32,7 @@ const content = {
     closingTitle: 'Comece grátis. Decida depois.',
     closingPrimaryCta: 'Começar grátis',
     salaryUndisclosed: 'Não divulgado',
+    jobExpired: 'Possivelmente encerrada',
   },
   en: {
     languageHref: '/',
@@ -47,6 +48,7 @@ const content = {
     closingTitle: 'Start free. Decide later.',
     closingPrimaryCta: 'Start free',
     salaryUndisclosed: 'Undisclosed',
+    jobExpired: 'Possibly closed',
   },
 } as const
 
@@ -65,7 +67,7 @@ async function fetchPublicJobs() {
 
   const { data } = await supabase
     .from('jobs')
-    .select('id, title, company, url, remote_reality, salary_min, salary_max, salary_currency, created_at')
+    .select('id, title, company, url, remote_reality, salary_min, salary_max, salary_currency, url_status, created_at')
     .eq('enrichment_status', 'done')
     .order('created_at', { ascending: false })
     .limit(20)
@@ -160,25 +162,32 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
                 <div>{copy.tableHeaders.salary}</div>
               </div>
 
-              {jobs.map((job, index) => (
-                <a
-                  key={job.id}
-                  href={job.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`group grid gap-1 sm:gap-4 sm:grid-cols-[2fr_1.2fr_1fr_1fr] px-6 py-4 text-sm transition-colors hover:bg-stone-50 ${
-                    index % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'
-                  }`}
-                >
-                  <div className="font-medium text-slate-900 flex items-center gap-2">
-                    {job.title}
-                    <ExternalLink className="h-3 w-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                  <div className="text-slate-600">{job.company}</div>
-                  <div className="text-slate-500">{remoteLabels[job.remote_reality as RemoteReality] ?? '—'}</div>
-                  <div className="text-slate-500">{formatSalary(job.salary_min, job.salary_max, job.salary_currency, copy.salaryUndisclosed)}</div>
-                </a>
-              ))}
+              {jobs.map((job, index) => {
+                const isDead = (job.url_status as UrlStatus) === 'dead'
+                const salaryFallback = isDead ? '—' : copy.salaryUndisclosed
+                return (
+                  <a
+                    key={job.id}
+                    href={job.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`group grid gap-1 sm:gap-4 sm:grid-cols-[2fr_1.2fr_1fr_1fr] px-6 py-4 text-sm transition-colors hover:bg-stone-50 ${
+                      index % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'
+                    } ${isDead ? 'opacity-60' : ''}`}
+                  >
+                    <div className="font-medium text-slate-900 flex items-center gap-2">
+                      {job.title}
+                      {isDead && (
+                        <span className="text-xs font-normal text-amber-500">{copy.jobExpired}</span>
+                      )}
+                      <ExternalLink className="h-3 w-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    <div className="text-slate-600">{job.company}</div>
+                    <div className="text-slate-500">{remoteLabels[job.remote_reality as RemoteReality] ?? '—'}</div>
+                    <div className="text-slate-500">{formatSalary(job.salary_min, job.salary_max, job.salary_currency, salaryFallback)}</div>
+                  </a>
+                )
+              })}
             </div>
           ) : (
             <p className="mt-6 text-sm text-slate-500">{copy.jobsEmpty}</p>

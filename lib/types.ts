@@ -7,6 +7,8 @@ export type RemoteReality =
 
 export type EnrichmentStatus = 'pending' | 'done' | 'failed'
 
+export type UrlStatus = 'live' | 'dead' | 'unknown'
+
 export type PipelineStatus =
   | 'researching'
   | 'applied'
@@ -59,6 +61,8 @@ export interface Job {
   suggested_leader_name: string | null
   suggested_leader_title: string | null
   suggested_leader_linkedin: string | null
+  url_status: UrlStatus
+  url_checked_at: string | null
   created_at: string
 }
 

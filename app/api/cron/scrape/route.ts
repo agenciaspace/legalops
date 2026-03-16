@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
     summary.duplicates = jobs.length - newJobs.length
 
     for (const job of newJobs) {
-      const { description: pageDescription, extractedSalary } = await fetchJobDescription(job.url)
+      const { description: pageDescription, extractedSalary, httpStatus } = await fetchJobDescription(job.url)
       const discoverySeed = buildJobDiscoverySeed(job)
       const description = [discoverySeed, pageDescription]
         .filter(Boolean)
@@ -103,6 +103,10 @@ export async function GET(req: NextRequest) {
         }
       }
 
+      const urlStatus = httpStatus === null ? 'unknown'
+        : (httpStatus >= 200 && httpStatus < 400) ? 'live'
+        : 'dead'
+
       const { error } = await supabase
         .from('jobs')
         .insert({
@@ -113,6 +117,8 @@ export async function GET(req: NextRequest) {
           raw_description: description,
           enrichment_status: 'pending',
           enrichment_attempts: 0,
+          url_status: urlStatus,
+          url_checked_at: new Date().toISOString(),
           ...salaryData,
         })
 
@@ -179,10 +185,12 @@ export async function GET(req: NextRequest) {
 
   // Backfill salary for existing jobs that have no salary_min/salary_max
   // First try raw_description, then re-fetch the job page for fresh HTML extraction
+  // Skip jobs with dead URLs to avoid wasting requests
   const { data: jobsMissingSalary } = await supabase
     .from('jobs')
-    .select('id, url, raw_description')
+    .select('id, url, raw_description, url_status')
     .eq('enrichment_status', 'done')
+    .neq('url_status', 'dead')
     .is('salary_min', null)
     .is('salary_max', null)
     .limit(20)
@@ -203,10 +211,22 @@ export async function GET(req: NextRequest) {
     // Strategy 2: re-fetch the job page and extract salary from fresh HTML
     if (job.url) {
       try {
-        const { extractedSalary } = await fetchJobDescription(job.url)
+        const { extractedSalary, httpStatus } = await fetchJobDescription(job.url)
+
+        // Update URL status based on fresh response
+        const freshUrlStatus = httpStatus === null ? 'unknown'
+          : (httpStatus >= 200 && httpStatus < 400) ? 'live'
+          : 'dead'
+        const urlUpdate: Record<string, unknown> = {
+          url_status: freshUrlStatus,
+          url_checked_at: new Date().toISOString(),
+        }
+
         const salary = parseSalaryValues(extractedSalary)
         if (salary.salary_min || salary.salary_max) {
-          await supabase.from('jobs').update(salary).eq('id', job.id)
+          await supabase.from('jobs').update({ ...salary, ...urlUpdate }).eq('id', job.id)
+        } else {
+          await supabase.from('jobs').update(urlUpdate).eq('id', job.id)
         }
       } catch {
         // Fetch failed, skip
