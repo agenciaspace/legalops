@@ -177,6 +177,28 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Backfill salary for existing jobs that have no salary_min/salary_max
+  // but may have salary text in their raw_description
+  const { data: jobsMissingSalary } = await supabase
+    .from('jobs')
+    .select('id, raw_description')
+    .eq('enrichment_status', 'done')
+    .is('salary_min', null)
+    .is('salary_max', null)
+    .limit(50)
+
+  for (const job of jobsMissingSalary ?? []) {
+    if (!job.raw_description) continue
+    const extracted = extractSalaryFromHtml(job.raw_description)
+    if (!extracted) continue
+    const salary = parseSalaryValues(extracted)
+    if (!salary.salary_min && !salary.salary_max) continue
+    await supabase
+      .from('jobs')
+      .update(salary)
+      .eq('id', job.id)
+  }
+
   const { data: jobsMissingLeader } = await supabase
     .from('jobs')
     .select('id, company, title')
