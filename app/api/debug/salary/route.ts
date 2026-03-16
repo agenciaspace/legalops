@@ -1,30 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { extractSalaryFromHtml, type ExtractedSalary } from '@/lib/utils'
+import { extractSalaryFromHtml } from '@/lib/utils'
 import { fetchJobDescription } from '@/lib/scraper'
-
-function parseSalaryNum(val: string | null): number | null {
-  if (!val) return null
-  let cleaned = val.replace(/[R$€£₹¥A$C$S$HK$NZ$CHFkrzł₪,\s]/g, '')
-  if (/k$/i.test(val.replace(/\s+/g, ''))) {
-    cleaned = cleaned.replace(/k$/i, '')
-    const num = parseFloat(cleaned)
-    return isNaN(num) ? null : Math.round(num * 1000)
-  }
-  if (/^\d{1,3}(\.\d{3})+$/.test(cleaned)) {
-    cleaned = cleaned.replace(/\./g, '')
-  }
-  const num = parseFloat(cleaned)
-  return isNaN(num) ? null : Math.round(num)
-}
-
-function toSalaryFields(extracted: ExtractedSalary | null) {
-  if (!extracted) return null
-  const salary_min = parseSalaryNum(extracted.min)
-  const salary_max = parseSalaryNum(extracted.max)
-  if (!salary_min && !salary_max) return null
-  return { salary_min, salary_max, salary_currency: extracted.currency ?? null }
-}
+import { toSalaryFields, backfillMissingSalaries } from '@/lib/salary-backfill'
 
 export async function GET(req: NextRequest) {
   const auth = req.headers.get('authorization')

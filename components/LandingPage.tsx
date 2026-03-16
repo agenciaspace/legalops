@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { BrandLogo } from '@/components/BrandLogo'
 import { formatSalary as formatSalaryUtil } from '@/lib/format-salary'
+import { backfillMissingSalaries } from '@/lib/salary-backfill'
 import type { RemoteReality } from '@/lib/types'
 
 type LandingLocale = 'pt' | 'en'
@@ -84,6 +85,8 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
     redirect('/dashboard')
   }
 
+  // Backfill salary data for jobs missing it, then fetch
+  await backfillMissingSalaries()
   const jobs = await fetchPublicJobs()
 
   return (

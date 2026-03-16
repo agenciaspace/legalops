@@ -4,6 +4,7 @@ import { buildJobDiscoverySeed, fetchJobDescription, scrapeAllBoards } from '@/l
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
 import { extractSalaryFromHtml, type ExtractedSalary } from '@/lib/utils'
+import { backfillMissingSalaries } from '@/lib/salary-backfill'
 
 function parseSalaryValues(extracted: ExtractedSalary | null): {
   salary_min: number | null
@@ -178,41 +179,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Backfill salary for existing jobs that have no salary_min/salary_max
-  // First try raw_description, then re-fetch the job page for fresh HTML extraction
-  const { data: jobsMissingSalary } = await supabase
-    .from('jobs')
-    .select('id, url, raw_description')
-    .eq('enrichment_status', 'done')
-    .is('salary_min', null)
-    .is('salary_max', null)
-    .limit(20)
-
-  for (const job of jobsMissingSalary ?? []) {
-    // Strategy 1: try extracting from stored raw_description
-    if (job.raw_description) {
-      const extracted = extractSalaryFromHtml(job.raw_description)
-      if (extracted) {
-        const salary = parseSalaryValues(extracted)
-        if (salary.salary_min || salary.salary_max) {
-          await supabase.from('jobs').update(salary).eq('id', job.id)
-          continue
-        }
-      }
-    }
-
-    // Strategy 2: re-fetch the job page and extract salary from fresh HTML
-    if (job.url) {
-      try {
-        const { extractedSalary } = await fetchJobDescription(job.url)
-        const salary = parseSalaryValues(extractedSalary)
-        if (salary.salary_min || salary.salary_max) {
-          await supabase.from('jobs').update(salary).eq('id', job.id)
-        }
-      } catch {
-        // Fetch failed, skip
-      }
-    }
-  }
+  await backfillMissingSalaries(20)
 
   const { data: jobsMissingLeader } = await supabase
     .from('jobs')
