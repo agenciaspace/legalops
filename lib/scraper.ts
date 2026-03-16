@@ -414,15 +414,19 @@ export async function scrapeLegacyBoards(dynamicSlugs: DynamicSlugs = []): Promi
   const results: RawJob[] = []
 
   // Merge static + dynamic slugs, deduplicating
-  const allSlugs: Record<string, Set<string>> = {
+  const slugSets: Record<string, Set<string>> = {
     greenhouse: new Set(COMPANY_SLUGS.greenhouse),
     lever: new Set(COMPANY_SLUGS.lever),
     workable: new Set(COMPANY_SLUGS.workable),
     gupy: new Set(COMPANY_SLUGS.gupy),
   }
   for (const { board, slug } of dynamicSlugs) {
-    if (!allSlugs[board]) allSlugs[board] = new Set()
-    allSlugs[board].add(slug)
+    if (!slugSets[board]) slugSets[board] = new Set()
+    slugSets[board].add(slug)
+  }
+  const allSlugs: Record<string, string[]> = {}
+  for (const key of Object.keys(slugSets)) {
+    allSlugs[key] = Array.from(slugSets[key])
   }
 
   for (const slug of allSlugs.greenhouse) {
