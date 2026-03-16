@@ -254,6 +254,38 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // URL health check: verify if existing jobs are still reachable
+  // Uses HEAD requests to minimize bandwidth; checks oldest-verified first
+  const { data: jobsToCheck } = await supabase
+    .from('jobs')
+    .select('id, url')
+    .eq('enrichment_status', 'done')
+    .neq('url_status', 'dead')
+    .order('url_checked_at', { ascending: true, nullsFirst: true })
+    .limit(30)
+
+  for (const job of jobsToCheck ?? []) {
+    try {
+      const response = await fetch(job.url, {
+        method: 'HEAD',
+        headers: { 'User-Agent': 'LegalOpsCRM/1.0' },
+        signal: AbortSignal.timeout(10_000),
+        redirect: 'follow',
+      })
+      const status = response.ok ? 'live' : 'dead'
+      await supabase
+        .from('jobs')
+        .update({ url_status: status, url_checked_at: new Date().toISOString() })
+        .eq('id', job.id)
+    } catch {
+      // Network/timeout error — mark as unknown, will retry next cycle
+      await supabase
+        .from('jobs')
+        .update({ url_status: 'unknown', url_checked_at: new Date().toISOString() })
+        .eq('id', job.id)
+    }
+  }
+
   const { data: jobsMissingLeader } = await supabase
     .from('jobs')
     .select('id, company, title')

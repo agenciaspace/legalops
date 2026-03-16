@@ -65,12 +65,25 @@ async function fetchPublicJobs() {
     cookies: { getAll: () => [], setAll: () => {} },
   })
 
-  const { data } = await supabase
+  // Try with url_status filter (after migration 009), fallback without it
+  const { data, error } = await supabase
     .from('jobs')
-    .select('id, title, company, url, remote_reality, salary_min, salary_max, salary_currency, created_at')
+    .select('id, title, company, url, remote_reality, salary_min, salary_max, salary_currency, url_status, created_at')
     .eq('enrichment_status', 'done')
+    .neq('url_status', 'dead')
     .order('created_at', { ascending: false })
     .limit(20)
+
+  if (error) {
+    // url_status column may not exist yet — retry without it
+    const { data: fallbackData } = await supabase
+      .from('jobs')
+      .select('id, title, company, url, remote_reality, salary_min, salary_max, salary_currency, created_at')
+      .eq('enrichment_status', 'done')
+      .order('created_at', { ascending: false })
+      .limit(20)
+    return fallbackData ?? []
+  }
 
   return data ?? []
 }
