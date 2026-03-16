@@ -27,9 +27,16 @@ export function toSalaryFields(extracted: ExtractedSalary | null) {
 
 /**
  * Backfill salary_min/salary_max for jobs missing salary data.
- * Strategy 1: extract from stored raw_description text.
+ *
+ * Strategy 1: extract from stored raw_description text (fast, no network).
  * Strategy 2: re-fetch the job page URL and extract from fresh HTML.
- * Self-heals: once salary is set, the job won't be queried again.
+ *
+ * When no salary is found after trying both strategies, sets salary_currency
+ * to 'none' so the job is skipped on subsequent runs (avoids infinite re-fetching
+ * of pages that don't have salary data).
+ *
+ * Jobs with salary_currency='none' display as "Não divulgado" since
+ * salary_min and salary_max remain null.
  */
 export async function backfillMissingSalaries(limit = 20) {
   const admin = createAdminClient()
@@ -39,6 +46,7 @@ export async function backfillMissingSalaries(limit = 20) {
     .eq('enrichment_status', 'done')
     .is('salary_min', null)
     .is('salary_max', null)
+    .is('salary_currency', null)
     .limit(limit)
 
   if (!jobs || jobs.length === 0) return 0
@@ -64,11 +72,15 @@ export async function backfillMissingSalaries(limit = 20) {
         if (salary) {
           await admin.from('jobs').update(salary).eq('id', job.id)
           updated++
+          return
         }
       } catch {
-        // Fetch failed, skip
+        // Fetch failed
       }
     }
+
+    // No salary found from any source — mark as attempted so we don't retry
+    await admin.from('jobs').update({ salary_currency: 'none' }).eq('id', job.id)
   }))
 
   return updated
