@@ -36,6 +36,8 @@ describe('types', () => {
       suggested_leader_name: null,
       suggested_leader_title: null,
       suggested_leader_linkedin: null,
+      url_status: 'live',
+      url_checked_at: null,
       created_at: new Date().toISOString(),
     }
     expect(job.id).toBe('uuid')

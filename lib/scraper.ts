@@ -504,6 +504,7 @@ export async function scrapeAllBoards(): Promise<ScrapeAllBoardsResult> {
 export interface FetchJobResult {
   description: string
   extractedSalary: ExtractedSalary | null
+  httpStatus: number | null
 }
 
 export async function fetchJobDescription(url: string): Promise<FetchJobResult> {
@@ -513,7 +514,7 @@ export async function fetchJobDescription(url: string): Promise<FetchJobResult> 
       signal: AbortSignal.timeout(15_000),
     })
 
-    if (!response.ok) return { description: '', extractedSalary: null }
+    if (!response.ok) return { description: '', extractedSalary: null, httpStatus: response.status }
 
     const html = await response.text()
 
@@ -526,8 +527,8 @@ export async function fetchJobDescription(url: string): Promise<FetchJobResult> 
       ? `${metaBlock}\n\n${text}`.slice(0, 8_000)
       : text.slice(0, 8_000)
 
-    return { description, extractedSalary: meta.salary }
+    return { description, extractedSalary: meta.salary, httpStatus: response.status }
   } catch {
-    return { description: '', extractedSalary: null }
+    return { description: '', extractedSalary: null, httpStatus: null }
   }
 }

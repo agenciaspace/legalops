@@ -26,10 +26,15 @@ export function JobCard({ job, onAction }: JobCardProps) {
     setLoading(null)
   }
 
+  const isDead = job.url_status === 'dead'
+
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
+    <div className={`bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition-all ${isDead ? 'opacity-60' : ''}`}>
       <div className="mb-3">
-        <h3 className="text-sm font-semibold text-slate-900 leading-tight">{job.title}</h3>
+        <h3 className="text-sm font-semibold text-slate-900 leading-tight">
+          {job.title}
+          {isDead && <span className="ml-1.5 text-xs font-normal text-amber-500">Possivelmente encerrada</span>}
+        </h3>
         <p className="text-xs text-slate-500 mt-0.5">{job.company}</p>
       </div>
 
@@ -39,7 +44,7 @@ export function JobCard({ job, onAction }: JobCardProps) {
 
       <div className={`flex items-center justify-between mb-4 ${hasSalary(job) ? 'bg-emerald-50 -mx-2 px-2 py-1.5 rounded-lg' : ''}`}>
         <span className={`text-xs font-medium ${hasSalary(job) ? 'text-emerald-700' : 'text-slate-400'}`}>
-          {formatSalary(job)}
+          {formatSalary(job, isDead ? '—' : 'Não divulgado')}
         </span>
         <span className="text-xs text-slate-400">{daysAgo(job.created_at)}</span>
       </div>
