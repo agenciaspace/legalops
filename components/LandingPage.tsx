@@ -5,7 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { BrandLogo } from '@/components/BrandLogo'
 import { formatSalary as formatSalaryUtil } from '@/lib/format-salary'
-import type { RemoteReality, UrlStatus } from '@/lib/types'
+import type { RemoteReality } from '@/lib/types'
 
 type LandingLocale = 'pt' | 'en'
 
@@ -67,7 +67,7 @@ async function fetchPublicJobs() {
 
   const { data } = await supabase
     .from('jobs')
-    .select('id, title, company, url, remote_reality, salary_min, salary_max, salary_currency, url_status, created_at')
+    .select('id, title, company, url, remote_reality, salary_min, salary_max, salary_currency, created_at')
     .eq('enrichment_status', 'done')
     .order('created_at', { ascending: false })
     .limit(20)
@@ -163,7 +163,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
               </div>
 
               {jobs.map((job, index) => {
-                const isDead = (job.url_status as UrlStatus) === 'dead'
+                const isDead = (job as Record<string, unknown>).url_status === 'dead'
                 const salaryFallback = isDead ? '—' : copy.salaryUndisclosed
                 return (
                   <a

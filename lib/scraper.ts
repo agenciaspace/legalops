@@ -48,6 +48,8 @@ const FIRECRAWL_SCRAPE_TARGETS = [
   'https://www.indeed.com/jobs?q=%22Legal+Ops%22&sort=date',
   'https://www.goinhouse.com/jobs/search?q=Legal+Operations',
   'https://jobs.cloc.org/jobs?keywords=Legal+Operations',
+  'https://www.linkedin.com/jobs/search/?keywords=%22Legal+Operations%22&sortBy=DD',
+  'https://www.linkedin.com/jobs/search/?keywords=%22Legal+Ops%22&sortBy=DD',
 ]
 
 const FIRECRAWL_EXTRACT_SCHEMA = {
@@ -255,6 +257,45 @@ export function buildJobDiscoverySeed(job: RawJob): string {
   return lines.join('\n')
 }
 
+/**
+ * Extract board slug from a job URL (e.g. "lyrahealth" from "jobs.lever.co/lyrahealth/...")
+ * Returns { board, slug } or null if not a recognized board URL.
+ */
+export function extractBoardSlug(url: string): { board: string; slug: string } | null {
+  try {
+    const u = new URL(url)
+    const host = u.hostname.toLowerCase()
+
+    // Lever: jobs.lever.co/{slug}/...
+    if (host === 'jobs.lever.co') {
+      const slug = u.pathname.split('/')[1]
+      if (slug) return { board: 'lever', slug }
+    }
+
+    // Greenhouse: boards.greenhouse.io/{slug}/... or job-boards.greenhouse.io/{slug}/...
+    if (host === 'boards.greenhouse.io' || host === 'job-boards.greenhouse.io') {
+      const slug = u.pathname.split('/')[1]
+      if (slug) return { board: 'greenhouse', slug }
+    }
+
+    // Workable: {slug}.workable.com/...
+    if (host.endsWith('.workable.com')) {
+      const slug = host.replace('.workable.com', '')
+      if (slug && slug !== 'www') return { board: 'workable', slug }
+    }
+
+    // Gupy: {slug}.gupy.io/...
+    if (host.endsWith('.gupy.io')) {
+      const slug = host.replace('.gupy.io', '')
+      if (slug && slug !== 'www') return { board: 'gupy', slug }
+    }
+
+    return null
+  } catch {
+    return null
+  }
+}
+
 export function dedupeJobsByUrl(jobs: RawJob[]): RawJob[] {
   const seen = new Map<string, RawJob>()
 
@@ -367,10 +408,24 @@ async function fetchJson(url: string): Promise<unknown> {
   return response.json()
 }
 
-export async function scrapeLegacyBoards(): Promise<RawJob[]> {
+export type DynamicSlugs = { board: string; slug: string }[]
+
+export async function scrapeLegacyBoards(dynamicSlugs: DynamicSlugs = []): Promise<RawJob[]> {
   const results: RawJob[] = []
 
-  for (const slug of COMPANY_SLUGS.greenhouse) {
+  // Merge static + dynamic slugs, deduplicating
+  const allSlugs: Record<string, Set<string>> = {
+    greenhouse: new Set(COMPANY_SLUGS.greenhouse),
+    lever: new Set(COMPANY_SLUGS.lever),
+    workable: new Set(COMPANY_SLUGS.workable),
+    gupy: new Set(COMPANY_SLUGS.gupy),
+  }
+  for (const { board, slug } of dynamicSlugs) {
+    if (!allSlugs[board]) allSlugs[board] = new Set()
+    allSlugs[board].add(slug)
+  }
+
+  for (const slug of allSlugs.greenhouse) {
     try {
       const data = await fetchJson(`https://boards-api.greenhouse.io/v1/boards/${slug}/jobs?content=true`)
       results.push(...parseGreenhouseJobs(data, slug))
@@ -379,7 +434,7 @@ export async function scrapeLegacyBoards(): Promise<RawJob[]> {
     }
   }
 
-  for (const slug of COMPANY_SLUGS.lever) {
+  for (const slug of allSlugs.lever) {
     try {
       const data = (await fetchJson(
         `https://api.lever.co/v0/postings/${slug}?mode=json`
@@ -390,7 +445,7 @@ export async function scrapeLegacyBoards(): Promise<RawJob[]> {
     }
   }
 
-  for (const slug of COMPANY_SLUGS.workable) {
+  for (const slug of allSlugs.workable) {
     try {
       const data = await fetchJson(`https://${slug}.workable.com/api/v1/jobs`)
       results.push(...parseWorkableJobs(data, slug))
@@ -399,7 +454,7 @@ export async function scrapeLegacyBoards(): Promise<RawJob[]> {
     }
   }
 
-  for (const slug of COMPANY_SLUGS.gupy) {
+  for (const slug of allSlugs.gupy) {
     try {
       const data = (await fetchJson(`https://${slug}.gupy.io/api/job-openings`)) as unknown[]
       results.push(...parseGupyJobs(data, slug))
@@ -468,14 +523,18 @@ export async function scrapeJobsWithFirecrawl(): Promise<RawJob[]> {
   })
 }
 
-export async function scrapeAllBoards(): Promise<ScrapeAllBoardsResult> {
+export async function scrapeAllBoards(dynamicSlugs: DynamicSlugs = []): Promise<ScrapeAllBoardsResult> {
   try {
     const firecrawlJobs = await scrapeJobsWithFirecrawl()
 
     if (firecrawlJobs.length > 0) {
-      console.info(`[scraper] Firecrawl returned ${firecrawlJobs.length} jobs`)
+      // Also run legacy boards to combine results — Firecrawl finds new companies,
+      // legacy boards give structured data (salary, etc.) from known companies.
+      const legacyJobs = await scrapeLegacyBoards(dynamicSlugs)
+      const combined = dedupeJobsByUrl([...firecrawlJobs, ...legacyJobs])
+      console.info(`[scraper] Firecrawl: ${firecrawlJobs.length}, legacy: ${legacyJobs.length}, combined: ${combined.length}`)
       return {
-        jobs: firecrawlJobs,
+        jobs: combined,
         discoverySource: 'firecrawl',
         fallbackReason: null,
       }
@@ -483,7 +542,7 @@ export async function scrapeAllBoards(): Promise<ScrapeAllBoardsResult> {
   } catch (error) {
     console.error('[scraper] Firecrawl discovery failed, falling back to legacy boards:', error)
 
-    const legacyJobs = await scrapeLegacyBoards()
+    const legacyJobs = await scrapeLegacyBoards(dynamicSlugs)
     console.info(`[scraper] legacy boards returned ${legacyJobs.length} jobs`)
     return {
       jobs: legacyJobs,
@@ -492,7 +551,7 @@ export async function scrapeAllBoards(): Promise<ScrapeAllBoardsResult> {
     }
   }
 
-  const legacyJobs = await scrapeLegacyBoards()
+  const legacyJobs = await scrapeLegacyBoards(dynamicSlugs)
   console.info(`[scraper] legacy boards returned ${legacyJobs.length} jobs`)
   return {
     jobs: legacyJobs,

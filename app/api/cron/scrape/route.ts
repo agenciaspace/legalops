@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { buildJobDiscoverySeed, fetchJobDescription, scrapeAllBoards } from '@/lib/scraper'
+import { buildJobDiscoverySeed, extractBoardSlug, fetchJobDescription, scrapeAllBoards } from '@/lib/scraper'
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
 import { extractSalaryFromHtml, type ExtractedSalary } from '@/lib/utils'
@@ -59,7 +59,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const scrapeResult = await scrapeAllBoards()
+    // Load dynamically discovered board slugs
+    const { data: dynamicSlugRows } = await supabase
+      .from('discovered_board_slugs')
+      .select('board, slug')
+    const dynamicSlugs = (dynamicSlugRows ?? []).map(r => ({ board: r.board as string, slug: r.slug as string }))
+
+    const scrapeResult = await scrapeAllBoards(dynamicSlugs)
     const jobs = scrapeResult.jobs
     summary.scraped = jobs.length
     summary.discoverySource = scrapeResult.discoverySource
@@ -134,6 +140,20 @@ export async function GET(req: NextRequest) {
 
       console.error(`[cron] insert job ${job.url} failed:`, error)
       summary.failed++
+    }
+    // Discover new board slugs from scraped job URLs
+    const newSlugs = new Map<string, { board: string; slug: string; url: string }>()
+    for (const job of jobs) {
+      const parsed = extractBoardSlug(job.url)
+      if (parsed) {
+        const key = `${parsed.board}/${parsed.slug}`
+        if (!newSlugs.has(key)) newSlugs.set(key, { ...parsed, url: job.url })
+      }
+    }
+    for (const { board, slug, url } of newSlugs.values()) {
+      await supabase
+        .from('discovered_board_slugs')
+        .upsert({ board, slug, discovered_from: url }, { onConflict: 'board,slug', ignoreDuplicates: true })
     }
   } catch (e) {
     console.error('[cron] scrape step failed:', e)
