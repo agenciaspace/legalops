@@ -1,4 +1,4 @@
-export type CrawlerDiscoverySource = 'firecrawl' | 'legacy'
+export type CrawlerDiscoverySource = 'firecrawl' | 'legacy' | 'combined'
 
 export interface CrawlerRun {
   id: string
@@ -21,7 +21,8 @@ export interface CrawlerStats {
 }
 
 export function formatCrawlerDiscoverySource(source: CrawlerDiscoverySource): string {
-  return source === 'firecrawl' ? 'Firecrawl' : 'Legacy fallback'
+  if (source === 'combined') return 'Firecrawl + APIs'
+  return source === 'firecrawl' ? 'Firecrawl' : 'Legacy'
 }
 
 export function getCrawlerRunHeadline(stats: CrawlerStats): string {

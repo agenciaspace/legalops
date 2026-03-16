@@ -13,8 +13,9 @@ export type RawJob = {
 
 export interface ScrapeAllBoardsResult {
   jobs: RawJob[]
-  discoverySource: 'firecrawl' | 'legacy'
-  fallbackReason: string | null
+  firecrawlCount: number
+  legacyCount: number
+  errors: string[]
 }
 
 interface FirecrawlJobListing {
@@ -528,39 +529,32 @@ export async function scrapeJobsWithFirecrawl(): Promise<RawJob[]> {
 }
 
 export async function scrapeAllBoards(dynamicSlugs: DynamicSlugs = []): Promise<ScrapeAllBoardsResult> {
-  try {
-    const firecrawlJobs = await scrapeJobsWithFirecrawl()
+  const errors: string[] = []
 
-    if (firecrawlJobs.length > 0) {
-      // Also run legacy boards to combine results — Firecrawl finds new companies,
-      // legacy boards give structured data (salary, etc.) from known companies.
-      const legacyJobs = await scrapeLegacyBoards(dynamicSlugs)
-      const combined = dedupeJobsByUrl([...firecrawlJobs, ...legacyJobs])
-      console.info(`[scraper] Firecrawl: ${firecrawlJobs.length}, legacy: ${legacyJobs.length}, combined: ${combined.length}`)
-      return {
-        jobs: combined,
-        discoverySource: 'firecrawl',
-        fallbackReason: null,
-      }
-    }
-  } catch (error) {
-    console.error('[scraper] Firecrawl discovery failed, falling back to legacy boards:', error)
+  // Always run both sources in parallel — no fallback logic
+  const [firecrawlResult, legacyResult] = await Promise.all([
+    scrapeJobsWithFirecrawl().catch(err => {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('[scraper] Firecrawl failed:', msg)
+      errors.push(`firecrawl: ${msg}`)
+      return [] as RawJob[]
+    }),
+    scrapeLegacyBoards(dynamicSlugs).catch(err => {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('[scraper] Legacy boards failed:', msg)
+      errors.push(`legacy: ${msg}`)
+      return [] as RawJob[]
+    }),
+  ])
 
-    const legacyJobs = await scrapeLegacyBoards(dynamicSlugs)
-    console.info(`[scraper] legacy boards returned ${legacyJobs.length} jobs`)
-    return {
-      jobs: legacyJobs,
-      discoverySource: 'legacy',
-      fallbackReason: error instanceof Error ? error.message : 'firecrawl_failed',
-    }
-  }
+  const combined = dedupeJobsByUrl([...firecrawlResult, ...legacyResult])
+  console.info(`[scraper] Firecrawl: ${firecrawlResult.length}, legacy: ${legacyResult.length}, combined: ${combined.length}`)
 
-  const legacyJobs = await scrapeLegacyBoards(dynamicSlugs)
-  console.info(`[scraper] legacy boards returned ${legacyJobs.length} jobs`)
   return {
-    jobs: legacyJobs,
-    discoverySource: 'legacy',
-    fallbackReason: 'firecrawl_returned_zero_jobs',
+    jobs: combined,
+    firecrawlCount: firecrawlResult.length,
+    legacyCount: legacyResult.length,
+    errors,
   }
 }
 

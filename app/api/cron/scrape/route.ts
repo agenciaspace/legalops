@@ -54,8 +54,9 @@ export async function GET(req: NextRequest) {
     enriched: 0,
     leadersBackfilled: 0,
     failed: 0,
-    discoverySource: 'legacy' as 'firecrawl' | 'legacy',
-    fallbackReason: null as string | null,
+    firecrawlCount: 0,
+    legacyCount: 0,
+    scrapeErrors: [] as string[],
   }
 
   try {
@@ -68,8 +69,9 @@ export async function GET(req: NextRequest) {
     const scrapeResult = await scrapeAllBoards(dynamicSlugs)
     const jobs = scrapeResult.jobs
     summary.scraped = jobs.length
-    summary.discoverySource = scrapeResult.discoverySource
-    summary.fallbackReason = scrapeResult.fallbackReason
+    summary.firecrawlCount = scrapeResult.firecrawlCount
+    summary.legacyCount = scrapeResult.legacyCount
+    summary.scrapeErrors = scrapeResult.errors
 
     const uniqueUrls = Array.from(new Set(jobs.map(job => job.url)))
     const existingUrlSet = new Set<string>()
@@ -319,7 +321,7 @@ export async function GET(req: NextRequest) {
 
   await supabase.from('crawler_runs').insert({
     provider: 'firecrawl',
-    discovery_source: summary.discoverySource,
+    discovery_source: 'combined',
     scraped_count: summary.scraped,
     inserted_count: summary.inserted,
     duplicate_count: summary.duplicates,
@@ -327,7 +329,9 @@ export async function GET(req: NextRequest) {
     failed_count: summary.failed,
     leaders_backfilled: summary.leadersBackfilled,
     notes: {
-      fallbackReason: summary.fallbackReason,
+      firecrawlCount: summary.firecrawlCount,
+      legacyCount: summary.legacyCount,
+      scrapeErrors: summary.scrapeErrors,
     },
     started_at: startedAt,
     completed_at: new Date().toISOString(),

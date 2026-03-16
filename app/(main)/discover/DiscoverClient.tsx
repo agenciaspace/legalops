@@ -68,10 +68,15 @@ export function DiscoverClient({
 
     return result
   }, [jobs, search, remoteFilter, salaryFilter, sortBy])
-  const fallbackReason =
-    typeof stats.latestRun?.notes?.fallbackReason === 'string'
-      ? stats.latestRun.notes.fallbackReason
-      : null
+  const scrapeErrors = Array.isArray(stats.latestRun?.notes?.scrapeErrors)
+    ? (stats.latestRun!.notes!.scrapeErrors as string[])
+    : []
+  const firecrawlCount = typeof stats.latestRun?.notes?.firecrawlCount === 'number'
+    ? stats.latestRun.notes.firecrawlCount as number
+    : null
+  const legacyCount = typeof stats.latestRun?.notes?.legacyCount === 'number'
+    ? stats.latestRun.notes.legacyCount as number
+    : null
 
   async function handleAction(jobId: string, action: 'add' | 'ignore') {
     const res = await fetch('/api/pipeline', {
@@ -160,9 +165,10 @@ export function DiscoverClient({
           </div>
         </div>
 
-        {fallbackReason && (
+        {(firecrawlCount !== null || scrapeErrors.length > 0) && (
           <p className="mt-3 text-xs text-slate-500">
-            Fallback: {fallbackReason}
+            {firecrawlCount !== null && `Firecrawl: ${firecrawlCount} · APIs: ${legacyCount ?? 0}`}
+            {scrapeErrors.length > 0 && ` · Erros: ${scrapeErrors.join(', ')}`}
           </p>
         )}
       </div>
