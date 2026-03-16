@@ -150,7 +150,7 @@ export async function GET(req: NextRequest) {
         if (!newSlugs.has(key)) newSlugs.set(key, { ...parsed, url: job.url })
       }
     }
-    for (const { board, slug, url } of newSlugs.values()) {
+    for (const { board, slug, url } of Array.from(newSlugs.values())) {
       await supabase
         .from('discovered_board_slugs')
         .upsert({ board, slug, discovered_from: url }, { onConflict: 'board,slug', ignoreDuplicates: true })
