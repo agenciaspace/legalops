@@ -32,7 +32,9 @@
       "Bash(/Users/leonhatori/legalops-work/legal-ops-crm/lib/types.ts:*)",
       "Bash(git -C /Users/leonhatori/legalops-work/legal-ops-crm add lib/types.ts __tests__/types.test.ts)",
       "Bash(git -C:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "mcp__Vercel__get_deployment",
+      "mcp__Vercel__list_deployments"
     ]
   }
 }
