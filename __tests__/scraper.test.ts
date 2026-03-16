@@ -11,28 +11,41 @@ import {
 } from '@/lib/scraper'
 
 describe('matchesLegalOpsTitle', () => {
-  it('keeps only titles that explicitly include Legal Operations or Legal Ops', () => {
+  it('matches titles with Legal Operations or Legal Ops', () => {
     expect(matchesLegalOpsTitle('Legal Operations Manager')).toBe(true)
     expect(matchesLegalOpsTitle('Head of Legal Ops')).toBe(true)
-    expect(matchesLegalOpsTitle('Operations Manager, Legal')).toBe(false)
     expect(matchesLegalOpsTitle('Senior Counsel')).toBe(false)
+  })
+
+  it('matches broader legal operations titles', () => {
+    expect(matchesLegalOpsTitle('Contracts & Legal Operations Manager')).toBe(true)
+    expect(matchesLegalOpsTitle('Legal Project & Operations Manager')).toBe(true)
+    expect(matchesLegalOpsTitle('Manager, Law Department Strategy & Operations')).toBe(true)
+    expect(matchesLegalOpsTitle('Head of Legal')).toBe(true)
+    expect(matchesLegalOpsTitle('General Counsel')).toBe(true)
+    expect(matchesLegalOpsTitle('Chief Legal Officer')).toBe(true)
+    expect(matchesLegalOpsTitle('CLM Manager')).toBe(true)
+    expect(matchesLegalOpsTitle('Software Engineer')).toBe(false)
+    expect(matchesLegalOpsTitle('Marketing Operations Manager')).toBe(false)
   })
 })
 
 describe('filterByKeywords', () => {
-  it('keeps jobs with explicit legal operations titles', () => {
+  it('keeps jobs with legal operations related titles', () => {
     const jobs = [
       { title: 'Legal Operations Manager', url: 'https://a.com' },
       { title: 'Software Engineer', url: 'https://b.com' },
       { title: 'Head of Legal Ops', url: 'https://c.com' },
-      { title: 'Operations Manager, Legal', url: 'https://d.com' },
+      { title: 'Head of Legal', url: 'https://d.com' },
+      { title: 'Marketing Coordinator', url: 'https://e.com' },
     ]
 
     const result = filterByKeywords(jobs)
 
-    expect(result).toHaveLength(2)
+    expect(result).toHaveLength(3)
     expect(result[0].title).toBe('Legal Operations Manager')
     expect(result[1].title).toBe('Head of Legal Ops')
+    expect(result[2].title).toBe('Head of Legal')
   })
 })
 

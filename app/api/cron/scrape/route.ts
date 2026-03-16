@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { buildJobDiscoverySeed, fetchJobDescription, scrapeAllBoards } from '@/lib/scraper'
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
-import type { ExtractedSalary } from '@/lib/utils'
+import { extractSalaryFromHtml, type ExtractedSalary } from '@/lib/utils'
 
 function parseSalaryValues(extracted: ExtractedSalary | null): {
   salary_min: number | null
@@ -93,7 +93,15 @@ export async function GET(req: NextRequest) {
         .slice(0, 8000)
 
       // Pre-populate salary from HTML extraction so it's available even if AI enrichment fails
-      const htmlSalary = parseSalaryValues(extractedSalary)
+      let salaryData = parseSalaryValues(extractedSalary)
+
+      // Fallback: parse salary_range from discovery source (Firecrawl/API) when HTML extraction found nothing
+      if (!salaryData.salary_min && !salaryData.salary_max && job.salary_range) {
+        const rangeSalary = extractSalaryFromHtml(job.salary_range)
+        if (rangeSalary) {
+          salaryData = parseSalaryValues(rangeSalary)
+        }
+      }
 
       const { error } = await supabase
         .from('jobs')
@@ -105,7 +113,7 @@ export async function GET(req: NextRequest) {
           raw_description: description,
           enrichment_status: 'pending',
           enrichment_attempts: 0,
-          ...htmlSalary,
+          ...salaryData,
         })
 
       if (!error) {
