@@ -19,7 +19,7 @@ describe('email alias helpers', () => {
       allowsCustomAliases: false,
     })
 
-    expect(getEmailTierPolicy('paid').maxActiveAliases).toBe(10)
+    expect(getEmailTierPolicy('pro').maxActiveAliases).toBe(10)
   })
 
   it('normalizes custom alias input before validation', () => {
@@ -48,7 +48,7 @@ describe('email alias helpers', () => {
       })
     ).toBe('Your free tier supports up to 1 active email alias.')
 
-    expect(getRemainingAliasSlots('paid', 3)).toBe(7)
+    expect(getRemainingAliasSlots('pro', 3)).toBe(7)
   })
 
   it('generates deterministic random aliases when indexes are provided', () => {

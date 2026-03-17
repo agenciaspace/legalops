@@ -23,14 +23,17 @@ const content = {
     languageLabel: 'English',
     languageCompact: 'EN',
     signIn: 'Entrar',
-    heroTitle: 'Vagas de Legal Ops',
-    heroDescription: 'Busque, aplique e acompanhe vagas de Legal Ops, CLM e operações jurídicas.',
+    heroTitle: 'A plataforma de Legal Ops',
+    heroDescription: 'A rede profissional para quem constrói operações jurídicas. Vagas curadas, match com IA, e a maior comunidade de Legal Ops do mercado.',
     heroPrimaryCta: 'Criar conta grátis',
+    heroSecondaryCta: 'Para Empresas',
+    heroSecondaryHref: '/for-employers',
     jobsTitle: 'Vagas recentes',
     jobsEmpty: 'Nenhuma vaga encontrada no momento.',
     tableHeaders: { title: 'Vaga', company: 'Empresa', remote: 'Remoto', salary: 'Salário' },
     closingTitle: 'Comece grátis. Decida depois.',
     closingPrimaryCta: 'Começar grátis',
+    pricingCta: 'Ver planos',
     salaryUndisclosed: 'Não divulgado',
     jobExpired: 'Possivelmente encerrada',
   },
@@ -39,14 +42,17 @@ const content = {
     languageLabel: 'Português',
     languageCompact: 'PT',
     signIn: 'Sign in',
-    heroTitle: 'Legal Ops Jobs',
-    heroDescription: 'Search, apply, and track Legal Ops, CLM, and legal operations jobs.',
+    heroTitle: 'The Legal Ops Platform',
+    heroDescription: 'The professional network for legal operations builders. Curated jobs, AI-powered matching, and the largest Legal Ops community.',
     heroPrimaryCta: 'Create free account',
+    heroSecondaryCta: 'For Employers',
+    heroSecondaryHref: '/for-employers',
     jobsTitle: 'Recent jobs',
     jobsEmpty: 'No jobs found at the moment.',
     tableHeaders: { title: 'Role', company: 'Company', remote: 'Remote', salary: 'Salary' },
     closingTitle: 'Start free. Decide later.',
     closingPrimaryCta: 'Start free',
+    pricingCta: 'View plans',
     salaryUndisclosed: 'Undisclosed',
     jobExpired: 'Possibly closed',
   },
@@ -98,6 +104,12 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
 
           <div className="flex items-center gap-3">
             <Link
+              href="/pricing"
+              className="hidden sm:inline-flex rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
+            >
+              {copy.pricingCta}
+            </Link>
+            <Link
               href={copy.languageHref}
               className="inline-flex items-center gap-2 rounded-full border border-stone-300 px-3 py-2 text-sm text-slate-700 transition-colors hover:border-slate-950"
             >
@@ -131,13 +143,19 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
             {copy.heroDescription}
           </p>
 
-          <div className="mt-6">
+          <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/login"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
             >
               {copy.heroPrimaryCta}
               <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href={copy.heroSecondaryHref}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+            >
+              {copy.heroSecondaryCta}
             </Link>
           </div>
         </section>
