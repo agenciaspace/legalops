@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { buildJobDiscoverySeed, fetchJobDescription, scrapeAllBoards } from '@/lib/scraper'
+import { buildJobDiscoverySeed, fetchJobDescription, mapWithConcurrency, scrapeAllBoards } from '@/lib/scraper'
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
 import { extractSalaryFromHtml, type ExtractedSalary } from '@/lib/utils'
@@ -84,8 +84,18 @@ export async function GET(req: NextRequest) {
     const newJobs = jobs.filter(job => !existingUrlSet.has(job.url.toLowerCase()))
     summary.duplicates = jobs.length - newJobs.length
 
-    for (const job of newJobs) {
-      const { description: pageDescription, extractedSalary, httpStatus } = await fetchJobDescription(job.url)
+    // Fetch all job descriptions in parallel (bounded concurrency)
+    const fetchResults = await mapWithConcurrency(newJobs, 6, async (job) => {
+      const fetchResult = await fetchJobDescription(job.url)
+      return { job, ...fetchResult }
+    })
+
+    for (const result of fetchResults) {
+      if (result.status === 'rejected') {
+        summary.failed++
+        continue
+      }
+      const { job, description: pageDescription, extractedSalary, httpStatus } = result.value
       const discoverySeed = buildJobDiscoverySeed(job)
       const description = [discoverySeed, pageDescription]
         .filter(Boolean)

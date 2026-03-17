@@ -4,6 +4,7 @@ import {
   extractFirecrawlJobsFromPayload,
   filterByKeywords,
   inferSourceBoardFromUrl,
+  mapWithConcurrency,
   matchesLegalOpsTitle,
   normalizeFirecrawlJobListing,
   parseGreenhouseJobs,
@@ -242,5 +243,38 @@ describe('parseLeverJobs', () => {
     expect(result).toHaveLength(1)
     expect(result[0].title).toBe('Legal Ops Specialist')
     expect(result[0].source_board).toBe('lever')
+  })
+})
+
+describe('mapWithConcurrency', () => {
+  it('processes all items respecting concurrency limit', async () => {
+    let maxConcurrent = 0
+    let active = 0
+
+    const items = [1, 2, 3, 4, 5, 6, 7, 8]
+    const results = await mapWithConcurrency(items, 3, async (item) => {
+      active++
+      maxConcurrent = Math.max(maxConcurrent, active)
+      await new Promise(r => setTimeout(r, 10))
+      active--
+      return item * 2
+    })
+
+    expect(maxConcurrent).toBeLessThanOrEqual(3)
+    expect(results.filter(r => r.status === 'fulfilled')).toHaveLength(8)
+    const values = results.map(r => r.status === 'fulfilled' ? r.value : null)
+    expect(values).toEqual([2, 4, 6, 8, 10, 12, 14, 16])
+  })
+
+  it('captures rejections without stopping other items', async () => {
+    const items = [1, 2, 3]
+    const results = await mapWithConcurrency(items, 3, async (item) => {
+      if (item === 2) throw new Error('boom')
+      return item
+    })
+
+    expect(results[0]).toEqual({ status: 'fulfilled', value: 1 })
+    expect(results[1].status).toBe('rejected')
+    expect(results[2]).toEqual({ status: 'fulfilled', value: 3 })
   })
 })

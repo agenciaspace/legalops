@@ -359,10 +359,14 @@ export function parseGupyJobs(data: any, slug: string): RawJob[] {
     .filter((job: RawJob) => matchesLegalOpsTitle(job.title))
 }
 
-async function fetchJson(url: string): Promise<unknown> {
+const LEGACY_CONCURRENCY = 6
+const FETCH_RETRY_ATTEMPTS = 3
+const FETCH_RETRY_BASE_MS = 1_000
+
+async function fetchJsonOnce(url: string, timeoutMs = 10_000): Promise<unknown> {
   const response = await fetch(url, {
     headers: { 'User-Agent': 'LegalOpsCRM/1.0' },
-    signal: AbortSignal.timeout(10_000),
+    signal: AbortSignal.timeout(timeoutMs),
   })
 
   if (!response.ok) {
@@ -372,44 +376,88 @@ async function fetchJson(url: string): Promise<unknown> {
   return response.json()
 }
 
+async function fetchJson(url: string, timeoutMs = 10_000): Promise<unknown> {
+  let lastError: unknown
+  for (let attempt = 0; attempt < FETCH_RETRY_ATTEMPTS; attempt++) {
+    try {
+      return await fetchJsonOnce(url, timeoutMs)
+    } catch (error) {
+      lastError = error
+      if (attempt < FETCH_RETRY_ATTEMPTS - 1) {
+        await sleep(FETCH_RETRY_BASE_MS * 2 ** attempt)
+      }
+    }
+  }
+  throw lastError
+}
+
+export async function mapWithConcurrency<T, R>(
+  items: readonly T[],
+  concurrency: number,
+  fn: (item: T) => Promise<R>,
+): Promise<PromiseSettledResult<R>[]> {
+  const results: PromiseSettledResult<R>[] = new Array(items.length)
+  let cursor = 0
+
+  async function worker() {
+    while (cursor < items.length) {
+      const index = cursor++
+      try {
+        results[index] = { status: 'fulfilled', value: await fn(items[index]) }
+      } catch (reason) {
+        results[index] = { status: 'rejected', reason }
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()))
+  return results
+}
+
+interface BoardTask {
+  board: string
+  slug: string
+  url: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parse: (data: any, slug: string) => RawJob[]
+}
+
 export async function scrapeLegacyBoards(): Promise<RawJob[]> {
+  const tasks: BoardTask[] = [
+    ...COMPANY_SLUGS.greenhouse.map(slug => ({
+      board: 'greenhouse', slug,
+      url: `https://boards-api.greenhouse.io/v1/boards/${slug}/jobs?content=true`,
+      parse: parseGreenhouseJobs,
+    })),
+    ...COMPANY_SLUGS.lever.map(slug => ({
+      board: 'lever', slug,
+      url: `https://api.lever.co/v0/postings/${slug}?mode=json`,
+      parse: parseLeverJobs,
+    })),
+    ...COMPANY_SLUGS.workable.map(slug => ({
+      board: 'workable', slug,
+      url: `https://${slug}.workable.com/api/v1/jobs`,
+      parse: parseWorkableJobs,
+    })),
+    ...COMPANY_SLUGS.gupy.map(slug => ({
+      board: 'gupy', slug,
+      url: `https://${slug}.gupy.io/api/job-openings`,
+      parse: parseGupyJobs,
+    })),
+  ]
+
+  const settled = await mapWithConcurrency(tasks, LEGACY_CONCURRENCY, async (task) => {
+    const data = await fetchJson(task.url)
+    return task.parse(data, task.slug)
+  })
+
   const results: RawJob[] = []
-
-  for (const slug of COMPANY_SLUGS.greenhouse) {
-    try {
-      const data = await fetchJson(`https://boards-api.greenhouse.io/v1/boards/${slug}/jobs?content=true`)
-      results.push(...parseGreenhouseJobs(data, slug))
-    } catch (error) {
-      console.error(`[scraper] greenhouse/${slug} failed:`, error)
-    }
-  }
-
-  for (const slug of COMPANY_SLUGS.lever) {
-    try {
-      const data = (await fetchJson(
-        `https://api.lever.co/v0/postings/${slug}?mode=json`
-      )) as unknown[]
-      results.push(...parseLeverJobs(data, slug))
-    } catch (error) {
-      console.error(`[scraper] lever/${slug} failed:`, error)
-    }
-  }
-
-  for (const slug of COMPANY_SLUGS.workable) {
-    try {
-      const data = await fetchJson(`https://${slug}.workable.com/api/v1/jobs`)
-      results.push(...parseWorkableJobs(data, slug))
-    } catch (error) {
-      console.error(`[scraper] workable/${slug} failed:`, error)
-    }
-  }
-
-  for (const slug of COMPANY_SLUGS.gupy) {
-    try {
-      const data = (await fetchJson(`https://${slug}.gupy.io/api/job-openings`)) as unknown[]
-      results.push(...parseGupyJobs(data, slug))
-    } catch (error) {
-      console.error(`[scraper] gupy/${slug} failed:`, error)
+  for (let i = 0; i < settled.length; i++) {
+    const r = settled[i]
+    if (r.status === 'fulfilled') {
+      results.push(...r.value)
+    } else {
+      console.error(`[scraper] ${tasks[i].board}/${tasks[i].slug} failed:`, r.reason)
     }
   }
 
