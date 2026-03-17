@@ -55,6 +55,45 @@ export async function PATCH(req: NextRequest) {
   if (typeof body.onboarding_completed === 'boolean') {
     allowed.onboarding_completed = body.onboarding_completed
   }
+  if (typeof body.public_headline === 'string') {
+    allowed.public_headline = body.public_headline.trim() || null
+  }
+  if (typeof body.public_bio === 'string') {
+    allowed.public_bio = body.public_bio.trim() || null
+  }
+  if (Array.isArray(body.skills)) {
+    allowed.skills = body.skills.filter((s: unknown) => typeof s === 'string')
+  }
+  if (Array.isArray(body.certifications)) {
+    allowed.certifications = body.certifications.filter((s: unknown) => typeof s === 'string')
+  }
+  if (Array.isArray(body.tools_used)) {
+    allowed.tools_used = body.tools_used.filter((s: unknown) => typeof s === 'string')
+  }
+  if (typeof body.open_to_opportunities === 'boolean') {
+    allowed.open_to_opportunities = body.open_to_opportunities
+  }
+  if (typeof body.desired_salary_min === 'number' && body.desired_salary_min >= 0) {
+    allowed.desired_salary_min = body.desired_salary_min
+  }
+  if (body.desired_salary_min === null) allowed.desired_salary_min = null
+  if (typeof body.desired_salary_max === 'number' && body.desired_salary_max >= 0) {
+    allowed.desired_salary_max = body.desired_salary_max
+  }
+  if (body.desired_salary_max === null) allowed.desired_salary_max = null
+  if (typeof body.desired_salary_currency === 'string') {
+    allowed.desired_salary_currency = body.desired_salary_currency
+  }
+  if (['remote', 'hybrid', 'onsite', 'any'].includes(body.preferred_remote)) {
+    allowed.preferred_remote = body.preferred_remote
+  }
+  if (body.preferred_remote === null) allowed.preferred_remote = null
+  if (Array.isArray(body.preferred_locations)) {
+    allowed.preferred_locations = body.preferred_locations.filter((s: unknown) => typeof s === 'string')
+  }
+  if (typeof body.is_public === 'boolean') {
+    allowed.is_public = body.is_public
+  }
 
   if (Object.keys(allowed).length === 0) {
     return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
