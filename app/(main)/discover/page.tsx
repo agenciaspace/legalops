@@ -1,4 +1,3 @@
-import type { CrawlerRun } from '@/lib/crawler-runs'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { extractSalaryFromHtml, type ExtractedSalary } from '@/lib/utils'
@@ -79,28 +78,13 @@ export default async function DiscoverPage() {
   // Backfill salary data for existing jobs before rendering
   await backfillMissingSalaries()
 
-  const sevenDaysAgo = new Date()
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-
   const [
     { data: pipeline },
-    { data: latestRun },
-    { data: recentRuns },
   ] = await Promise.all([
     supabase
       .from('user_pipeline_entries')
       .select('job_id')
       .eq('user_id', user!.id),
-    supabase
-      .from('crawler_runs')
-      .select('*')
-      .order('completed_at', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from('crawler_runs')
-      .select('inserted_count')
-      .gte('completed_at', sevenDaysAgo.toISOString()),
   ])
 
   const excludedIds = pipeline?.map(e => e.job_id) ?? []
@@ -118,18 +102,7 @@ export default async function DiscoverPage() {
 
   const { data: jobs } = await query
 
-  const insertedLast7Days = (recentRuns ?? []).reduce(
-    (sum, run) => sum + (typeof run.inserted_count === 'number' ? run.inserted_count : 0),
-    0
-  )
-
   return (
-    <DiscoverClient
-      initialJobs={jobs ?? []}
-      crawlerStats={{
-        latestRun: (latestRun as CrawlerRun | null) ?? null,
-        insertedLast7Days,
-      }}
-    />
+    <DiscoverClient initialJobs={jobs ?? []} />
   )
 }
