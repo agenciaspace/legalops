@@ -63,25 +63,25 @@ const steps = [
 
 export default function ForEmployersPage() {
   return (
-    <div className="min-h-screen bg-stone-50 text-slate-950">
-      <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
+    <div className="min-h-screen bg-white text-slate-950">
+      <header className="border-b border-stone-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <Link href="/">
             <BrandLogo
               className="flex items-center gap-3"
-              markClassName="h-10 w-10 text-slate-950"
+              markClassName="h-10 w-10 text-brand-500"
             />
           </Link>
           <div className="flex items-center gap-3">
             <Link
               href="/pricing"
-              className="rounded-full border border-stone-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+              className="rounded-full border border-stone-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
             >
               Preços
             </Link>
             <Link
               href="/login"
-              className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="rounded-full bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600"
             >
               Entrar
             </Link>
@@ -112,14 +112,14 @@ export default function ForEmployersPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-600"
               >
                 Publicar uma vaga — $299
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/pricing"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
               >
                 Ver todos os planos
               </Link>
@@ -128,7 +128,7 @@ export default function ForEmployersPage() {
         </section>
 
         {/* How it works */}
-        <section className="border-t border-stone-200 py-16">
+        <section className="border-t border-stone-100 py-16">
           <h2
             className="text-3xl sm:text-4xl"
             style={{
@@ -150,7 +150,7 @@ export default function ForEmployersPage() {
         </section>
 
         {/* Features */}
-        <section className="border-t border-stone-200 py-16">
+        <section className="border-t border-stone-100 py-16">
           <h2
             className="text-3xl sm:text-4xl"
             style={{
@@ -162,7 +162,7 @@ export default function ForEmployersPage() {
           </h2>
           <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
-              <div key={feature.title} className="rounded-xl border border-stone-200 bg-white p-6">
+              <div key={feature.title} className="rounded-xl border border-stone-100 bg-white p-6">
                 <feature.icon className="h-6 w-6 text-slate-700" />
                 <h3 className="mt-3 font-semibold">{feature.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">{feature.description}</p>
@@ -172,7 +172,7 @@ export default function ForEmployersPage() {
         </section>
 
         {/* Stats */}
-        <section className="border-t border-stone-200 py-16">
+        <section className="border-t border-stone-100 py-16">
           <div className="grid gap-8 sm:grid-cols-3">
             <div className="text-center">
               <p className="text-4xl font-bold">500+</p>
@@ -190,7 +190,7 @@ export default function ForEmployersPage() {
         </section>
 
         {/* CTA */}
-        <section className="mb-16 rounded-2xl border border-stone-200 bg-white px-6 py-8 sm:px-8">
+        <section className="mb-16 rounded-2xl border border-stone-100 bg-white px-6 py-8 sm:px-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <h2
@@ -208,7 +208,7 @@ export default function ForEmployersPage() {
             </div>
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-600"
             >
               Começar agora
               <ArrowRight className="h-4 w-4" />

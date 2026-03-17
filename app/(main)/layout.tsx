@@ -26,7 +26,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   const { count } = await countQuery
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-white">
       <Nav discoverCount={count ?? 0} />
       <main className="max-w-7xl mx-auto">{children}</main>
     </div>

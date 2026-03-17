@@ -29,7 +29,7 @@ export function JobCard({ job, onAction }: JobCardProps) {
   const isDead = job.url_status === 'dead'
 
   return (
-    <div className={`bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition-all ${isDead ? 'opacity-60' : ''}`}>
+    <div className={`bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md hover:border-brand-200 transition-all ${isDead ? 'opacity-60' : ''}`}>
       <div className="mb-3">
         <h3 className="text-sm font-semibold text-slate-900 leading-tight">
           {job.title}
@@ -64,7 +64,7 @@ export function JobCard({ job, onAction }: JobCardProps) {
         <button
           onClick={() => handleAction('add')}
           disabled={loading !== null}
-          className="flex-1 bg-blue-600 text-white text-xs font-medium py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="flex-1 bg-brand-500 text-white text-xs font-medium py-2 rounded-lg hover:bg-brand-600 disabled:opacity-50 transition-colors"
         >
           {loading === 'add' ? '...' : 'Adicionar'}
         </button>

@@ -70,7 +70,7 @@ export function DashboardClient({ stats, recentActivity }: Props) {
         </div>
         <Link
           href="/discover"
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 transition-colors"
         >
           Descobrir vagas
         </Link>
@@ -79,7 +79,7 @@ export function DashboardClient({ stats, recentActivity }: Props) {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Total rastreadas" value={stats.total_tracked} />
-        <StatCard label="Aplicadas esta semana" value={stats.applied_this_week} accent="text-blue-600" />
+        <StatCard label="Aplicadas esta semana" value={stats.applied_this_week} accent="text-brand-500" />
         <StatCard label="Entrevistas esta semana" value={stats.interviews_this_week} accent="text-purple-600" />
         <StatCard label="Taxa de resposta" value={`${stats.response_rate}%`} accent="text-green-600" sub="Entrevistas + Ofertas / Total ativo" />
       </div>
@@ -101,7 +101,7 @@ export function DashboardClient({ stats, recentActivity }: Props) {
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-slate-700">Atividade recente</h2>
-            <Link href="/pipeline" className="text-xs text-blue-600 hover:underline">Ver pipeline</Link>
+            <Link href="/pipeline" className="text-xs text-brand-500 hover:underline">Ver pipeline</Link>
           </div>
           {recentActivity.length === 0 ? (
             <p className="text-sm text-slate-400 text-center py-8">Nenhuma atividade ainda. Comece adicionando vagas!</p>
@@ -133,20 +133,20 @@ export function DashboardClient({ stats, recentActivity }: Props) {
       </div>
 
       {/* Quick Tips */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-5">
-        <h2 className="text-sm font-semibold text-blue-900 mb-2">Dicas para sua busca</h2>
+      <div className="bg-gradient-to-r from-brand-50 to-orange-50 rounded-xl border border-brand-100 p-5">
+        <h2 className="text-sm font-semibold text-brand-700 mb-2">Dicas para sua busca</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-xs text-blue-800">
+          <div className="text-xs text-brand-700">
             <p className="font-medium mb-1">Mantenha o ritmo</p>
-            <p className="text-blue-600">Tente aplicar para pelo menos 5 vagas por semana para manter um fluxo constante.</p>
+            <p className="text-brand-500">Tente aplicar para pelo menos 5 vagas por semana para manter um fluxo constante.</p>
           </div>
-          <div className="text-xs text-blue-800">
+          <div className="text-xs text-brand-700">
             <p className="font-medium mb-1">Follow-up importa</p>
-            <p className="text-blue-600">Acompanhe suas aplicacoes 5-7 dias apos o envio. Use as notas para registrar cada interacao.</p>
+            <p className="text-brand-500">Acompanhe suas aplicacoes 5-7 dias apos o envio. Use as notas para registrar cada interacao.</p>
           </div>
-          <div className="text-xs text-blue-800">
+          <div className="text-xs text-brand-700">
             <p className="font-medium mb-1">Prepare-se com IA</p>
-            <p className="text-blue-600">Use nosso prep de entrevista com IA para se preparar antes de cada conversa.</p>
+            <p className="text-brand-500">Use nosso prep de entrevista com IA para se preparar antes de cada conversa.</p>
           </div>
         </div>
       </div>

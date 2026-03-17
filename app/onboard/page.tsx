@@ -215,11 +215,11 @@ export default function OnboardPage() {
   const currentStepIndex = STEPS.indexOf(step)
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col items-center py-10 px-4">
+    <div className="min-h-screen bg-white flex flex-col items-center py-10 px-4">
       <div className="mb-8 text-center">
         <BrandLogo
           className="flex flex-col items-center gap-3"
-          markClassName="h-10 w-10 text-slate-950"
+          markClassName="h-10 w-10 text-brand-500"
           titleClassName="text-xl font-semibold tracking-[0.18em] text-slate-950 uppercase"
           subtitle="Vamos configurar seu perfil profissional"
           subtitleClassName="text-sm text-slate-500"
@@ -234,7 +234,7 @@ export default function OnboardPage() {
               i < currentStepIndex
                 ? 'bg-green-100 text-green-700'
                 : i === currentStepIndex
-                ? 'bg-blue-600 text-white'
+                ? 'bg-brand-500 text-white'
                 : 'bg-slate-100 text-slate-400'
             }`}>
               {i < currentStepIndex && (
@@ -270,7 +270,7 @@ export default function OnboardPage() {
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
                 placeholder="Ex: Maria Clara Souza"
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               />
             </div>
 
@@ -283,7 +283,7 @@ export default function OnboardPage() {
                 value={currentRole}
                 onChange={e => setCurrentRole(e.target.value)}
                 placeholder="Ex: Legal Operations Specialist, Advogada Sênior..."
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               />
               <p className="text-xs text-slate-400 mt-1">Se estiver em transição, informe o cargo que deseja ou o mais recente.</p>
             </div>
@@ -293,7 +293,7 @@ export default function OnboardPage() {
             <button
               onClick={handleBasicsNext}
               disabled={saving}
-              className="w-full bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="w-full bg-brand-500 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors"
             >
               {saving ? 'Salvando...' : 'Continuar →'}
             </button>
@@ -316,7 +316,7 @@ export default function OnboardPage() {
                   onClick={() => setProfessionalType(pt.value)}
                   className={`w-full text-left rounded-xl border p-4 transition-all ${
                     professionalType === pt.value
-                      ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                      ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500'
                       : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
@@ -337,7 +337,7 @@ export default function OnboardPage() {
                 value={yearsExperience}
                 onChange={e => setYearsExperience(e.target.value === '' ? '' : Number(e.target.value))}
                 placeholder="Ex: 5"
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               />
             </div>
 
@@ -353,7 +353,7 @@ export default function OnboardPage() {
               <button
                 onClick={handleProfessionalNext}
                 disabled={saving}
-                className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="flex-1 bg-brand-500 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors"
               >
                 {saving ? 'Salvando...' : 'Continuar →'}
               </button>
@@ -377,8 +377,8 @@ export default function OnboardPage() {
                   onClick={() => toggleArea(area)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                     selectedAreas.includes(area)
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600'
+                      ? 'bg-brand-500 text-white border-brand-500'
+                      : 'bg-white text-slate-600 border-slate-200 hover:border-brand-400 hover:text-brand-600'
                   }`}
                 >
                   {area}
@@ -402,7 +402,7 @@ export default function OnboardPage() {
               <button
                 onClick={handleExpertiseNext}
                 disabled={saving}
-                className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="flex-1 bg-brand-500 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors"
               >
                 {saving ? 'Salvando...' : 'Continuar →'}
               </button>
@@ -420,9 +420,9 @@ export default function OnboardPage() {
               </p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-1.5">
-              <p className="text-xs font-medium text-blue-800">O que você vai receber:</p>
-              <ul className="text-xs text-blue-700 space-y-1">
+            <div className="bg-brand-50 border border-brand-100 rounded-xl p-4 space-y-1.5">
+              <p className="text-xs font-medium text-brand-700">O que você vai receber:</p>
+              <ul className="text-xs text-brand-600 space-y-1">
                 <li>✓ Análise do headline e visibilidade nos recrutadores</li>
                 <li>✓ Gaps de keywords relevantes para Legal Ops</li>
                 <li>✓ Sugestões de seções em falta (Sobre, Skills, etc.)</li>
@@ -437,7 +437,7 @@ export default function OnboardPage() {
                 value={linkedinUrl}
                 onChange={e => setLinkedinUrl(e.target.value)}
                 placeholder="https://linkedin.com/in/seuperfil"
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               />
               <p className="text-xs text-slate-400 mt-1">Certifique-se de que seu perfil está público para melhor análise.</p>
             </div>
@@ -447,7 +447,7 @@ export default function OnboardPage() {
             <button
               onClick={handleLinkedInAnalyze}
               disabled={saving || !linkedinUrl.trim()}
-              className="w-full bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="w-full bg-brand-500 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors"
             >
               {saving ? 'Analisando perfil...' : 'Analisar meu LinkedIn →'}
             </button>
@@ -522,7 +522,7 @@ export default function OnboardPage() {
             <button
               onClick={handleFinish}
               disabled={saving}
-              className="w-full bg-blue-600 text-white rounded-xl py-3 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+              className="w-full bg-brand-500 text-white rounded-xl py-3 text-sm font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors shadow-sm"
             >
               {saving ? 'Finalizando...' : 'Ir para a plataforma →'}
             </button>

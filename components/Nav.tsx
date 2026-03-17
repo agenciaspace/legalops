@@ -25,13 +25,13 @@ export function Nav({ discoverCount }: NavProps) {
       href={href}
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
         pathname === href
-          ? 'bg-blue-50 text-blue-700'
+          ? 'bg-brand-50 text-brand-700'
           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
       }`}
     >
       {label}
       {badge !== undefined && badge > 0 && (
-        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blue-600 text-white text-xs font-bold">
+        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-xs font-bold">
           {badge > 99 ? '99+' : badge}
         </span>
       )}
@@ -45,7 +45,7 @@ export function Nav({ discoverCount }: NavProps) {
           <Link href="/dashboard" className="flex items-center gap-2 mr-6">
             <BrandLogo
               className="flex items-center gap-2"
-              markClassName="h-7 w-7 text-slate-950"
+              markClassName="h-7 w-7 text-brand-500"
               titleClassName="text-sm font-semibold tracking-[0.18em] text-slate-900 uppercase"
             />
           </Link>

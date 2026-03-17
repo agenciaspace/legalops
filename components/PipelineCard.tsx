@@ -13,7 +13,7 @@ interface PipelineCardProps {
 export function PipelineCard({ entry, canMoveLeft, canMoveRight, onMove }: PipelineCardProps) {
   return (
     <Link href={`/jobs/${entry.id}`}>
-      <div className="bg-white border border-slate-200 rounded-lg p-3 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer group">
+      <div className="bg-white border border-slate-200 rounded-lg p-3 hover:border-brand-300 hover:shadow-sm transition-all cursor-pointer group">
         <div className="mb-2">
           <h4 className="text-xs font-semibold text-slate-900 leading-tight truncate">{entry.job.title}</h4>
           <p className="text-xs text-slate-500 truncate">{entry.job.company}</p>

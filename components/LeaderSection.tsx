@@ -55,7 +55,7 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
         No leader found.{' '}
         <button
           onClick={() => setEditing(true)}
-          className="text-blue-600 hover:underline"
+          className="text-brand-500 hover:underline"
         >
           Add
         </button>
@@ -74,7 +74,7 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
             <input
               value={form[field]}
               onChange={e => setForm(p => ({ ...p, [field]: e.target.value }))}
-              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500"
               placeholder={field === 'linkedin_url' ? 'https://linkedin.com/in/...' : ''}
             />
           </div>
@@ -84,7 +84,7 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50"
+            className="px-3 py-1 bg-brand-500 text-white text-xs rounded hover:bg-brand-600 disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save'}
           </button>
@@ -112,7 +112,7 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
       {leader!.title && <p className="text-xs text-slate-500">{leader!.title}</p>}
       {leader!.linkedin_url && (
         <a href={leader!.linkedin_url} target="_blank" rel="noopener noreferrer"
-          className="text-xs text-blue-600 hover:underline block">
+          className="text-xs text-brand-500 hover:underline block">
           LinkedIn →
         </a>
       )}

@@ -103,10 +103,10 @@ export function DiscoverClient({
 
   return (
     <div className="p-6">
-      <div className="mb-6 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 via-white to-emerald-50 p-4 shadow-sm">
+      <div className="mb-6 rounded-2xl border border-brand-100 bg-gradient-to-r from-brand-50 via-white to-orange-50 p-4 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">
               Crawler monitor
             </p>
             <h1 className="mt-1 text-lg font-semibold text-slate-900">
@@ -148,7 +148,7 @@ export function DiscoverClient({
               <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
                 Ultimos 7 dias
               </p>
-              <p className="mt-1 text-2xl font-bold text-blue-600">
+              <p className="mt-1 text-2xl font-bold text-brand-500">
                 {stats.insertedLast7Days}
               </p>
             </div>
@@ -169,7 +169,7 @@ export function DiscoverClient({
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Buscar por cargo ou empresa..."
-              className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-white"
             />
           </div>
           <span className="text-sm text-slate-500 flex-shrink-0">
@@ -185,7 +185,7 @@ export function DiscoverClient({
               onClick={() => setRemoteFilter(opt.value)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 remoteFilter === opt.value
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-brand-500 text-white'
                   : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
               }`}
             >
@@ -196,7 +196,7 @@ export function DiscoverClient({
           <select
             value={salaryFilter}
             onChange={e => setSalaryFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             {SALARY_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -205,7 +205,7 @@ export function DiscoverClient({
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value as 'newest' | 'salary')}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             <option value="newest">Mais recentes</option>
             <option value="salary">Maior salario</option>

@@ -152,7 +152,7 @@ export function EmailAliasesClient({
                 value={customLocalPart}
                 onChange={event => setCustomLocalPart(event.target.value)}
                 disabled={!policy.allowsCustomAliases || submitting !== null}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
               />
               <button
                 onClick={() => createAlias('custom')}
@@ -210,7 +210,7 @@ export function EmailAliasesClient({
                       {alias.status}
                     </span>
                     {alias.is_primary && (
-                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                      <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
                         primary
                       </span>
                     )}
@@ -275,7 +275,7 @@ export function EmailAliasesClient({
                           className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                             message.direction === 'inbound'
                               ? 'bg-emerald-50 text-emerald-700'
-                              : 'bg-blue-50 text-blue-700'
+                              : 'bg-brand-50 text-brand-700'
                           }`}
                         >
                           {message.direction}

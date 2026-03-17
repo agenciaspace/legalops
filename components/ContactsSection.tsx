@@ -43,7 +43,7 @@ export function ContactsSection({ entryId, initialContacts }: ContactsSectionPro
       {!adding ? (
         <button
           onClick={() => setAdding(true)}
-          className="text-xs text-blue-600 hover:underline font-medium"
+          className="text-xs text-brand-500 hover:underline font-medium"
         >
           + Adicionar contato
         </button>
@@ -58,7 +58,7 @@ export function ContactsSection({ entryId, initialContacts }: ContactsSectionPro
                 <input
                   value={form[field]}
                   onChange={e => setForm(p => ({ ...p, [field]: e.target.value }))}
-                  className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500"
                 />
               </div>
             ))}
@@ -69,7 +69,7 @@ export function ContactsSection({ entryId, initialContacts }: ContactsSectionPro
               value={form.linkedin_url}
               onChange={e => setForm(p => ({ ...p, linkedin_url: e.target.value }))}
               placeholder="https://linkedin.com/in/..."
-              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500"
             />
           </div>
           <div>
@@ -77,14 +77,14 @@ export function ContactsSection({ entryId, initialContacts }: ContactsSectionPro
             <input
               value={form.notes}
               onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
-              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500"
             />
           </div>
           <div className="flex gap-2">
             <button
               onClick={handleAdd}
               disabled={saving || !form.name.trim()}
-              className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50"
+              className="px-3 py-1 bg-brand-500 text-white text-xs rounded hover:bg-brand-600 disabled:opacity-50"
             >
               {saving ? 'Salvando...' : 'Salvar'}
             </button>
@@ -102,8 +102,8 @@ export function ContactsSection({ entryId, initialContacts }: ContactsSectionPro
         <div className="space-y-2">
           {contacts.map(contact => (
             <div key={contact.id} className="flex items-start gap-3 bg-slate-50 rounded-lg p-3">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-bold text-blue-700">
+              <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-brand-700">
                   {contact.name.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -112,11 +112,11 @@ export function ContactsSection({ entryId, initialContacts }: ContactsSectionPro
                 {contact.role && <p className="text-xs text-slate-500">{contact.role}</p>}
                 <div className="flex flex-wrap gap-3 mt-1">
                   {contact.email && (
-                    <a href={`mailto:${contact.email}`} className="text-xs text-blue-600 hover:underline">{contact.email}</a>
+                    <a href={`mailto:${contact.email}`} className="text-xs text-brand-500 hover:underline">{contact.email}</a>
                   )}
                   {contact.phone && <span className="text-xs text-slate-500">{contact.phone}</span>}
                   {contact.linkedin_url && (
-                    <a href={contact.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">LinkedIn</a>
+                    <a href={contact.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-xs text-brand-500 hover:underline">LinkedIn</a>
                   )}
                 </div>
                 {contact.notes && <p className="text-xs text-slate-400 mt-1 italic">{contact.notes}</p>}

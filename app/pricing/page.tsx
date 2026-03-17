@@ -119,8 +119,8 @@ function PlanCard({
     <div
       className={`flex flex-col rounded-2xl border p-6 ${
         plan.highlight
-          ? 'border-slate-950 bg-slate-950 text-white shadow-xl'
-          : 'border-stone-200 bg-white'
+          ? 'border-brand-500 bg-brand-500 text-white shadow-xl'
+          : 'border-stone-100 bg-white'
       }`}
     >
       <h3 className="text-lg font-semibold">{plan.name}</h3>
@@ -155,8 +155,8 @@ function PlanCard({
         href={plan.href}
         className={`mt-6 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors ${
           plan.highlight
-            ? 'bg-white text-slate-950 hover:bg-slate-100'
-            : 'bg-slate-950 text-white hover:bg-slate-800'
+            ? 'bg-white text-brand-600 hover:bg-brand-50'
+            : 'bg-brand-500 text-white hover:bg-brand-600'
         }`}
       >
         {plan.cta}
@@ -168,25 +168,25 @@ function PlanCard({
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-stone-50 text-slate-950">
-      <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
+    <div className="min-h-screen bg-white text-slate-950">
+      <header className="border-b border-stone-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <Link href="/">
             <BrandLogo
               className="flex items-center gap-3"
-              markClassName="h-10 w-10 text-slate-950"
+              markClassName="h-10 w-10 text-brand-500"
             />
           </Link>
           <div className="flex items-center gap-3">
             <Link
               href="/for-employers"
-              className="rounded-full border border-stone-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+              className="rounded-full border border-stone-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
             >
               Para Empresas
             </Link>
             <Link
               href="/login"
-              className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="rounded-full bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600"
             >
               Entrar
             </Link>
@@ -239,7 +239,7 @@ export default function PricingPage() {
         </section>
 
         {/* FAQ / CTA */}
-        <section className="mt-20 rounded-2xl border border-stone-200 bg-white px-6 py-8 text-center sm:px-8">
+        <section className="mt-20 rounded-2xl border border-stone-100 bg-white px-6 py-8 text-center sm:px-8">
           <h2
             className="text-3xl"
             style={{
@@ -254,7 +254,7 @@ export default function PricingPage() {
           </p>
           <Link
             href="/login"
-            className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-brand-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-600"
           >
             Criar conta grátis
             <ArrowRight className="h-4 w-4" />

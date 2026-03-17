@@ -41,7 +41,7 @@ export function StatusDropdown({ entryId, currentStatus }: StatusDropdownProps) 
       value={status}
       onChange={e => handleChange(e.target.value as PipelineStatus)}
       disabled={saving}
-      className="text-sm border border-slate-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+      className="text-sm border border-slate-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50"
     >
       {OPTIONS.map(opt => (
         <option key={opt.value} value={opt.value}>{opt.label}</option>

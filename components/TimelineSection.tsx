@@ -62,7 +62,7 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
       {!adding ? (
         <button
           onClick={() => setAdding(true)}
-          className="text-xs text-blue-600 hover:underline font-medium"
+          className="text-xs text-brand-500 hover:underline font-medium"
         >
           + Adicionar evento
         </button>
@@ -74,7 +74,7 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
               <select
                 value={form.event_type}
                 onChange={e => setForm(p => ({ ...p, event_type: e.target.value as EventType }))}
-                className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500"
               >
                 {(Object.keys(EVENT_TYPE_LABELS) as EventType[]).map(type => (
                   <option key={type} value={type}>{EVENT_TYPE_LABELS[type]}</option>
@@ -87,7 +87,7 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
                 type="date"
                 value={form.event_date}
                 onChange={e => setForm(p => ({ ...p, event_date: e.target.value }))}
-                className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
             </div>
           </div>
@@ -97,7 +97,7 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
               value={form.title}
               onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
               placeholder="Ex: Enviou candidatura pelo site"
-              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500"
             />
           </div>
           <div>
@@ -106,14 +106,14 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
               value={form.description}
               onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
               rows={2}
-              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 resize-none"
             />
           </div>
           <div className="flex gap-2">
             <button
               onClick={handleAdd}
               disabled={saving || !form.title.trim()}
-              className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50"
+              className="px-3 py-1 bg-brand-500 text-white text-xs rounded hover:bg-brand-600 disabled:opacity-50"
             >
               {saving ? 'Salvando...' : 'Salvar'}
             </button>

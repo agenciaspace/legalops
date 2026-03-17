@@ -10,26 +10,26 @@ export const metadata = {
 
 export default function ManifestoPage() {
   return (
-    <div className="min-h-screen bg-stone-50 text-slate-950">
+    <div className="min-h-screen bg-white text-slate-950">
       {/* Header */}
-      <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
+      <header className="border-b border-stone-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <Link href="/">
             <BrandLogo
               className="flex items-center gap-3"
-              markClassName="h-10 w-10 text-slate-950"
+              markClassName="h-10 w-10 text-brand-500"
             />
           </Link>
           <div className="flex items-center gap-3">
             <Link
               href="/pricing"
-              className="hidden sm:inline-flex rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
+              className="hidden sm:inline-flex rounded-full px-4 py-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-950"
             >
               Planos
             </Link>
             <Link
               href="/login"
-              className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="rounded-full bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600"
             >
               Entrar
             </Link>
@@ -109,7 +109,7 @@ export default function ManifestoPage() {
             </p>
             <ul className="mt-4 space-y-3">
               <li className="flex gap-3">
-                <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-950" />
+                <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-500" />
                 <span>
                   <strong className="text-slate-950">Para profissionais:</strong>{' '}
                   um perfil que mostra de verdade o que você faz. Vagas curadas
@@ -118,7 +118,7 @@ export default function ManifestoPage() {
                 </span>
               </li>
               <li className="flex gap-3">
-                <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-950" />
+                <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-500" />
                 <span>
                   <strong className="text-slate-950">Para empresas:</strong>{' '}
                   acesso ao maior pool de talentos especializados em Legal Ops.
@@ -128,7 +128,7 @@ export default function ManifestoPage() {
                 </span>
               </li>
               <li className="flex gap-3">
-                <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-950" />
+                <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-500" />
                 <span>
                   <strong className="text-slate-950">Para a comunidade:</strong>{' '}
                   um diretório público onde profissionais se encontram, trocam
@@ -212,21 +212,21 @@ export default function ManifestoPage() {
         <div className="mt-12 flex flex-wrap gap-3">
           <Link
             href="/login"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-600"
           >
             Criar minha conta grátis
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href="/for-employers"
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
           >
             Sou empresa — quero contratar
           </Link>
         </div>
 
         {/* Signature */}
-        <div className="mt-16 border-t border-stone-200 pt-8">
+        <div className="mt-16 border-t border-stone-100 pt-8">
           <p className="text-sm text-slate-500">
             — O time LegalOps
           </p>

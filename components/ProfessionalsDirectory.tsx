@@ -52,7 +52,7 @@ export function ProfessionalsDirectory({ professionals }: { professionals: Profe
           placeholder="Buscar por nome, cargo, skill ou ferramenta..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
         />
       </div>
 
@@ -85,7 +85,7 @@ export function ProfessionalsDirectory({ professionals }: { professionals: Profe
                         className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs font-medium ${
                           p.tier === 'expert'
                             ? 'bg-amber-50 text-amber-700'
-                            : 'bg-blue-50 text-blue-700'
+                            : 'bg-brand-50 text-brand-700'
                         }`}
                       >
                         <Star className="h-3 w-3" />
@@ -139,7 +139,7 @@ export function ProfessionalsDirectory({ professionals }: { professionals: Profe
                 href={p.linkedin_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 inline-block text-xs text-blue-600 hover:underline"
+                className="mt-3 inline-block text-xs text-brand-500 hover:underline"
               >
                 Ver LinkedIn
               </a>

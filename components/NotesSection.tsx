@@ -37,12 +37,12 @@ export function NotesSection({ entryId, initialNotes }: NotesSectionProps) {
           onChange={e => setContent(e.target.value)}
           placeholder="Add a note..."
           rows={2}
-          className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
         />
         <button
           onClick={handleAdd}
           disabled={saving || !content.trim()}
-          className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 self-start"
+          className="px-3 py-2 bg-brand-500 text-white text-sm rounded-lg hover:bg-brand-600 disabled:opacity-50 self-start"
         >
           {saving ? '...' : 'Add'}
         </button>
