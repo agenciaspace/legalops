@@ -54,16 +54,16 @@ export async function GET(req: NextRequest) {
     enriched: 0,
     leadersBackfilled: 0,
     failed: 0,
-    discoverySource: 'legacy' as 'firecrawl' | 'legacy',
-    fallbackReason: null as string | null,
+    discoverySource: 'combined' as 'firecrawl' | 'legacy' | 'combined',
   }
 
+  let scrapeResult: Awaited<ReturnType<typeof scrapeAllBoards>> | null = null
+
   try {
-    const scrapeResult = await scrapeAllBoards()
+    scrapeResult = await scrapeAllBoards()
     const jobs = scrapeResult.jobs
     summary.scraped = jobs.length
     summary.discoverySource = scrapeResult.discoverySource
-    summary.fallbackReason = scrapeResult.fallbackReason
 
     const uniqueUrls = Array.from(new Set(jobs.map(job => job.url)))
     const existingUrlSet = new Set<string>()
@@ -275,7 +275,9 @@ export async function GET(req: NextRequest) {
     failed_count: summary.failed,
     leaders_backfilled: summary.leadersBackfilled,
     notes: {
-      fallbackReason: summary.fallbackReason,
+      firecrawlCount: scrapeResult?.firecrawlCount ?? 0,
+      legacyCount: scrapeResult?.legacyCount ?? 0,
+      ...(scrapeResult?.errors?.length ? { errors: scrapeResult.errors } : {}),
     },
     started_at: startedAt,
     completed_at: new Date().toISOString(),

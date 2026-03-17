@@ -13,8 +13,10 @@ export type RawJob = {
 
 export interface ScrapeAllBoardsResult {
   jobs: RawJob[]
-  discoverySource: 'firecrawl' | 'legacy'
-  fallbackReason: string | null
+  discoverySource: 'firecrawl' | 'legacy' | 'combined'
+  firecrawlCount: number
+  legacyCount: number
+  errors: string[]
 }
 
 interface FirecrawlJobListing {
@@ -30,25 +32,28 @@ interface FirecrawlJobListing {
   applicationLink_citation?: string
 }
 
-interface FirecrawlScrapeResponse {
+interface FirecrawlAgentStartResponse {
   success?: boolean
-  data?: {
-    metadata?: { creditsUsed?: number }
-    extract?: {
-      jobListings?: FirecrawlJobListing[]
-    }
-  }
+  id?: string
   error?: string
 }
 
-const FIRECRAWL_SCRAPE_URL = 'https://api.firecrawl.dev/v1/scrape'
+interface FirecrawlAgentStatusResponse {
+  success?: boolean
+  status?: 'processing' | 'completed' | 'failed'
+  data?: {
+    jobListings?: FirecrawlJobListing[]
+  }
+  creditsUsed?: number
+  error?: string
+}
 
-const FIRECRAWL_SCRAPE_TARGETS = [
-  'https://www.indeed.com/jobs?q=%22Legal+Operations%22&sort=date',
-  'https://www.indeed.com/jobs?q=%22Legal+Ops%22&sort=date',
-  'https://www.goinhouse.com/jobs/search?q=Legal+Operations',
-  'https://jobs.cloc.org/jobs?keywords=Legal+Operations',
-]
+const FIRECRAWL_AGENT_URL = 'https://api.firecrawl.dev/v2/agent'
+
+const FIRECRAWL_AGENT_PROMPT = `Find current job listings for Legal Operations roles. Search job boards like Indeed, GoInhouse, CLOC Jobs, Legal.io, and LegalOperators for positions with titles containing "Legal Operations", "Legal Ops", "Head of Legal", "General Counsel", "Chief Legal Officer", or "CLM Manager". Return all matching job listings with their title, company, location, salary range (if available), and application link.`
+
+const FIRECRAWL_AGENT_POLL_INTERVAL_MS = 5_000
+const FIRECRAWL_AGENT_TIMEOUT_MS = 120_000
 
 const FIRECRAWL_EXTRACT_SCHEMA = {
   type: 'object',
@@ -411,93 +416,136 @@ export async function scrapeLegacyBoards(): Promise<RawJob[]> {
   return dedupeJobsByUrl(results)
 }
 
-async function scrapeOneBoard(apiKey: string, url: string): Promise<FirecrawlJobListing[]> {
-  const response = await fetch(FIRECRAWL_SCRAPE_URL, {
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function runFirecrawlAgent(apiKey: string): Promise<FirecrawlJobListing[]> {
+  const headers = {
+    Authorization: `Bearer ${apiKey}`,
+    'Content-Type': 'application/json',
+  }
+
+  // Start the agent job
+  const startResponse = await fetch(FIRECRAWL_AGENT_URL, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({
-      url,
-      formats: ['extract'],
-      extract: { schema: FIRECRAWL_EXTRACT_SCHEMA },
+      prompt: FIRECRAWL_AGENT_PROMPT,
+      schema: FIRECRAWL_EXTRACT_SCHEMA,
+      model: 'spark-1-mini',
+      maxCredits: 500,
     }),
     signal: AbortSignal.timeout(30_000),
   })
 
-  if (!response.ok) {
-    const body = await response.text().catch(() => '')
-    console.error(`[firecrawl] scrape failed for ${url}: HTTP ${response.status} ${body.slice(0, 300)}`)
-    return []
+  if (!startResponse.ok) {
+    const body = await startResponse.text().catch(() => '')
+    throw new Error(`[firecrawl] agent start failed: HTTP ${startResponse.status} ${body.slice(0, 300)}`)
   }
 
-  const result = (await response.json()) as FirecrawlScrapeResponse
+  const startResult = (await startResponse.json()) as FirecrawlAgentStartResponse
 
-  if (!result.success) {
-    console.error(`[firecrawl] scrape error for ${url}: ${result.error}`)
-    return []
+  if (!startResult.success || !startResult.id) {
+    throw new Error(`[firecrawl] agent start error: ${startResult.error ?? 'no job id returned'}`)
   }
 
-  const credits = result.data?.metadata?.creditsUsed ?? 0
-  const listings = result.data?.extract?.jobListings ?? []
-  console.info(`[firecrawl] ${url} → ${listings.length} listings (${credits} credits)`)
-  return listings
+  const jobId = startResult.id
+  console.info(`[firecrawl] agent started, job id: ${jobId}`)
+
+  // Poll for completion
+  const deadline = Date.now() + FIRECRAWL_AGENT_TIMEOUT_MS
+
+  while (Date.now() < deadline) {
+    await sleep(FIRECRAWL_AGENT_POLL_INTERVAL_MS)
+
+    const statusResponse = await fetch(`${FIRECRAWL_AGENT_URL}/${jobId}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(15_000),
+    })
+
+    if (!statusResponse.ok) {
+      console.error(`[firecrawl] agent poll failed: HTTP ${statusResponse.status}`)
+      continue
+    }
+
+    const statusResult = (await statusResponse.json()) as FirecrawlAgentStatusResponse
+
+    if (statusResult.status === 'completed') {
+      const listings = statusResult.data?.jobListings ?? []
+      const credits = statusResult.creditsUsed ?? 0
+      console.info(`[firecrawl] agent completed: ${listings.length} listings (${credits} credits)`)
+      return listings
+    }
+
+    if (statusResult.status === 'failed') {
+      throw new Error(`[firecrawl] agent failed: ${statusResult.error ?? 'unknown error'}`)
+    }
+
+    // Still processing, continue polling
+  }
+
+  throw new Error(`[firecrawl] agent timed out after ${FIRECRAWL_AGENT_TIMEOUT_MS / 1000}s`)
 }
 
 export async function scrapeJobsWithFirecrawl(): Promise<RawJob[]> {
   const apiKey = cleanString(process.env.FIRECRAWL_API_KEY)
   if (!apiKey) return []
 
-  const targets = (cleanString(process.env.FIRECRAWL_SCRAPE_URLS) ?? '')
-    .split(',')
-    .map(u => u.trim())
-    .filter(Boolean)
-
-  const urls = targets.length > 0 ? targets : FIRECRAWL_SCRAPE_TARGETS
-
-  const allListings = await Promise.all(
-    urls.map(url => scrapeOneBoard(apiKey, url).catch(err => {
-      console.error(`[firecrawl] ${url} threw:`, err)
-      return [] as FirecrawlJobListing[]
-    }))
-  )
+  const listings = await runFirecrawlAgent(apiKey)
 
   return extractFirecrawlJobsFromPayload({
-    jobListings: allListings.flat(),
+    jobListings: listings,
   })
 }
 
 export async function scrapeAllBoards(): Promise<ScrapeAllBoardsResult> {
-  try {
-    const firecrawlJobs = await scrapeJobsWithFirecrawl()
+  const [firecrawlResult, legacyResult] = await Promise.allSettled([
+    scrapeJobsWithFirecrawl(),
+    scrapeLegacyBoards(),
+  ])
 
-    if (firecrawlJobs.length > 0) {
-      console.info(`[scraper] Firecrawl returned ${firecrawlJobs.length} jobs`)
-      return {
-        jobs: firecrawlJobs,
-        discoverySource: 'firecrawl',
-        fallbackReason: null,
-      }
-    }
-  } catch (error) {
-    console.error('[scraper] Firecrawl discovery failed, falling back to legacy boards:', error)
+  const errors: string[] = []
 
-    const legacyJobs = await scrapeLegacyBoards()
-    console.info(`[scraper] legacy boards returned ${legacyJobs.length} jobs`)
-    return {
-      jobs: legacyJobs,
-      discoverySource: 'legacy',
-      fallbackReason: error instanceof Error ? error.message : 'firecrawl_failed',
-    }
-  }
+  const firecrawlJobs = firecrawlResult.status === 'fulfilled'
+    ? firecrawlResult.value
+    : (() => {
+        const msg = firecrawlResult.reason instanceof Error
+          ? firecrawlResult.reason.message
+          : String(firecrawlResult.reason)
+        console.error('[scraper] Firecrawl failed:', msg)
+        errors.push(`firecrawl: ${msg}`)
+        return [] as RawJob[]
+      })()
 
-  const legacyJobs = await scrapeLegacyBoards()
-  console.info(`[scraper] legacy boards returned ${legacyJobs.length} jobs`)
+  const legacyJobs = legacyResult.status === 'fulfilled'
+    ? legacyResult.value
+    : (() => {
+        const msg = legacyResult.reason instanceof Error
+          ? legacyResult.reason.message
+          : String(legacyResult.reason)
+        console.error('[scraper] Legacy boards failed:', msg)
+        errors.push(`legacy: ${msg}`)
+        return [] as RawJob[]
+      })()
+
+  // Firecrawl first so its richer metadata wins in dedup
+  const combined = dedupeJobsByUrl([...firecrawlJobs, ...legacyJobs])
+
+  const discoverySource = firecrawlJobs.length > 0 && legacyJobs.length > 0
+    ? 'combined' as const
+    : firecrawlJobs.length > 0
+      ? 'firecrawl' as const
+      : 'legacy' as const
+
+  console.info(`[scraper] firecrawl: ${firecrawlJobs.length}, legacy: ${legacyJobs.length}, combined: ${combined.length}`)
+
   return {
-    jobs: legacyJobs,
-    discoverySource: 'legacy',
-    fallbackReason: 'firecrawl_returned_zero_jobs',
+    jobs: combined,
+    discoverySource,
+    firecrawlCount: firecrawlJobs.length,
+    legacyCount: legacyJobs.length,
+    errors,
   }
 }
 

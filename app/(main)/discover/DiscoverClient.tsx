@@ -68,11 +68,6 @@ export function DiscoverClient({
 
     return result
   }, [jobs, search, remoteFilter, salaryFilter, sortBy])
-  const fallbackReason =
-    typeof stats.latestRun?.notes?.fallbackReason === 'string'
-      ? stats.latestRun.notes.fallbackReason
-      : null
-
   async function handleAction(jobId: string, action: 'add' | 'ignore') {
     const res = await fetch('/api/pipeline', {
       method: 'POST',
@@ -160,11 +155,6 @@ export function DiscoverClient({
           </div>
         </div>
 
-        {fallbackReason && (
-          <p className="mt-3 text-xs text-slate-500">
-            Fallback: {fallbackReason}
-          </p>
-        )}
       </div>
 
       {/* Search & Filters Bar */}
