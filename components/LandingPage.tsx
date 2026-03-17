@@ -23,7 +23,8 @@ const content = {
     languageLabel: 'English',
     languageCompact: 'EN',
     signIn: 'Entrar',
-    heroTitle: 'A plataforma de Legal Ops',
+    heroTitle: 'Legal Ops\nnão é um cargo.',
+    heroHighlight: 'É um movimento.',
     heroDescription: 'A rede profissional para quem constrói operações jurídicas. Vagas curadas, match com IA, e a maior comunidade de Legal Ops do mercado.',
     heroPrimaryCta: 'Criar conta grátis',
     heroSecondaryCta: 'Para Empresas',
@@ -31,7 +32,8 @@ const content = {
     jobsTitle: 'Vagas recentes',
     jobsEmpty: 'Nenhuma vaga encontrada no momento.',
     tableHeaders: { title: 'Vaga', company: 'Empresa', remote: 'Remoto', salary: 'Salário' },
-    closingTitle: 'Comece grátis. Decida depois.',
+    closingTitle: 'Carreiras em Legal Ops.',
+    closingSubtitle: 'Powered by AI.',
     closingPrimaryCta: 'Começar grátis',
     manifestoLink: 'Leia nosso manifesto',
     pricingCta: 'Ver planos',
@@ -43,7 +45,8 @@ const content = {
     languageLabel: 'Português',
     languageCompact: 'PT',
     signIn: 'Sign in',
-    heroTitle: 'The Legal Ops Platform',
+    heroTitle: 'Legal Ops\nis not a job title.',
+    heroHighlight: "It's a movement.",
     heroDescription: 'The professional network for legal operations builders. Curated jobs, AI-powered matching, and the largest Legal Ops community.',
     heroPrimaryCta: 'Create free account',
     heroSecondaryCta: 'For Employers',
@@ -51,7 +54,8 @@ const content = {
     jobsTitle: 'Recent jobs',
     jobsEmpty: 'No jobs found at the moment.',
     tableHeaders: { title: 'Role', company: 'Company', remote: 'Remote', salary: 'Salary' },
-    closingTitle: 'Start free. Decide later.',
+    closingTitle: 'LegalOps careers.',
+    closingSubtitle: 'Powered by AI.',
     closingPrimaryCta: 'Start free',
     manifestoLink: 'Read our manifesto',
     pricingCta: 'View plans',
@@ -97,23 +101,23 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
   const jobs = await fetchPublicJobs()
 
   return (
-    <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-stone-50 text-slate-950">
-      <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
+    <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-white text-slate-950">
+      <header className="border-b border-stone-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <Link href={locale === 'pt' ? '/' : '/en'}>
-            <BrandLogo className="flex items-center gap-3" markClassName="h-10 w-10 text-slate-950" />
+            <BrandLogo className="flex items-center gap-3" markClassName="h-10 w-10 text-brand-500" />
           </Link>
 
           <div className="flex items-center gap-3">
             <Link
               href="/pricing"
-              className="hidden sm:inline-flex rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
+              className="hidden sm:inline-flex rounded-full px-4 py-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-950"
             >
               {copy.pricingCta}
             </Link>
             <Link
               href={copy.languageHref}
-              className="inline-flex items-center gap-2 rounded-full border border-stone-300 px-3 py-2 text-sm text-slate-700 transition-colors hover:border-slate-950"
+              className="inline-flex items-center gap-2 rounded-full border border-stone-200 px-3 py-2 text-sm text-slate-600 transition-colors hover:border-slate-950"
             >
               <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">{copy.languageLabel}</span>
@@ -121,7 +125,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
             </Link>
             <Link
               href="/login"
-              className="rounded-full border border-stone-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950 hover:text-slate-950"
+              className="rounded-full bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600"
             >
               {copy.signIn}
             </Link>
@@ -129,53 +133,44 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
-        <section className="max-w-3xl">
-          <h1
-            className="text-5xl leading-tight text-slate-950 sm:text-6xl"
-            style={{
-              fontFamily:
-                '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-            }}
-          >
+      <main className="mx-auto max-w-6xl px-6">
+        <section className="py-20 sm:py-28">
+          <h1 className="whitespace-pre-line text-5xl font-bold leading-tight tracking-tight text-slate-950 sm:text-7xl">
             {copy.heroTitle}
           </h1>
+          <p className="mt-2 text-5xl font-bold leading-tight tracking-tight text-brand-500 sm:text-7xl">
+            {copy.heroHighlight}
+          </p>
 
-          <p className="mt-4 text-lg leading-8 text-slate-600">
+          <p className="mt-6 max-w-xl text-lg leading-8 text-slate-500">
             {copy.heroDescription}
           </p>
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-600"
             >
               {copy.heroPrimaryCta}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={copy.heroSecondaryHref}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
             >
               {copy.heroSecondaryCta}
             </Link>
           </div>
         </section>
 
-        <section className="mt-16">
-          <h2
-            className="text-3xl text-slate-950 sm:text-4xl"
-            style={{
-              fontFamily:
-                '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-            }}
-          >
+        <section className="pb-16">
+          <h2 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
             {copy.jobsTitle}
           </h2>
 
           {jobs.length > 0 ? (
-            <div className="mt-6 overflow-hidden rounded-[20px] border border-stone-200 bg-white">
-              <div className="hidden sm:grid sm:grid-cols-[2fr_1.2fr_1fr_1fr] gap-4 border-b border-stone-200 px-6 py-3 text-xs font-medium uppercase tracking-wider text-slate-400">
+            <div className="mt-6 overflow-hidden rounded-2xl border border-stone-100 bg-white">
+              <div className="hidden sm:grid sm:grid-cols-[2fr_1.2fr_1fr_1fr] gap-4 border-b border-stone-100 px-6 py-3 text-xs font-medium uppercase tracking-wider text-slate-400">
                 <div>{copy.tableHeaders.title}</div>
                 <div>{copy.tableHeaders.company}</div>
                 <div>{copy.tableHeaders.remote}</div>
@@ -191,7 +186,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
                     href={job.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`group grid gap-1 sm:gap-4 sm:grid-cols-[2fr_1.2fr_1fr_1fr] px-6 py-4 text-sm transition-colors hover:bg-stone-50 ${
+                    className={`group grid gap-1 sm:gap-4 sm:grid-cols-[2fr_1.2fr_1fr_1fr] px-6 py-4 text-sm transition-colors hover:bg-brand-50 ${
                       index % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'
                     } ${isDead ? 'opacity-60' : ''}`}
                   >
@@ -214,21 +209,18 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
           )}
         </section>
 
-        <section className="mt-16 rounded-[24px] border border-stone-200 bg-white px-6 py-8 sm:px-8">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <section className="mb-16 overflow-hidden rounded-3xl bg-gradient-to-br from-brand-500 to-brand-600 px-8 py-12 sm:px-12 sm:py-16">
+          <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2
-                className="text-3xl text-slate-950 sm:text-4xl"
-                style={{
-                  fontFamily:
-                    '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-                }}
-              >
+              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 {copy.closingTitle}
               </h2>
+              <p className="mt-1 text-2xl font-light text-white/80 sm:text-3xl">
+                {copy.closingSubtitle}
+              </p>
               <Link
                 href="/manifesto"
-                className="mt-2 inline-block text-sm text-slate-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-slate-950 hover:decoration-slate-950"
+                className="mt-4 inline-block text-sm text-white/70 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-white"
               >
                 {copy.manifestoLink}
               </Link>
@@ -236,7 +228,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
 
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-brand-600 transition-colors hover:bg-brand-50"
             >
               {copy.closingPrimaryCta}
               <ArrowRight className="h-4 w-4" />
