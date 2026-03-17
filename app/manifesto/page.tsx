@@ -44,11 +44,7 @@ export default function ManifestoPage() {
         </p>
 
         <h1
-          className="mt-4 text-4xl leading-tight sm:text-5xl"
-          style={{
-            fontFamily:
-              '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-          }}
+          className="mt-4 font-serif text-4xl leading-tight sm:text-5xl"
         >
           Legal Ops merece mais do que um job board genérico.
         </h1>
@@ -228,10 +224,10 @@ export default function ManifestoPage() {
         {/* Signature */}
         <div className="mt-16 border-t border-stone-100 pt-8">
           <p className="text-sm text-slate-500">
-            — O time LegalOps
+            — Leon
           </p>
           <p className="mt-1 text-sm text-slate-400">
-            Março de 2026
+            Fundador, LegalOps · Março de 2026
           </p>
         </div>
       </article>
