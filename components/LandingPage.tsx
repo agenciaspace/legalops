@@ -33,6 +33,7 @@ const content = {
     tableHeaders: { title: 'Vaga', company: 'Empresa', remote: 'Remoto', salary: 'Salário' },
     closingTitle: 'Comece grátis. Decida depois.',
     closingPrimaryCta: 'Começar grátis',
+    manifestoLink: 'Leia nosso manifesto',
     pricingCta: 'Ver planos',
     salaryUndisclosed: 'Não divulgado',
     jobExpired: 'Possivelmente encerrada',
@@ -52,6 +53,7 @@ const content = {
     tableHeaders: { title: 'Role', company: 'Company', remote: 'Remote', salary: 'Salary' },
     closingTitle: 'Start free. Decide later.',
     closingPrimaryCta: 'Start free',
+    manifestoLink: 'Read our manifesto',
     pricingCta: 'View plans',
     salaryUndisclosed: 'Undisclosed',
     jobExpired: 'Possibly closed',
@@ -214,15 +216,23 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
 
         <section className="mt-16 rounded-[24px] border border-stone-200 bg-white px-6 py-8 sm:px-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <h2
-              className="text-3xl text-slate-950 sm:text-4xl"
-              style={{
-                fontFamily:
-                  '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-              }}
-            >
-              {copy.closingTitle}
-            </h2>
+            <div>
+              <h2
+                className="text-3xl text-slate-950 sm:text-4xl"
+                style={{
+                  fontFamily:
+                    '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
+                }}
+              >
+                {copy.closingTitle}
+              </h2>
+              <Link
+                href="/manifesto"
+                className="mt-2 inline-block text-sm text-slate-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-slate-950 hover:decoration-slate-950"
+              >
+                {copy.manifestoLink}
+              </Link>
+            </div>
 
             <Link
               href="/login"
