@@ -4,6 +4,7 @@ import { ArrowRight, Globe, ExternalLink } from 'lucide-react'
 import { createServerClient } from '@supabase/ssr'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { BrandLogo } from '@/components/BrandLogo'
+import { LocaleSync } from '@/components/LocaleSync'
 import { formatSalary as formatSalaryUtil } from '@/lib/format-salary'
 import type { RemoteReality, UrlStatus } from '@/lib/types'
 
@@ -98,6 +99,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
 
   return (
     <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-stone-50 text-slate-950">
+      <LocaleSync locale={locale} />
       <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <Link href={locale === 'pt' ? '/' : '/en'}>

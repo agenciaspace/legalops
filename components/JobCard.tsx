@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { RemoteBadge } from './RemoteBadge'
 import { formatSalary, hasSalary } from '@/lib/format-salary'
+import { useI18n } from '@/lib/i18n'
 import type { Job } from '@/lib/types'
 
 interface JobCardProps {
@@ -10,15 +11,20 @@ interface JobCardProps {
   onAction: (jobId: string, action: 'add' | 'ignore') => void
 }
 
-function daysAgo(dateStr: string): string {
-  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
-  if (days === 0) return 'hoje'
-  if (days === 1) return 'ontem'
-  return `ha ${days} dias`
+function useDaysAgo() {
+  const { t } = useI18n()
+  return (dateStr: string): string => {
+    const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
+    if (days === 0) return t.jobCard.today
+    if (days === 1) return t.jobCard.yesterday
+    return t.jobCard.daysAgo(days)
+  }
 }
 
 export function JobCard({ job, onAction }: JobCardProps) {
   const [loading, setLoading] = useState<'add' | 'ignore' | null>(null)
+  const { t } = useI18n()
+  const daysAgo = useDaysAgo()
 
   async function handleAction(action: 'add' | 'ignore') {
     setLoading(action)
@@ -33,7 +39,7 @@ export function JobCard({ job, onAction }: JobCardProps) {
       <div className="mb-3">
         <h3 className="text-sm font-semibold text-slate-900 leading-tight">
           {job.title}
-          {isDead && <span className="ml-1.5 text-xs font-normal text-amber-500">Possivelmente encerrada</span>}
+          {isDead && <span className="ml-1.5 text-xs font-normal text-amber-500">{t.jobCard.possiblyClosed}</span>}
         </h3>
         <p className="text-xs text-slate-500 mt-0.5">{job.company}</p>
       </div>
@@ -44,7 +50,7 @@ export function JobCard({ job, onAction }: JobCardProps) {
 
       <div className={`flex items-center justify-between mb-4 ${hasSalary(job) ? 'bg-emerald-50 -mx-2 px-2 py-1.5 rounded-lg' : ''}`}>
         <span className={`text-xs font-medium ${hasSalary(job) ? 'text-emerald-700' : 'text-slate-400'}`}>
-          {formatSalary(job, isDead ? '—' : 'Não divulgado')}
+          {formatSalary(job, isDead ? '—' : t.jobCard.undisclosed)}
         </span>
         <span className="text-xs text-slate-400">{daysAgo(job.created_at)}</span>
       </div>
@@ -66,14 +72,14 @@ export function JobCard({ job, onAction }: JobCardProps) {
           disabled={loading !== null}
           className="flex-1 bg-blue-600 text-white text-xs font-medium py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
-          {loading === 'add' ? '...' : 'Adicionar'}
+          {loading === 'add' ? '...' : t.jobCard.add}
         </button>
         <button
           onClick={() => handleAction('ignore')}
           disabled={loading !== null}
           className="flex-1 bg-slate-100 text-slate-600 text-xs font-medium py-2 rounded-lg hover:bg-slate-200 disabled:opacity-50 transition-colors"
         >
-          {loading === 'ignore' ? '...' : 'Ignorar'}
+          {loading === 'ignore' ? '...' : t.jobCard.ignore}
         </button>
       </div>
     </div>

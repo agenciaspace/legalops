@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Home } from 'lucide-react'
 import { RemoteBadge } from '@/components/RemoteBadge'
 import { formatSalary } from '@/lib/format-salary'
 import { StatusDropdown } from '@/components/StatusDropdown'
@@ -13,6 +14,7 @@ import { TimelineSection } from '@/components/TimelineSection'
 import { InterviewPrepSection } from '@/components/InterviewPrepSection'
 import { CoverLetterSection } from '@/components/CoverLetterSection'
 import { PaidPlanAgentsSection } from '@/components/PaidPlanAgentsSection'
+import { useI18n } from '@/lib/i18n'
 import type { PaidAgentSettings } from '@/lib/paid-agent-settings'
 import type {
   PipelineEntryWithJob,
@@ -45,6 +47,7 @@ export function JobDetailClient({
   agentSettings,
 }: Props) {
   const router = useRouter()
+  const { t, locale } = useI18n()
   const job = entry.job
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [copiedAlias, setCopiedAlias] = useState(false)
@@ -77,7 +80,7 @@ export function JobDetailClient({
   }
 
   function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('pt-BR', {
+    return new Date(dateStr).toLocaleDateString(locale === 'pt' ? 'pt-BR' : 'en-US', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -85,17 +88,23 @@ export function JobDetailClient({
   }
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'overview', label: 'Visao geral' },
-    { id: 'ai-tools', label: 'Ferramentas IA' },
-    { id: 'networking', label: 'Networking' },
+    { id: 'overview', label: t.jobDetail.overviewTab },
+    { id: 'ai-tools', label: t.jobDetail.aiToolsTab },
+    { id: 'networking', label: t.jobDetail.networkingTab },
   ]
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-4">
-      {/* Back link */}
-      <Link href="/pipeline" className="text-xs text-slate-500 hover:text-slate-700 transition-colors">
-        ← Voltar ao pipeline
-      </Link>
+      {/* Navigation links */}
+      <div className="flex items-center gap-4">
+        <Link href="/pipeline" className="text-xs text-slate-500 hover:text-slate-700 transition-colors">
+          &larr; {t.jobDetail.backToPipeline}
+        </Link>
+        <Link href="/dashboard" className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors">
+          <Home className="h-3 w-3" />
+          {t.jobDetail.backToHome}
+        </Link>
+      </div>
 
       {/* Header Card */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
@@ -106,7 +115,7 @@ export function JobDetailClient({
             <div className="flex items-center gap-3 mt-2">
               <RemoteBadge reality={job.remote_reality} />
               <span className="text-xs text-slate-400">
-                Adicionada em {formatDate(entry.created_at)}
+                {t.jobDetail.addedOn(formatDate(entry.created_at))}
               </span>
             </div>
           </div>
@@ -116,7 +125,7 @@ export function JobDetailClient({
               onClick={handleApply}
               className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Aplicar →
+              {t.jobDetail.apply} &rarr;
             </button>
           </div>
         </div>
@@ -125,15 +134,15 @@ export function JobDetailClient({
       {/* Quick Stats Bar */}
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-sm text-center">
-          <p className="text-xs text-slate-500">Salario</p>
+          <p className="text-xs text-slate-500">{t.jobDetail.salary}</p>
           <p className="text-sm font-semibold text-slate-900 mt-0.5">{formatSalary(job)}</p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-sm text-center">
-          <p className="text-xs text-slate-500">Contatos</p>
+          <p className="text-xs text-slate-500">{t.jobDetail.contacts}</p>
           <p className="text-sm font-semibold text-slate-900 mt-0.5">{contacts.length}</p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-sm text-center">
-          <p className="text-xs text-slate-500">Eventos</p>
+          <p className="text-xs text-slate-500">{t.jobDetail.events}</p>
           <p className="text-sm font-semibold text-slate-900 mt-0.5">{events.length}</p>
         </div>
       </div>
@@ -160,7 +169,7 @@ export function JobDetailClient({
         <div className="space-y-4">
           {/* Remote */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Modalidade</h2>
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t.jobDetail.modality}</h2>
             <div className="flex items-center gap-2">
               <RemoteBadge reality={job.remote_reality} />
               {job.remote_notes && (
@@ -168,13 +177,13 @@ export function JobDetailClient({
               )}
             </div>
             {job.remote_label && (
-              <p className="text-xs text-slate-400 mt-1">Publicado como: &quot;{job.remote_label}&quot;</p>
+              <p className="text-xs text-slate-400 mt-1">{t.jobDetail.publishedAs} &quot;{job.remote_label}&quot;</p>
             )}
           </section>
 
           {/* Benefits */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Beneficios</h2>
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t.jobDetail.benefits}</h2>
             {job.benefits.length > 0 ? (
               <div className="flex flex-wrap gap-1.5">
                 {job.benefits.map((b, i) => (
@@ -182,51 +191,51 @@ export function JobDetailClient({
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-400">Nao divulgados</p>
+              <p className="text-xs text-slate-400">{t.jobDetail.noBenefits}</p>
             )}
           </section>
 
           {/* Direct Manager */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Gestor direto</h2>
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t.jobDetail.directManager}</h2>
             <LeaderSection entryId={entry.id} initialLeader={leader} />
           </section>
 
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-              Email da candidatura
+              {t.jobDetail.applicationEmail}
             </h2>
             {entry.email_alias?.address ? (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-900">{entry.email_alias.address}</p>
                   <p className="text-xs text-slate-500 mt-1">
-                    Use este alias em formulários e replies desta vaga. O histórico chega na aba Emails.
+                    {t.jobDetail.aliasHint}
                   </p>
                 </div>
                 <button
                   onClick={() => void copyApplicationAlias()}
                   className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50"
                 >
-                  {copiedAlias ? 'Copiado' : 'Copiar alias'}
+                  {copiedAlias ? t.jobDetail.copied : t.jobDetail.copyAlias}
                 </button>
               </div>
             ) : (
               <p className="text-xs text-slate-500">
-                O alias será atribuído automaticamente quando a vaga for marcada como aplicada.
+                {t.jobDetail.aliasPending}
               </p>
             )}
           </section>
 
           {/* Notes */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Notas</h2>
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t.jobDetail.notes}</h2>
             <NotesSection entryId={entry.id} initialNotes={notes} />
           </section>
 
           {/* Timeline */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Linha do tempo</h2>
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t.jobDetail.timeline}</h2>
             <TimelineSection entryId={entry.id} initialEvents={events} />
           </section>
         </div>
@@ -236,7 +245,7 @@ export function JobDetailClient({
         <div className="space-y-4">
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-              Agentes especialistas
+              {t.jobDetail.specialistAgents}
             </h2>
             <PaidPlanAgentsSection
               entryId={entry.id}
@@ -249,7 +258,7 @@ export function JobDetailClient({
           {/* Interview Prep */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-              Preparacao para entrevista
+              {t.jobDetail.interviewPrep}
             </h2>
             <InterviewPrepSection entryId={entry.id} />
           </section>
@@ -257,7 +266,7 @@ export function JobDetailClient({
           {/* Cover Letter */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
             <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-              Cover letter rapida
+              {t.jobDetail.coverLetter}
             </h2>
             <CoverLetterSection entryId={entry.id} />
           </section>
@@ -268,13 +277,13 @@ export function JobDetailClient({
         <div className="space-y-4">
           {/* Contacts */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Contatos</h2>
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t.jobDetail.contacts}</h2>
             <ContactsSection entryId={entry.id} initialContacts={contacts} />
           </section>
 
           {/* Direct Manager */}
           <section className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Gestor direto</h2>
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t.jobDetail.directManager}</h2>
             <LeaderSection entryId={entry.id} initialLeader={leader} />
           </section>
         </div>

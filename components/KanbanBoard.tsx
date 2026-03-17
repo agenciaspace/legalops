@@ -2,20 +2,22 @@
 
 import { useState } from 'react'
 import { PipelineCard } from './PipelineCard'
+import { useI18n } from '@/lib/i18n'
 import type { PipelineEntryWithJob, PipelineStatus } from '@/lib/types'
 
-const COLUMNS: { label: string; status: PipelineStatus }[] = [
-  { label: 'Pesquisando', status: 'researching' },
-  { label: 'Aplicada', status: 'applied' },
-  { label: 'Entrevista', status: 'interview' },
-  { label: 'Oferta', status: 'offer' },
-  { label: 'Descartada', status: 'discarded' },
-]
-
-const STATUS_ORDER = COLUMNS.map(c => c.status)
+const STATUS_ORDER: PipelineStatus[] = ['researching', 'applied', 'interview', 'offer', 'discarded']
 
 export function KanbanBoard({ initialEntries }: { initialEntries: PipelineEntryWithJob[] }) {
   const [entries, setEntries] = useState(initialEntries)
+  const { t } = useI18n()
+
+  const COLUMNS: { label: string; status: PipelineStatus }[] = [
+    { label: t.status.researching, status: 'researching' },
+    { label: t.status.applied, status: 'applied' },
+    { label: t.status.interview, status: 'interview' },
+    { label: t.status.offer, status: 'offer' },
+    { label: t.status.discarded, status: 'discarded' },
+  ]
 
   async function handleMove(entryId: string, direction: 'left' | 'right') {
     const entry = entries.find(e => e.id === entryId)
@@ -52,7 +54,7 @@ export function KanbanBoard({ initialEntries }: { initialEntries: PipelineEntryW
             </div>
             <div className="space-y-2 bg-slate-100 rounded-xl p-2 min-h-24">
               {colEntries.length === 0 ? (
-                <p className="py-6 text-center text-xs text-slate-400">No jobs here yet</p>
+                <p className="py-6 text-center text-xs text-slate-400">{t.kanban.noJobsYet}</p>
               ) : (
                 colEntries.map(entry => (
                   <PipelineCard

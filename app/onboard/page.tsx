@@ -2,76 +2,46 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Home } from 'lucide-react'
 import { BrandLogo } from '@/components/BrandLogo'
+import { useI18n } from '@/lib/i18n'
 import type { LinkedInInsight, ProfessionalType } from '@/lib/types'
 
 type Step = 'basics' | 'professional' | 'expertise' | 'linkedin' | 'insights'
 
-const PROFESSIONAL_TYPES: { value: ProfessionalType; label: string; description: string }[] = [
-  {
-    value: 'law_firm',
-    label: 'Escritório de advocacia',
-    description: 'Atuo ou quero atuar em escritório de advocacia (societário, consultivo ou contencioso)',
-  },
-  {
-    value: 'legal_dept',
-    label: 'Departamento jurídico (in-house)',
-    description: 'Atuo ou quero atuar no jurídico de uma empresa (in-house counsel / Legal Ops)',
-  },
-  {
-    value: 'public_sector',
-    label: 'Cargo público / concurso',
-    description: 'Busco ou já ocupo cargo em órgão público, autarquia, tribunal ou MP',
-  },
-  {
-    value: 'freelance',
-    label: 'Freelance / autônomo(a)',
-    description: 'Trabalho de forma independente prestando serviços jurídicos',
-  },
-  {
-    value: 'other',
-    label: 'Outro',
-    description: 'LegalTech, consultoria, academia ou outra área do setor jurídico',
-  },
-]
-
 const AREAS_OPTIONS = [
   'Legal Operations',
   'Contratos / CLM',
-  'Compliance e Governança',
+  'Compliance e Governanca',
   'M&A e Corporate',
   'Trabalhista',
-  'Tributário',
-  'Regulatório',
+  'Tributario',
+  'Regulatorio',
   'Propriedade Intelectual',
-  'Proteção de Dados / LGPD',
-  'Tecnologia Jurídica',
+  'Protecao de Dados / LGPD',
+  'Tecnologia Juridica',
   'Contencioso',
   'Terceiro Setor / ESG',
   'Mercado de Capitais',
-  'Direito Bancário',
+  'Direito Bancario',
 ]
 
-const PRIORITY_CONFIG = {
-  high: { label: 'Alta prioridade', color: 'bg-red-50 border-red-200 text-red-800', dot: 'bg-red-500' },
-  medium: { label: 'Média prioridade', color: 'bg-amber-50 border-amber-200 text-amber-800', dot: 'bg-amber-500' },
-  low: { label: 'Baixa prioridade', color: 'bg-blue-50 border-blue-200 text-blue-800', dot: 'bg-blue-500' },
-}
-
 const CATEGORY_ICONS: Record<LinkedInInsight['category'], string> = {
-  headline: '✏️',
-  photo: '📷',
-  about: '📝',
-  experience: '💼',
-  skills: '🔧',
-  recommendations: '⭐',
-  activity: '📢',
-  keywords: '🔍',
-  other: '💡',
+  headline: '\u270F\uFE0F',
+  photo: '\uD83D\uDCF7',
+  about: '\uD83D\uDCDD',
+  experience: '\uD83D\uDCBC',
+  skills: '\uD83D\uDD27',
+  recommendations: '\u2B50',
+  activity: '\uD83D\uDCE2',
+  keywords: '\uD83D\uDD0D',
+  other: '\uD83D\uDCA1',
 }
 
 export default function OnboardPage() {
   const router = useRouter()
+  const { t } = useI18n()
   const [step, setStep] = useState<Step>('basics')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -85,6 +55,20 @@ export default function OnboardPage() {
   const [linkedinUrl, setLinkedinUrl] = useState('')
   const [insights, setInsights] = useState<LinkedInInsight[]>([])
   const [insightsScrapeSuccess, setInsightsScrapeSuccess] = useState(false)
+
+  const PROFESSIONAL_TYPES: { value: ProfessionalType; label: string; description: string }[] = [
+    { value: 'law_firm', label: t.onboard.lawFirm, description: t.onboard.lawFirmDesc },
+    { value: 'legal_dept', label: t.onboard.legalDept, description: t.onboard.legalDeptDesc },
+    { value: 'public_sector', label: t.onboard.publicSector, description: t.onboard.publicSectorDesc },
+    { value: 'freelance', label: t.onboard.freelance, description: t.onboard.freelanceDesc },
+    { value: 'other', label: t.onboard.other, description: t.onboard.otherDesc },
+  ]
+
+  const PRIORITY_CONFIG = {
+    high: { label: t.onboard.highPriority, color: 'bg-red-50 border-red-200 text-red-800', dot: 'bg-red-500' },
+    medium: { label: t.onboard.mediumPriority, color: 'bg-amber-50 border-amber-200 text-amber-800', dot: 'bg-amber-500' },
+    low: { label: t.onboard.lowPriority, color: 'bg-blue-50 border-blue-200 text-blue-800', dot: 'bg-blue-500' },
+  }
 
   function toggleArea(area: string) {
     setSelectedAreas(prev =>
@@ -100,26 +84,26 @@ export default function OnboardPage() {
     })
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
-      throw new Error(data.error ?? 'Erro ao salvar dados')
+      throw new Error(data.error ?? t.onboard.unknownError)
     }
   }
 
   async function handleBasicsNext() {
-    if (!fullName.trim()) { setError('Por favor, informe seu nome completo.'); return }
+    if (!fullName.trim()) { setError(t.onboard.validNameError); return }
     setError(null)
     setSaving(true)
     try {
       await saveStep({ full_name: fullName.trim(), current_role: currentRole.trim() })
       setStep('professional')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+      setError(e instanceof Error ? e.message : t.onboard.unknownError)
     } finally {
       setSaving(false)
     }
   }
 
   async function handleProfessionalNext() {
-    if (!professionalType) { setError('Selecione seu tipo de atuação.'); return }
+    if (!professionalType) { setError(t.onboard.selectTypeError); return }
     setError(null)
     setSaving(true)
     try {
@@ -129,7 +113,7 @@ export default function OnboardPage() {
       })
       setStep('expertise')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+      setError(e instanceof Error ? e.message : t.onboard.unknownError)
     } finally {
       setSaving(false)
     }
@@ -142,7 +126,7 @@ export default function OnboardPage() {
       await saveStep({ areas_of_expertise: selectedAreas })
       setStep('linkedin')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+      setError(e instanceof Error ? e.message : t.onboard.unknownError)
     } finally {
       setSaving(false)
     }
@@ -150,29 +134,25 @@ export default function OnboardPage() {
 
   async function handleLinkedInAnalyze() {
     if (!linkedinUrl.trim() || !linkedinUrl.includes('linkedin.com')) {
-      setError('Informe uma URL válida do LinkedIn (ex: https://linkedin.com/in/seuperfil)')
+      setError(t.onboard.validLinkedinError)
       return
     }
     setError(null)
     setSaving(true)
     try {
-      // Save linkedin_url first
       await saveStep({ linkedin_url: linkedinUrl.trim() })
-
-      // Generate insights
       const res = await fetch('/api/profile/linkedin-insights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ linkedin_url: linkedinUrl.trim() }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Erro ao analisar LinkedIn')
-
+      if (!res.ok) throw new Error(data.error ?? t.onboard.unknownError)
       setInsights(data.insights ?? [])
       setInsightsScrapeSuccess(!!data.scraped)
       setStep('insights')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+      setError(e instanceof Error ? e.message : t.onboard.unknownError)
     } finally {
       setSaving(false)
     }
@@ -185,7 +165,7 @@ export default function OnboardPage() {
       await saveStep({ onboarding_completed: true })
       router.push('/discover')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+      setError(e instanceof Error ? e.message : t.onboard.unknownError)
     } finally {
       setSaving(false)
     }
@@ -198,30 +178,37 @@ export default function OnboardPage() {
       await saveStep({ onboarding_completed: true })
       router.push('/discover')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+      setError(e instanceof Error ? e.message : t.onboard.unknownError)
     } finally {
       setSaving(false)
     }
   }
 
   const STEP_LABELS: Record<Step, string> = {
-    basics: 'Dados básicos',
-    professional: 'Tipo de atuação',
-    expertise: 'Especialidades',
-    linkedin: 'LinkedIn',
-    insights: 'Quick wins',
+    basics: t.onboard.stepBasics,
+    professional: t.onboard.stepProfessional,
+    expertise: t.onboard.stepExpertise,
+    linkedin: t.onboard.stepLinkedin,
+    insights: t.onboard.stepInsights,
   }
   const STEPS: Step[] = ['basics', 'professional', 'expertise', 'linkedin', 'insights']
   const currentStepIndex = STEPS.indexOf(step)
 
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col items-center py-10 px-4">
+      <div className="mb-2">
+        <Link href="/" className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors">
+          <Home className="h-3 w-3" />
+          {t.nav.home}
+        </Link>
+      </div>
+
       <div className="mb-8 text-center">
         <BrandLogo
           className="flex flex-col items-center gap-3"
           markClassName="h-10 w-10 text-slate-950"
           titleClassName="text-xl font-semibold tracking-[0.18em] text-slate-950 uppercase"
-          subtitle="Vamos configurar seu perfil profissional"
+          subtitle={t.onboard.setupSubtitle}
           subtitleClassName="text-sm text-slate-500"
         />
       </div>
@@ -253,61 +240,52 @@ export default function OnboardPage() {
 
       <div className="w-full max-w-lg">
 
-        {/* ─── STEP: BASICS ─────────────────────────────────────────────── */}
         {step === 'basics' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Dados básicos</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Como devemos te chamar e qual é seu cargo atual?</p>
+              <h2 className="text-lg font-semibold text-slate-900">{t.onboard.basicsTitle}</h2>
+              <p className="text-sm text-slate-500 mt-0.5">{t.onboard.basicsSubtitle}</p>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Nome completo <span className="text-red-500">*</span>
+                {t.onboard.fullName} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
-                placeholder="Ex: Maria Clara Souza"
+                placeholder={t.onboard.fullNamePlaceholder}
                 className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Cargo atual
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.onboard.currentRole}</label>
               <input
                 type="text"
                 value={currentRole}
                 onChange={e => setCurrentRole(e.target.value)}
-                placeholder="Ex: Legal Operations Specialist, Advogada Sênior..."
+                placeholder={t.onboard.currentRolePlaceholder}
                 className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <p className="text-xs text-slate-400 mt-1">Se estiver em transição, informe o cargo que deseja ou o mais recente.</p>
+              <p className="text-xs text-slate-400 mt-1">{t.onboard.currentRoleHint}</p>
             </div>
-
             {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
-
             <button
               onClick={handleBasicsNext}
               disabled={saving}
               className="w-full bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
-              {saving ? 'Salvando...' : 'Continuar →'}
+              {saving ? t.onboard.saving : `${t.onboard.continue} \u2192`}
             </button>
           </div>
         )}
 
-        {/* ─── STEP: PROFESSIONAL TYPE ──────────────────────────────────── */}
         {step === 'professional' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Tipo de atuação</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Onde você atua ou quer atuar profissionalmente?</p>
+              <h2 className="text-lg font-semibold text-slate-900">{t.onboard.professionalTitle}</h2>
+              <p className="text-sm text-slate-500 mt-0.5">{t.onboard.professionalSubtitle}</p>
             </div>
-
             <div className="space-y-2">
               {PROFESSIONAL_TYPES.map(pt => (
                 <button
@@ -325,11 +303,8 @@ export default function OnboardPage() {
                 </button>
               ))}
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Anos de experiência jurídica
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.onboard.yearsExperience}</label>
               <input
                 type="number"
                 min={0}
@@ -340,35 +315,31 @@ export default function OnboardPage() {
                 className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-
             {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
-
             <div className="flex gap-3">
               <button
                 onClick={() => setStep('basics')}
                 className="flex-1 border border-slate-300 text-slate-700 rounded-xl py-2.5 text-sm font-medium hover:bg-slate-50 transition-colors"
               >
-                ← Voltar
+                &larr; {t.onboard.back}
               </button>
               <button
                 onClick={handleProfessionalNext}
                 disabled={saving}
                 className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
-                {saving ? 'Salvando...' : 'Continuar →'}
+                {saving ? t.onboard.saving : `${t.onboard.continue} \u2192`}
               </button>
             </div>
           </div>
         )}
 
-        {/* ─── STEP: EXPERTISE ─────────────────────────────────────────── */}
         {step === 'expertise' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Áreas de especialização</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Selecione as áreas em que você atua ou tem interesse. Isso melhora as sugestões de vagas.</p>
+              <h2 className="text-lg font-semibold text-slate-900">{t.onboard.expertiseTitle}</h2>
+              <p className="text-sm text-slate-500 mt-0.5">{t.onboard.expertiseSubtitle}</p>
             </div>
-
             <div className="flex flex-wrap gap-2">
               {AREAS_OPTIONS.map(area => (
                 <button
@@ -385,98 +356,87 @@ export default function OnboardPage() {
                 </button>
               ))}
             </div>
-
             {selectedAreas.length > 0 && (
-              <p className="text-xs text-slate-400">{selectedAreas.length} área{selectedAreas.length > 1 ? 's' : ''} selecionada{selectedAreas.length > 1 ? 's' : ''}</p>
+              <p className="text-xs text-slate-400">{t.onboard.areasSelected(selectedAreas.length)}</p>
             )}
-
             {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
-
             <div className="flex gap-3">
               <button
                 onClick={() => setStep('professional')}
                 className="flex-1 border border-slate-300 text-slate-700 rounded-xl py-2.5 text-sm font-medium hover:bg-slate-50 transition-colors"
               >
-                ← Voltar
+                &larr; {t.onboard.back}
               </button>
               <button
                 onClick={handleExpertiseNext}
                 disabled={saving}
                 className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
-                {saving ? 'Salvando...' : 'Continuar →'}
+                {saving ? t.onboard.saving : `${t.onboard.continue} \u2192`}
               </button>
             </div>
           </div>
         )}
 
-        {/* ─── STEP: LINKEDIN ───────────────────────────────────────────── */}
         {step === 'linkedin' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Perfil LinkedIn</h2>
-              <p className="text-sm text-slate-500 mt-0.5">
-                Informe o link do seu LinkedIn. Vamos analisar seu perfil e sugerir <strong>quick wins</strong> para você conquistar mais vagas na área jurídica.
-              </p>
+              <h2 className="text-lg font-semibold text-slate-900">{t.onboard.linkedinTitle}</h2>
+              <p className="text-sm text-slate-500 mt-0.5">{t.onboard.linkedinSubtitle}</p>
             </div>
-
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-1.5">
-              <p className="text-xs font-medium text-blue-800">O que você vai receber:</p>
+              <p className="text-xs font-medium text-blue-800">
+                {t.onboard.linkedinBenefits.length > 0 ? '' : ''}
+              </p>
               <ul className="text-xs text-blue-700 space-y-1">
-                <li>✓ Análise do headline e visibilidade nos recrutadores</li>
-                <li>✓ Gaps de keywords relevantes para Legal Ops</li>
-                <li>✓ Sugestões de seções em falta (Sobre, Skills, etc.)</li>
-                <li>✓ Dicas para aumentar o alcance orgânico do perfil</li>
+                {t.onboard.linkedinBenefits.map((benefit, i) => (
+                  <li key={i}>{'\u2713'} {benefit}</li>
+                ))}
               </ul>
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">URL do LinkedIn</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.onboard.linkedinUrlLabel}</label>
               <input
                 type="url"
                 value={linkedinUrl}
                 onChange={e => setLinkedinUrl(e.target.value)}
-                placeholder="https://linkedin.com/in/seuperfil"
+                placeholder={t.onboard.linkedinUrlPlaceholder}
                 className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <p className="text-xs text-slate-400 mt-1">Certifique-se de que seu perfil está público para melhor análise.</p>
+              <p className="text-xs text-slate-400 mt-1">{t.onboard.linkedinUrlHint}</p>
             </div>
-
             {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
-
             <button
               onClick={handleLinkedInAnalyze}
               disabled={saving || !linkedinUrl.trim()}
               className="w-full bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
-              {saving ? 'Analisando perfil...' : 'Analisar meu LinkedIn →'}
+              {saving ? t.onboard.analyzingLinkedin : `${t.onboard.analyzeLinkedin} \u2192`}
             </button>
-
             <button
               onClick={handleSkipLinkedIn}
               disabled={saving}
               className="w-full text-slate-400 text-xs hover:text-slate-600 transition-colors"
             >
-              Pular por agora — adicionar depois nas configurações
+              {t.onboard.skipLinkedin}
             </button>
           </div>
         )}
 
-        {/* ─── STEP: INSIGHTS ───────────────────────────────────────────── */}
         {step === 'insights' && (
           <div className="space-y-4">
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">Seus quick wins do LinkedIn</h2>
+              <h2 className="text-lg font-semibold text-slate-900">{t.onboard.insightsTitle}</h2>
               <p className="text-sm text-slate-500 mt-0.5">
                 {insightsScrapeSuccess
-                  ? 'Analisamos seu perfil e identificamos as principais oportunidades de melhoria.'
-                  : 'Geramos recomendações baseadas no seu contexto profissional para impulsionar seu perfil.'}
+                  ? t.onboard.insightsSubtitleScraped
+                  : t.onboard.insightsSubtitleGenerated}
               </p>
             </div>
 
             {insights.length === 0 ? (
               <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center shadow-sm">
-                <p className="text-slate-500 text-sm">Não foi possível gerar insights agora. Você pode tentar novamente nas configurações.</p>
+                <p className="text-slate-500 text-sm">{t.onboard.noInsights}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -505,7 +465,7 @@ export default function OnboardPage() {
                             <p className="text-xs text-slate-600 mt-1">{insight.description}</p>
                             <div className="mt-2 bg-slate-50 rounded-lg px-3 py-2">
                               <p className="text-xs font-medium text-slate-700">
-                                <span className="text-green-600">Ação: </span>
+                                <span className="text-green-600">{t.onboard.action} </span>
                                 {insight.action}
                               </p>
                             </div>
@@ -524,9 +484,9 @@ export default function OnboardPage() {
               disabled={saving}
               className="w-full bg-blue-600 text-white rounded-xl py-3 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
             >
-              {saving ? 'Finalizando...' : 'Ir para a plataforma →'}
+              {saving ? t.onboard.finishing : `${t.onboard.goToPlatform} \u2192`}
             </button>
-            <p className="text-center text-xs text-slate-400">Esses insights ficam salvos nas suas configurações de perfil.</p>
+            <p className="text-center text-xs text-slate-400">{t.onboard.insightsSaved}</p>
           </div>
         )}
       </div>

@@ -8,21 +8,8 @@ import {
   type CrawlerStats,
 } from '@/lib/crawler-runs'
 import { JobCard } from '@/components/JobCard'
+import { useI18n } from '@/lib/i18n'
 import type { Job, RemoteReality } from '@/lib/types'
-
-const REMOTE_OPTIONS: { value: RemoteReality | 'all'; label: string }[] = [
-  { value: 'all', label: 'Todos' },
-  { value: 'fully_remote', label: '100% Remoto' },
-  { value: 'remote_with_travel', label: 'Remoto + Viagem' },
-  { value: 'hybrid_disguised', label: 'Hibrido' },
-  { value: 'onsite', label: 'Presencial' },
-]
-
-const SALARY_OPTIONS = [
-  { value: 'all', label: 'Qualquer salario' },
-  { value: 'disclosed', label: 'Salario divulgado' },
-  { value: 'high', label: 'Alto (100k+)' },
-]
 
 export function DiscoverClient({
   initialJobs,
@@ -40,6 +27,21 @@ export function DiscoverClient({
   const [salaryFilter, setSalaryFilter] = useState('all')
   const [sortBy, setSortBy] = useState<'newest' | 'salary'>('newest')
   const router = useRouter()
+  const { t, locale } = useI18n()
+
+  const REMOTE_OPTIONS: { value: RemoteReality | 'all'; label: string }[] = [
+    { value: 'all', label: t.discover.all },
+    { value: 'fully_remote', label: t.discover.fullyRemote },
+    { value: 'remote_with_travel', label: t.discover.remoteTravel },
+    { value: 'hybrid_disguised', label: t.discover.hybrid },
+    { value: 'onsite', label: t.discover.onsite },
+  ]
+
+  const SALARY_OPTIONS = [
+    { value: 'all', label: t.discover.anySalary },
+    { value: 'disclosed', label: t.discover.disclosedSalary },
+    { value: 'high', label: t.discover.highSalary },
+  ]
 
   const filteredJobs = useMemo(() => {
     let result = jobs
@@ -68,6 +70,7 @@ export function DiscoverClient({
 
     return result
   }, [jobs, search, remoteFilter, salaryFilter, sortBy])
+
   async function handleAction(jobId: string, action: 'add' | 'ignore') {
     const res = await fetch('/api/pipeline', {
       method: 'POST',
@@ -107,22 +110,25 @@ export function DiscoverClient({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">
-              Crawler monitor
+              {t.discover.crawlerMonitor}
             </p>
             <h1 className="mt-1 text-lg font-semibold text-slate-900">
               {getCrawlerRunHeadline(stats)}
             </h1>
             <p className="mt-1 text-sm text-slate-600">
               {stats.latestRun
-                ? `Ultima execucao em ${new Date(stats.latestRun.completed_at).toLocaleString('pt-BR')} usando ${formatCrawlerDiscoverySource(stats.latestRun.discovery_source)}.`
-                : 'Ainda nao ha execucoes registradas do crawler.'}
+                ? t.discover.lastRun(
+                    new Date(stats.latestRun.completed_at).toLocaleString(locale === 'pt' ? 'pt-BR' : 'en-US'),
+                    formatCrawlerDiscoverySource(stats.latestRun.discovery_source)
+                  )
+                : t.discover.noRunsYet}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-xl bg-white/80 px-4 py-3">
               <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
-                Novas
+                {t.discover.newJobs}
               </p>
               <p className="mt-1 text-2xl font-bold text-emerald-600">
                 {stats.latestRun?.inserted_count ?? 0}
@@ -130,7 +136,7 @@ export function DiscoverClient({
             </div>
             <div className="rounded-xl bg-white/80 px-4 py-3">
               <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
-                Duplicadas
+                {t.discover.duplicates}
               </p>
               <p className="mt-1 text-2xl font-bold text-amber-600">
                 {stats.latestRun?.duplicate_count ?? 0}
@@ -138,7 +144,7 @@ export function DiscoverClient({
             </div>
             <div className="rounded-xl bg-white/80 px-4 py-3">
               <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
-                Varridas
+                {t.discover.scraped}
               </p>
               <p className="mt-1 text-2xl font-bold text-slate-900">
                 {stats.latestRun?.scraped_count ?? 0}
@@ -146,7 +152,7 @@ export function DiscoverClient({
             </div>
             <div className="rounded-xl bg-white/80 px-4 py-3">
               <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
-                Ultimos 7 dias
+                {t.discover.last7Days}
               </p>
               <p className="mt-1 text-2xl font-bold text-blue-600">
                 {stats.insertedLast7Days}
@@ -168,17 +174,17 @@ export function DiscoverClient({
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar por cargo ou empresa..."
+              placeholder={t.discover.searchPlaceholder}
               className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
             />
           </div>
           <span className="text-sm text-slate-500 flex-shrink-0">
-            {filteredJobs.length} vaga{filteredJobs.length !== 1 ? 's' : ''}
+            {t.discover.jobCount(filteredJobs.length)}
           </span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-slate-500 font-medium">Filtros:</span>
+          <span className="text-xs text-slate-500 font-medium">{t.discover.filters}</span>
           {REMOTE_OPTIONS.map(opt => (
             <button
               key={opt.value}
@@ -207,8 +213,8 @@ export function DiscoverClient({
             onChange={e => setSortBy(e.target.value as 'newest' | 'salary')}
             className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="newest">Mais recentes</option>
-            <option value="salary">Maior salario</option>
+            <option value="newest">{t.discover.newest}</option>
+            <option value="salary">{t.discover.highestSalary}</option>
           </select>
         </div>
       </div>
@@ -220,11 +226,11 @@ export function DiscoverClient({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <p className="text-sm text-slate-500 font-medium">Nenhuma vaga encontrada</p>
+          <p className="text-sm text-slate-500 font-medium">{t.discover.noJobsFound}</p>
           <p className="text-xs text-slate-400 mt-1">
             {search || remoteFilter !== 'all' || salaryFilter !== 'all'
-              ? 'Tente ajustar seus filtros de busca.'
-              : 'A proxima busca roda amanha as 7h.'}
+              ? t.discover.noJobsFilterHint
+              : t.discover.noJobsHint}
           </p>
         </div>
       ) : (
@@ -241,7 +247,7 @@ export function DiscoverClient({
                 disabled={loadingMore}
                 className="px-6 py-2.5 text-sm text-slate-600 border border-slate-300 rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-colors"
               >
-                {loadingMore ? 'Carregando...' : 'Carregar mais'}
+                {loadingMore ? t.discover.loading : t.discover.loadMore}
               </button>
             </div>
           )}

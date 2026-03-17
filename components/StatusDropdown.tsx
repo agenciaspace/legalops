@@ -2,15 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useI18n } from '@/lib/i18n'
 import type { PipelineStatus } from '@/lib/types'
-
-const OPTIONS: { value: PipelineStatus; label: string }[] = [
-  { value: 'researching', label: 'Pesquisando' },
-  { value: 'applied', label: 'Aplicada' },
-  { value: 'interview', label: 'Entrevista' },
-  { value: 'offer', label: 'Oferta' },
-  { value: 'discarded', label: 'Descartada' },
-]
 
 interface StatusDropdownProps {
   entryId: string
@@ -19,8 +12,17 @@ interface StatusDropdownProps {
 
 export function StatusDropdown({ entryId, currentStatus }: StatusDropdownProps) {
   const router = useRouter()
+  const { t } = useI18n()
   const [status, setStatus] = useState(currentStatus)
   const [saving, setSaving] = useState(false)
+
+  const OPTIONS: { value: PipelineStatus; label: string }[] = [
+    { value: 'researching', label: t.status.researching },
+    { value: 'applied', label: t.status.applied },
+    { value: 'interview', label: t.status.interview },
+    { value: 'offer', label: t.status.offer },
+    { value: 'discarded', label: t.status.discarded },
+  ]
 
   async function handleChange(newStatus: PipelineStatus) {
     setSaving(true)
