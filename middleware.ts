@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
-  const publicPaths = new Set(['/', '/en', '/login'])
+  const publicPaths = new Set(['/', '/en', '/login', '/manifesto', '/pricing', '/for-employers'])
   const { pathname } = request.nextUrl
 
   const supabase = createServerClient(
