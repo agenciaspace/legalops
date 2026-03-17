@@ -74,7 +74,7 @@ export default function ForEmployersPage() {
           </Link>
           <div className="flex items-center gap-3">
             <Link
-              href="/pricing"
+              href="/pricing/employers"
               className="rounded-full border border-stone-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
             >
               Preços
@@ -118,7 +118,7 @@ export default function ForEmployersPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/pricing"
+                href="/pricing/employers"
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
               >
                 Ver todos os planos

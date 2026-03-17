@@ -1,170 +1,6 @@
 import Link from 'next/link'
-import { Check, ArrowRight } from 'lucide-react'
+import { ArrowRight, Briefcase, Building2 } from 'lucide-react'
 import { BrandLogo } from '@/components/BrandLogo'
-
-const professionalPlans = [
-  {
-    name: 'Free',
-    price: '$0',
-    period: '/mês',
-    description: 'Para quem está começando na área de Legal Ops.',
-    features: [
-      'Perfil profissional público',
-      'Descoberta de vagas (feed básico)',
-      '1 alias de email',
-      'Acesso ao diretório de profissionais',
-    ],
-    cta: 'Começar grátis',
-    href: '/login',
-    highlight: false,
-  },
-  {
-    name: 'Pro',
-    price: '$29',
-    period: '/mês',
-    description: 'Para profissionais que querem acelerar a carreira.',
-    features: [
-      'Tudo do Free +',
-      'Pipeline completo (Kanban)',
-      '10 aliases de email',
-      'AI Interview Prep ilimitado',
-      'AI Cover Letter ilimitado',
-      'Alertas personalizados de vagas',
-      'Perfil destacado no diretório',
-      'Match score automático com vagas',
-    ],
-    cta: 'Assinar Pro',
-    href: '/login',
-    highlight: true,
-  },
-  {
-    name: 'Expert',
-    price: '$99',
-    period: '/mês',
-    description: 'Para líderes e referências do mercado.',
-    features: [
-      'Tudo do Pro +',
-      'Publicação de artigos/insights',
-      'Aliases de email ilimitados',
-      'AI Agent pessoal de pesquisa',
-      'Selo "Expert" verificado',
-      'Acesso antecipado a vagas premium',
-      'Convite para eventos exclusivos',
-    ],
-    cta: 'Assinar Expert',
-    href: '/login',
-    highlight: false,
-  },
-]
-
-const employerPlans = [
-  {
-    name: 'Job Post',
-    price: '$299',
-    period: '/vaga',
-    description: 'Publique vagas e alcance profissionais qualificados.',
-    features: [
-      'Publicação de 1 vaga',
-      'Visibilidade por 30 dias',
-      'Até 50 candidatos',
-      'Descrição enriquecida com IA',
-      'Match automático básico',
-    ],
-    cta: 'Publicar vaga',
-    href: '/for-employers',
-    highlight: false,
-  },
-  {
-    name: 'Talent Access',
-    price: '$999',
-    period: '/mês',
-    description: 'Acesso completo ao pool de talentos de Legal Ops.',
-    features: [
-      'Vagas ilimitadas',
-      'Match automático com IA avançada',
-      'Filtros avançados de candidatos',
-      'Contato direto com profissionais',
-      'Dashboard de métricas',
-      'Integração com ATS',
-    ],
-    cta: 'Contratar plano',
-    href: '/for-employers',
-    highlight: true,
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    period: '',
-    description: 'Para grandes operações de recrutamento jurídico.',
-    features: [
-      'Tudo do Talent Access +',
-      'API de integração',
-      'Account manager dedicado',
-      'Employer branding page',
-      'Analytics avançado',
-      'SLA de suporte',
-    ],
-    cta: 'Falar com vendas',
-    href: '/for-employers',
-    highlight: false,
-  },
-]
-
-function PlanCard({
-  plan,
-}: {
-  plan: (typeof professionalPlans)[number]
-}) {
-  return (
-    <div
-      className={`flex flex-col rounded-2xl border p-6 ${
-        plan.highlight
-          ? 'border-slate-950 bg-slate-950 text-white shadow-xl'
-          : 'border-stone-200 bg-white'
-      }`}
-    >
-      <h3 className="text-lg font-semibold">{plan.name}</h3>
-      <div className="mt-3 flex items-baseline gap-1">
-        <span className="text-4xl font-bold">{plan.price}</span>
-        {plan.period && (
-          <span className={plan.highlight ? 'text-slate-400' : 'text-slate-500'}>
-            {plan.period}
-          </span>
-        )}
-      </div>
-      <p
-        className={`mt-3 text-sm ${
-          plan.highlight ? 'text-slate-300' : 'text-slate-600'
-        }`}
-      >
-        {plan.description}
-      </p>
-      <ul className="mt-6 flex-1 space-y-3">
-        {plan.features.map((feature) => (
-          <li key={feature} className="flex items-start gap-2 text-sm">
-            <Check
-              className={`mt-0.5 h-4 w-4 flex-shrink-0 ${
-                plan.highlight ? 'text-emerald-400' : 'text-emerald-600'
-              }`}
-            />
-            <span>{feature}</span>
-          </li>
-        ))}
-      </ul>
-      <Link
-        href={plan.href}
-        className={`mt-6 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors ${
-          plan.highlight
-            ? 'bg-white text-slate-950 hover:bg-slate-100'
-            : 'bg-slate-950 text-white hover:bg-slate-800'
-        }`}
-      >
-        {plan.cta}
-        <ArrowRight className="h-4 w-4" />
-      </Link>
-    </div>
-  )
-}
 
 export default function PricingPage() {
   return (
@@ -194,7 +30,7 @@ export default function PricingPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-6 py-16">
+      <main className="mx-auto max-w-4xl px-6 py-16 sm:py-24">
         {/* Hero */}
         <div className="text-center">
           <h1
@@ -204,42 +40,66 @@ export default function PricingPage() {
                 '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
             }}
           >
-            Planos para cada fase da sua carreira
+            Planos e preços
           </h1>
           <p className="mt-4 text-lg text-slate-600">
-            De profissional iniciante a líder referência em Legal Ops.
+            Soluções para profissionais que querem acelerar a carreira e empresas que buscam os melhores talentos.
           </p>
         </div>
 
-        {/* Professional Plans */}
-        <section className="mt-12">
-          <h2 className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400">
-            Para Profissionais
-          </h2>
-          <div className="mt-6 grid gap-6 md:grid-cols-3">
-            {professionalPlans.map((plan) => (
-              <PlanCard key={plan.name} plan={plan} />
-            ))}
-          </div>
-        </section>
+        {/* Two paths */}
+        <div className="mt-12 grid gap-6 md:grid-cols-2">
+          {/* Professionals */}
+          <Link
+            href="/pricing/professionals"
+            className="group relative flex flex-col rounded-2xl border border-stone-200 bg-white p-8 transition-all hover:border-slate-950 hover:shadow-lg"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50">
+              <Briefcase className="h-6 w-6 text-blue-600" />
+            </div>
+            <h2 className="mt-5 text-2xl font-semibold">Para Profissionais</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Ferramentas de IA para entrevistas e cover letters, pipeline visual de candidaturas,
+              email aliases profissionais e posicionamento no diretório.
+            </p>
+            <ul className="mt-5 space-y-2 text-sm text-slate-500">
+              <li>Free — $0/mês</li>
+              <li>Pro — $29/mês</li>
+              <li>Expert — $99/mês</li>
+            </ul>
+            <div className="mt-6 flex items-center gap-2 text-sm font-medium text-slate-950 group-hover:gap-3 transition-all">
+              Ver planos para profissionais
+              <ArrowRight className="h-4 w-4" />
+            </div>
+          </Link>
 
-        {/* Employer Plans */}
-        <section className="mt-20">
-          <h2 className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400">
-            Para Empresas
-          </h2>
-          <p className="mt-2 text-center text-lg text-slate-600">
-            Encontre os melhores profissionais de Legal Ops do mercado.
-          </p>
-          <div className="mt-6 grid gap-6 md:grid-cols-3">
-            {employerPlans.map((plan) => (
-              <PlanCard key={plan.name} plan={plan} />
-            ))}
-          </div>
-        </section>
+          {/* Employers */}
+          <Link
+            href="/pricing/employers"
+            className="group relative flex flex-col rounded-2xl border border-stone-200 bg-white p-8 transition-all hover:border-slate-950 hover:shadow-lg"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
+              <Building2 className="h-6 w-6 text-emerald-600" />
+            </div>
+            <h2 className="mt-5 text-2xl font-semibold">Para Empresas</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Publique vagas, acesse o pool de talentos especializados, match automático com IA,
+              filtros avançados e integração com ATS.
+            </p>
+            <ul className="mt-5 space-y-2 text-sm text-slate-500">
+              <li>Job Post — $299/vaga</li>
+              <li>Talent Access — $999/mês</li>
+              <li>Enterprise — Custom</li>
+            </ul>
+            <div className="mt-6 flex items-center gap-2 text-sm font-medium text-slate-950 group-hover:gap-3 transition-all">
+              Ver planos para empresas
+              <ArrowRight className="h-4 w-4" />
+            </div>
+          </Link>
+        </div>
 
-        {/* FAQ / CTA */}
-        <section className="mt-20 rounded-2xl border border-stone-200 bg-white px-6 py-8 text-center sm:px-8">
+        {/* CTA */}
+        <section className="mt-16 rounded-2xl border border-stone-200 bg-white px-6 py-8 text-center sm:px-8">
           <h2
             className="text-3xl"
             style={{
