@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, Globe } from 'lucide-react'
-import { BrandLogo } from '@/components/BrandLogo'
+import { BrandMark } from '@/components/BrandLogo'
 
 type Locale = 'pt' | 'en'
 
@@ -141,26 +141,26 @@ export function ManifestoPage({ locale }: { locale: Locale }) {
   const copy = content[locale]
 
   return (
-    <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-stone-50 text-slate-950">
+    <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-[#F5F4F0] text-[#1A1A1A]">
       {/* Header */}
-      <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <Link href={locale === 'pt' ? '/' : '/en'}>
-            <BrandLogo
-              className="flex items-center gap-3"
-              markClassName="h-10 w-10 text-orange-500"
-            />
+      <header className="border-b border-[#1A1A1A]/5 bg-[#F5F4F0]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <Link href={locale === 'pt' ? '/' : '/en'} className="flex items-center gap-3">
+            <BrandMark className="h-8 w-8 md:h-10 md:w-10 text-[#FF6A00]" />
+            <span className="font-bold text-xl md:text-2xl tracking-tight text-[#1A1A1A]">
+              legalops.work
+            </span>
           </Link>
           <div className="flex items-center gap-3">
             <Link
               href={copy.plansHref}
-              className="hidden sm:inline-flex rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
+              className="hidden sm:inline-flex text-sm font-medium text-[#1A1A1A]/70 hover:text-[#FF6A00] transition-colors"
             >
               {copy.plansLabel}
             </Link>
             <Link
               href={copy.languageHref}
-              className="inline-flex items-center gap-2 rounded-full border border-stone-300 px-3 py-2 text-sm text-slate-700 transition-colors hover:border-slate-950"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1A1A1A]/70 hover:text-[#1A1A1A] transition-colors"
             >
               <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">{copy.languageLabel}</span>
@@ -168,7 +168,7 @@ export function ManifestoPage({ locale }: { locale: Locale }) {
             </Link>
             <Link
               href="/login"
-              className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="bg-[#1A1A1A] hover:bg-[#1A1A1A]/80 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-colors"
             >
               {copy.signIn}
             </Link>
@@ -178,7 +178,7 @@ export function ManifestoPage({ locale }: { locale: Locale }) {
 
       {/* Content */}
       <article className="mx-auto max-w-2xl px-6 py-16 sm:py-20">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#1A1A1A]/40">
           {copy.badge}
         </p>
 
@@ -192,10 +192,10 @@ export function ManifestoPage({ locale }: { locale: Locale }) {
           {copy.title}
         </h1>
 
-        <div className="mt-10 space-y-8 text-base leading-8 text-slate-700">
+        <div className="mt-10 space-y-8 text-base leading-8 text-[#1A1A1A]/70">
           {copy.sections.map((section) => (
             <section key={section.heading}>
-              <h2 className="text-lg font-semibold text-slate-950">
+              <h2 className="text-lg font-semibold text-[#1A1A1A]">
                 {section.heading}
               </h2>
               {section.paragraphs.map((p, i) => (
@@ -207,9 +207,9 @@ export function ManifestoPage({ locale }: { locale: Locale }) {
                 <ul className="mt-4 space-y-3">
                   {section.bullets.map((bullet) => (
                     <li key={bullet.bold} className="flex gap-3">
-                      <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-950" />
+                      <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#1A1A1A]" />
                       <span>
-                        <strong className="text-slate-950">{bullet.bold}</strong>
+                        <strong className="text-[#1A1A1A]">{bullet.bold}</strong>
                         {bullet.text}
                       </span>
                     </li>
@@ -217,7 +217,7 @@ export function ManifestoPage({ locale }: { locale: Locale }) {
                 </ul>
               )}
               {'closing' in section && section.closing && (
-                <p className="mt-3 font-medium text-slate-950">
+                <p className="mt-3 font-medium text-[#1A1A1A]">
                   {section.closing.split('\n').map((line, i) => (
                     <span key={i}>
                       {i > 0 && <br />}
@@ -234,25 +234,25 @@ export function ManifestoPage({ locale }: { locale: Locale }) {
         <div className="mt-12 flex flex-wrap gap-3">
           <Link
             href="/login"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1A1A1A] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#1A1A1A]/80"
           >
             {copy.primaryCta}
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href={copy.secondaryHref}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#1A1A1A]/15 px-6 py-3 text-sm font-medium text-[#1A1A1A]/70 transition-colors hover:border-[#1A1A1A]"
           >
             {copy.secondaryCta}
           </Link>
         </div>
 
         {/* Signature */}
-        <div className="mt-16 border-t border-stone-200 pt-8">
-          <p className="text-sm text-slate-500">
+        <div className="mt-16 border-t border-[#1A1A1A]/10 pt-8">
+          <p className="text-sm text-[#1A1A1A]/50">
             {copy.signature}
           </p>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[#1A1A1A]/40">
             {copy.date}
           </p>
         </div>

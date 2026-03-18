@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Check, ArrowRight, Globe } from 'lucide-react'
-import { BrandLogo } from '@/components/BrandLogo'
+import { BrandMark } from '@/components/BrandLogo'
 
 type Locale = 'pt' | 'en'
 
@@ -267,22 +267,22 @@ function PlanCard({ plan }: { plan: Plan }) {
     <div
       className={`flex flex-col rounded-2xl border p-6 ${
         plan.highlight
-          ? 'border-slate-950 bg-slate-950 text-white shadow-xl'
-          : 'border-stone-200 bg-white'
+          ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white shadow-xl'
+          : 'border-[#1A1A1A]/10 bg-white'
       }`}
     >
       <h3 className="text-lg font-semibold">{plan.name}</h3>
       <div className="mt-3 flex items-baseline gap-1">
         <span className="text-4xl font-bold">{plan.price}</span>
         {plan.period && (
-          <span className={plan.highlight ? 'text-slate-400' : 'text-slate-500'}>
+          <span className={plan.highlight ? 'text-white/40' : 'text-[#1A1A1A]/50'}>
             {plan.period}
           </span>
         )}
       </div>
       <p
         className={`mt-3 text-sm ${
-          plan.highlight ? 'text-slate-300' : 'text-slate-600'
+          plan.highlight ? 'text-white/60' : 'text-[#1A1A1A]/60'
         }`}
       >
         {plan.description}
@@ -301,10 +301,10 @@ function PlanCard({ plan }: { plan: Plan }) {
       </ul>
       <Link
         href={plan.href}
-        className={`mt-6 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors ${
+        className={`mt-6 flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-bold transition-colors ${
           plan.highlight
-            ? 'bg-white text-slate-950 hover:bg-slate-100'
-            : 'bg-slate-950 text-white hover:bg-slate-800'
+            ? 'bg-white text-[#1A1A1A] hover:bg-white/90'
+            : 'bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/80'
         }`}
       >
         {plan.cta}
@@ -318,25 +318,25 @@ export function PricingPage({ locale }: { locale: Locale }) {
   const copy = content[locale]
 
   return (
-    <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-stone-50 text-slate-950">
-      <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <Link href={locale === 'pt' ? '/' : '/en'}>
-            <BrandLogo
-              className="flex items-center gap-3"
-              markClassName="h-10 w-10 text-orange-500"
-            />
+    <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-[#F5F4F0] text-[#1A1A1A]">
+      <header className="border-b border-[#1A1A1A]/5 bg-[#F5F4F0]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <Link href={locale === 'pt' ? '/' : '/en'} className="flex items-center gap-3">
+            <BrandMark className="h-8 w-8 md:h-10 md:w-10 text-[#FF6A00]" />
+            <span className="font-bold text-xl md:text-2xl tracking-tight text-[#1A1A1A]">
+              legalops.work
+            </span>
           </Link>
           <div className="flex items-center gap-3">
             <Link
               href={copy.forEmployersHref}
-              className="rounded-full border border-stone-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+              className="hidden sm:inline-flex text-sm font-medium text-[#1A1A1A]/70 hover:text-[#FF6A00] transition-colors"
             >
               {copy.forEmployersLabel}
             </Link>
             <Link
               href={copy.languageHref}
-              className="inline-flex items-center gap-2 rounded-full border border-stone-300 px-3 py-2 text-sm text-slate-700 transition-colors hover:border-slate-950"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1A1A1A]/70 hover:text-[#1A1A1A] transition-colors"
             >
               <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">{copy.languageLabel}</span>
@@ -344,7 +344,7 @@ export function PricingPage({ locale }: { locale: Locale }) {
             </Link>
             <Link
               href="/login"
-              className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="bg-[#1A1A1A] hover:bg-[#1A1A1A]/80 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-colors"
             >
               {copy.signIn}
             </Link>
@@ -352,7 +352,7 @@ export function PricingPage({ locale }: { locale: Locale }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-6 py-16">
+      <main className="mx-auto max-w-7xl px-6 py-16">
         {/* Hero */}
         <div className="text-center">
           <h1
@@ -364,14 +364,14 @@ export function PricingPage({ locale }: { locale: Locale }) {
           >
             {copy.heroTitle}
           </h1>
-          <p className="mt-4 text-lg text-slate-600">
+          <p className="mt-4 text-lg text-[#1A1A1A]/60">
             {copy.heroDescription}
           </p>
         </div>
 
         {/* Professional Plans */}
         <section className="mt-12">
-          <h2 className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400">
+          <h2 className="text-center text-xs font-semibold uppercase tracking-widest text-[#1A1A1A]/40">
             {copy.forProfessionals}
           </h2>
           <div className="mt-6 grid gap-6 md:grid-cols-3">
@@ -383,10 +383,10 @@ export function PricingPage({ locale }: { locale: Locale }) {
 
         {/* Employer Plans */}
         <section className="mt-20">
-          <h2 className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400">
+          <h2 className="text-center text-xs font-semibold uppercase tracking-widest text-[#1A1A1A]/40">
             {copy.forEmployers}
           </h2>
-          <p className="mt-2 text-center text-lg text-slate-600">
+          <p className="mt-2 text-center text-lg text-[#1A1A1A]/60">
             {copy.forEmployersDescription}
           </p>
           <div className="mt-6 grid gap-6 md:grid-cols-3">
@@ -396,8 +396,8 @@ export function PricingPage({ locale }: { locale: Locale }) {
           </div>
         </section>
 
-        {/* FAQ / CTA */}
-        <section className="mt-20 rounded-2xl border border-stone-200 bg-white px-6 py-8 text-center sm:px-8">
+        {/* CTA */}
+        <section className="mt-20 rounded-2xl border border-[#1A1A1A]/10 bg-white px-6 py-8 text-center sm:px-8">
           <h2
             className="text-3xl"
             style={{
@@ -407,12 +407,12 @@ export function PricingPage({ locale }: { locale: Locale }) {
           >
             {copy.ctaTitle}
           </h2>
-          <p className="mt-3 text-slate-600">
+          <p className="mt-3 text-[#1A1A1A]/60">
             {copy.ctaDescription}
           </p>
           <Link
             href="/login"
-            className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-[#1A1A1A] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#1A1A1A]/80"
           >
             {copy.ctaCta}
             <ArrowRight className="h-4 w-4" />

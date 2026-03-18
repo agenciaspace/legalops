@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { ArrowRight, Globe, ExternalLink, Search } from 'lucide-react'
 import { createServerClient } from '@supabase/ssr'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { BrandLogo } from '@/components/BrandLogo'
+import { BrandMark } from '@/components/BrandLogo'
 import { TypingText } from '@/components/TypingText'
 import { formatSalary as formatSalaryUtil } from '@/lib/format-salary'
 import type { RemoteReality, UrlStatus } from '@/lib/types'
@@ -41,6 +41,9 @@ const content = {
     pricingHref: '/pricing',
     salaryUndisclosed: 'Não divulgado',
     jobExpired: 'Possivelmente encerrada',
+    forEmployersLabel: 'Empresas',
+    forEmployersHref: '/for-employers',
+    postJobCta: 'Anunciar Vaga',
   },
   en: {
     languageHref: '/',
@@ -64,6 +67,9 @@ const content = {
     pricingHref: '/en/pricing',
     salaryUndisclosed: 'Undisclosed',
     jobExpired: 'Possibly closed',
+    forEmployersLabel: 'Companies',
+    forEmployersHref: '/en/for-employers',
+    postJobCta: 'Post a Job',
   },
 } as const
 
@@ -104,23 +110,33 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
   const jobs = await fetchPublicJobs()
 
   return (
-    <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-stone-50 text-slate-950">
-      <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <Link href={locale === 'pt' ? '/' : '/en'}>
-            <BrandLogo className="flex items-center gap-3" markClassName="h-10 w-10 text-orange-500" />
+    <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-[#F5F4F0] text-[#1A1A1A]">
+      <header className="border-b border-[#1A1A1A]/5 bg-[#F5F4F0]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <Link href={locale === 'pt' ? '/' : '/en'} className="flex items-center gap-3">
+            <BrandMark className="h-8 w-8 md:h-10 md:w-10 text-[#FF6A00]" />
+            <span className="font-bold text-xl md:text-2xl tracking-tight text-[#1A1A1A]">
+              legalops.work
+            </span>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-6">
             <Link
               href={copy.pricingHref}
-              className="hidden sm:inline-flex rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
+              className="text-sm font-medium text-[#1A1A1A]/70 hover:text-[#FF6A00] transition-colors"
             >
               {copy.pricingCta}
             </Link>
             <Link
+              href={copy.forEmployersHref}
+              className="text-sm font-medium text-[#1A1A1A]/70 hover:text-[#FF6A00] transition-colors"
+            >
+              {copy.forEmployersLabel}
+            </Link>
+            <div className="h-4 w-px bg-[#1A1A1A]/10" />
+            <Link
               href={copy.languageHref}
-              className="inline-flex items-center gap-2 rounded-full border border-stone-300 px-3 py-2 text-sm text-slate-700 transition-colors hover:border-slate-950"
+              className="flex items-center gap-1.5 text-sm font-medium text-[#1A1A1A]/70 hover:text-[#1A1A1A] transition-colors"
             >
               <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">{copy.languageLabel}</span>
@@ -128,7 +144,30 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
             </Link>
             <Link
               href="/login"
-              className="rounded-full border border-stone-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950 hover:text-slate-950"
+              className="text-sm font-bold text-[#1A1A1A] hover:text-[#FF6A00] transition-colors"
+            >
+              {copy.signIn}
+            </Link>
+            <Link
+              href={copy.forEmployersHref}
+              className="bg-[#FF6A00] hover:bg-[#E65C00] text-white px-6 py-3 rounded-lg text-sm font-bold transition-colors"
+            >
+              {copy.postJobCta}
+            </Link>
+          </div>
+
+          {/* Mobile nav */}
+          <div className="flex md:hidden items-center gap-3">
+            <Link
+              href={copy.languageHref}
+              className="flex items-center gap-1.5 text-sm text-[#1A1A1A]/70"
+            >
+              <Globe className="h-4 w-4" />
+              {copy.languageCompact}
+            </Link>
+            <Link
+              href="/login"
+              className="text-sm font-bold text-[#1A1A1A]"
             >
               {copy.signIn}
             </Link>
@@ -136,10 +175,10 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+      <main className="mx-auto max-w-7xl px-6 py-16 sm:py-20">
         <section className="max-w-3xl">
           <h1
-            className="text-5xl leading-tight text-slate-950 sm:text-6xl"
+            className="text-5xl leading-tight text-[#1A1A1A] sm:text-6xl"
             style={{
               fontFamily:
                 '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
@@ -148,21 +187,21 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
             {copy.heroTitle}
           </h1>
 
-          <p className="mt-4 text-lg leading-8 text-slate-600">
+          <p className="mt-4 text-lg leading-8 text-[#1A1A1A]/60">
             <TypingText text={copy.heroDescription} delay={300} speed={25} />
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1A1A1A] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#1A1A1A]/80"
             >
               {copy.heroPrimaryCta}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={copy.heroSecondaryHref}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#1A1A1A]/15 px-6 py-3 text-sm font-medium text-[#1A1A1A]/70 transition-colors hover:border-[#1A1A1A]"
             >
               {copy.heroSecondaryCta}
             </Link>
@@ -171,7 +210,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
 
         <section className="mt-16">
           <h2
-            className="text-3xl text-slate-950 sm:text-4xl"
+            className="text-3xl text-[#1A1A1A] sm:text-4xl"
             style={{
               fontFamily:
                 '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
@@ -179,14 +218,14 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
           >
             {copy.jobsTitle}
           </h2>
-          <p className="mt-2 flex items-center gap-2 text-sm text-slate-500">
+          <p className="mt-2 flex items-center gap-2 text-sm text-[#1A1A1A]/50">
             <Search className="h-4 w-4" />
             {copy.jobsSubtitle}
           </p>
 
           {jobs.length > 0 ? (
-            <div className="mt-6 overflow-hidden rounded-[20px] border border-stone-200 bg-white">
-              <div className="hidden sm:grid sm:grid-cols-[2fr_1.2fr_1fr_1fr] gap-4 border-b border-stone-200 px-6 py-3 text-xs font-medium uppercase tracking-wider text-slate-400">
+            <div className="mt-6 overflow-hidden rounded-2xl border border-[#1A1A1A]/10 bg-white">
+              <div className="hidden sm:grid sm:grid-cols-[2fr_1.2fr_1fr_1fr] gap-4 border-b border-[#1A1A1A]/10 px-6 py-3 text-xs font-medium uppercase tracking-wider text-[#1A1A1A]/40">
                 <div>{copy.tableHeaders.title}</div>
                 <div>{copy.tableHeaders.company}</div>
                 <div>{copy.tableHeaders.remote}</div>
@@ -202,34 +241,34 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
                     href={job.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`group grid gap-1 sm:gap-4 sm:grid-cols-[2fr_1.2fr_1fr_1fr] px-6 py-4 text-sm transition-colors hover:bg-stone-50 ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-stone-50/50'
+                    className={`group grid gap-1 sm:gap-4 sm:grid-cols-[2fr_1.2fr_1fr_1fr] px-6 py-4 text-sm transition-colors hover:bg-[#F5F4F0] ${
+                      index % 2 === 0 ? 'bg-white' : 'bg-[#F5F4F0]/50'
                     } ${isDead ? 'opacity-60' : ''}`}
                   >
-                    <div className="font-medium text-slate-900 flex items-center gap-2">
+                    <div className="font-medium text-[#1A1A1A] flex items-center gap-2">
                       {job.title}
                       {isDead && (
                         <span className="text-xs font-normal text-amber-500">{copy.jobExpired}</span>
                       )}
-                      <ExternalLink className="h-3 w-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ExternalLink className="h-3 w-3 text-[#1A1A1A]/30 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                    <div className="text-slate-600">{job.company}</div>
-                    <div className="text-slate-500">{remoteLabels[job.remote_reality as RemoteReality] ?? '—'}</div>
-                    <div className="text-slate-500">{formatSalary(job.salary_min, job.salary_max, job.salary_currency, salaryFallback)}</div>
+                    <div className="text-[#1A1A1A]/60">{job.company}</div>
+                    <div className="text-[#1A1A1A]/50">{remoteLabels[job.remote_reality as RemoteReality] ?? '—'}</div>
+                    <div className="text-[#1A1A1A]/50">{formatSalary(job.salary_min, job.salary_max, job.salary_currency, salaryFallback)}</div>
                   </a>
                 )
               })}
             </div>
           ) : (
-            <p className="mt-6 text-sm text-slate-500">{copy.jobsEmpty}</p>
+            <p className="mt-6 text-sm text-[#1A1A1A]/50">{copy.jobsEmpty}</p>
           )}
         </section>
 
-        <section className="mt-16 rounded-[24px] border border-stone-200 bg-white px-6 py-8 sm:px-8">
+        <section className="mt-16 rounded-2xl border border-[#1A1A1A]/10 bg-white px-6 py-8 sm:px-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <h2
-                className="text-3xl text-slate-950 sm:text-4xl"
+                className="text-3xl text-[#1A1A1A] sm:text-4xl"
                 style={{
                   fontFamily:
                     '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
@@ -239,7 +278,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
               </h2>
               <Link
                 href={copy.manifestoHref}
-                className="mt-2 inline-block text-sm text-slate-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-slate-950 hover:decoration-slate-950"
+                className="mt-2 inline-block text-sm text-[#1A1A1A]/50 underline decoration-[#1A1A1A]/20 underline-offset-4 transition-colors hover:text-[#1A1A1A] hover:decoration-[#1A1A1A]"
               >
                 {copy.manifestoLink}
               </Link>
@@ -247,7 +286,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
 
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1A1A1A] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#1A1A1A]/80"
             >
               {copy.closingPrimaryCta}
               <ArrowRight className="h-4 w-4" />

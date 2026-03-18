@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, Users, Zap, BarChart3, Shield, Search, Target, Globe } from 'lucide-react'
-import { BrandLogo } from '@/components/BrandLogo'
+import { BrandMark } from '@/components/BrandLogo'
 
 type Locale = 'pt' | 'en'
 
@@ -173,25 +173,25 @@ export function ForEmployersPage({ locale }: { locale: Locale }) {
   const copy = content[locale]
 
   return (
-    <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-stone-50 text-slate-950">
-      <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <Link href={locale === 'pt' ? '/' : '/en'}>
-            <BrandLogo
-              className="flex items-center gap-3"
-              markClassName="h-10 w-10 text-orange-500"
-            />
+    <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-[#F5F4F0] text-[#1A1A1A]">
+      <header className="border-b border-[#1A1A1A]/5 bg-[#F5F4F0]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <Link href={locale === 'pt' ? '/' : '/en'} className="flex items-center gap-3">
+            <BrandMark className="h-8 w-8 md:h-10 md:w-10 text-[#FF6A00]" />
+            <span className="font-bold text-xl md:text-2xl tracking-tight text-[#1A1A1A]">
+              legalops.work
+            </span>
           </Link>
           <div className="flex items-center gap-3">
             <Link
               href={copy.pricingHref}
-              className="rounded-full border border-stone-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+              className="hidden sm:inline-flex text-sm font-medium text-[#1A1A1A]/70 hover:text-[#FF6A00] transition-colors"
             >
               {copy.pricingLabel}
             </Link>
             <Link
               href={copy.languageHref}
-              className="inline-flex items-center gap-2 rounded-full border border-stone-300 px-3 py-2 text-sm text-slate-700 transition-colors hover:border-slate-950"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1A1A1A]/70 hover:text-[#1A1A1A] transition-colors"
             >
               <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">{copy.languageLabel}</span>
@@ -199,7 +199,7 @@ export function ForEmployersPage({ locale }: { locale: Locale }) {
             </Link>
             <Link
               href="/login"
-              className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="bg-[#1A1A1A] hover:bg-[#1A1A1A]/80 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-colors"
             >
               {copy.signIn}
             </Link>
@@ -207,11 +207,11 @@ export function ForEmployersPage({ locale }: { locale: Locale }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-6">
+      <main className="mx-auto max-w-7xl px-6">
         {/* Hero */}
         <section className="py-16 sm:py-20">
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#1A1A1A]/40">
               {copy.badge}
             </p>
             <h1
@@ -223,20 +223,20 @@ export function ForEmployersPage({ locale }: { locale: Locale }) {
             >
               {copy.heroTitle}
             </h1>
-            <p className="mt-4 text-lg leading-8 text-slate-600">
+            <p className="mt-4 text-lg leading-8 text-[#1A1A1A]/60">
               {copy.heroDescription}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1A1A1A] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#1A1A1A]/80"
               >
                 {copy.heroPrimaryCta}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href={copy.pricingHref}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 px-6 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#1A1A1A]/15 px-6 py-3 text-sm font-medium text-[#1A1A1A]/70 transition-colors hover:border-[#1A1A1A]"
               >
                 {copy.heroSecondaryCta}
               </Link>
@@ -245,7 +245,7 @@ export function ForEmployersPage({ locale }: { locale: Locale }) {
         </section>
 
         {/* How it works */}
-        <section className="border-t border-stone-200 py-16">
+        <section className="border-t border-[#1A1A1A]/10 py-16">
           <h2
             className="text-3xl sm:text-4xl"
             style={{
@@ -258,16 +258,16 @@ export function ForEmployersPage({ locale }: { locale: Locale }) {
           <div className="mt-10 grid gap-8 md:grid-cols-3">
             {copy.steps.map((step) => (
               <div key={step.number}>
-                <span className="text-4xl font-bold text-slate-200">{step.number}</span>
+                <span className="text-4xl font-bold text-[#1A1A1A]/15">{step.number}</span>
                 <h3 className="mt-2 text-lg font-semibold">{step.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{step.description}</p>
+                <p className="mt-2 text-sm leading-6 text-[#1A1A1A]/60">{step.description}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* Features */}
-        <section className="border-t border-stone-200 py-16">
+        <section className="border-t border-[#1A1A1A]/10 py-16">
           <h2
             className="text-3xl sm:text-4xl"
             style={{
@@ -279,29 +279,29 @@ export function ForEmployersPage({ locale }: { locale: Locale }) {
           </h2>
           <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {copy.features.map((feature) => (
-              <div key={feature.title} className="rounded-xl border border-stone-200 bg-white p-6">
-                <feature.icon className="h-6 w-6 text-slate-700" />
+              <div key={feature.title} className="rounded-xl border border-[#1A1A1A]/10 bg-white p-6">
+                <feature.icon className="h-6 w-6 text-[#1A1A1A]/70" />
                 <h3 className="mt-3 font-semibold">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{feature.description}</p>
+                <p className="mt-2 text-sm leading-6 text-[#1A1A1A]/60">{feature.description}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* Stats */}
-        <section className="border-t border-stone-200 py-16">
+        <section className="border-t border-[#1A1A1A]/10 py-16">
           <div className="grid gap-8 sm:grid-cols-3">
             {copy.stats.map((stat) => (
               <div key={stat.label} className="text-center">
                 <p className="text-4xl font-bold">{stat.value}</p>
-                <p className="mt-1 text-sm text-slate-600">{stat.label}</p>
+                <p className="mt-1 text-sm text-[#1A1A1A]/60">{stat.label}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* CTA */}
-        <section className="mb-16 rounded-2xl border border-stone-200 bg-white px-6 py-8 sm:px-8">
+        <section className="mb-16 rounded-2xl border border-[#1A1A1A]/10 bg-white px-6 py-8 sm:px-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <h2
@@ -313,13 +313,13 @@ export function ForEmployersPage({ locale }: { locale: Locale }) {
               >
                 {copy.ctaTitle}
               </h2>
-              <p className="mt-2 text-slate-600">
+              <p className="mt-2 text-[#1A1A1A]/60">
                 {copy.ctaDescription}
               </p>
             </div>
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1A1A1A] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#1A1A1A]/80"
             >
               {copy.ctaCta}
               <ArrowRight className="h-4 w-4" />

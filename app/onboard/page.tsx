@@ -215,14 +215,14 @@ export default function OnboardPage() {
   const currentStepIndex = STEPS.indexOf(step)
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col items-center py-10 px-4">
+    <div className="min-h-screen bg-[#F5F4F0] flex flex-col items-center py-10 px-4">
       <div className="mb-8 text-center">
         <BrandLogo
           className="flex flex-col items-center gap-3"
-          markClassName="h-10 w-10 text-orange-500"
-          titleClassName="text-xl font-semibold tracking-[0.18em] text-slate-950 uppercase"
+          markClassName="h-10 w-10 text-[#FF6A00]"
+          titleClassName="font-bold text-xl tracking-tight text-[#1A1A1A]"
           subtitle="Vamos configurar seu perfil profissional"
-          subtitleClassName="text-sm text-slate-500"
+          subtitleClassName="text-sm text-[#1A1A1A]/50"
         />
       </div>
 

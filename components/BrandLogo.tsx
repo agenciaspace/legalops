@@ -36,13 +36,13 @@ export function BrandLogo({
 }: BrandLogoProps) {
   return (
     <div className={className ?? 'flex items-center gap-3'}>
-      <BrandMark className={markClassName ?? 'h-10 w-10 text-orange-500'} />
+      <BrandMark className={markClassName ?? 'h-10 w-10 text-[#FF6A00]'} />
       <div>
-        <div className={titleClassName ?? 'text-sm font-semibold tracking-[0.22em] text-slate-950 uppercase'}>
-          LegalOps
+        <div className={titleClassName ?? 'font-bold text-xl tracking-tight text-[#1A1A1A]'}>
+          legalops.work
         </div>
         {subtitle ? (
-          <div className={subtitleClassName ?? 'text-sm text-slate-500'}>
+          <div className={subtitleClassName ?? 'text-sm text-[#1A1A1A]/60'}>
             {subtitle}
           </div>
         ) : null}

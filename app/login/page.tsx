@@ -36,15 +36,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F4F0] p-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <BrandLogo
             className="flex flex-col items-center gap-4"
-            markClassName="h-14 w-14 text-orange-500"
-            titleClassName="text-2xl font-semibold tracking-[0.18em] text-slate-950 uppercase"
+            markClassName="h-14 w-14 text-[#FF6A00]"
+            titleClassName="font-bold text-2xl tracking-tight text-[#1A1A1A]"
             subtitle="Plataforma inteligente de job hunting para Legal Operations"
-            subtitleClassName="max-w-xs text-sm leading-6 text-slate-500"
+            subtitleClassName="max-w-xs text-sm leading-6 text-[#1A1A1A]/50"
           />
         </div>
 
