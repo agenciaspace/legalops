@@ -108,7 +108,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
       <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <Link href={locale === 'pt' ? '/' : '/en'}>
-            <BrandLogo className="flex items-center gap-3" markClassName="h-10 w-10 text-slate-950" />
+            <BrandLogo className="flex items-center gap-3" markClassName="h-10 w-10 text-orange-500" />
           </Link>
 
           <div className="flex items-center gap-3">

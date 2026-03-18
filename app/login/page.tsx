@@ -41,7 +41,7 @@ export default function LoginPage() {
         <div className="mb-8 text-center">
           <BrandLogo
             className="flex flex-col items-center gap-4"
-            markClassName="h-14 w-14 text-slate-950"
+            markClassName="h-14 w-14 text-orange-500"
             titleClassName="text-2xl font-semibold tracking-[0.18em] text-slate-950 uppercase"
             subtitle="Plataforma inteligente de job hunting para Legal Operations"
             subtitleClassName="max-w-xs text-sm leading-6 text-slate-500"

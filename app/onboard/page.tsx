@@ -219,7 +219,7 @@ export default function OnboardPage() {
       <div className="mb-8 text-center">
         <BrandLogo
           className="flex flex-col items-center gap-3"
-          markClassName="h-10 w-10 text-slate-950"
+          markClassName="h-10 w-10 text-orange-500"
           titleClassName="text-xl font-semibold tracking-[0.18em] text-slate-950 uppercase"
           subtitle="Vamos configurar seu perfil profissional"
           subtitleClassName="text-sm text-slate-500"

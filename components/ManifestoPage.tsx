@@ -148,7 +148,7 @@ export function ManifestoPage({ locale }: { locale: Locale }) {
           <Link href={locale === 'pt' ? '/' : '/en'}>
             <BrandLogo
               className="flex items-center gap-3"
-              markClassName="h-10 w-10 text-slate-950"
+              markClassName="h-10 w-10 text-orange-500"
             />
           </Link>
           <div className="flex items-center gap-3">

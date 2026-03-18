@@ -45,7 +45,7 @@ export function Nav({ discoverCount }: NavProps) {
           <Link href="/dashboard" className="flex items-center gap-2 mr-6">
             <BrandLogo
               className="flex items-center gap-2"
-              markClassName="h-7 w-7 text-slate-950"
+              markClassName="h-7 w-7 text-orange-500"
               titleClassName="text-sm font-semibold tracking-[0.18em] text-slate-900 uppercase"
             />
           </Link>
