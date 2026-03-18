@@ -249,14 +249,14 @@ const content = {
       },
     ],
   },
-} as const
+}
 
 type Plan = {
   name: string
   price: string
   period: string
   description: string
-  features: readonly string[]
+  features: string[]
   cta: string
   href: string
   highlight: boolean
