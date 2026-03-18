@@ -1,13 +1,14 @@
+'use client'
+
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Users, Zap, BarChart3, Shield, Search, Target } from 'lucide-react'
+import { ArrowRight, Users, Zap, BarChart3, Shield, Search, Target, Globe, ChevronDown } from 'lucide-react'
 import { BrandLogo } from '@/components/BrandLogo'
 
 type Locale = 'pt' | 'en'
 
 const content = {
   pt: {
-    lang: 'pt-BR',
-    homeHref: '/',
     pricingHref: '/pricing',
     pricingLabel: 'Preços',
     signIn: 'Entrar',
@@ -85,9 +86,7 @@ const content = {
     ],
   },
   en: {
-    lang: 'en',
-    homeHref: '/en',
-    pricingHref: '/en/pricing',
+    pricingHref: '/pricing',
     pricingLabel: 'Pricing',
     signIn: 'Sign in',
     heroTag: 'For Employers',
@@ -166,13 +165,27 @@ const content = {
 }
 
 export function ForEmployersPage({ locale }: { locale: Locale }) {
-  const copy = content[locale]
+  const [lang, setLang] = useState<Locale>(locale)
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false)
+  const langMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+        setIsLangMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const copy = content[lang]
 
   return (
-    <div lang={copy.lang} className="min-h-screen bg-[#F5F4F0] text-[#1A1A1A]">
+    <div lang={lang === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-[#F5F4F0] text-[#1A1A1A]">
       <header className="border-b border-[#1A1A1A]/10 bg-[#F5F4F0]/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <Link href={copy.homeHref}>
+          <Link href={lang === 'pt' ? '/' : '/en'}>
             <BrandLogo
               className="flex items-center gap-3"
               markClassName="h-10 w-10 text-[#1A1A1A]"
@@ -185,6 +198,43 @@ export function ForEmployersPage({ locale }: { locale: Locale }) {
             >
               {copy.pricingLabel}
             </Link>
+
+            {/* Language Switcher */}
+            <div className="relative" ref={langMenuRef}>
+              <button
+                onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                className="flex items-center gap-1.5 rounded-xl border-2 border-[#1A1A1A]/20 px-3 py-2 text-sm font-medium text-[#1A1A1A]/70 transition-colors hover:border-[#1A1A1A]"
+              >
+                <Globe className="h-4 w-4" />
+                <span className="uppercase">{lang}</span>
+                <ChevronDown
+                  className={`h-3 w-3 transition-transform ${isLangMenuOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {isLangMenuOpen && (
+                <div className="absolute top-full right-0 mt-2 w-24 overflow-hidden rounded-lg border border-[#1A1A1A]/10 bg-white py-1 shadow-lg">
+                  <button
+                    onClick={() => {
+                      setLang('pt')
+                      setIsLangMenuOpen(false)
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-[#F5F4F0] transition-colors ${lang === 'pt' ? 'font-bold text-[#FF6A00]' : 'text-[#1A1A1A]/70'}`}
+                  >
+                    PT
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLang('en')
+                      setIsLangMenuOpen(false)
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-[#F5F4F0] transition-colors ${lang === 'en' ? 'font-bold text-[#FF6A00]' : 'text-[#1A1A1A]/70'}`}
+                  >
+                    EN
+                  </button>
+                </div>
+              )}
+            </div>
+
             <Link
               href="/login"
               className="rounded-xl bg-[#1A1A1A] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-black"
