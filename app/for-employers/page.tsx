@@ -97,11 +97,7 @@ export default function ForEmployersPage() {
               Para Empresas
             </p>
             <h1
-              className="mt-3 text-4xl leading-tight sm:text-5xl"
-              style={{
-                fontFamily:
-                  '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-              }}
+              className="font-serif mt-3 text-4xl leading-tight sm:text-5xl"
             >
               Contrate os melhores profissionais de Legal Ops
             </h1>
@@ -130,11 +126,7 @@ export default function ForEmployersPage() {
         {/* How it works */}
         <section className="border-t border-stone-200 py-16">
           <h2
-            className="text-3xl sm:text-4xl"
-            style={{
-              fontFamily:
-                '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-            }}
+            className="font-serif text-3xl sm:text-4xl"
           >
             Como funciona
           </h2>
@@ -152,11 +144,7 @@ export default function ForEmployersPage() {
         {/* Features */}
         <section className="border-t border-stone-200 py-16">
           <h2
-            className="text-3xl sm:text-4xl"
-            style={{
-              fontFamily:
-                '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-            }}
+            className="font-serif text-3xl sm:text-4xl"
           >
             Por que empresas escolhem LegalOps
           </h2>
@@ -194,11 +182,7 @@ export default function ForEmployersPage() {
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <h2
-                className="text-3xl"
-                style={{
-                  fontFamily:
-                    '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-                }}
+                className="font-serif text-3xl"
               >
                 Pronto para encontrar seu próximo talento?
               </h2>

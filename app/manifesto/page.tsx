@@ -44,11 +44,7 @@ export default function ManifestoPage() {
         </p>
 
         <h1
-          className="mt-4 text-4xl leading-tight sm:text-5xl"
-          style={{
-            fontFamily:
-              '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-          }}
+          className="font-serif mt-4 text-4xl leading-tight sm:text-5xl"
         >
           Legal Ops merece mais do que um job board genérico.
         </h1>

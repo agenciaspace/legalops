@@ -198,11 +198,7 @@ export default function PricingPage() {
         {/* Hero */}
         <div className="text-center">
           <h1
-            className="text-4xl sm:text-5xl"
-            style={{
-              fontFamily:
-                '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-            }}
+            className="font-serif text-4xl sm:text-5xl"
           >
             Planos para cada fase da sua carreira
           </h1>
@@ -241,11 +237,7 @@ export default function PricingPage() {
         {/* FAQ / CTA */}
         <section className="mt-20 rounded-2xl border border-stone-200 bg-white px-6 py-8 text-center sm:px-8">
           <h2
-            className="text-3xl"
-            style={{
-              fontFamily:
-                '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-            }}
+            className="font-serif text-3xl"
           >
             Comece grátis. Evolua quando quiser.
           </h2>

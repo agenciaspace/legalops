@@ -132,11 +132,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
       <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
         <section className="max-w-3xl">
           <h1
-            className="text-5xl leading-tight text-slate-950 sm:text-6xl"
-            style={{
-              fontFamily:
-                '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-            }}
+            className="font-serif text-5xl leading-tight text-slate-950 sm:text-6xl"
           >
             {copy.heroTitle}
           </h1>
@@ -164,11 +160,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
 
         <section className="mt-16">
           <h2
-            className="text-3xl text-slate-950 sm:text-4xl"
-            style={{
-              fontFamily:
-                '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-            }}
+            className="font-serif text-3xl text-slate-950 sm:text-4xl"
           >
             {copy.jobsTitle}
           </h2>
@@ -218,11 +210,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <h2
-                className="text-3xl text-slate-950 sm:text-4xl"
-                style={{
-                  fontFamily:
-                    '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-                }}
+                className="font-serif text-3xl text-slate-950 sm:text-4xl"
               >
                 {copy.closingTitle}
               </h2>
