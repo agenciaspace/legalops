@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ArrowRight, Globe, ExternalLink } from 'lucide-react'
+import { ArrowRight, Globe, ExternalLink, Search } from 'lucide-react'
 import { createServerClient } from '@supabase/ssr'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { BrandLogo } from '@/components/BrandLogo'
+import { TypingText } from '@/components/TypingText'
 import { formatSalary as formatSalaryUtil } from '@/lib/format-salary'
 import type { RemoteReality, UrlStatus } from '@/lib/types'
 
@@ -29,6 +30,7 @@ const content = {
     heroSecondaryCta: 'Para Empresas',
     heroSecondaryHref: '/for-employers',
     jobsTitle: 'Vagas recentes',
+    jobsSubtitle: 'Pesquise vagas de Legal Ops direto aqui. Clique em qualquer vaga para ver detalhes.',
     jobsEmpty: 'Nenhuma vaga encontrada no momento.',
     tableHeaders: { title: 'Vaga', company: 'Empresa', remote: 'Remoto', salary: 'Salário' },
     closingTitle: 'Comece grátis. Decida depois.',
@@ -51,6 +53,7 @@ const content = {
     heroSecondaryCta: 'For Employers',
     heroSecondaryHref: '/en/for-employers',
     jobsTitle: 'Recent jobs',
+    jobsSubtitle: 'Browse Legal Ops jobs right here. Click any role for details.',
     jobsEmpty: 'No jobs found at the moment.',
     tableHeaders: { title: 'Role', company: 'Company', remote: 'Remote', salary: 'Salary' },
     closingTitle: 'Start free. Decide later.',
@@ -176,6 +179,10 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
           >
             {copy.jobsTitle}
           </h2>
+          <p className="mt-2 flex items-center gap-2 text-sm text-slate-500">
+            <Search className="h-4 w-4" />
+            {copy.jobsSubtitle}
+          </p>
 
           {jobs.length > 0 ? (
             <div className="mt-6 overflow-hidden rounded-[20px] border border-stone-200 bg-white">
@@ -232,9 +239,9 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
               </h2>
               <Link
                 href={copy.manifestoHref}
-                className="mt-2 inline-block text-sm text-slate-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-slate-950 hover:decoration-slate-950"
+                className="mt-2 inline-flex items-center gap-1 text-sm text-slate-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-slate-950 hover:decoration-slate-950"
               >
-                {copy.manifestoLink}
+                <TypingText text={copy.manifestoLink} delay={500} speed={50} />
               </Link>
             </div>
 
