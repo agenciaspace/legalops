@@ -38,7 +38,7 @@ export function BrandLogo({
     <div className={className ?? 'flex items-center gap-3'}>
       <BrandMark className={markClassName ?? 'h-10 w-10 text-slate-950'} />
       <div>
-        <div className={titleClassName ?? 'text-sm font-semibold tracking-[0.22em] text-slate-950 uppercase'}>
+        <div className={titleClassName ?? 'font-serif text-sm font-semibold tracking-[0.22em] text-slate-950 uppercase'}>
           LegalOps
         </div>
         {subtitle ? (
