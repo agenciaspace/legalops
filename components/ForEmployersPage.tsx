@@ -1,14 +1,14 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Users, Zap, BarChart3, Shield, Search, Target, Globe } from 'lucide-react'
+import { ArrowRight, Users, Zap, BarChart3, Shield, Search, Target, Globe, ChevronDown } from 'lucide-react'
 import { BrandMark } from '@/components/BrandLogo'
 
 type Locale = 'pt' | 'en'
 
 const content = {
   pt: {
-    languageHref: '/en/for-employers',
-    languageLabel: 'English',
-    languageCompact: 'EN',
     pricingLabel: 'Preços',
     pricingHref: '/pricing',
     signIn: 'Entrar',
@@ -87,9 +87,6 @@ const content = {
     ],
   },
   en: {
-    languageHref: '/for-employers',
-    languageLabel: 'Português',
-    languageCompact: 'PT',
     pricingLabel: 'Pricing',
     pricingHref: '/en/pricing',
     signIn: 'Sign in',
@@ -167,16 +164,17 @@ const content = {
       },
     ],
   },
-} as const
+}
 
 export function ForEmployersPage({ locale }: { locale: Locale }) {
-  const copy = content[locale]
+  const [lang, setLang] = useState<Locale>(locale)
+  const copy = content[lang]
 
   return (
-    <div lang={locale === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-[#F5F4F0] text-[#1A1A1A]">
+    <div lang={lang === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-[#F5F4F0] text-[#1A1A1A]">
       <header className="border-b border-[#1A1A1A]/5 bg-[#F5F4F0]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <Link href={locale === 'pt' ? '/' : '/en'} className="flex items-center gap-3">
+          <Link href={lang === 'pt' ? '/' : '/en'} className="flex items-center gap-3">
             <BrandMark className="h-8 w-8 md:h-10 md:w-10 text-[#FF6A00]" />
             <span className="font-bold text-xl md:text-2xl tracking-tight text-[#1A1A1A]">
               legalops.work
@@ -189,14 +187,14 @@ export function ForEmployersPage({ locale }: { locale: Locale }) {
             >
               {copy.pricingLabel}
             </Link>
-            <Link
-              href={copy.languageHref}
+            <button
+              onClick={() => setLang(lang === 'pt' ? 'en' : 'pt')}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1A1A1A]/70 hover:text-[#1A1A1A] transition-colors"
             >
               <Globe className="h-4 w-4" />
-              <span className="hidden sm:inline">{copy.languageLabel}</span>
-              <span className="sm:hidden">{copy.languageCompact}</span>
-            </Link>
+              <span className="uppercase">{lang}</span>
+              <ChevronDown className="h-3 w-3" />
+            </button>
             <Link
               href="/login"
               className="bg-[#1A1A1A] hover:bg-[#1A1A1A]/80 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-colors"
