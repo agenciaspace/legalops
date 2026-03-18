@@ -43,54 +43,54 @@ export function ContactsSection({ entryId, initialContacts }: ContactsSectionPro
       {!adding ? (
         <button
           onClick={() => setAdding(true)}
-          className="text-xs text-blue-600 hover:underline font-medium"
+          className="text-xs text-[#FF6A00] hover:text-[#E65C00] font-medium"
         >
           + Adicionar contato
         </button>
       ) : (
-        <div className="space-y-2 bg-slate-50 rounded-lg p-3">
+        <div className="space-y-2 bg-[#1A1A1A]/5 rounded-lg p-3">
           <div className="grid grid-cols-2 gap-2">
             {(['name', 'role', 'email', 'phone'] as const).map(field => (
               <div key={field}>
-                <label className="block text-xs font-medium text-slate-600 mb-0.5 capitalize">
+                <label className="block text-xs font-medium text-[#1A1A1A]/70 mb-0.5 capitalize">
                   {field === 'name' ? 'Nome *' : field === 'role' ? 'Cargo' : field === 'email' ? 'Email' : 'Telefone'}
                 </label>
                 <input
                   value={form[field]}
                   onChange={e => setForm(p => ({ ...p, [field]: e.target.value }))}
-                  className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full border border-[#1A1A1A]/20 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#FF6A00] focus:border-[#FF6A00]"
                 />
               </div>
             ))}
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-0.5">LinkedIn</label>
+            <label className="block text-xs font-medium text-[#1A1A1A]/70 mb-0.5">LinkedIn</label>
             <input
               value={form.linkedin_url}
               onChange={e => setForm(p => ({ ...p, linkedin_url: e.target.value }))}
               placeholder="https://linkedin.com/in/..."
-              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-[#1A1A1A]/20 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#FF6A00] focus:border-[#FF6A00]"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-0.5">Notas</label>
+            <label className="block text-xs font-medium text-[#1A1A1A]/70 mb-0.5">Notas</label>
             <input
               value={form.notes}
               onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
-              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-[#1A1A1A]/20 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#FF6A00] focus:border-[#FF6A00]"
             />
           </div>
           <div className="flex gap-2">
             <button
               onClick={handleAdd}
               disabled={saving || !form.name.trim()}
-              className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50"
+              className="px-3 py-1 bg-[#FF6A00] text-white text-xs font-bold rounded-xl hover:bg-[#E65C00] disabled:opacity-50"
             >
               {saving ? 'Salvando...' : 'Salvar'}
             </button>
             <button
               onClick={() => setAdding(false)}
-              className="px-3 py-1 text-slate-500 text-xs rounded hover:bg-slate-100"
+              className="px-3 py-1 text-[#1A1A1A]/60 text-xs rounded hover:bg-[#1A1A1A]/5"
             >
               Cancelar
             </button>
@@ -101,29 +101,29 @@ export function ContactsSection({ entryId, initialContacts }: ContactsSectionPro
       {contacts.length > 0 && (
         <div className="space-y-2">
           {contacts.map(contact => (
-            <div key={contact.id} className="flex items-start gap-3 bg-slate-50 rounded-lg p-3">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-bold text-blue-700">
+            <div key={contact.id} className="flex items-start gap-3 bg-[#1A1A1A]/5 rounded-lg p-3">
+              <div className="w-8 h-8 rounded-full bg-[#FF6A00]/10 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-[#FF6A00]">
                   {contact.name.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-900">{contact.name}</p>
-                {contact.role && <p className="text-xs text-slate-500">{contact.role}</p>}
+                <p className="text-sm font-medium text-[#1A1A1A]">{contact.name}</p>
+                {contact.role && <p className="text-xs text-[#1A1A1A]/60">{contact.role}</p>}
                 <div className="flex flex-wrap gap-3 mt-1">
                   {contact.email && (
-                    <a href={`mailto:${contact.email}`} className="text-xs text-blue-600 hover:underline">{contact.email}</a>
+                    <a href={`mailto:${contact.email}`} className="text-xs text-[#FF6A00] hover:text-[#E65C00]">{contact.email}</a>
                   )}
-                  {contact.phone && <span className="text-xs text-slate-500">{contact.phone}</span>}
+                  {contact.phone && <span className="text-xs text-[#1A1A1A]/60">{contact.phone}</span>}
                   {contact.linkedin_url && (
-                    <a href={contact.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">LinkedIn</a>
+                    <a href={contact.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-xs text-[#FF6A00] hover:text-[#E65C00]">LinkedIn</a>
                   )}
                 </div>
-                {contact.notes && <p className="text-xs text-slate-400 mt-1 italic">{contact.notes}</p>}
+                {contact.notes && <p className="text-xs text-[#1A1A1A]/50 mt-1 italic">{contact.notes}</p>}
               </div>
               <button
                 onClick={() => handleDelete(contact.id)}
-                className="text-xs text-slate-400 hover:text-red-500 flex-shrink-0"
+                className="text-xs text-[#1A1A1A]/50 hover:text-red-600 flex-shrink-0"
                 title="Remover"
               >
                 x
@@ -134,7 +134,7 @@ export function ContactsSection({ entryId, initialContacts }: ContactsSectionPro
       )}
 
       {contacts.length === 0 && !adding && (
-        <p className="text-xs text-slate-400">Nenhum contato adicionado ainda.</p>
+        <p className="text-xs text-[#1A1A1A]/50">Nenhum contato adicionado ainda.</p>
       )}
     </div>
   )

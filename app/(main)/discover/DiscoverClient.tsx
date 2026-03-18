@@ -103,16 +103,16 @@ export function DiscoverClient({
 
   return (
     <div className="p-6">
-      <div className="mb-6 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 via-white to-emerald-50 p-4 shadow-sm">
+      <div className="mb-6 rounded-2xl border border-[#FF6A00]/20 bg-gradient-to-r from-[#FF6A00]/5 via-white to-emerald-50 p-4 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#FF6A00]">
               Crawler monitor
             </p>
-            <h1 className="mt-1 text-lg font-semibold text-slate-900">
+            <h1 className="mt-1 text-lg font-semibold text-[#1A1A1A]">
               {getCrawlerRunHeadline(stats)}
             </h1>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-[#1A1A1A]/70">
               {stats.latestRun
                 ? `Ultima execucao em ${new Date(stats.latestRun.completed_at).toLocaleString('pt-BR')} usando ${formatCrawlerDiscoverySource(stats.latestRun.discovery_source)}.`
                 : 'Ainda nao ha execucoes registradas do crawler.'}
@@ -121,7 +121,7 @@ export function DiscoverClient({
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-xl bg-white/80 px-4 py-3">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-[#1A1A1A]/60">
                 Novas
               </p>
               <p className="mt-1 text-2xl font-bold text-emerald-600">
@@ -129,7 +129,7 @@ export function DiscoverClient({
               </p>
             </div>
             <div className="rounded-xl bg-white/80 px-4 py-3">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-[#1A1A1A]/60">
                 Duplicadas
               </p>
               <p className="mt-1 text-2xl font-bold text-amber-600">
@@ -137,18 +137,18 @@ export function DiscoverClient({
               </p>
             </div>
             <div className="rounded-xl bg-white/80 px-4 py-3">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-[#1A1A1A]/60">
                 Varridas
               </p>
-              <p className="mt-1 text-2xl font-bold text-slate-900">
+              <p className="mt-1 text-2xl font-bold text-[#1A1A1A]">
                 {stats.latestRun?.scraped_count ?? 0}
               </p>
             </div>
             <div className="rounded-xl bg-white/80 px-4 py-3">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-[#1A1A1A]/60">
                 Ultimos 7 dias
               </p>
-              <p className="mt-1 text-2xl font-bold text-blue-600">
+              <p className="mt-1 text-2xl font-bold text-[#FF6A00]">
                 {stats.insertedLast7Days}
               </p>
             </div>
@@ -161,7 +161,7 @@ export function DiscoverClient({
       <div className="mb-6 space-y-3">
         <div className="flex items-center gap-3">
           <div className="relative flex-1">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1A1A1A]/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -169,34 +169,34 @@ export function DiscoverClient({
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Buscar por cargo ou empresa..."
-              className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              className="w-full pl-10 pr-4 py-2.5 border border-[#1A1A1A]/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent bg-white"
             />
           </div>
-          <span className="text-sm text-slate-500 flex-shrink-0">
+          <span className="text-sm text-[#1A1A1A]/60 flex-shrink-0">
             {filteredJobs.length} vaga{filteredJobs.length !== 1 ? 's' : ''}
           </span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-slate-500 font-medium">Filtros:</span>
+          <span className="text-xs text-[#1A1A1A]/60 font-medium">Filtros:</span>
           {REMOTE_OPTIONS.map(opt => (
             <button
               key={opt.value}
               onClick={() => setRemoteFilter(opt.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
                 remoteFilter === opt.value
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
+                  ? 'bg-[#FF6A00] text-white'
+                  : 'bg-white border border-[#1A1A1A]/10 text-[#1A1A1A]/70 hover:border-[#1A1A1A]/20'
               }`}
             >
               {opt.label}
             </button>
           ))}
-          <div className="w-px h-5 bg-slate-200 mx-1" />
+          <div className="w-px h-5 bg-[#1A1A1A]/10 mx-1" />
           <select
             value={salaryFilter}
             onChange={e => setSalaryFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-1.5 rounded-xl text-xs font-medium bg-white border border-[#1A1A1A]/10 text-[#1A1A1A]/70 focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
           >
             {SALARY_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -205,7 +205,7 @@ export function DiscoverClient({
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value as 'newest' | 'salary')}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-1.5 rounded-xl text-xs font-medium bg-white border border-[#1A1A1A]/10 text-[#1A1A1A]/70 focus:outline-none focus:ring-2 focus:ring-[#FF6A00]"
           >
             <option value="newest">Mais recentes</option>
             <option value="salary">Maior salario</option>
@@ -215,13 +215,13 @@ export function DiscoverClient({
 
       {filteredJobs.length === 0 ? (
         <div className="py-16 text-center">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 bg-[#1A1A1A]/5 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-[#1A1A1A]/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <p className="text-sm text-slate-500 font-medium">Nenhuma vaga encontrada</p>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm text-[#1A1A1A]/60 font-medium">Nenhuma vaga encontrada</p>
+          <p className="text-xs text-[#1A1A1A]/50 mt-1">
             {search || remoteFilter !== 'all' || salaryFilter !== 'all'
               ? 'Tente ajustar seus filtros de busca.'
               : 'A proxima busca roda amanha as 7h.'}
@@ -239,7 +239,7 @@ export function DiscoverClient({
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="px-6 py-2.5 text-sm text-slate-600 border border-slate-300 rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                className="px-6 py-2.5 text-sm text-[#1A1A1A] border border-[#1A1A1A]/20 rounded-xl hover:bg-[#1A1A1A]/5 disabled:opacity-50 transition-colors"
               >
                 {loadingMore ? 'Carregando...' : 'Carregar mais'}
               </button>

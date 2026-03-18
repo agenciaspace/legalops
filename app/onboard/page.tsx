@@ -53,9 +53,9 @@ const AREAS_OPTIONS = [
 ]
 
 const PRIORITY_CONFIG = {
-  high: { label: 'Alta prioridade', color: 'bg-red-50 border-red-200 text-red-800', dot: 'bg-red-500' },
-  medium: { label: 'Média prioridade', color: 'bg-amber-50 border-amber-200 text-amber-800', dot: 'bg-amber-500' },
-  low: { label: 'Baixa prioridade', color: 'bg-blue-50 border-blue-200 text-blue-800', dot: 'bg-blue-500' },
+  high: { label: 'Alta prioridade', color: 'bg-red-50 border-red-200 text-red-700', dot: 'bg-red-500' },
+  medium: { label: 'Média prioridade', color: 'bg-[#FF6A00]/10 border-[#FF6A00]/20 text-[#FF6A00]', dot: 'bg-[#FF6A00]' },
+  low: { label: 'Baixa prioridade', color: 'bg-[#FF6A00]/10 border-[#FF6A00]/20 text-[#FF6A00]', dot: 'bg-[#FF6A00]' },
 }
 
 const CATEGORY_ICONS: Record<LinkedInInsight['category'], string> = {
@@ -215,14 +215,14 @@ export default function OnboardPage() {
   const currentStepIndex = STEPS.indexOf(step)
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col items-center py-10 px-4">
+    <div className="min-h-screen bg-[#F5F4F0] flex flex-col items-center py-10 px-4">
       <div className="mb-8 text-center">
         <BrandLogo
           className="flex flex-col items-center gap-3"
-          markClassName="h-10 w-10 text-slate-950"
-          titleClassName="text-xl font-semibold tracking-[0.18em] text-slate-950 uppercase"
+          markClassName="h-10 w-10 text-[#1A1A1A]"
+          titleClassName="text-xl font-semibold tracking-[0.18em] text-[#1A1A1A] uppercase"
           subtitle="Vamos configurar seu perfil profissional"
-          subtitleClassName="text-sm text-slate-500"
+          subtitleClassName="text-sm text-[#1A1A1A]/60"
         />
       </div>
 
@@ -230,12 +230,12 @@ export default function OnboardPage() {
       <div className="flex items-center gap-2 mb-8">
         {STEPS.filter(s => s !== 'insights').map((s, i) => (
           <div key={s} className="flex items-center gap-2">
-            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
               i < currentStepIndex
-                ? 'bg-green-100 text-green-700'
+                ? 'bg-emerald-50 text-emerald-700'
                 : i === currentStepIndex
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-100 text-slate-400'
+                ? 'bg-[#FF6A00] text-white'
+                : 'bg-[#1A1A1A]/5 text-[#1A1A1A]/50'
             }`}>
               {i < currentStepIndex && (
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,7 +245,7 @@ export default function OnboardPage() {
               {STEP_LABELS[s]}
             </div>
             {i < STEPS.filter(s => s !== 'insights').length - 1 && (
-              <div className={`h-px w-6 ${i < currentStepIndex ? 'bg-green-300' : 'bg-slate-200'}`} />
+              <div className={`h-px w-6 ${i < currentStepIndex ? 'bg-emerald-300' : 'bg-[#1A1A1A]/10'}`} />
             )}
           </div>
         ))}
@@ -255,14 +255,14 @@ export default function OnboardPage() {
 
         {/* ─── STEP: BASICS ─────────────────────────────────────────────── */}
         {step === 'basics' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+          <div className="bg-white rounded-2xl border border-[#1A1A1A]/10 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Dados básicos</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Como devemos te chamar e qual é seu cargo atual?</p>
+              <h2 className="text-lg font-semibold text-[#1A1A1A]">Dados básicos</h2>
+              <p className="text-sm text-[#1A1A1A]/60 mt-0.5">Como devemos te chamar e qual é seu cargo atual?</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-[#1A1A1A]/70 mb-1">
                 Nome completo <span className="text-red-500">*</span>
               </label>
               <input
@@ -270,12 +270,12 @@ export default function OnboardPage() {
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
                 placeholder="Ex: Maria Clara Souza"
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-[#1A1A1A]/20 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-[#1A1A1A]/70 mb-1">
                 Cargo atual
               </label>
               <input
@@ -283,17 +283,17 @@ export default function OnboardPage() {
                 value={currentRole}
                 onChange={e => setCurrentRole(e.target.value)}
                 placeholder="Ex: Legal Operations Specialist, Advogada Sênior..."
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-[#1A1A1A]/20 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
               />
-              <p className="text-xs text-slate-400 mt-1">Se estiver em transição, informe o cargo que deseja ou o mais recente.</p>
+              <p className="text-xs text-[#1A1A1A]/50 mt-1">Se estiver em transição, informe o cargo que deseja ou o mais recente.</p>
             </div>
 
-            {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
+            {error && <p className="text-red-700 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
 
             <button
               onClick={handleBasicsNext}
               disabled={saving}
-              className="w-full bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="w-full bg-[#FF6A00] text-white rounded-xl py-2.5 text-sm font-bold hover:bg-[#E65C00] disabled:opacity-50 transition-colors"
             >
               {saving ? 'Salvando...' : 'Continuar →'}
             </button>
@@ -302,10 +302,10 @@ export default function OnboardPage() {
 
         {/* ─── STEP: PROFESSIONAL TYPE ──────────────────────────────────── */}
         {step === 'professional' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+          <div className="bg-white rounded-2xl border border-[#1A1A1A]/10 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Tipo de atuação</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Onde você atua ou quer atuar profissionalmente?</p>
+              <h2 className="text-lg font-semibold text-[#1A1A1A]">Tipo de atuação</h2>
+              <p className="text-sm text-[#1A1A1A]/60 mt-0.5">Onde você atua ou quer atuar profissionalmente?</p>
             </div>
 
             <div className="space-y-2">
@@ -316,18 +316,18 @@ export default function OnboardPage() {
                   onClick={() => setProfessionalType(pt.value)}
                   className={`w-full text-left rounded-xl border p-4 transition-all ${
                     professionalType === pt.value
-                      ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
-                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'border-[#FF6A00] bg-[#FF6A00]/10 ring-1 ring-[#FF6A00]'
+                      : 'border-[#1A1A1A]/10 hover:border-[#1A1A1A]/20 hover:bg-[#1A1A1A]/5'
                   }`}
                 >
-                  <p className="text-sm font-medium text-slate-900">{pt.label}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{pt.description}</p>
+                  <p className="text-sm font-medium text-[#1A1A1A]">{pt.label}</p>
+                  <p className="text-xs text-[#1A1A1A]/60 mt-0.5">{pt.description}</p>
                 </button>
               ))}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-[#1A1A1A]/70 mb-1">
                 Anos de experiência jurídica
               </label>
               <input
@@ -337,23 +337,23 @@ export default function OnboardPage() {
                 value={yearsExperience}
                 onChange={e => setYearsExperience(e.target.value === '' ? '' : Number(e.target.value))}
                 placeholder="Ex: 5"
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-[#1A1A1A]/20 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
               />
             </div>
 
-            {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
+            {error && <p className="text-red-700 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
 
             <div className="flex gap-3">
               <button
                 onClick={() => setStep('basics')}
-                className="flex-1 border border-slate-300 text-slate-700 rounded-xl py-2.5 text-sm font-medium hover:bg-slate-50 transition-colors"
+                className="flex-1 border-2 border-[#1A1A1A] text-[#1A1A1A] rounded-xl py-2.5 text-sm font-bold hover:bg-[#1A1A1A]/5 transition-colors"
               >
                 ← Voltar
               </button>
               <button
                 onClick={handleProfessionalNext}
                 disabled={saving}
-                className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="flex-1 bg-[#FF6A00] text-white rounded-xl py-2.5 text-sm font-bold hover:bg-[#E65C00] disabled:opacity-50 transition-colors"
               >
                 {saving ? 'Salvando...' : 'Continuar →'}
               </button>
@@ -363,10 +363,10 @@ export default function OnboardPage() {
 
         {/* ─── STEP: EXPERTISE ─────────────────────────────────────────── */}
         {step === 'expertise' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+          <div className="bg-white rounded-2xl border border-[#1A1A1A]/10 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Áreas de especialização</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Selecione as áreas em que você atua ou tem interesse. Isso melhora as sugestões de vagas.</p>
+              <h2 className="text-lg font-semibold text-[#1A1A1A]">Áreas de especialização</h2>
+              <p className="text-sm text-[#1A1A1A]/60 mt-0.5">Selecione as áreas em que você atua ou tem interesse. Isso melhora as sugestões de vagas.</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -375,10 +375,10 @@ export default function OnboardPage() {
                   key={area}
                   type="button"
                   onClick={() => toggleArea(area)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
                     selectedAreas.includes(area)
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600'
+                      ? 'bg-[#FF6A00] text-white border-[#FF6A00]'
+                      : 'bg-white text-[#1A1A1A]/70 border-[#1A1A1A]/10 hover:border-[#FF6A00] hover:text-[#FF6A00]'
                   }`}
                 >
                   {area}
@@ -387,22 +387,22 @@ export default function OnboardPage() {
             </div>
 
             {selectedAreas.length > 0 && (
-              <p className="text-xs text-slate-400">{selectedAreas.length} área{selectedAreas.length > 1 ? 's' : ''} selecionada{selectedAreas.length > 1 ? 's' : ''}</p>
+              <p className="text-xs text-[#1A1A1A]/50">{selectedAreas.length} área{selectedAreas.length > 1 ? 's' : ''} selecionada{selectedAreas.length > 1 ? 's' : ''}</p>
             )}
 
-            {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
+            {error && <p className="text-red-700 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
 
             <div className="flex gap-3">
               <button
                 onClick={() => setStep('professional')}
-                className="flex-1 border border-slate-300 text-slate-700 rounded-xl py-2.5 text-sm font-medium hover:bg-slate-50 transition-colors"
+                className="flex-1 border-2 border-[#1A1A1A] text-[#1A1A1A] rounded-xl py-2.5 text-sm font-bold hover:bg-[#1A1A1A]/5 transition-colors"
               >
                 ← Voltar
               </button>
               <button
                 onClick={handleExpertiseNext}
                 disabled={saving}
-                className="flex-1 bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="flex-1 bg-[#FF6A00] text-white rounded-xl py-2.5 text-sm font-bold hover:bg-[#E65C00] disabled:opacity-50 transition-colors"
               >
                 {saving ? 'Salvando...' : 'Continuar →'}
               </button>
@@ -412,17 +412,17 @@ export default function OnboardPage() {
 
         {/* ─── STEP: LINKEDIN ───────────────────────────────────────────── */}
         {step === 'linkedin' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+          <div className="bg-white rounded-2xl border border-[#1A1A1A]/10 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Perfil LinkedIn</h2>
-              <p className="text-sm text-slate-500 mt-0.5">
+              <h2 className="text-lg font-semibold text-[#1A1A1A]">Perfil LinkedIn</h2>
+              <p className="text-sm text-[#1A1A1A]/60 mt-0.5">
                 Informe o link do seu LinkedIn. Vamos analisar seu perfil e sugerir <strong>quick wins</strong> para você conquistar mais vagas na área jurídica.
               </p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-1.5">
-              <p className="text-xs font-medium text-blue-800">O que você vai receber:</p>
-              <ul className="text-xs text-blue-700 space-y-1">
+            <div className="bg-[#FF6A00]/10 border border-[#FF6A00]/20 rounded-xl p-4 space-y-1.5">
+              <p className="text-xs font-medium text-[#FF6A00]">O que você vai receber:</p>
+              <ul className="text-xs text-[#FF6A00] space-y-1">
                 <li>✓ Análise do headline e visibilidade nos recrutadores</li>
                 <li>✓ Gaps de keywords relevantes para Legal Ops</li>
                 <li>✓ Sugestões de seções em falta (Sobre, Skills, etc.)</li>
@@ -431,23 +431,23 @@ export default function OnboardPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">URL do LinkedIn</label>
+              <label className="block text-sm font-medium text-[#1A1A1A]/70 mb-1">URL do LinkedIn</label>
               <input
                 type="url"
                 value={linkedinUrl}
                 onChange={e => setLinkedinUrl(e.target.value)}
                 placeholder="https://linkedin.com/in/seuperfil"
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-[#1A1A1A]/20 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
               />
-              <p className="text-xs text-slate-400 mt-1">Certifique-se de que seu perfil está público para melhor análise.</p>
+              <p className="text-xs text-[#1A1A1A]/50 mt-1">Certifique-se de que seu perfil está público para melhor análise.</p>
             </div>
 
-            {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
+            {error && <p className="text-red-700 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
 
             <button
               onClick={handleLinkedInAnalyze}
               disabled={saving || !linkedinUrl.trim()}
-              className="w-full bg-blue-600 text-white rounded-xl py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="w-full bg-[#FF6A00] text-white rounded-xl py-2.5 text-sm font-bold hover:bg-[#E65C00] disabled:opacity-50 transition-colors"
             >
               {saving ? 'Analisando perfil...' : 'Analisar meu LinkedIn →'}
             </button>
@@ -455,7 +455,7 @@ export default function OnboardPage() {
             <button
               onClick={handleSkipLinkedIn}
               disabled={saving}
-              className="w-full text-slate-400 text-xs hover:text-slate-600 transition-colors"
+              className="w-full text-[#1A1A1A]/50 text-xs hover:text-[#1A1A1A]/70 transition-colors"
             >
               Pular por agora — adicionar depois nas configurações
             </button>
@@ -465,9 +465,9 @@ export default function OnboardPage() {
         {/* ─── STEP: INSIGHTS ───────────────────────────────────────────── */}
         {step === 'insights' && (
           <div className="space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">Seus quick wins do LinkedIn</h2>
-              <p className="text-sm text-slate-500 mt-0.5">
+            <div className="bg-white rounded-2xl border border-[#1A1A1A]/10 p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-[#1A1A1A]">Seus quick wins do LinkedIn</h2>
+              <p className="text-sm text-[#1A1A1A]/60 mt-0.5">
                 {insightsScrapeSuccess
                   ? 'Analisamos seu perfil e identificamos as principais oportunidades de melhoria.'
                   : 'Geramos recomendações baseadas no seu contexto profissional para impulsionar seu perfil.'}
@@ -475,8 +475,8 @@ export default function OnboardPage() {
             </div>
 
             {insights.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center shadow-sm">
-                <p className="text-slate-500 text-sm">Não foi possível gerar insights agora. Você pode tentar novamente nas configurações.</p>
+              <div className="bg-white rounded-2xl border border-[#1A1A1A]/10 p-6 text-center shadow-sm">
+                <p className="text-[#1A1A1A]/60 text-sm">Não foi possível gerar insights agora. Você pode tentar novamente nas configurações.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -490,22 +490,22 @@ export default function OnboardPage() {
                     return (
                       <div
                         key={i}
-                        className={`bg-white rounded-xl border p-4 shadow-sm ${cfg.color.includes('red') ? 'border-red-100' : cfg.color.includes('amber') ? 'border-amber-100' : 'border-blue-100'}`}
+                        className={`bg-white rounded-xl border p-4 shadow-sm ${cfg.color.includes('red') ? 'border-red-100' : 'border-[#FF6A00]/20'}`}
                       >
                         <div className="flex items-start gap-3">
                           <span className="text-xl leading-none mt-0.5">{CATEGORY_ICONS[insight.category]}</span>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="text-sm font-semibold text-slate-900">{insight.title}</h3>
+                              <h3 className="text-sm font-semibold text-[#1A1A1A]">{insight.title}</h3>
                               <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${cfg.color}`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
                                 {cfg.label}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-600 mt-1">{insight.description}</p>
-                            <div className="mt-2 bg-slate-50 rounded-lg px-3 py-2">
-                              <p className="text-xs font-medium text-slate-700">
-                                <span className="text-green-600">Ação: </span>
+                            <p className="text-xs text-[#1A1A1A]/70 mt-1">{insight.description}</p>
+                            <div className="mt-2 bg-[#1A1A1A]/5 rounded-lg px-3 py-2">
+                              <p className="text-xs font-medium text-[#1A1A1A]/70">
+                                <span className="text-emerald-700">Ação: </span>
                                 {insight.action}
                               </p>
                             </div>
@@ -517,16 +517,16 @@ export default function OnboardPage() {
               </div>
             )}
 
-            {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
+            {error && <p className="text-red-700 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
 
             <button
               onClick={handleFinish}
               disabled={saving}
-              className="w-full bg-blue-600 text-white rounded-xl py-3 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+              className="w-full bg-[#FF6A00] text-white rounded-xl py-3 text-sm font-bold hover:bg-[#E65C00] disabled:opacity-50 transition-colors shadow-sm"
             >
               {saving ? 'Finalizando...' : 'Ir para a plataforma →'}
             </button>
-            <p className="text-center text-xs text-slate-400">Esses insights ficam salvos nas suas configurações de perfil.</p>
+            <p className="text-center text-xs text-[#1A1A1A]/50">Esses insights ficam salvos nas suas configurações de perfil.</p>
           </div>
         )}
       </div>

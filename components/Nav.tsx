@@ -2,14 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { Bell } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { BrandLogo } from '@/components/BrandLogo'
 
 interface NavProps {
   discoverCount: number
+  newJobsCount: number
 }
 
-export function Nav({ discoverCount }: NavProps) {
+export function Nav({ discoverCount, newJobsCount }: NavProps) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -23,15 +25,15 @@ export function Nav({ discoverCount }: NavProps) {
   const navLink = (href: string, label: string, badge?: number) => (
     <Link
       href={href}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
         pathname === href
-          ? 'bg-blue-50 text-blue-700'
-          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+          ? 'bg-[#FF6A00]/10 text-[#FF6A00]'
+          : 'text-[#1A1A1A]/70 hover:text-[#1A1A1A] hover:bg-[#1A1A1A]/5'
       }`}
     >
       {label}
       {badge !== undefined && badge > 0 && (
-        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blue-600 text-white text-xs font-bold">
+        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-[#FF6A00] text-white text-xs font-bold">
           {badge > 99 ? '99+' : badge}
         </span>
       )}
@@ -39,14 +41,14 @@ export function Nav({ discoverCount }: NavProps) {
   )
 
   return (
-    <header className="bg-white border-b border-slate-200 px-6 py-3 sticky top-0 z-50">
+    <header className="bg-white border-b border-[#1A1A1A]/10 px-6 py-3 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-1">
           <Link href="/dashboard" className="flex items-center gap-2 mr-6">
             <BrandLogo
               className="flex items-center gap-2"
-              markClassName="h-7 w-7 text-slate-950"
-              titleClassName="text-sm font-semibold tracking-[0.18em] text-slate-900 uppercase"
+              markClassName="h-7 w-7 text-[#1A1A1A]"
+              titleClassName="text-sm font-semibold tracking-[0.18em] text-[#1A1A1A] uppercase"
             />
           </Link>
           {navLink('/dashboard', 'Dashboard')}
@@ -56,12 +58,26 @@ export function Nav({ discoverCount }: NavProps) {
           {navLink('/emails', 'Emails')}
           {navLink('/settings', 'Configurações')}
         </div>
-        <button
-          onClick={handleSignOut}
-          className="text-xs text-slate-500 hover:text-slate-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-50"
-        >
-          Sair
-        </button>
+        <div className="flex items-center gap-2">
+          {newJobsCount > 0 && (
+            <Link
+              href="/discover"
+              className="relative flex items-center justify-center p-2 rounded-xl text-[#1A1A1A]/60 hover:text-[#FF6A00] hover:bg-[#1A1A1A]/5 transition-colors"
+              title={`${newJobsCount} vagas novas adicionadas pelo crawler`}
+            >
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF6A00] text-[9px] font-bold text-white ring-2 ring-white">
+                {newJobsCount > 99 ? '99+' : newJobsCount}
+              </span>
+            </Link>
+          )}
+          <button
+            onClick={handleSignOut}
+            className="text-xs text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition-colors px-3 py-1.5 rounded-xl hover:bg-[#1A1A1A]/5"
+          >
+            Sair
+          </button>
+        </div>
       </div>
     </header>
   )

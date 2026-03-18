@@ -16,8 +16,8 @@ export default async function ProfessionalsPage() {
     <div className="px-6 py-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Diretório de Profissionais</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-semibold text-[#1A1A1A]">Diretório de Profissionais</h1>
+          <p className="mt-1 text-sm text-[#1A1A1A]/60">
             Conecte-se com profissionais de Legal Ops do mundo todo.
           </p>
         </div>
