@@ -119,22 +119,22 @@ function PlanCard({
     <div
       className={`flex flex-col rounded-2xl border p-6 ${
         plan.highlight
-          ? 'border-slate-950 bg-slate-950 text-white shadow-xl'
-          : 'border-stone-200 bg-white'
+          ? 'border-2 border-[#FF6A00] bg-[#1A1A1A] text-white shadow-xl'
+          : 'border-[#1A1A1A]/10 bg-white'
       }`}
     >
       <h3 className="text-lg font-semibold">{plan.name}</h3>
       <div className="mt-3 flex items-baseline gap-1">
         <span className="text-4xl font-bold">{plan.price}</span>
         {plan.period && (
-          <span className={plan.highlight ? 'text-slate-400' : 'text-slate-500'}>
+          <span className={plan.highlight ? 'text-white/50' : 'text-[#1A1A1A]/60'}>
             {plan.period}
           </span>
         )}
       </div>
       <p
         className={`mt-3 text-sm ${
-          plan.highlight ? 'text-slate-300' : 'text-slate-600'
+          plan.highlight ? 'text-white/70' : 'text-[#1A1A1A]/70'
         }`}
       >
         {plan.description}
@@ -144,7 +144,7 @@ function PlanCard({
           <li key={feature} className="flex items-start gap-2 text-sm">
             <Check
               className={`mt-0.5 h-4 w-4 flex-shrink-0 ${
-                plan.highlight ? 'text-emerald-400' : 'text-emerald-600'
+                plan.highlight ? 'text-[#FF6A00]' : 'text-[#1A1A1A]/40'
               }`}
             />
             <span>{feature}</span>
@@ -153,10 +153,10 @@ function PlanCard({
       </ul>
       <Link
         href={plan.href}
-        className={`mt-6 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors ${
+        className={`mt-6 flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition-colors ${
           plan.highlight
-            ? 'bg-white text-slate-950 hover:bg-slate-100'
-            : 'bg-slate-950 text-white hover:bg-slate-800'
+            ? 'bg-[#FF6A00] text-white hover:bg-[#E65C00]'
+            : 'bg-[#1A1A1A] text-white hover:bg-black'
         }`}
       >
         {plan.cta}
@@ -168,25 +168,25 @@ function PlanCard({
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-stone-50 text-slate-950">
-      <header className="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
+    <div className="min-h-screen bg-[#F5F4F0] text-[#1A1A1A]">
+      <header className="border-b border-[#1A1A1A]/10 bg-[#F5F4F0]/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <Link href="/">
             <BrandLogo
               className="flex items-center gap-3"
-              markClassName="h-10 w-10 text-slate-950"
+              markClassName="h-10 w-10 text-[#1A1A1A]"
             />
           </Link>
           <div className="flex items-center gap-3">
             <Link
               href="/for-employers"
-              className="rounded-full border border-stone-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-950"
+              className="rounded-xl border-2 border-[#1A1A1A] px-4 py-2 text-sm font-bold text-[#1A1A1A] transition-colors hover:bg-[#1A1A1A]/5"
             >
               Para Empresas
             </Link>
             <Link
               href="/login"
-              className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="rounded-xl bg-[#1A1A1A] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-black"
             >
               Entrar
             </Link>
@@ -197,23 +197,17 @@ export default function PricingPage() {
       <main className="mx-auto max-w-6xl px-6 py-16">
         {/* Hero */}
         <div className="text-center">
-          <h1
-            className="text-4xl sm:text-5xl"
-            style={{
-              fontFamily:
-                '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-            }}
-          >
+          <h1 className="text-4xl font-bold sm:text-5xl">
             Planos para cada fase da sua carreira
           </h1>
-          <p className="mt-4 text-lg text-slate-600">
+          <p className="mt-4 text-lg text-[#1A1A1A]/70">
             De profissional iniciante a líder referência em Legal Ops.
           </p>
         </div>
 
         {/* Professional Plans */}
         <section className="mt-12">
-          <h2 className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400">
+          <h2 className="text-center text-xs font-semibold uppercase tracking-widest text-[#1A1A1A]/50">
             Para Profissionais
           </h2>
           <div className="mt-6 grid gap-6 md:grid-cols-3">
@@ -225,10 +219,10 @@ export default function PricingPage() {
 
         {/* Employer Plans */}
         <section className="mt-20">
-          <h2 className="text-center text-xs font-semibold uppercase tracking-widest text-slate-400">
+          <h2 className="text-center text-xs font-semibold uppercase tracking-widest text-[#1A1A1A]/50">
             Para Empresas
           </h2>
-          <p className="mt-2 text-center text-lg text-slate-600">
+          <p className="mt-2 text-center text-lg text-[#1A1A1A]/70">
             Encontre os melhores profissionais de Legal Ops do mercado.
           </p>
           <div className="mt-6 grid gap-6 md:grid-cols-3">
@@ -239,22 +233,16 @@ export default function PricingPage() {
         </section>
 
         {/* FAQ / CTA */}
-        <section className="mt-20 rounded-2xl border border-stone-200 bg-white px-6 py-8 text-center sm:px-8">
-          <h2
-            className="text-3xl"
-            style={{
-              fontFamily:
-                '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-            }}
-          >
+        <section className="mt-20 rounded-2xl border border-[#1A1A1A]/10 bg-white px-6 py-8 text-center sm:px-8">
+          <h2 className="text-3xl font-bold">
             Comece grátis. Evolua quando quiser.
           </h2>
-          <p className="mt-3 text-slate-600">
+          <p className="mt-3 text-[#1A1A1A]/70">
             Sem compromisso. Cancele a qualquer momento.
           </p>
           <Link
             href="/login"
-            className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF6A00] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#E65C00]"
           >
             Criar conta grátis
             <ArrowRight className="h-4 w-4" />

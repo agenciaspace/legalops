@@ -51,11 +51,11 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
 
   if (!leader && !editing) {
     return (
-      <div className="text-xs text-slate-400">
+      <div className="text-xs text-[#1A1A1A]/50">
         No leader found.{' '}
         <button
           onClick={() => setEditing(true)}
-          className="text-blue-600 hover:underline"
+          className="text-[#FF6A00] hover:text-[#E65C00]"
         >
           Add
         </button>
@@ -68,13 +68,13 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
       <div className="space-y-2">
         {(['name', 'title', 'linkedin_url', 'notes'] as const).map(field => (
           <div key={field}>
-            <label className="block text-xs font-medium text-slate-600 mb-0.5 capitalize">
+            <label className="block text-xs font-medium text-[#1A1A1A]/70 mb-0.5 capitalize">
               {field.replace('_', ' ')}
             </label>
             <input
               value={form[field]}
               onChange={e => setForm(p => ({ ...p, [field]: e.target.value }))}
-              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-[#1A1A1A]/20 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#FF6A00] focus:border-[#FF6A00]"
               placeholder={field === 'linkedin_url' ? 'https://linkedin.com/in/...' : ''}
             />
           </div>
@@ -84,13 +84,13 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50"
+            className="px-3 py-1 bg-[#FF6A00] text-white text-xs font-bold rounded-xl hover:bg-[#E65C00] disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save'}
           </button>
           <button
             onClick={() => setEditing(false)}
-            className="px-3 py-1 text-slate-500 text-xs rounded hover:bg-slate-100"
+            className="px-3 py-1 text-[#1A1A1A]/60 text-xs rounded hover:bg-[#1A1A1A]/5"
           >
             Cancel
           </button>
@@ -102,27 +102,27 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-slate-900">{leader!.name}</span>
+        <span className="text-sm font-medium text-[#1A1A1A]">{leader!.name}</span>
         {leader!.confirmed ? (
-          <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Confirmed</span>
+          <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700">Confirmed</span>
         ) : (
-          <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Suggested</span>
+          <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">Suggested</span>
         )}
       </div>
-      {leader!.title && <p className="text-xs text-slate-500">{leader!.title}</p>}
+      {leader!.title && <p className="text-xs text-[#1A1A1A]/60">{leader!.title}</p>}
       {leader!.linkedin_url && (
         <a href={leader!.linkedin_url} target="_blank" rel="noopener noreferrer"
-          className="text-xs text-blue-600 hover:underline block">
+          className="text-xs text-[#FF6A00] hover:text-[#E65C00] block">
           LinkedIn →
         </a>
       )}
-      {leader!.notes && <p className="text-xs text-slate-400 italic mt-1">{leader!.notes}</p>}
+      {leader!.notes && <p className="text-xs text-[#1A1A1A]/50 italic mt-1">{leader!.notes}</p>}
       <div className="flex gap-2 mt-2">
         {!leader!.confirmed && (
           <button
             onClick={handleConfirm}
             disabled={saving}
-            className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 disabled:opacity-50"
+            className="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs rounded hover:bg-emerald-100 disabled:opacity-50"
           >
             Confirm
           </button>
@@ -132,7 +132,7 @@ export function LeaderSection({ entryId, initialLeader }: LeaderSectionProps) {
             setForm({ name: leader!.name ?? '', title: leader!.title ?? '', linkedin_url: leader!.linkedin_url ?? '', notes: leader!.notes ?? '' })
             setEditing(true)
           }}
-          className="px-2 py-1 text-xs text-slate-500 rounded hover:bg-slate-100"
+          className="px-2 py-1 text-xs text-[#1A1A1A]/60 rounded hover:bg-[#1A1A1A]/5"
         >
           Edit
         </button>

@@ -9,12 +9,12 @@ interface TimelineSectionProps {
 }
 
 const EVENT_ICONS: Record<EventType, { icon: string; color: string }> = {
-  status_change: { icon: '→', color: 'bg-blue-100 text-blue-700' },
-  note_added: { icon: '✎', color: 'bg-slate-100 text-slate-600' },
-  contact_added: { icon: '👤', color: 'bg-purple-100 text-purple-700' },
-  interview_scheduled: { icon: '📅', color: 'bg-green-100 text-green-700' },
-  follow_up: { icon: '↩', color: 'bg-yellow-100 text-yellow-700' },
-  custom: { icon: '•', color: 'bg-slate-100 text-slate-600' },
+  status_change: { icon: '→', color: 'bg-[#FF6A00]/10 text-[#FF6A00]' },
+  note_added: { icon: '✎', color: 'bg-[#1A1A1A]/5 text-[#1A1A1A]/70' },
+  contact_added: { icon: '👤', color: 'bg-[#FF6A00]/10 text-[#FF6A00]' },
+  interview_scheduled: { icon: '📅', color: 'bg-emerald-50 text-emerald-700' },
+  follow_up: { icon: '↩', color: 'bg-amber-50 text-amber-700' },
+  custom: { icon: '•', color: 'bg-[#1A1A1A]/5 text-[#1A1A1A]/70' },
 }
 
 const EVENT_TYPE_LABELS: Record<EventType, string> = {
@@ -62,19 +62,19 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
       {!adding ? (
         <button
           onClick={() => setAdding(true)}
-          className="text-xs text-blue-600 hover:underline font-medium"
+          className="text-xs text-[#FF6A00] hover:text-[#E65C00] font-medium"
         >
           + Adicionar evento
         </button>
       ) : (
-        <div className="space-y-2 bg-slate-50 rounded-lg p-3">
+        <div className="space-y-2 bg-[#1A1A1A]/5 rounded-lg p-3">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-0.5">Tipo</label>
+              <label className="block text-xs font-medium text-[#1A1A1A]/70 mb-0.5">Tipo</label>
               <select
                 value={form.event_type}
                 onChange={e => setForm(p => ({ ...p, event_type: e.target.value as EventType }))}
-                className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full border border-[#1A1A1A]/20 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#FF6A00] focus:border-[#FF6A00]"
               >
                 {(Object.keys(EVENT_TYPE_LABELS) as EventType[]).map(type => (
                   <option key={type} value={type}>{EVENT_TYPE_LABELS[type]}</option>
@@ -82,44 +82,44 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-0.5">Data</label>
+              <label className="block text-xs font-medium text-[#1A1A1A]/70 mb-0.5">Data</label>
               <input
                 type="date"
                 value={form.event_date}
                 onChange={e => setForm(p => ({ ...p, event_date: e.target.value }))}
-                className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full border border-[#1A1A1A]/20 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#FF6A00] focus:border-[#FF6A00]"
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-0.5">Titulo *</label>
+            <label className="block text-xs font-medium text-[#1A1A1A]/70 mb-0.5">Titulo *</label>
             <input
               value={form.title}
               onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
               placeholder="Ex: Enviou candidatura pelo site"
-              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-[#1A1A1A]/20 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#FF6A00] focus:border-[#FF6A00]"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-0.5">Descricao</label>
+            <label className="block text-xs font-medium text-[#1A1A1A]/70 mb-0.5">Descricao</label>
             <textarea
               value={form.description}
               onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
               rows={2}
-              className="w-full border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+              className="w-full border border-[#1A1A1A]/20 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#FF6A00] focus:border-[#FF6A00] resize-none"
             />
           </div>
           <div className="flex gap-2">
             <button
               onClick={handleAdd}
               disabled={saving || !form.title.trim()}
-              className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50"
+              className="px-3 py-1 bg-[#FF6A00] text-white text-xs font-bold rounded-xl hover:bg-[#E65C00] disabled:opacity-50"
             >
               {saving ? 'Salvando...' : 'Salvar'}
             </button>
             <button
               onClick={() => setAdding(false)}
-              className="px-3 py-1 text-slate-500 text-xs rounded hover:bg-slate-100"
+              className="px-3 py-1 text-[#1A1A1A]/60 text-xs rounded hover:bg-[#1A1A1A]/5"
             >
               Cancelar
             </button>
@@ -129,7 +129,7 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
 
       {events.length > 0 ? (
         <div className="relative">
-          <div className="absolute left-[15px] top-2 bottom-2 w-px bg-slate-200" />
+          <div className="absolute left-[15px] top-2 bottom-2 w-px bg-[#1A1A1A]/10" />
           <div className="space-y-3">
             {events.map(event => {
               const config = EVENT_ICONS[event.event_type as EventType] ?? EVENT_ICONS.custom
@@ -140,13 +140,13 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
                   </div>
                   <div className="flex-1 pt-1">
                     <div className="flex items-baseline gap-2">
-                      <p className="text-sm font-medium text-slate-900">{event.title}</p>
-                      <span className="text-xs text-slate-400">
+                      <p className="text-sm font-medium text-[#1A1A1A]">{event.title}</p>
+                      <span className="text-xs text-[#1A1A1A]/50">
                         {new Date(event.event_date).toLocaleDateString('pt-BR')}
                       </span>
                     </div>
                     {event.description && (
-                      <p className="text-xs text-slate-500 mt-0.5">{event.description}</p>
+                      <p className="text-xs text-[#1A1A1A]/60 mt-0.5">{event.description}</p>
                     )}
                   </div>
                 </div>
@@ -155,7 +155,7 @@ export function TimelineSection({ entryId, initialEvents }: TimelineSectionProps
           </div>
         </div>
       ) : !adding ? (
-        <p className="text-xs text-slate-400">Nenhum evento registrado ainda.</p>
+        <p className="text-xs text-[#1A1A1A]/50">Nenhum evento registrado ainda.</p>
       ) : null}
     </div>
   )

@@ -93,46 +93,46 @@ export function EmailAliasesClient({
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold text-slate-900">Email aliases</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-2xl font-semibold text-[#1A1A1A]">Email aliases</h1>
+        <p className="text-sm text-[#1A1A1A]/60">
           Gerencie os aliases de candidatura e acompanhe aqui as respostas recebidas em cada vaga aplicada.
         </p>
       </div>
 
       <section className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">Plan rules</h2>
-          <div className="mt-4 space-y-3 text-sm text-slate-600">
+        <div className="rounded-2xl border border-[#1A1A1A]/10 bg-white p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-[#1A1A1A]">Plan rules</h2>
+          <div className="mt-4 space-y-3 text-sm text-[#1A1A1A]/70">
             <div className="flex items-center justify-between">
               <span>Current tier</span>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700">
+              <span className="rounded-full bg-[#1A1A1A]/5 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-[#1A1A1A]/70">
                 {initialTier}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span>Active aliases</span>
-              <span className="font-medium text-slate-900">
+              <span className="font-medium text-[#1A1A1A]">
                 {activeAliases.length} / {policy.maxActiveAliases}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span>Random aliases</span>
-              <span className="font-medium text-slate-900">
+              <span className="font-medium text-[#1A1A1A]">
                 {policy.allowsRandomAliases ? 'Enabled' : 'Unavailable'}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span>Custom aliases</span>
-              <span className="font-medium text-slate-900">
+              <span className="font-medium text-[#1A1A1A]">
                 {policy.allowsCustomAliases ? 'Enabled' : 'Paid only'}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">Create alias</h2>
-          <p className="mt-1 text-sm text-slate-500">
+        <div className="rounded-2xl border border-[#1A1A1A]/10 bg-white p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-[#1A1A1A]">Create alias</h2>
+          <p className="mt-1 text-sm text-[#1A1A1A]/60">
             Remaining active slots: {remainingSlots}
           </p>
 
@@ -140,7 +140,7 @@ export function EmailAliasesClient({
             <button
               onClick={() => createAlias('random')}
               disabled={submitting !== null || remainingSlots === 0}
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-xl bg-[#FF6A00] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#E65C00] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting === 'random' ? 'Creating random alias...' : 'Create random alias'}
             </button>
@@ -152,12 +152,12 @@ export function EmailAliasesClient({
                 value={customLocalPart}
                 onChange={event => setCustomLocalPart(event.target.value)}
                 disabled={!policy.allowsCustomAliases || submitting !== null}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                className="w-full rounded-xl border border-[#1A1A1A]/20 px-3 py-2.5 text-sm text-[#1A1A1A] outline-none transition focus:border-[#FF6A00] focus:ring-2 focus:ring-[#FF6A00]/20 disabled:cursor-not-allowed disabled:bg-[#1A1A1A]/5 disabled:text-[#1A1A1A]/50"
               />
               <button
                 onClick={() => createAlias('custom')}
                 disabled={!policy.allowsCustomAliases || submitting !== null || remainingSlots === 0}
-                className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-xl border border-[#1A1A1A]/20 px-4 py-2.5 text-sm font-medium text-[#1A1A1A]/70 transition-colors hover:bg-[#1A1A1A]/5 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting === 'custom' ? 'Creating custom alias...' : 'Create custom alias'}
               </button>
@@ -178,17 +178,17 @@ export function EmailAliasesClient({
         </p>
       )}
 
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 px-5 py-4">
-          <h2 className="text-sm font-semibold text-slate-900">Provisioned aliases</h2>
+      <section className="rounded-2xl border border-[#1A1A1A]/10 bg-white shadow-sm">
+        <div className="border-b border-[#1A1A1A]/10 px-5 py-4">
+          <h2 className="text-sm font-semibold text-[#1A1A1A]">Provisioned aliases</h2>
         </div>
 
         {aliases.length === 0 ? (
-          <div className="px-5 py-8 text-sm text-slate-500">
+          <div className="px-5 py-8 text-sm text-[#1A1A1A]/60">
             No aliases provisioned yet. Create one to start routing replies into your inbox.
           </div>
         ) : (
-          <div className="divide-y divide-slate-200">
+          <div className="divide-y divide-[#1A1A1A]/10">
             {aliases.map(alias => (
               <div
                 key={alias.id}
@@ -196,26 +196,26 @@ export function EmailAliasesClient({
               >
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium text-slate-900">{alias.address}</p>
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium capitalize text-slate-700">
+                    <p className="font-medium text-[#1A1A1A]">{alias.address}</p>
+                    <span className="rounded-full bg-[#1A1A1A]/5 px-2 py-0.5 text-xs font-medium capitalize text-[#1A1A1A]/70">
                       {alias.source}
                     </span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         alias.status === 'active'
                           ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-slate-100 text-slate-500'
+                          : 'bg-[#1A1A1A]/5 text-[#1A1A1A]/60'
                       }`}
                     >
                       {alias.status}
                     </span>
                     {alias.is_primary && (
-                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                      <span className="rounded-full bg-[#FF6A00]/10 px-2 py-0.5 text-xs font-medium text-[#FF6A00]">
                         primary
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[#1A1A1A]/60">
                     Created {new Date(alias.created_at).toLocaleString()}
                   </p>
                 </div>
@@ -228,7 +228,7 @@ export function EmailAliasesClient({
                       alias.status !== 'active' ||
                       updatingAliasId === alias.id
                     }
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-lg border border-[#1A1A1A]/20 px-3 py-2 text-xs font-medium text-[#1A1A1A]/70 transition-colors hover:bg-[#1A1A1A]/5 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Make primary
                   </button>
@@ -239,7 +239,7 @@ export function EmailAliasesClient({
                       })
                     }
                     disabled={updatingAliasId === alias.id}
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-lg border border-[#1A1A1A]/20 px-3 py-2 text-xs font-medium text-[#1A1A1A]/70 transition-colors hover:bg-[#1A1A1A]/5 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {updatingAliasId === alias.id
                       ? 'Saving...'
@@ -254,17 +254,17 @@ export function EmailAliasesClient({
         )}
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 px-5 py-4">
-          <h2 className="text-sm font-semibold text-slate-900">Recent mailbox activity</h2>
+      <section className="rounded-2xl border border-[#1A1A1A]/10 bg-white shadow-sm">
+        <div className="border-b border-[#1A1A1A]/10 px-5 py-4">
+          <h2 className="text-sm font-semibold text-[#1A1A1A]">Recent mailbox activity</h2>
         </div>
 
         {messages.length === 0 ? (
-          <div className="px-5 py-8 text-sm text-slate-500">
+          <div className="px-5 py-8 text-sm text-[#1A1A1A]/60">
             No inbound or outbound messages yet.
           </div>
         ) : (
-          <div className="divide-y divide-slate-200">
+          <div className="divide-y divide-[#1A1A1A]/10">
             {messages.map(message => (
               <details key={message.id} className="group px-5 py-4">
                 <summary className="cursor-pointer list-none">
@@ -275,43 +275,43 @@ export function EmailAliasesClient({
                           className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                             message.direction === 'inbound'
                               ? 'bg-emerald-50 text-emerald-700'
-                              : 'bg-blue-50 text-blue-700'
+                              : 'bg-[#FF6A00]/10 text-[#FF6A00]'
                           }`}
                         >
                           {message.direction}
                         </span>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                        <span className="rounded-full bg-[#1A1A1A]/5 px-2 py-0.5 text-xs font-medium text-[#1A1A1A]/70">
                           {message.status}
                         </span>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                        <span className="rounded-full bg-[#1A1A1A]/5 px-2 py-0.5 text-xs font-medium text-[#1A1A1A]/70">
                           {message.alias.address}
                         </span>
                       </div>
-                      <p className="font-medium text-slate-900">
+                      <p className="font-medium text-[#1A1A1A]">
                         {message.subject || '(no subject)'}
                       </p>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-[#1A1A1A]/70">
                         {message.direction === 'inbound'
                           ? `From ${message.from_name ? `${message.from_name} <${message.from_address}>` : message.from_address}`
                           : `From ${message.from_address} to ${message.to_addresses.join(', ')}`}
                       </p>
                       {message.reply_to_address && message.direction === 'outbound' && (
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-[#1A1A1A]/60">
                           Reply-To: {message.reply_to_address}
                         </p>
                       )}
-                      <p className="text-sm text-slate-500">
+                      <p className="text-sm text-[#1A1A1A]/60">
                         {getEmailMessagePreview(message)}
                       </p>
                     </div>
 
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-[#1A1A1A]/60">
                       {new Date(getEmailMessageOccurredAt(message)).toLocaleString()}
                     </p>
                   </div>
                 </summary>
 
-                <div className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
+                <div className="mt-4 rounded-xl bg-[#1A1A1A]/5 p-4 text-sm text-[#1A1A1A]/70">
                   <pre className="whitespace-pre-wrap font-sans leading-6">
                     {message.text_body || getEmailMessagePreview(message, 4000)}
                   </pre>

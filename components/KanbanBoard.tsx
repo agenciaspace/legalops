@@ -45,14 +45,14 @@ export function KanbanBoard({ initialEntries }: { initialEntries: PipelineEntryW
         return (
           <div key={col.status} className="flex-shrink-0 w-72">
             <div className="flex items-center gap-2 mb-3">
-              <h3 className="text-sm font-semibold text-slate-700">{col.label}</h3>
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 text-xs font-medium text-slate-600">
+              <h3 className="text-sm font-semibold text-[#1A1A1A]/70">{col.label}</h3>
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#1A1A1A]/10 text-xs font-medium text-[#1A1A1A]/70">
                 {colEntries.length}
               </span>
             </div>
-            <div className="space-y-2 bg-slate-100 rounded-xl p-2 min-h-24">
+            <div className="space-y-2 bg-[#1A1A1A]/5 rounded-xl p-2 min-h-24">
               {colEntries.length === 0 ? (
-                <p className="py-6 text-center text-xs text-slate-400">No jobs here yet</p>
+                <p className="py-6 text-center text-xs text-[#1A1A1A]/50">No jobs here yet</p>
               ) : (
                 colEntries.map(entry => (
                   <PipelineCard
