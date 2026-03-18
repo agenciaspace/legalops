@@ -251,7 +251,16 @@ const content = {
   },
 } as const
 
-type Plan = (typeof content)['pt']['professionalPlans'][number]
+type Plan = {
+  name: string
+  price: string
+  period: string
+  description: string
+  features: readonly string[]
+  cta: string
+  href: string
+  highlight: boolean
+}
 
 function PlanCard({ plan }: { plan: Plan }) {
   return (
