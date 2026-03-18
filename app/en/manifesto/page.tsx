@@ -4,9 +4,9 @@ import { ManifestoPage } from '@/components/ManifestoPage'
 export const metadata: Metadata = {
   title: 'Manifesto — LegalOps',
   description:
-    'Por que criamos a plataforma que Legal Ops merecia desde o início.',
+    'Why we built the platform Legal Ops deserved from day one.',
 }
 
-export default function Manifesto() {
-  return <ManifestoPage locale="pt" />
+export default function EnglishManifesto() {
+  return <ManifestoPage locale="en" />
 }

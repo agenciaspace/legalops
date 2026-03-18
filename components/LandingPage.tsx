@@ -34,7 +34,9 @@ const content = {
     closingTitle: 'Comece grátis. Decida depois.',
     closingPrimaryCta: 'Começar grátis',
     manifestoLink: 'Leia nosso manifesto',
+    manifestoHref: '/manifesto',
     pricingCta: 'Ver planos',
+    pricingHref: '/pricing',
     salaryUndisclosed: 'Não divulgado',
     jobExpired: 'Possivelmente encerrada',
   },
@@ -47,14 +49,16 @@ const content = {
     heroDescription: 'The professional network for legal operations builders. Curated jobs, AI-powered matching, and the largest Legal Ops community.',
     heroPrimaryCta: 'Create free account',
     heroSecondaryCta: 'For Employers',
-    heroSecondaryHref: '/for-employers',
+    heroSecondaryHref: '/en/for-employers',
     jobsTitle: 'Recent jobs',
     jobsEmpty: 'No jobs found at the moment.',
     tableHeaders: { title: 'Role', company: 'Company', remote: 'Remote', salary: 'Salary' },
     closingTitle: 'Start free. Decide later.',
     closingPrimaryCta: 'Start free',
     manifestoLink: 'Read our manifesto',
+    manifestoHref: '/en/manifesto',
     pricingCta: 'View plans',
+    pricingHref: '/en/pricing',
     salaryUndisclosed: 'Undisclosed',
     jobExpired: 'Possibly closed',
   },
@@ -106,7 +110,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/pricing"
+              href={copy.pricingHref}
               className="hidden sm:inline-flex rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
             >
               {copy.pricingCta}
@@ -227,7 +231,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
                 {copy.closingTitle}
               </h2>
               <Link
-                href="/manifesto"
+                href={copy.manifestoHref}
                 className="mt-2 inline-block text-sm text-slate-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-slate-950 hover:decoration-slate-950"
               >
                 {copy.manifestoLink}
