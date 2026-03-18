@@ -149,7 +149,7 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
           </h1>
 
           <p className="mt-4 text-lg leading-8 text-slate-600">
-            {copy.heroDescription}
+            <TypingText text={copy.heroDescription} delay={300} speed={25} />
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -239,9 +239,9 @@ export async function LandingPage({ locale }: { locale: LandingLocale }) {
               </h2>
               <Link
                 href={copy.manifestoHref}
-                className="mt-2 inline-flex items-center gap-1 text-sm text-slate-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-slate-950 hover:decoration-slate-950"
+                className="mt-2 inline-block text-sm text-slate-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-slate-950 hover:decoration-slate-950"
               >
-                <TypingText text={copy.manifestoLink} delay={500} speed={50} />
+                {copy.manifestoLink}
               </Link>
             </div>
 
