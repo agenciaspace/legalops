@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { Check, ArrowRight, Globe, ChevronDown } from 'lucide-react'
-import { BrandLogo } from '@/components/BrandLogo'
+import { BrandMark } from '@/components/BrandLogo'
 
 type Locale = 'pt' | 'en'
 
@@ -333,14 +333,14 @@ export default function PricingPage() {
   const t = content[lang]
 
   return (
-    <div lang={lang === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-[#F5F4F0] text-[#1A1A1A]">
+    <div lang={lang === 'pt' ? 'pt-BR' : 'en'} className="min-h-screen bg-[#F5F4F0] font-sans text-[#1A1A1A] selection:bg-[#FF6A00] selection:text-white">
       <header className="border-b border-[#1A1A1A]/10 bg-[#F5F4F0]/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <Link href="/">
-            <BrandLogo
-              className="flex items-center gap-3"
-              markClassName="h-10 w-10 text-[#1A1A1A]"
-            />
+          <Link href="/" className="flex items-center gap-2 sm:gap-3">
+            <BrandMark className="w-8 h-8 md:w-10 md:h-10 text-[#FF6A00]" />
+            <span className="font-bold text-xl md:text-2xl tracking-tight text-[#1A1A1A]">
+              legalops.work
+            </span>
           </Link>
           <div className="flex items-center gap-3">
             {/* Language Switcher */}

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { BrandLogo, BrandMark } from '@/components/BrandLogo'
+import { BrandMark } from '@/components/BrandLogo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -38,14 +38,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F5F4F0] p-4">
       <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <BrandLogo
-            className="flex flex-col items-center gap-4"
-            markClassName="h-14 w-14 text-[#1A1A1A]"
-            titleClassName="text-2xl font-semibold tracking-[0.18em] text-[#1A1A1A] uppercase"
-            subtitle="Plataforma inteligente de job hunting para Legal Operations"
-            subtitleClassName="max-w-xs text-sm leading-6 text-[#1A1A1A]/60"
-          />
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <BrandMark className="h-12 w-12 text-[#FF6A00]" />
+          <span className="font-bold text-2xl tracking-tight text-[#1A1A1A]">
+            legalops.work
+          </span>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-[#1A1A1A]/10 p-6 space-y-4 shadow-sm">
