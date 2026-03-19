@@ -5,59 +5,59 @@ import { BrandLogo } from '@/components/BrandLogo'
 const features = [
   {
     icon: Target,
-    title: 'Match automático com IA',
+    title: 'AI-powered matching',
     description:
-      'Nosso algoritmo analisa skills, experiência e preferências para conectar você aos candidatos ideais.',
+      'Our algorithm analyzes skills, experience, and preferences to connect you with the ideal candidates.',
   },
   {
     icon: Users,
-    title: 'Pool de talentos especializado',
+    title: 'Specialized talent pool',
     description:
-      'Acesse milhares de profissionais verificados em Legal Ops, CLM, e operações jurídicas.',
+      'Access thousands of verified professionals in Legal Ops, CLM, and legal operations.',
   },
   {
     icon: Search,
-    title: 'Filtros avançados',
+    title: 'Advanced filters',
     description:
-      'Filtre por especialização, ferramentas dominadas, anos de experiência, pretensão salarial e localização.',
+      'Filter by specialization, tools mastered, years of experience, salary expectations, and location.',
   },
   {
     icon: Zap,
-    title: 'Contratação mais rápida',
+    title: 'Faster hiring',
     description:
-      'Reduza o tempo de contratação de meses para semanas com candidatos pré-qualificados.',
+      'Reduce time-to-hire from months to weeks with pre-qualified candidates.',
   },
   {
     icon: BarChart3,
-    title: 'Analytics de recrutamento',
+    title: 'Recruitment analytics',
     description:
-      'Dashboard com métricas de funil, tempo de contratação e qualidade dos candidatos.',
+      'Dashboard with funnel metrics, time-to-hire, and candidate quality insights.',
   },
   {
     icon: Shield,
-    title: 'Candidatos verificados',
+    title: 'Verified candidates',
     description:
-      'Perfis profissionais completos com histórico, certificações e avaliações da comunidade.',
+      'Complete professional profiles with work history, certifications, and community reviews.',
   },
 ]
 
 const steps = [
   {
     number: '01',
-    title: 'Publique sua vaga',
-    description: 'Descreva o que busca. Nossa IA enriquece automaticamente com dados do mercado.',
+    title: 'Post your job',
+    description: 'Describe what you are looking for. Our AI automatically enriches it with market data.',
   },
   {
     number: '02',
-    title: 'Receba matches',
+    title: 'Receive matches',
     description:
-      'Em minutos, nosso algoritmo identifica os profissionais mais alinhados ao seu perfil de vaga.',
+      'Within minutes, our algorithm identifies the professionals best aligned with your job profile.',
   },
   {
     number: '03',
-    title: 'Conecte-se',
+    title: 'Connect',
     description:
-      'Entre em contato diretamente com os candidatos ou deixe que eles apliquem à sua vaga.',
+      'Reach out to candidates directly or let them apply to your posting.',
   },
 ]
 
@@ -77,13 +77,13 @@ export default function ForEmployersPage() {
               href="/pricing"
               className="rounded-xl border-2 border-[#1A1A1A] px-4 py-2 text-sm font-bold text-[#1A1A1A] transition-colors hover:bg-[#1A1A1A]/5"
             >
-              Preços
+              Pricing
             </Link>
             <Link
               href="/login"
               className="rounded-xl bg-[#1A1A1A] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-black"
             >
-              Entrar
+              Sign in
             </Link>
           </div>
         </div>
@@ -94,28 +94,28 @@ export default function ForEmployersPage() {
         <section className="py-16 sm:py-20">
           <div className="max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-widest text-[#1A1A1A]/50">
-              Para Empresas
+              For Companies
             </p>
             <h1 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">
-              Contrate os melhores profissionais de Legal Ops
+              Hire the best Legal Ops professionals
             </h1>
             <p className="mt-4 text-lg leading-8 text-[#1A1A1A]/70">
-              Acesse o maior pool de talentos especializados em operações jurídicas.
-              Match automático com IA. Candidatos pré-qualificados e filtrados.
+              Access the largest pool of talent specialized in legal operations.
+              AI-powered matching. Pre-qualified and filtered candidates.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/login"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF6A00] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#E65C00]"
               >
-                Publicar uma vaga — $299
+                Post a job — $299
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/pricing"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[#1A1A1A] px-6 py-3 text-sm font-bold text-[#1A1A1A] transition-colors hover:bg-[#1A1A1A]/5"
               >
-                Ver todos os planos
+                View all plans
               </Link>
             </div>
           </div>
@@ -124,7 +124,7 @@ export default function ForEmployersPage() {
         {/* How it works */}
         <section className="border-t border-[#1A1A1A]/10 py-16">
           <h2 className="text-3xl font-bold sm:text-4xl">
-            Como funciona
+            How it works
           </h2>
           <div className="mt-10 grid gap-8 md:grid-cols-3">
             {steps.map((step) => (
@@ -140,7 +140,7 @@ export default function ForEmployersPage() {
         {/* Features */}
         <section className="border-t border-[#1A1A1A]/10 py-16">
           <h2 className="text-3xl font-bold sm:text-4xl">
-            Por que empresas escolhem LegalOps
+            Why companies choose LegalOps
           </h2>
           <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
@@ -158,15 +158,15 @@ export default function ForEmployersPage() {
           <div className="grid gap-8 sm:grid-cols-3">
             <div className="text-center">
               <p className="text-4xl font-bold">500+</p>
-              <p className="mt-1 text-sm text-[#1A1A1A]/70">Vagas mapeadas</p>
+              <p className="mt-1 text-sm text-[#1A1A1A]/70">Jobs mapped</p>
             </div>
             <div className="text-center">
               <p className="text-4xl font-bold">95%</p>
-              <p className="mt-1 text-sm text-[#1A1A1A]/70">Match score médio</p>
+              <p className="mt-1 text-sm text-[#1A1A1A]/70">Average match score</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-bold">2 sem</p>
-              <p className="mt-1 text-sm text-[#1A1A1A]/70">Tempo médio de contratação</p>
+              <p className="text-4xl font-bold">2 wks</p>
+              <p className="mt-1 text-sm text-[#1A1A1A]/70">Average time-to-hire</p>
             </div>
           </div>
         </section>
@@ -176,17 +176,17 @@ export default function ForEmployersPage() {
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="text-3xl font-bold">
-                Pronto para encontrar seu próximo talento?
+                Ready to find your next talent?
               </h2>
               <p className="mt-2 text-[#1A1A1A]/70">
-                Publique sua primeira vaga hoje e receba matches em minutos.
+                Post your first job today and receive matches in minutes.
               </p>
             </div>
             <Link
               href="/login"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF6A00] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#E65C00]"
             >
-              Começar agora
+              Get started
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
