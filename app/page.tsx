@@ -7,6 +7,8 @@ export const metadata: Metadata = {
     'Busque vagas de Legal Ops, CLM e operações jurídicas, candidate-se e acompanhe seu pipeline gratuitamente. Assine o Pro só se quiser recursos extras com IA e outreach.',
 }
 
+export const revalidate = 60
+
 export default function Home() {
   return <LandingPage locale="pt" />
 }

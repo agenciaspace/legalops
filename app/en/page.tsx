@@ -7,6 +7,8 @@ export const metadata: Metadata = {
     'Find Legal Ops, CLM, and legal operations roles, apply, track statuses, and manage your pipeline for free. Upgrade to Pro only if you want AI-powered extras and stronger outreach.',
 }
 
+export const revalidate = 60
+
 export default function EnglishHome() {
   return <LandingPage locale="en" />
 }
