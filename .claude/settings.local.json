@@ -32,7 +32,8 @@
       "Bash(/Users/leonhatori/legalops-work/legal-ops-crm/lib/types.ts:*)",
       "Bash(git -C /Users/leonhatori/legalops-work/legal-ops-crm add lib/types.ts __tests__/types.test.ts)",
       "Bash(git -C:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "mcp__978ef5ce-283d-42e4-8f5d-30bd4114d846__execute_sql"
     ]
   }
 }
