@@ -92,22 +92,16 @@ const FIRECRAWL_EXTRACT_SCHEMA = {
   required: ['jobListings'],
 }
 
+// Slugs verified live on 2026-05-06. Removed entries that returned HTTP 404
+// (companies that migrated boards or changed slug). Re-audit periodically.
 export const COMPANY_SLUGS = {
   greenhouse: [
-    'nubank', 'ifood', 'totvs', 'vtex', 'loft', 'gympass', 'creditas',
-    'stripe', 'coinbase', 'cloudflare', 'notion', 'databricks', 'brex',
-    'verkada', 'cohere-health', 'cerebras-systems', 'applied-intuition',
-    'highlevel', 'hive', 'match-group', 'skylo', 'harbor',
-    'neros-technologies', 'ipx', 'thinking-machines-lab',
-    'airtable', 'plaid', 'figma', 'anduril', 'ramp',
+    'nubank', 'vtex', 'gympass', 'stripe', 'cloudflare', 'databricks',
+    'brex', 'verkada', 'hive', 'harbor', 'airtable', 'figma',
   ],
-  lever: [
-    'stone', 'pagarme', 'dock', 'ebanx', 'nuvemshop',
-    'netflix', 'affirm', 'nerdwallet', 'ironclad',
-    'linktr.ee', 'drata', 'abridge',
-  ],
-  workable: ['jusbrasil', 'lalamove-brazil'],
-  gupy: ['itau', 'bradesco', 'ambev', 'embraer', 'raizen'],
+  lever: ['netflix'],
+  workable: [] as string[],
+  gupy: [] as string[],
 } as const
 
 function cleanString(value: unknown): string | null {
@@ -372,6 +366,15 @@ async function fetchJson(url: string): Promise<unknown> {
   return response.json()
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+// Random delay to avoid pattern-based rate limiting from board APIs.
+function jitter(): Promise<void> {
+  return sleep(500 + Math.floor(Math.random() * 1000))
+}
+
 export async function scrapeLegacyBoards(): Promise<RawJob[]> {
   const results: RawJob[] = []
 
@@ -382,6 +385,7 @@ export async function scrapeLegacyBoards(): Promise<RawJob[]> {
     } catch (error) {
       console.error(`[scraper] greenhouse/${slug} failed:`, error)
     }
+    await jitter()
   }
 
   for (const slug of COMPANY_SLUGS.lever) {
@@ -393,6 +397,7 @@ export async function scrapeLegacyBoards(): Promise<RawJob[]> {
     } catch (error) {
       console.error(`[scraper] lever/${slug} failed:`, error)
     }
+    await jitter()
   }
 
   for (const slug of COMPANY_SLUGS.workable) {
@@ -402,6 +407,7 @@ export async function scrapeLegacyBoards(): Promise<RawJob[]> {
     } catch (error) {
       console.error(`[scraper] workable/${slug} failed:`, error)
     }
+    await jitter()
   }
 
   for (const slug of COMPANY_SLUGS.gupy) {
@@ -411,13 +417,10 @@ export async function scrapeLegacyBoards(): Promise<RawJob[]> {
     } catch (error) {
       console.error(`[scraper] gupy/${slug} failed:`, error)
     }
+    await jitter()
   }
 
   return dedupeJobsByUrl(results)
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 async function runFirecrawlAgent(apiKey: string): Promise<FirecrawlJobListing[]> {
@@ -490,7 +493,11 @@ async function runFirecrawlAgent(apiKey: string): Promise<FirecrawlJobListing[]>
 
 export async function scrapeJobsWithFirecrawl(): Promise<RawJob[]> {
   const apiKey = cleanString(process.env.FIRECRAWL_API_KEY)
-  if (!apiKey) return []
+  if (!apiKey) {
+    // Throw so Promise.allSettled in scrapeAllBoards surfaces it in errors[],
+    // instead of silently degrading to legacy-only and hiding the misconfig.
+    throw new Error('FIRECRAWL_API_KEY is missing or empty')
+  }
 
   const listings = await runFirecrawlAgent(apiKey)
 
