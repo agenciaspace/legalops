@@ -10,16 +10,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    setNotice(null)
     setLoading(true)
     const supabase = createClient()
 
-    const { error } =
+    const { data, error } =
       mode === 'login'
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signUp({ email, password })
@@ -28,6 +30,12 @@ export default function LoginPage() {
 
     if (error) {
       setError(error.message)
+      return
+    }
+
+    if (mode === 'signup' && !data.session) {
+      setNotice('Conta criada. Confira seu email para confirmar o acesso e depois entre aqui.')
+      setMode('login')
       return
     }
 
@@ -80,6 +88,9 @@ export default function LoginPage() {
           {error && (
             <p className="text-red-700 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>
           )}
+          {notice ? (
+            <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{notice}</p>
+          ) : null}
 
           <button
             type="submit"
