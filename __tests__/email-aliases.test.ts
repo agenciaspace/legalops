@@ -20,6 +20,7 @@ describe('email alias helpers', () => {
     })
 
     expect(getEmailTierPolicy('pro').maxActiveAliases).toBe(10)
+    expect(getEmailTierPolicy('paid').maxActiveAliases).toBe(10)
   })
 
   it('normalizes custom alias input before validation', () => {

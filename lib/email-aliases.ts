@@ -14,6 +14,12 @@ export const EMAIL_TIER_POLICIES: Record<UserTier, EmailTierPolicy> = {
     allowsRandomAliases: true,
     allowsCustomAliases: false,
   },
+  paid: {
+    tier: 'paid',
+    maxActiveAliases: 10,
+    allowsRandomAliases: true,
+    allowsCustomAliases: true,
+  },
   pro: {
     tier: 'pro',
     maxActiveAliases: 10,
@@ -46,7 +52,7 @@ const RESERVED_LOCAL_PARTS = new Set([
 const RANDOM_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789'
 
 export function isUserTier(value: unknown): value is UserTier {
-  return value === 'free' || value === 'pro' || value === 'expert'
+  return value === 'free' || value === 'paid' || value === 'pro' || value === 'expert'
 }
 
 export function isEmailAliasSource(value: unknown): value is EmailAliasSource {

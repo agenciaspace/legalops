@@ -135,6 +135,14 @@ describe('types', () => {
     const profile: AccountProfile = {
       user_id: 'user-uuid',
       tier: 'free',
+      full_name: null,
+      current_role: null,
+      professional_type: null,
+      years_experience: null,
+      areas_of_expertise: [],
+      linkedin_url: null,
+      linkedin_data: null,
+      onboarding_completed: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }

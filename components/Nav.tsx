@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Bell } from 'lucide-react'
+import { Bell, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { BrandLogo } from '@/components/BrandLogo'
 
@@ -26,7 +26,7 @@ export function Nav({ discoverCount, newJobsCount }: NavProps) {
     <Link
       href={href}
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
-        pathname === href
+        pathname === href || (href === '/community' && pathname.startsWith('/community'))
           ? 'bg-[#FF6A00]/10 text-[#FF6A00]'
           : 'text-[#1A1A1A]/70 hover:text-[#1A1A1A] hover:bg-[#1A1A1A]/5'
       }`}
@@ -41,9 +41,9 @@ export function Nav({ discoverCount, newJobsCount }: NavProps) {
   )
 
   return (
-    <header className="bg-white border-b border-[#1A1A1A]/10 px-6 py-3 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-1">
+    <header className="sticky top-0 z-50 border-b border-[#1A1A1A]/10 bg-white">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
           <Link href="/dashboard" className="flex items-center gap-2 mr-6">
             <BrandLogo
               className="flex items-center gap-2"
@@ -51,14 +51,14 @@ export function Nav({ discoverCount, newJobsCount }: NavProps) {
               titleClassName="text-sm font-semibold tracking-[0.18em] text-[#1A1A1A] uppercase"
             />
           </Link>
+          {navLink('/community', 'Club')}
           {navLink('/dashboard', 'Dashboard')}
           {navLink('/discover', 'Descobrir', discoverCount)}
           {navLink('/pipeline', 'Pipeline')}
           {navLink('/professionals', 'Profissionais')}
           {navLink('/emails', 'Emails')}
-          {navLink('/settings', 'Configurações')}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1">
           {newJobsCount > 0 && (
             <Link
               href="/discover"
@@ -71,6 +71,9 @@ export function Nav({ discoverCount, newJobsCount }: NavProps) {
               </span>
             </Link>
           )}
+          <Link href="/community/members" className="hidden rounded-xl p-2 text-[#1A1A1A]/50 transition hover:bg-[#1A1A1A]/5 hover:text-[#FF6A00] sm:flex" title="Membros do Club">
+            <Users className="h-5 w-5" />
+          </Link>
           <button
             onClick={handleSignOut}
             className="text-xs text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition-colors px-3 py-1.5 rounded-xl hover:bg-[#1A1A1A]/5"

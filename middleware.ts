@@ -2,9 +2,19 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
-  const publicPaths = new Set(['/', '/en', '/login', '/manifesto', '/pricing', '/for-employers'])
   const { pathname } = request.nextUrl
+  const hostname = (request.headers.get('host') ?? '').split(':')[0]
+  const isClubDomain = hostname === 'legalops.club' || hostname === 'www.legalops.club'
+
+  // Keep legalops.work as the job platform while legalops.club gets its own home.
+  if (isClubDomain && pathname === '/') {
+    const clubUrl = request.nextUrl.clone()
+    clubUrl.pathname = '/club'
+    return NextResponse.rewrite(clubUrl)
+  }
+
+  let supabaseResponse = NextResponse.next({ request })
+  const publicPaths = new Set(['/', '/club', '/en', '/login', '/manifesto', '/pricing', '/for-employers'])
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,14 +40,20 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     if (!publicPaths.has(pathname)) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      const loginUrl = new URL('/login', request.url)
+      if (pathname.startsWith('/community')) loginUrl.searchParams.set('next', pathname)
+      return NextResponse.redirect(loginUrl)
     }
     return supabaseResponse
   }
 
   // Authenticated user on login → redirect to app
   if (pathname === '/login') {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    const requestedPath = request.nextUrl.searchParams.get('next')
+    const destination = requestedPath?.startsWith('/') && !requestedPath.startsWith('//')
+      ? requestedPath
+      : isClubDomain ? '/community' : '/dashboard'
+    return NextResponse.redirect(new URL(destination, request.url))
   }
 
   // Check onboarding completion for non-onboarding, non-API routes
@@ -53,7 +69,9 @@ export async function middleware(request: NextRequest) {
       .single()
 
     if (profile && profile.onboarding_completed === false) {
-      return NextResponse.redirect(new URL('/onboard', request.url))
+      const onboardUrl = new URL('/onboard', request.url)
+      onboardUrl.searchParams.set('next', pathname)
+      return NextResponse.redirect(onboardUrl)
     }
   }
 

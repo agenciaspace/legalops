@@ -36,7 +36,7 @@ export type EventType =
   | 'interview_scheduled'
   | 'follow_up'
   | 'custom'
-export type UserTier = 'free' | 'pro' | 'expert'
+export type UserTier = 'free' | 'paid' | 'pro' | 'expert'
 export type ProfessionalType = 'law_firm' | 'legal_dept' | 'public_sector' | 'freelance' | 'other'
 export type EmailAliasSource = 'random' | 'custom'
 export type EmailAliasStatus = 'active' | 'disabled'

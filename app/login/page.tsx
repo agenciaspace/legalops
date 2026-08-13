@@ -31,8 +31,13 @@ export default function LoginPage() {
       return
     }
 
+    const requestedPath = new URLSearchParams(window.location.search).get('next')
+    const safePath = requestedPath?.startsWith('/') && !requestedPath.startsWith('//')
+      ? requestedPath
+      : window.location.hostname.endsWith('legalops.club') ? '/community' : '/dashboard'
+
+    router.push(safePath)
     router.refresh()
-    router.push('/dashboard')
   }
 
   return (
@@ -43,7 +48,7 @@ export default function LoginPage() {
             className="flex flex-col items-center gap-4"
             markClassName="h-14 w-14 text-[#1A1A1A]"
             titleClassName="text-2xl font-semibold tracking-[0.18em] text-[#1A1A1A] uppercase"
-            subtitle="Plataforma inteligente de job hunting para Legal Operations"
+            subtitle="Sua conta para vagas, conteúdo e comunidade de Legal Operations"
             subtitleClassName="max-w-xs text-sm leading-6 text-[#1A1A1A]/60"
           />
         </div>

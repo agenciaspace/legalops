@@ -86,6 +86,13 @@ export default function OnboardPage() {
   const [insights, setInsights] = useState<LinkedInInsight[]>([])
   const [insightsScrapeSuccess, setInsightsScrapeSuccess] = useState(false)
 
+  function finishDestination() {
+    const requestedPath = new URLSearchParams(window.location.search).get('next')
+    return requestedPath?.startsWith('/') && !requestedPath.startsWith('//')
+      ? requestedPath
+      : '/discover'
+  }
+
   function toggleArea(area: string) {
     setSelectedAreas(prev =>
       prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area]
@@ -183,7 +190,7 @@ export default function OnboardPage() {
     setSaving(true)
     try {
       await saveStep({ onboarding_completed: true })
-      router.push('/discover')
+      router.push(finishDestination())
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro desconhecido')
     } finally {
@@ -196,7 +203,7 @@ export default function OnboardPage() {
     setSaving(true)
     try {
       await saveStep({ onboarding_completed: true })
-      router.push('/discover')
+      router.push(finishDestination())
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro desconhecido')
     } finally {
