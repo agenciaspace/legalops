@@ -122,7 +122,7 @@ export function ClubDiscovery({ annualPrice }: { annualPrice: string }) {
         </label>
       </div>
 
-      <div className="mt-7 flex gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:justify-center">
+      <div className="mt-7 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:justify-center">
         {filters.map(filter => (
           <button
             key={filter.key}
