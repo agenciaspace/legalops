@@ -59,7 +59,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(destination, request.url))
   }
 
-  if (pathname.startsWith('/community/classroom') || pathname.startsWith('/community/leaderboard')) {
+  if (pathname.startsWith('/community/leaderboard')) {
     return NextResponse.redirect(new URL('/community', request.url))
   }
 
