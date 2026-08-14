@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   }
 
   let supabaseResponse = NextResponse.next({ request })
-  const publicPaths = new Set(['/', '/club', '/en', '/login', '/manifesto', '/pricing', '/for-employers'])
+  const publicPaths = new Set(['/', '/club', '/club/about', '/en', '/login', '/manifesto', '/pricing', '/for-employers'])
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -44,7 +44,9 @@ export async function middleware(request: NextRequest) {
     }
     if (!publicPaths.has(pathname)) {
       const loginUrl = new URL('/login', request.url)
-      if (pathname.startsWith('/community')) loginUrl.searchParams.set('next', pathname)
+      if (pathname.startsWith('/community')) {
+        loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`)
+      }
       return NextResponse.redirect(loginUrl)
     }
     return supabaseResponse
