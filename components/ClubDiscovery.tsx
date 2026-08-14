@@ -32,70 +32,60 @@ const communities = [
     key: 'ia-automacao',
     filter: 'technology' as const,
     Icon: Bot,
-    cover: 'from-[#183B35] via-[#22564A] to-[#D9A441]',
     shortLabel: 'IA',
   },
   {
     key: 'dados-metricas',
     filter: 'technology' as const,
     Icon: BarChart3,
-    cover: 'from-[#18324B] via-[#285A7B] to-[#8FC5D3]',
     shortLabel: 'DADOS',
   },
   {
     key: 'contratos-clm',
     filter: 'operations' as const,
     Icon: FileCheck2,
-    cover: 'from-[#4D231B] via-[#9A3F27] to-[#E5A56F]',
     shortLabel: 'CLM',
   },
   {
     key: 'processos-projetos',
     filter: 'operations' as const,
     Icon: Workflow,
-    cover: 'from-[#312C55] via-[#5A4C91] to-[#C0AEE8]',
     shortLabel: 'FLUXO',
   },
   {
     key: 'ferramentas',
     filter: 'technology' as const,
     Icon: Boxes,
-    cover: 'from-[#132F40] via-[#28647B] to-[#77B8A7]',
     shortLabel: 'STACK',
   },
   {
     key: 'financeiro-fornecedores',
     filter: 'operations' as const,
     Icon: Landmark,
-    cover: 'from-[#45330E] via-[#85651A] to-[#D8B75B]',
     shortLabel: 'SPEND',
   },
   {
     key: 'governanca-conhecimento',
     filter: 'operations' as const,
     Icon: Library,
-    cover: 'from-[#273628] via-[#50694A] to-[#A8BC86]',
     shortLabel: 'GOV',
   },
   {
     key: 'estrategia-maturidade',
     filter: 'strategy' as const,
     Icon: ShieldCheck,
-    cover: 'from-[#3B203D] via-[#714875] to-[#C39ABF]',
     shortLabel: 'ESTRATÉGIA',
   },
   {
     key: 'modelos-entrega',
     filter: 'strategy' as const,
     Icon: Network,
-    cover: 'from-[#412A24] via-[#765449] to-[#C6A28D]',
     shortLabel: 'DELIVERY',
   },
   {
     key: 'carreira',
     filter: 'strategy' as const,
     Icon: BriefcaseBusiness,
-    cover: 'from-[#222C47] via-[#455A8A] to-[#A8B8DD]',
     shortLabel: 'PESSOAS',
   },
 ]
@@ -147,7 +137,7 @@ export function ClubDiscovery({ annualPrice }: { annualPrice: string }) {
 
       {visibleCommunities.length > 0 ? (
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleCommunities.map(community => {
+          {visibleCommunities.map((community, index) => {
             const category = COMMUNITY_CATEGORIES[community.key]
             const Icon = community.Icon
 
@@ -157,20 +147,25 @@ export function ClubDiscovery({ annualPrice }: { annualPrice: string }) {
                 href={`/community?space=${community.key}`}
                 className="group overflow-hidden rounded-lg border border-[#DFDFDB] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition hover:-translate-y-0.5 hover:border-[#C3C3BE] hover:shadow-md"
               >
-                <div className={`relative aspect-[16/8.5] overflow-hidden bg-gradient-to-br ${community.cover} p-5 text-white`}>
-                  <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,.35)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.35)_1px,transparent_1px)] [background-size:28px_28px]" />
+                <div className="relative aspect-[16/8.5] overflow-hidden border-b border-[#DFDFDB] bg-[#F0F0ED] p-5 text-[#20201D] transition group-hover:bg-[#ECECE8]">
+                  <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(32,32,29,.06)_1px,transparent_1px),linear-gradient(90deg,rgba(32,32,29,.06)_1px,transparent_1px)] [background-size:28px_28px]" />
                   <div className="relative flex h-full flex-col justify-between">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-semibold tracking-[0.16em] text-white/70">LEGALOPS CLUB</span>
-                      <Icon className="h-6 w-6 text-white/80" />
+                      <span className="text-[10px] font-semibold tracking-[0.16em] text-[#E45220]">LEGALOPS CLUB</span>
+                      <span className="flex h-9 w-9 items-center justify-center rounded-md border border-[#D4D4CF] bg-white/70">
+                        <Icon className="h-[18px] w-[18px] text-[#53534F]" />
+                      </span>
                     </div>
-                    <p className="text-3xl font-black tracking-[-0.04em]">{community.shortLabel}</p>
+                    <div className="flex items-end justify-between gap-4">
+                      <p className="text-3xl font-black tracking-[-0.04em]">{community.shortLabel}</p>
+                      <span className="pb-1 text-[10px] font-semibold text-[#90908B]">{String(index + 1).padStart(2, '0')} / {String(communities.length).padStart(2, '0')}</span>
+                    </div>
                   </div>
                 </div>
 
                 <div className="p-4">
                   <div className="flex items-center gap-2.5">
-                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gradient-to-br ${community.cover} text-white`}>
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#D9D9D4] bg-[#F3F3F0] text-[#E45220]">
                       <Icon className="h-4 w-4" />
                     </span>
                     <h2 className="line-clamp-1 text-sm font-semibold text-[#20201D]">{category.title}</h2>
