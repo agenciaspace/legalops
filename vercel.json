@@ -5,6 +5,10 @@
     {
       "path": "/api/cron/scrape",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/community-summary",
+      "schedule": "0 21 * * 0"
     }
   ]
 }

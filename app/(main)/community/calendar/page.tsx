@@ -25,7 +25,7 @@ function googleCalendarUrl(event: Event) {
 
 const eventLabels: Record<string, string> = {
   encontro: 'Encontro',
-  aula: 'Aula ao vivo',
+  aula: 'Live',
   'office-hours': 'Office hours',
   networking: 'Networking',
 }
@@ -47,8 +47,8 @@ export default async function CalendarPage() {
     <div className="mx-auto w-full max-w-[1000px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Eventos</h1>
-          <p className="mt-1 text-xs text-[#77746E]">Aulas, office hours e encontros da comunidade. Horário de Brasília.</p>
+          <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Lives</h1>
+          <p className="mt-1 text-xs text-[#77746E]">Conversas ao vivo, office hours e encontros da comunidade. Horário de Brasília.</p>
         </div>
         <div className="hidden rounded-lg border border-[#DFDFDB] bg-white p-1 sm:flex">
           <button className="rounded-md bg-[#F1F1EE] p-1.5 text-[#33322E]" aria-label="Visualização em lista"><List className="h-3.5 w-3.5" /></button>
@@ -58,7 +58,7 @@ export default async function CalendarPage() {
 
       <section className="mt-5 overflow-hidden rounded-xl border border-[#E1E1DD] bg-white">
         <div className="flex items-center justify-between border-b border-[#ECECE8] px-4 py-3.5 sm:px-5">
-          <h2 className="text-xs font-extrabold text-[#34332F]">Próximos eventos</h2>
+          <h2 className="text-xs font-extrabold text-[#34332F]">Próximas lives</h2>
           <span className="rounded-md bg-[#F1F1EE] px-2 py-1 text-[8px] font-black text-[#77746E]">{events.length} AGENDADOS</span>
         </div>
 

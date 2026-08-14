@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { hasActiveClubAccess } from '@/lib/community'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -58,6 +59,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(destination, request.url))
   }
 
+  if (pathname.startsWith('/community/classroom') || pathname.startsWith('/community/leaderboard')) {
+    return NextResponse.redirect(new URL('/community', request.url))
+  }
+
   // Check onboarding completion for non-onboarding, non-API routes
   if (
     pathname !== '/onboard' &&
@@ -74,6 +79,21 @@ export async function middleware(request: NextRequest) {
       const onboardUrl = new URL('/onboard', request.url)
       onboardUrl.searchParams.set('next', pathname)
       return NextResponse.redirect(onboardUrl)
+    }
+  }
+
+  // The root feed contains the public preview. Every deeper Club route is paid-only.
+  if (pathname.startsWith('/community/')) {
+    const { data: clubAccess } = await supabase
+      .from('community_members')
+      .select('club_access_status, club_access_expires_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (!hasActiveClubAccess(clubAccess)) {
+      const upgradeUrl = new URL('/community', request.url)
+      upgradeUrl.searchParams.set('upgrade', '1')
+      return NextResponse.redirect(upgradeUrl)
     }
   }
 

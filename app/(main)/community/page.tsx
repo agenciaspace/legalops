@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import {
   ArrowRight,
-  CalendarDays,
   Heart,
   Image as ImageIcon,
+  Lock,
   MessageCircle,
   MoreHorizontal,
   Paperclip,
@@ -22,6 +22,7 @@ import {
   getAvatarTone,
   getCommunityCategory,
   getInitials,
+  hasActiveClubAccess,
 } from '@/lib/community'
 import { createCommunityComment, createCommunityPost, toggleCommunityPostLike } from './actions'
 
@@ -59,22 +60,19 @@ type Member = {
   current_role: string | null
 }
 
-const SPACE_COPY: Record<string, { title: string; description: string }> = {
-  anuncio: { title: 'Anúncios', description: 'Novidades, comunicados e atualizações importantes do Club.' },
-  apresentacoes: { title: 'Apresente-se', description: 'Conheça as pessoas por trás das operações jurídicas.' },
-  discussao: { title: 'Discussões gerais', description: 'Perguntas, ideias e trocas sobre o dia a dia de Legal Operations.' },
-  carreira: { title: 'Carreira', description: 'Movimentos, aprendizados e oportunidades para crescer em Legal Ops.' },
-  ferramentas: { title: 'Tech & ferramentas', description: 'Stack, automações e tecnologia aplicada à operação jurídica.' },
-  cases: { title: 'Cases & aprendizados', description: 'O que funcionou, o que falhou e o que faríamos diferente.' },
-}
-
 export const dynamic = 'force-dynamic'
 
-export default async function CommunityPage({ searchParams }: { searchParams?: { space?: string } }) {
+export default async function CommunityPage({ searchParams }: { searchParams?: { space?: string; upgrade?: string } }) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   const requestedSpace = searchParams?.space
   const selectedSpace = requestedSpace && COMMUNITY_CATEGORIES[requestedSpace] ? requestedSpace : null
+  const { data: clubAccess } = await supabase
+    .from('community_members')
+    .select('club_access_status, club_access_expires_at')
+    .eq('user_id', user?.id ?? '')
+    .maybeSingle()
+  const hasPaidAccess = hasActiveClubAccess(clubAccess)
 
   let postsQuery = supabase
     .from('community_posts')
@@ -104,7 +102,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
   const posts = (rawPosts ?? []) as Post[]
   const upcomingEvent = rawEvent as Event | null
   const newMembers = (rawMembers ?? []) as Member[]
-  const activeSpace = selectedSpace ? SPACE_COPY[selectedSpace] : null
+  const activeSpace = selectedSpace ? COMMUNITY_CATEGORIES[selectedSpace] : null
   const trendingPosts = [...posts]
     .sort((a, b) => (
       (b.community_post_likes?.length ?? 0) + (b.community_comments?.length ?? 0) * 2
@@ -132,6 +130,22 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
             </button>
           </header>
 
+          {!hasPaidAccess ? (
+            <section className="mb-4 overflow-hidden rounded-xl border border-[#FFD0BD] bg-[#FFF6F1] p-4 sm:p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#292825] text-white"><Lock className="h-4 w-4" /></div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#D9470F]">Prévia aberta</p>
+                  <h2 className="mt-1 text-sm font-extrabold text-[#292824]">Você está vendo uma parte do conteúdo.</h2>
+                  <p className="mt-1 text-[11px] leading-5 text-[#77746E]">Assinantes acessam todas as conversas, publicam, comentam e entram nas lives, resumos por IA e diretório validado de membros.</p>
+                  <Link href="/club#planos" className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[#FF5C1A] px-3 py-2 text-[10px] font-extrabold text-white hover:bg-[#E84D10]">
+                    Ver lotes de lançamento <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
           {!selectedSpace ? (
             <section className="mb-4 overflow-hidden rounded-xl border border-[#E2D4CB] bg-[#2A2926] text-white">
               <div className="relative px-5 py-5 sm:px-6 sm:py-6">
@@ -151,7 +165,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
             </section>
           ) : null}
 
-          <details id="new-post" className="group mb-4 overflow-hidden rounded-xl border border-[#E2E2DE] bg-white" open={posts.length === 0}>
+          {hasPaidAccess ? <details id="new-post" className="group mb-4 overflow-hidden rounded-xl border border-[#E2E2DE] bg-white" open={posts.length === 0}>
             <summary className="flex cursor-pointer list-none items-center gap-3 p-3.5 sm:px-4">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FF5C1A] text-[10px] font-black text-white">
                 {getInitials(user?.email?.split('@')[0] ?? 'LO')}
@@ -195,7 +209,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                 </button>
               </div>
             </form>
-          </details>
+          </details> : null}
 
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-1 rounded-lg bg-[#ECECE8] p-1 text-[10px] font-bold text-[#77746E]">
@@ -247,7 +261,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                     <p className="mt-2 whitespace-pre-wrap text-[13px] leading-[1.65] text-[#68655F]">{post.body}</p>
                   </div>
 
-                  <div className="mt-5 flex items-center gap-4 border-t border-[#ECECE8] pb-0 pt-3 text-[10px] font-bold text-[#77746E] sm:ml-[52px]">
+                  {hasPaidAccess ? <div className="mt-5 flex items-center gap-4 border-t border-[#ECECE8] pb-0 pt-3 text-[10px] font-bold text-[#77746E] sm:ml-[52px]">
                     <form action={toggleCommunityPostLike}>
                       <input type="hidden" name="post_id" value={post.id} />
                       <button className={`flex items-center gap-1.5 rounded-md px-1 py-1 transition hover:text-[#D9470F] ${likedByUser ? 'text-[#D9470F]' : ''}`} aria-label={likedByUser ? 'Remover curtida' : 'Curtir'}>
@@ -255,9 +269,13 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                       </button>
                     </form>
                     <span className="flex items-center gap-1.5"><MessageCircle className="h-4 w-4" /> {comments.length || 'Comentar'}</span>
-                  </div>
+                  </div> : (
+                    <div className="mt-5 flex items-center gap-2 border-t border-[#ECECE8] pt-3 text-[10px] font-bold text-[#9A9791] sm:ml-[52px]">
+                      <Lock className="h-3.5 w-3.5" /> Interações disponíveis para assinantes
+                    </div>
+                  )}
 
-                  {comments.length > 0 ? (
+                  {hasPaidAccess && comments.length > 0 ? (
                     <div className="mt-3 space-y-2 border-t border-[#ECECE8] pt-3 sm:ml-[52px]">
                       {comments.slice(-3).map(comment => (
                         <div key={comment.id} className="flex gap-2 rounded-lg bg-[#F7F7F5] px-3 py-2.5 text-[11px] leading-5">
@@ -268,7 +286,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                     </div>
                   ) : null}
 
-                  <form action={createCommunityComment} className="mt-3 flex gap-2 sm:ml-[52px]">
+                  {hasPaidAccess ? <form action={createCommunityComment} className="mt-3 flex gap-2 sm:ml-[52px]">
                     <input type="hidden" name="post_id" value={post.id} />
                     <input
                       name="body"
@@ -281,7 +299,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                     <button className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#292825] text-white transition hover:bg-[#FF5C1A]" aria-label="Enviar comentário">
                       <Send className="h-3.5 w-3.5" />
                     </button>
-                  </form>
+                  </form> : null}
                 </article>
               )
             })}
@@ -289,6 +307,14 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
         </section>
 
         <aside className="hidden space-y-4 xl:sticky xl:top-[5.75rem] xl:block">
+          {!hasPaidAccess ? (
+            <section className="rounded-xl bg-[#292825] p-5 text-white">
+              <Lock className="h-5 w-5 text-[#FF7A45]" />
+              <h2 className="mt-4 text-sm font-extrabold">O restante acontece por dentro.</h2>
+              <p className="mt-2 text-[10px] leading-5 text-white/60">Lives, resumos das discussões por IA, diretório validado e conversas completas ficam disponíveis na assinatura anual.</p>
+              <Link href="/club#planos" className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-extrabold text-[#FF8B5D] hover:text-white">Escolher meu lote <ArrowRight className="h-3.5 w-3.5" /></Link>
+            </section>
+          ) : <>
           <section className="rounded-xl border border-[#E1E1DD] bg-white p-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xs font-extrabold text-[#292824]">Próximo evento</h2>
@@ -340,6 +366,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
               ))}
             </div>
           </section>
+          </>}
 
           <p className="px-1 text-[8px] leading-4 text-[#AAA7A1]">LegalOps Club · Diretrizes · Privacidade<br />Feito para operações jurídicas melhores.</p>
         </aside>

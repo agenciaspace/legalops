@@ -1,4 +1,5 @@
-import { BriefcaseBusiness, MessageCircle, Search, SlidersHorizontal, UserPlus, Users } from 'lucide-react'
+import Link from 'next/link'
+import { BadgeCheck, BriefcaseBusiness, Building2, Search, SlidersHorizontal, UserPlus, Users } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getAvatarTone, getInitials } from '@/lib/community'
 
@@ -7,6 +8,10 @@ type Member = {
   display_name: string
   current_role: string | null
   areas_of_expertise: string[] | null
+  public_headline: string | null
+  public_bio: string | null
+  organization_name: string | null
+  profile_verification_status: string
 }
 
 export const dynamic = 'force-dynamic'
@@ -16,7 +21,7 @@ export default async function MembersPage({ searchParams }: { searchParams?: { q
   const search = searchParams?.q?.trim() ?? ''
   let membersQuery = supabase
     .from('community_members')
-    .select('user_id, display_name, current_role, areas_of_expertise')
+    .select('user_id, display_name, current_role, areas_of_expertise, public_headline, public_bio, organization_name, profile_verification_status')
 
   if (search) membersQuery = membersQuery.ilike('display_name', `%${search}%`)
 
@@ -55,21 +60,21 @@ export default async function MembersPage({ searchParams }: { searchParams?: { q
           const name = member.display_name?.trim() || 'Membro LegalOps'
           const areas = member.areas_of_expertise ?? []
           return (
-            <article key={member.user_id} className="group flex min-h-52 flex-col rounded-xl border border-[#E1E1DD] bg-white p-4 transition hover:border-[#CBCAC5] hover:shadow-sm">
+            <article key={member.user_id} className="group flex min-h-64 flex-col rounded-xl border border-[#E1E1DD] bg-white p-4 transition hover:border-[#CBCAC5] hover:shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-black ${getAvatarTone(name)}`}>{getInitials(name)}</div>
-                <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E5E4E0] text-[#797671] opacity-60 transition hover:border-[#FFB99E] hover:text-[#D9470F] group-hover:opacity-100" aria-label={`Enviar mensagem para ${name}`}>
-                  <MessageCircle className="h-3.5 w-3.5" />
-                </button>
+                {member.profile_verification_status === 'verified' ? <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[8px] font-black text-emerald-700"><BadgeCheck className="h-3.5 w-3.5" /> Validado</span> : <span className="rounded-full bg-stone-100 px-2 py-1 text-[8px] font-bold text-stone-500">Em validação</span>}
               </div>
-              <h2 className="mt-4 text-sm font-extrabold tracking-[-0.01em] text-[#2C2B27]">{name}</h2>
+              <h2 className="mt-4 flex items-center gap-1.5 text-sm font-extrabold tracking-[-0.01em] text-[#2C2B27]">{name}</h2>
+              {member.public_headline ? <p className="mt-1.5 line-clamp-2 text-[10px] font-semibold leading-4 text-[#5F5C56]">{member.public_headline}</p> : null}
               <p className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-[#88857F]"><BriefcaseBusiness className="h-3.5 w-3.5" /> {member.current_role || 'Profissional do jurídico'}</p>
+              {member.organization_name ? <p className="mt-1 flex items-center gap-1.5 text-[9px] text-[#999690]"><Building2 className="h-3.5 w-3.5" /> {member.organization_name}</p> : null}
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {areas.slice(0, 3).map(area => <span key={area} className="rounded-md bg-[#F1F1EE] px-2 py-1 text-[8px] font-bold text-[#67645F]">{area}</span>)}
                 {areas.length > 3 ? <span className="rounded-md bg-[#FFF0E9] px-2 py-1 text-[8px] font-bold text-[#D9470F]">+{areas.length - 3}</span> : null}
                 {areas.length === 0 ? <span className="text-[9px] text-[#AAA7A1]">Perfil em construção</span> : null}
               </div>
-              <button className="mt-auto pt-4 text-left text-[9px] font-extrabold text-[#D9470F] opacity-0 transition group-hover:opacity-100">Ver perfil →</button>
+              <Link href={`/community/members/${member.user_id}`} className="mt-auto pt-4 text-left text-[9px] font-extrabold text-[#D9470F] transition group-hover:translate-x-0.5">Ver perfil completo →</Link>
             </article>
           )
         })}

@@ -4,29 +4,38 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import {
   BarChart3,
-  BookOpen,
+  BadgeCheck,
+  Bot,
   BriefcaseBusiness,
   CalendarDays,
   ChevronDown,
+  CircleDollarSign,
+  Database,
   FileText,
+  FileCheck2,
   Home,
+  Library,
   Lightbulb,
+  Lock,
   Megaphone,
   MessageCircle,
   MessagesSquare,
+  Network,
   Rocket,
   Settings,
-  Trophy,
+  Sparkles,
+  Target,
   Users,
+  Workflow,
   Wrench,
 } from 'lucide-react'
 
 const mainItems = [
   { href: '/community', label: 'Início', icon: Home, exact: true },
-  { href: '/community/classroom', label: 'Trilhas', icon: BookOpen },
-  { href: '/community/calendar', label: 'Eventos', icon: CalendarDays },
+  { href: '/community/summaries', label: 'Resumos IA', icon: Sparkles },
+  { href: '/community/calendar', label: 'Lives', icon: CalendarDays },
   { href: '/community/members', label: 'Membros', icon: Users },
-  { href: '/community/leaderboard', label: 'Leaderboard', icon: Trophy },
+  { href: '/community/profile', label: 'Meu perfil', icon: BadgeCheck },
 ]
 
 const spaceGroups = [
@@ -38,12 +47,35 @@ const spaceGroups = [
     ],
   },
   {
-    label: 'COMUNIDADE LEGAL OPS',
+    label: 'CONVERSAS CENTRAIS',
     items: [
       { space: 'discussao', label: 'Discussões gerais', icon: MessagesSquare },
-      { space: 'cases', label: 'Cases & aprendizados', icon: FileText },
-      { space: 'ferramentas', label: 'Tech & ferramentas', icon: Wrench },
-      { space: 'carreira', label: 'Carreira', icon: BriefcaseBusiness },
+      { space: 'cases', label: 'Cases & playbooks', icon: FileText },
+    ],
+  },
+  {
+    label: 'TEMAS LATENTES',
+    items: [
+      { space: 'ia-automacao', label: 'IA & automação', icon: Bot },
+      { space: 'dados-metricas', label: 'Dados, métricas & BI', icon: Database },
+      { space: 'contratos-clm', label: 'Contratos & CLM', icon: FileCheck2 },
+    ],
+  },
+  {
+    label: 'OPERAÇÃO',
+    items: [
+      { space: 'processos-projetos', label: 'Processos & projetos', icon: Workflow },
+      { space: 'ferramentas', label: 'Tech stack & integrações', icon: Wrench },
+      { space: 'financeiro-fornecedores', label: 'Spend & fornecedores', icon: CircleDollarSign },
+      { space: 'governanca-conhecimento', label: 'Governança & conhecimento', icon: Library },
+    ],
+  },
+  {
+    label: 'ESTRATÉGIA & PESSOAS',
+    items: [
+      { space: 'estrategia-maturidade', label: 'Estratégia & maturidade', icon: Target },
+      { space: 'modelos-entrega', label: 'Modelos de entrega', icon: Network },
+      { space: 'carreira', label: 'Pessoas & liderança', icon: BriefcaseBusiness },
     ],
   },
 ]
@@ -53,9 +85,10 @@ type CommunityTabsProps = {
   memberRole?: string | null
   memberCount?: number
   initials?: string
+  hasPaidAccess?: boolean
 }
 
-export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memberCount = 0, initials = 'LO' }: CommunityTabsProps) {
+export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memberCount = 0, initials = 'LO', hasPaidAccess = false }: CommunityTabsProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const selectedSpace = searchParams.get('space')
@@ -73,9 +106,10 @@ export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memb
           {mainItems.map(item => {
             const active = item.exact ? pathname === item.href && !selectedSpace : pathname.startsWith(item.href)
             const Icon = item.icon
+            const locked = !hasPaidAccess && !item.exact
             return (
-              <Link key={item.href} href={item.href} className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold ${active ? 'bg-[#FFF0E9] text-[#D9470F]' : 'text-[#686661]'}`}>
-                <Icon className="h-3.5 w-3.5" /> {item.label}
+              <Link key={item.href} href={locked ? '/community?upgrade=1' : item.href} className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold ${active ? 'bg-[#FFF0E9] text-[#D9470F]' : 'text-[#686661]'}`}>
+                <Icon className="h-3.5 w-3.5" /> {item.label} {locked ? <Lock className="h-3 w-3 text-[#AAA7A1]" /> : null}
               </Link>
             )
           })}
@@ -88,11 +122,13 @@ export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memb
             {mainItems.map(item => {
               const active = item.exact ? pathname === item.href && !selectedSpace : pathname.startsWith(item.href)
               const Icon = item.icon
+              const locked = !hasPaidAccess && !item.exact
               return (
-                <Link key={item.href} href={item.href} className={itemClass(active)}>
+                <Link key={item.href} href={locked ? '/community?upgrade=1' : item.href} className={itemClass(active)}>
                   <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.3 : 1.8} />
                   <span className="flex-1">{item.label}</span>
                   {item.label === 'Membros' && memberCount > 0 ? <span className="text-[10px] font-bold text-[#9B9993]">{memberCount}</span> : null}
+                  {locked ? <Lock className="h-3 w-3 text-[#AAA7A1]" /> : null}
                 </Link>
               )
             })}
@@ -122,10 +158,18 @@ export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memb
             </div>
           ))}
 
-          <div className="rounded-xl border border-[#E3E2DD] bg-white p-3">
-            <div className="flex items-center gap-2 text-[11px] font-extrabold text-[#23221F]"><Lightbulb className="h-3.5 w-3.5 text-[#FF5C1A]" /> Dica da comunidade</div>
-            <p className="mt-2 text-[10px] leading-4 text-[#77746E]">Comece por uma pergunta real. Contexto gera conversas melhores.</p>
-          </div>
+          {hasPaidAccess ? (
+            <div className="rounded-xl border border-[#E3E2DD] bg-white p-3">
+              <div className="flex items-center gap-2 text-[11px] font-extrabold text-[#23221F]"><Lightbulb className="h-3.5 w-3.5 text-[#FF5C1A]" /> Dica da comunidade</div>
+              <p className="mt-2 text-[10px] leading-4 text-[#77746E]">Comece por uma pergunta real. Contexto gera conversas melhores.</p>
+            </div>
+          ) : (
+            <div className="rounded-xl bg-[#292825] p-3 text-white">
+              <div className="flex items-center gap-2 text-[11px] font-extrabold"><Lock className="h-3.5 w-3.5 text-[#FF7A45]" /> Acesso completo</div>
+              <p className="mt-2 text-[10px] leading-4 text-white/60">Desbloqueie conversas, resumos por IA, lives e a rede validada.</p>
+              <Link href="/club#planos" className="mt-3 inline-flex text-[10px] font-extrabold text-[#FF8B5D] hover:text-white">Ver planos →</Link>
+            </div>
+          )}
         </nav>
 
         <div className="border-t border-[#E4E4E0] p-3">
