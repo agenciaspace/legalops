@@ -44,9 +44,7 @@ export async function middleware(request: NextRequest) {
     }
     if (!publicPaths.has(pathname)) {
       const loginUrl = new URL('/login', request.url)
-      if (pathname.startsWith('/community')) {
-        loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`)
-      }
+      loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`)
       return NextResponse.redirect(loginUrl)
     }
     return supabaseResponse

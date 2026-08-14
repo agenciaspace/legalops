@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { buildJobDiscoverySeed, fetchJobDescription, scrapeAllBoards } from '@/lib/scraper'
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
+import { generateClubJobAlerts } from '@/lib/club-job-matching'
 import { extractSalaryFromHtml, type ExtractedSalary } from '@/lib/utils'
 
 function parseSalaryValues(extracted: ExtractedSalary | null): {
@@ -54,10 +55,12 @@ export async function GET(req: NextRequest) {
     enriched: 0,
     leadersBackfilled: 0,
     failed: 0,
+    alertsCreated: 0,
     discoverySource: 'combined' as 'firecrawl' | 'legacy' | 'combined',
   }
 
   let scrapeResult: Awaited<ReturnType<typeof scrapeAllBoards>> | null = null
+  let alertError: string | null = null
 
   try {
     scrapeResult = await scrapeAllBoards()
@@ -265,6 +268,14 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  try {
+    const alertResult = await generateClubJobAlerts()
+    summary.alertsCreated = alertResult.created
+  } catch (error) {
+    alertError = error instanceof Error ? error.message : String(error)
+    console.error('[cron] Club job alerts failed:', error)
+  }
+
   await supabase.from('crawler_runs').insert({
     provider: 'firecrawl',
     discovery_source: summary.discoverySource,
@@ -277,6 +288,8 @@ export async function GET(req: NextRequest) {
     notes: {
       firecrawlCount: scrapeResult?.firecrawlCount ?? 0,
       legacyCount: scrapeResult?.legacyCount ?? 0,
+      alertsCreated: summary.alertsCreated,
+      ...(alertError ? { alertError } : {}),
       ...(scrapeResult?.errors?.length ? { errors: scrapeResult.errors } : {}),
     },
     started_at: startedAt,

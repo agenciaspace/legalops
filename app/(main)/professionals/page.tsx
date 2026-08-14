@@ -1,8 +1,11 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { ProfessionalsDirectory } from '@/components/ProfessionalsDirectory'
 
-export default async function ProfessionalsPage() {
+export default async function ProfessionalsPage({ searchParams }: { searchParams?: { type?: string } }) {
   const supabase = await createServerSupabaseClient()
+  const initialType = searchParams?.type === 'law_firm' || searchParams?.type === 'legal_dept'
+    ? searchParams.type
+    : 'all'
 
   const { data: professionals } = await supabase
     .from('account_profiles')
@@ -16,14 +19,14 @@ export default async function ProfessionalsPage() {
     <div className="px-6 py-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1A1A1A]">Diretório de Profissionais</h1>
+          <h1 className="text-2xl font-semibold text-[#1A1A1A]">Encontre pessoas</h1>
           <p className="mt-1 text-sm text-[#1A1A1A]/60">
-            Conecte-se com profissionais de Legal Ops do mundo todo.
+            Perfis que autorizaram a exibição para escritórios e departamentos jurídicos.
           </p>
         </div>
       </div>
 
-      <ProfessionalsDirectory professionals={professionals ?? []} />
+      <ProfessionalsDirectory professionals={professionals ?? []} initialType={initialType} />
     </div>
   )
 }

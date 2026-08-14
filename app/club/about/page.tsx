@@ -44,6 +44,14 @@ const membershipIncludes = [
     title: 'Diretório de membros',
     description: 'Os perfis verificados ajudam a identificar quem participa das conversas.',
   },
+  {
+    title: 'Vagas para o seu perfil',
+    description: 'Os crawlers do LegalOps Work encontram vagas. O Club compara cada uma com seus objetivos, competências e modelo de trabalho.',
+  },
+  {
+    title: 'Ajustes de currículo',
+    description: 'Cada alerta mostra termos da vaga que já aparecem no seu perfil e pontos que merecem um exemplo mais concreto no CV.',
+  },
 ]
 
 const checkoutEnvironmentKeys: Record<string, string | undefined> = {
@@ -86,9 +94,9 @@ export default function ClubAboutPage() {
           <div className="mx-auto grid max-w-[980px] gap-12 lg:grid-cols-[0.75fr_1.25fr]">
             <div>
               <p className="text-sm font-semibold text-[#E45220]">Como funciona</p>
-              <h2 className="mt-3 text-3xl font-bold tracking-[-0.03em]">Da publicação ao resumo</h2>
+              <h2 className="mt-3 text-3xl font-bold tracking-[-0.03em]">O que a assinatura inclui</h2>
               <p className="mt-5 text-sm leading-7 text-[#686863]">
-                Um membro escolhe o grupo, descreve a situação e publica a dúvida. Outros membros respondem no mesmo tópico. Assuntos que precisam de mais tempo podem virar um encontro ao vivo.
+                O perfil profissional organiza sua participação no Club e também configura os alertas de vagas. Você pode mudar cargos, temas, ferramentas e preferências quando quiser.
               </p>
             </div>
 
@@ -100,6 +108,30 @@ export default function ClubAboutPage() {
                   <p className="text-sm leading-6 text-[#686863]">{item.description}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-[#E1E1DD] bg-[#20201D] px-5 py-16 text-white sm:px-8 sm:py-20">
+          <div className="mx-auto max-w-[980px]">
+            <p className="text-sm font-semibold text-[#FF8B5D]">Perfil, comunidade e vagas</p>
+            <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-[-0.03em]">Um perfil alimenta as três partes</h2>
+            <div className="mt-10 grid border-y border-white/20 md:grid-cols-3">
+              <div className="border-b border-white/20 py-5 md:border-b-0 md:border-r md:pr-6">
+                <span className="text-[10px] font-semibold text-[#FF8B5D]">01 PERFIL</span>
+                <h3 className="mt-3 text-sm font-semibold">Informe o que você faz e procura</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">Cargo, temas, competências, ferramentas, localidades e modelo de trabalho.</p>
+              </div>
+              <div className="border-b border-white/20 py-5 md:border-b-0 md:border-r md:px-6">
+                <span className="text-[10px] font-semibold text-[#FF8B5D]">02 COMUNIDADES</span>
+                <h3 className="mt-3 text-sm font-semibold">Participe dos grupos relacionados</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">As discussões, referências e encontros ajudam a aprofundar os temas do seu perfil.</p>
+              </div>
+              <div className="py-5 md:pl-6">
+                <span className="text-[10px] font-semibold text-[#FF8B5D]">03 VAGAS</span>
+                <h3 className="mt-3 text-sm font-semibold">Receba a comparação com o seu CV</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">O alerta mostra a aderência da vaga e sugere ajustes baseados nas informações que você salvou.</p>
+              </div>
             </div>
           </div>
         </section>

@@ -8,10 +8,11 @@ import { BrandLogo } from '@/components/BrandLogo'
 
 interface NavProps {
   discoverCount: number
-  newJobsCount: number
+  jobAlertCount: number
+  hasClubAccess: boolean
 }
 
-export function Nav({ discoverCount, newJobsCount }: NavProps) {
+export function Nav({ discoverCount, jobAlertCount, hasClubAccess }: NavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const isCommunity = pathname.startsWith('/community')
@@ -70,10 +71,10 @@ export function Nav({ discoverCount, newJobsCount }: NavProps) {
             <button className="hidden h-9 w-9 items-center justify-center rounded-lg text-[#696762] transition hover:bg-[#F2F2EF] hover:text-[#1D1C1A] sm:flex" aria-label="Mensagens">
               <MessageCircle className="h-[18px] w-[18px]" />
             </button>
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-lg text-[#696762] transition hover:bg-[#F2F2EF] hover:text-[#1D1C1A]" aria-label="Notificações">
+            <Link href={hasClubAccess ? '/community/jobs' : '/community?upgrade=1'} className="relative flex h-9 w-9 items-center justify-center rounded-lg text-[#696762] transition hover:bg-[#F2F2EF] hover:text-[#1D1C1A]" aria-label={jobAlertCount > 0 ? `${jobAlertCount} alertas de vagas` : 'Alertas de vagas'}>
               <Bell className="h-[18px] w-[18px]" />
-              {newJobsCount > 0 ? <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#FF5C1A] ring-2 ring-white" /> : null}
-            </button>
+              {jobAlertCount > 0 ? <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#FF5C1A] ring-2 ring-white" /> : null}
+            </Link>
             <button className="ml-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#292825] text-[10px] font-black text-white ring-2 ring-white" aria-label="Abrir menu do perfil">LO</button>
           </div>
         </div>
@@ -100,15 +101,15 @@ export function Nav({ discoverCount, newJobsCount }: NavProps) {
           {navLink('/emails', 'Emails')}
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          {newJobsCount > 0 && (
+          {jobAlertCount > 0 && (
             <Link
-              href="/discover"
+              href="/community/jobs"
               className="relative flex items-center justify-center p-2 rounded-xl text-[#1A1A1A]/60 hover:text-[#FF6A00] hover:bg-[#1A1A1A]/5 transition-colors"
-              title={`${newJobsCount} vagas novas adicionadas pelo crawler`}
+              title={`${jobAlertCount} alertas de vagas para o seu perfil do Club`}
             >
               <Bell className="w-5 h-5" />
               <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF6A00] text-[9px] font-bold text-white ring-2 ring-white">
-                {newJobsCount > 99 ? '99+' : newJobsCount}
+                {jobAlertCount > 99 ? '99+' : jobAlertCount}
               </span>
             </Link>
           )}

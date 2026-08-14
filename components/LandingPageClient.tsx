@@ -22,12 +22,20 @@ export interface LandingJob {
   title: string
   company: string
   url: string
+  source_board: string
   remote_reality: string | null
   salary_min: number | null
   salary_max: number | null
   salary_currency: string | null
   url_status: string | null
   created_at: string
+}
+
+export interface LandingCrawlerRun {
+  completed_at: string
+  discovery_source: string
+  scraped_count: number
+  inserted_count: number
 }
 
 const remoteLabels: Record<RemoteReality, Record<LandingLocale, string>> = {
@@ -63,6 +71,8 @@ const content = {
     pricing: 'Ver planos',
     employers: 'Para empresas',
     manifesto: 'Sobre o Work',
+    updatedDaily: 'Crawler diário',
+    lastScan: 'Última varredura',
   },
   en: {
     eyebrow: 'LEGALOPS WORK',
@@ -88,10 +98,21 @@ const content = {
     pricing: 'View plans',
     employers: 'For employers',
     manifesto: 'About Work',
+    updatedDaily: 'Daily crawler',
+    lastScan: 'Last scan',
   },
 } as const
 
 const filterOrder: JobFilter[] = ['all', 'remote', 'hybrid', 'onsite']
+
+const sourceLabels: Record<string, string> = {
+  greenhouse: 'Greenhouse',
+  lever: 'Lever',
+  workable: 'Workable',
+  gupy: 'Gupy',
+  firecrawl: 'Firecrawl',
+  company_site: 'Company site',
+}
 
 function remoteLabel(remoteReality: string | null, locale: LandingLocale) {
   const key = (remoteReality ?? 'unknown') as RemoteReality
@@ -111,10 +132,12 @@ export function LandingPageClient({
   locale,
   jobs,
   jobCount,
+  crawlerRun,
 }: {
   locale: LandingLocale
   jobs: LandingJob[]
   jobCount: number
+  crawlerRun: LandingCrawlerRun | null
 }) {
   const [query, setQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<JobFilter>('all')
@@ -188,6 +211,10 @@ export function LandingPageClient({
             <p className="text-xs font-medium text-[#777772]">
               {copy.count(normalizedQuery || activeFilter !== 'all' ? visibleJobs.length : jobCount)}
             </p>
+            <p className="text-right text-[10px] text-[#888883]">
+              {copy.updatedDaily}
+              {crawlerRun ? ` · ${copy.lastScan}: ${new Intl.DateTimeFormat(locale === 'pt' ? 'pt-BR' : 'en-US', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: 'short' }).format(new Date(crawlerRun.completed_at))}` : ''}
+            </p>
           </div>
 
           {visibleJobs.length > 0 ? (
@@ -239,7 +266,7 @@ export function LandingPageClient({
                         {salary && <span className="rounded-full bg-[#F3F3F0] px-2 py-1">{salary}</span>}
                       </div>
                       <div className="mt-4 flex items-center justify-between border-t border-[#ECECE8] pt-3 text-[11px] text-[#777772]">
-                        <span>{job.company}</span>
+                        <span>{sourceLabels[job.source_board] ?? job.source_board}</span>
                         <span className="flex items-center gap-1 font-medium text-[#444440]">
                           {copy.source} <ExternalLink className="h-3 w-3" />
                         </span>

@@ -3,7 +3,20 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { COMMUNITY_CATEGORIES, hasActiveClubAccess } from '@/lib/community'
+import { generateClubJobAlerts } from '@/lib/club-job-matching'
+
+const PROFESSIONAL_TYPES = new Set(['law_firm', 'legal_dept', 'public_sector', 'freelance', 'other'])
+const REMOTE_PREFERENCES = new Set(['remote', 'hybrid', 'onsite', 'any'])
+
+function commaSeparatedValues(formData: FormData, field: string, limit: number) {
+  return String(formData.get(field) ?? '')
+    .split(',')
+    .map(value => value.trim().slice(0, 120))
+    .filter(Boolean)
+    .slice(0, limit)
+}
 
 async function getAuthenticatedMember() {
   const supabase = await createServerSupabaseClient()
@@ -99,11 +112,17 @@ export async function updateCommunityProfile(formData: FormData) {
   const organizationName = String(formData.get('organization_name') ?? '').trim()
   const bio = String(formData.get('public_bio') ?? '').trim()
   const linkedinUrl = String(formData.get('linkedin_url') ?? '').trim()
-  const areasOfExpertise = String(formData.get('areas_of_expertise') ?? '')
-    .split(',')
-    .map(area => area.trim())
-    .filter(Boolean)
-    .slice(0, 10)
+  const areasOfExpertise = commaSeparatedValues(formData, 'areas_of_expertise', 10)
+  const desiredRoles = commaSeparatedValues(formData, 'desired_roles', 6)
+  const preferredLocations = commaSeparatedValues(formData, 'preferred_locations', 8)
+  const skills = commaSeparatedValues(formData, 'skills', 15)
+  const toolsUsed = commaSeparatedValues(formData, 'tools_used', 15)
+  const professionalType = String(formData.get('professional_type') ?? '')
+  const preferredRemote = String(formData.get('preferred_remote') ?? '')
+  const openToOpportunities = formData.get('open_to_opportunities') === 'on'
+  const jobAlertsEnabled = formData.get('job_alerts_enabled') === 'on'
+  const cvSuggestionsEnabled = formData.get('cv_suggestions_enabled') === 'on'
+  const isPublic = formData.get('is_public') === 'on'
 
   if (
     fullName.length < 3 || fullName.length > 120
@@ -112,6 +131,8 @@ export async function updateCommunityProfile(formData: FormData) {
     || organizationName.length < 2 || organizationName.length > 120
     || bio.length < 20 || bio.length > 1200
     || areasOfExpertise.length === 0
+    || !PROFESSIONAL_TYPES.has(professionalType)
+    || !REMOTE_PREFERENCES.has(preferredRemote)
   ) return
 
   if (linkedinUrl && !/^https:\/\/(www\.)?linkedin\.com\//i.test(linkedinUrl)) return
@@ -127,12 +148,46 @@ export async function updateCommunityProfile(formData: FormData) {
       public_bio: bio,
       linkedin_url: linkedinUrl || null,
       areas_of_expertise: areasOfExpertise,
+      professional_type: professionalType,
+      desired_roles: desiredRoles,
+      preferred_remote: preferredRemote,
+      preferred_locations: preferredLocations,
+      skills,
+      tools_used: toolsUsed,
+      open_to_opportunities: openToOpportunities,
+      job_alerts_enabled: jobAlertsEnabled,
+      cv_suggestions_enabled: cvSuggestionsEnabled,
+      is_public: isPublic,
     })
     .eq('user_id', user.id)
 
   if (error) return
 
+  if (openToOpportunities && jobAlertsEnabled) {
+    try {
+      await generateClubJobAlerts(user.id)
+    } catch (alertError) {
+      console.error('[community profile] Could not refresh job alerts:', alertError)
+    }
+  }
+
   revalidatePath('/community/profile')
   revalidatePath('/community/members')
+  revalidatePath('/community/jobs')
   redirect('/community/profile?saved=1')
+}
+
+export async function markClubJobAlertsRead() {
+  const { user } = await getAuthenticatedMember()
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('club_job_alerts')
+    .update({ read_at: new Date().toISOString() })
+    .eq('user_id', user.id)
+    .is('read_at', null)
+
+  if (!error) {
+    revalidatePath('/community/jobs')
+    revalidatePath('/community')
+  }
 }

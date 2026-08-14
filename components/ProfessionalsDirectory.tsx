@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, MapPin, Briefcase, Star } from 'lucide-react'
+import { Search, Briefcase, Star } from 'lucide-react'
+
+type ProfessionalTypeFilter = 'all' | 'law_firm' | 'legal_dept'
 
 interface Professional {
   user_id: string
@@ -19,17 +21,31 @@ interface Professional {
 }
 
 const professionalTypeLabels: Record<string, string> = {
-  law_firm: 'Law Firm',
-  legal_dept: 'Legal Department',
-  public_sector: 'Public Sector',
-  freelance: 'Freelance',
-  other: 'Other',
+  law_firm: 'Escritório de advocacia',
+  legal_dept: 'Departamento jurídico',
+  public_sector: 'Setor público',
+  freelance: 'Autônomo ou consultoria',
+  other: 'Outro',
 }
 
-export function ProfessionalsDirectory({ professionals }: { professionals: Professional[] }) {
+const typeFilters: Array<{ value: ProfessionalTypeFilter; label: string }> = [
+  { value: 'all', label: 'Todos' },
+  { value: 'law_firm', label: 'Escritórios' },
+  { value: 'legal_dept', label: 'Departamentos jurídicos' },
+]
+
+export function ProfessionalsDirectory({
+  professionals,
+  initialType = 'all',
+}: {
+  professionals: Professional[]
+  initialType?: ProfessionalTypeFilter
+}) {
   const [search, setSearch] = useState('')
+  const [typeFilter, setTypeFilter] = useState<ProfessionalTypeFilter>(initialType)
 
   const filtered = professionals.filter((p) => {
+    if (typeFilter !== 'all' && p.professional_type !== typeFilter) return false
     if (!search) return true
     const q = search.toLowerCase()
     return (
@@ -44,16 +60,24 @@ export function ProfessionalsDirectory({ professionals }: { professionals: Profe
 
   return (
     <div className="mt-6">
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1A1A1A]/50" />
-        <input
-          type="text"
-          placeholder="Buscar por nome, cargo, skill ou ferramenta..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-[#1A1A1A]/10 bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1A1A] placeholder-[#1A1A1A]/50 focus:border-[#FF6A00] focus:outline-none focus:ring-1 focus:ring-[#FF6A00]"
-        />
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1A1A1A]/50" />
+          <input
+            type="search"
+            placeholder="Nome, cargo, competência ou ferramenta"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-lg border border-[#1A1A1A]/10 bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1A1A] placeholder-[#1A1A1A]/50 focus:border-[#FF6A00] focus:outline-none focus:ring-1 focus:ring-[#FF6A00]"
+          />
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {typeFilters.map(filter => (
+            <button key={filter.value} type="button" onClick={() => setTypeFilter(filter.value)} className={`shrink-0 rounded-full border px-3 py-2 text-xs font-medium ${typeFilter === filter.value ? 'border-[#20201D] bg-[#20201D] text-white' : 'border-[#DEDEDA] bg-white text-[#666661] hover:border-[#B9B9B4]'}`}>
+              {filter.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Results */}
@@ -151,8 +175,8 @@ export function ProfessionalsDirectory({ professionals }: { professionals: Profe
       {filtered.length === 0 && (
         <p className="mt-8 text-center text-sm text-[#1A1A1A]/60">
           {search
-            ? 'Nenhum profissional encontrado com esses critérios.'
-            : 'Nenhum profissional cadastrado ainda.'}
+            ? 'Nenhum perfil corresponde a essa busca.'
+            : 'Nenhum perfil autorizou a exibição neste filtro.'}
         </p>
       )}
     </div>

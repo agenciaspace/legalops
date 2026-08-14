@@ -137,7 +137,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                 <div className="min-w-0 flex-1">
                   <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#D9470F]">Prévia aberta</p>
                   <h2 className="mt-1 text-sm font-extrabold text-[#292824]">Você está vendo uma parte do conteúdo.</h2>
-                  <p className="mt-1 text-[11px] leading-5 text-[#77746E]">Assinantes acessam todas as conversas, publicam, comentam e entram nas lives, resumos por IA e diretório validado de membros.</p>
+                  <p className="mt-1 text-[11px] leading-5 text-[#77746E]">Assinantes acessam as conversas completas, lives, resumos, diretório de membros e alertas de vagas comparados com o perfil.</p>
                   <Link href="/club#planos" className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[#FF5C1A] px-3 py-2 text-[10px] font-extrabold text-white hover:bg-[#E84D10]">
                     Ver lotes de lançamento <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
@@ -156,9 +156,16 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                     <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.14em] text-[#FF9A72]"><Sparkles className="h-3.5 w-3.5" /> Bem-vindo ao Club</div>
                     <h2 className="mt-2 text-xl font-extrabold tracking-[-0.025em]">A casa de quem constrói operações jurídicas melhores.</h2>
                     <p className="mt-2 text-xs leading-5 text-white/60">Apresente-se, encontre um espaço e compartilhe o desafio que está na sua mesa hoje.</p>
-                    <Link href="/community?space=apresentacoes" className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-extrabold text-white hover:text-[#FF9A72]">
-                      Começar por aqui <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
+                    <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+                      <Link href="/community?space=apresentacoes" className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-white hover:text-[#FF9A72]">
+                        Começar por aqui <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                      {hasPaidAccess ? (
+                        <Link href="/community/jobs" className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#FF9A72] hover:text-white">
+                          Ver vagas para o meu perfil <ArrowRight className="h-3.5 w-3.5" />
+                        </Link>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -311,7 +318,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
             <section className="rounded-xl bg-[#292825] p-5 text-white">
               <Lock className="h-5 w-5 text-[#FF7A45]" />
               <h2 className="mt-4 text-sm font-extrabold">O restante acontece por dentro.</h2>
-              <p className="mt-2 text-[10px] leading-5 text-white/60">Lives, resumos das discussões por IA, diretório validado e conversas completas ficam disponíveis na assinatura anual.</p>
+              <p className="mt-2 text-[10px] leading-5 text-white/60">A assinatura anual inclui as conversas completas, lives, resumos, diretório validado e alertas de vagas com ajustes de CV.</p>
               <Link href="/club#planos" className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-extrabold text-[#FF8B5D] hover:text-white">Escolher meu lote <ArrowRight className="h-3.5 w-3.5" /></Link>
             </section>
           ) : <>

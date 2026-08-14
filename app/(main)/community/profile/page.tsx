@@ -10,6 +10,16 @@ type Profile = {
   organization_name: string | null
   linkedin_url: string | null
   areas_of_expertise: string[] | null
+  professional_type: string | null
+  desired_roles: string[] | null
+  preferred_remote: string | null
+  preferred_locations: string[] | null
+  skills: string[] | null
+  tools_used: string[] | null
+  open_to_opportunities: boolean
+  job_alerts_enabled: boolean
+  cv_suggestions_enabled: boolean
+  is_public: boolean
 }
 
 type Verification = {
@@ -49,7 +59,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
   const [{ data: rawProfile }, { data: rawVerification }] = await Promise.all([
     supabase
       .from('account_profiles')
-      .select('full_name, current_role, public_headline, public_bio, organization_name, linkedin_url, areas_of_expertise')
+      .select('full_name, current_role, public_headline, public_bio, organization_name, linkedin_url, areas_of_expertise, professional_type, desired_roles, preferred_remote, preferred_locations, skills, tools_used, open_to_opportunities, job_alerts_enabled, cv_suggestions_enabled, is_public')
       .eq('user_id', user?.id ?? '')
       .maybeSingle(),
     supabase
@@ -77,7 +87,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
     <div className="mx-auto w-full max-w-[980px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
       <header>
         <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Meu perfil</h1>
-        <p className="mt-1 text-xs text-[#77746E]">Um perfil claro ajuda os membros certos a encontrar você e dá contexto às suas contribuições.</p>
+        <p className="mt-1 text-xs text-[#77746E]">O mesmo perfil apresenta você no Club e define quais vagas e ajustes de CV chegam até você.</p>
       </header>
 
       {searchParams?.saved ? (
@@ -118,6 +128,67 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
               Sobre sua atuação
               <textarea name="public_bio" required minLength={20} maxLength={1200} rows={6} defaultValue={profile?.public_bio ?? ''} placeholder="Conte o tipo de operação em que atua, desafios que conhece e trocas que procura." className="mt-1.5 w-full resize-y rounded-lg border border-[#DFDFDB] px-3 py-2.5 text-xs leading-5 outline-none focus:border-[#FF9E77]" />
             </label>
+
+            <div className="border-t border-[#ECECE8] pt-5 sm:col-span-2">
+              <h2 className="text-sm font-extrabold text-[#292824]">Vagas e currículo</h2>
+              <p className="mt-1 text-[10px] leading-4 text-[#77746E]">O crawler compara estes campos com as vagas publicadas no LegalOps Work.</p>
+            </div>
+
+            <label className="text-[10px] font-extrabold text-[#4D4B46]">
+              Ambiente profissional
+              <select name="professional_type" required defaultValue={profile?.professional_type ?? ''} className="mt-1.5 h-10 w-full rounded-lg border border-[#DFDFDB] bg-white px-3 text-xs font-medium outline-none focus:border-[#FF9E77]">
+                <option value="" disabled>Selecione</option>
+                <option value="law_firm">Escritório de advocacia</option>
+                <option value="legal_dept">Departamento jurídico</option>
+                <option value="public_sector">Setor público</option>
+                <option value="freelance">Autônomo ou consultoria</option>
+                <option value="other">Outro</option>
+              </select>
+            </label>
+            <label className="text-[10px] font-extrabold text-[#4D4B46]">
+              Modelo de trabalho
+              <select name="preferred_remote" required defaultValue={profile?.preferred_remote ?? 'any'} className="mt-1.5 h-10 w-full rounded-lg border border-[#DFDFDB] bg-white px-3 text-xs font-medium outline-none focus:border-[#FF9E77]">
+                <option value="any">Qualquer modelo</option>
+                <option value="remote">Remoto</option>
+                <option value="hybrid">Híbrido</option>
+                <option value="onsite">Presencial</option>
+              </select>
+            </label>
+            <label className="text-[10px] font-extrabold text-[#4D4B46] sm:col-span-2">
+              Cargos que procura
+              <input name="desired_roles" defaultValue={(profile?.desired_roles ?? []).join(', ')} placeholder="Legal Ops Manager, CLM Manager" className="mt-1.5 h-10 w-full rounded-lg border border-[#DFDFDB] px-3 text-xs font-medium outline-none focus:border-[#FF9E77]" />
+            </label>
+            <label className="text-[10px] font-extrabold text-[#4D4B46] sm:col-span-2">
+              Localidades
+              <input name="preferred_locations" defaultValue={(profile?.preferred_locations ?? []).join(', ')} placeholder="São Paulo, Brasil, América Latina" className="mt-1.5 h-10 w-full rounded-lg border border-[#DFDFDB] px-3 text-xs font-medium outline-none focus:border-[#FF9E77]" />
+            </label>
+            <label className="text-[10px] font-extrabold text-[#4D4B46]">
+              Competências
+              <input name="skills" defaultValue={(profile?.skills ?? []).join(', ')} placeholder="Gestão de projetos, analytics" className="mt-1.5 h-10 w-full rounded-lg border border-[#DFDFDB] px-3 text-xs font-medium outline-none focus:border-[#FF9E77]" />
+            </label>
+            <label className="text-[10px] font-extrabold text-[#4D4B46]">
+              Ferramentas
+              <input name="tools_used" defaultValue={(profile?.tools_used ?? []).join(', ')} placeholder="Ironclad, Power BI" className="mt-1.5 h-10 w-full rounded-lg border border-[#DFDFDB] px-3 text-xs font-medium outline-none focus:border-[#FF9E77]" />
+            </label>
+
+            <div className="grid gap-2.5 sm:col-span-2">
+              <label className="flex items-start gap-3 rounded-lg border border-[#E4E3DF] bg-[#FAFAF8] p-3 text-[10px] leading-4 text-[#5F5C56]">
+                <input type="checkbox" name="open_to_opportunities" defaultChecked={profile?.open_to_opportunities ?? false} className="mt-0.5 h-4 w-4 accent-[#FF5C1A]" />
+                <span><strong className="block text-[#292824]">Estou aberto a oportunidades</strong>Use meu perfil para calcular aderência com novas vagas.</span>
+              </label>
+              <label className="flex items-start gap-3 rounded-lg border border-[#E4E3DF] bg-[#FAFAF8] p-3 text-[10px] leading-4 text-[#5F5C56]">
+                <input type="checkbox" name="job_alerts_enabled" defaultChecked={profile?.job_alerts_enabled ?? true} className="mt-0.5 h-4 w-4 accent-[#FF5C1A]" />
+                <span><strong className="block text-[#292824]">Receber alertas no Club</strong>Mostre vagas novas na área “Vagas para você”.</span>
+              </label>
+              <label className="flex items-start gap-3 rounded-lg border border-[#E4E3DF] bg-[#FAFAF8] p-3 text-[10px] leading-4 text-[#5F5C56]">
+                <input type="checkbox" name="cv_suggestions_enabled" defaultChecked={profile?.cv_suggestions_enabled ?? true} className="mt-0.5 h-4 w-4 accent-[#FF5C1A]" />
+                <span><strong className="block text-[#292824]">Receber ajustes de CV</strong>Compare as palavras da vaga com as competências que você informou.</span>
+              </label>
+              <label className="flex items-start gap-3 rounded-lg border border-[#E4E3DF] bg-[#FAFAF8] p-3 text-[10px] leading-4 text-[#5F5C56]">
+                <input type="checkbox" name="is_public" defaultChecked={profile?.is_public ?? false} className="mt-0.5 h-4 w-4 accent-[#FF5C1A]" />
+                <span><strong className="block text-[#292824]">Aparecer para empresas</strong>Inclua meu perfil no diretório usado por escritórios e departamentos jurídicos.</span>
+              </label>
+            </div>
           </div>
           <div className="mt-5 flex justify-end border-t border-[#ECECE8] pt-4">
             <button className="rounded-lg bg-[#FF5C1A] px-4 py-2.5 text-[11px] font-extrabold text-white hover:bg-[#E84D10]">Salvar e solicitar validação</button>
@@ -141,6 +212,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
               <p className="flex items-center gap-2"><Building2 className="h-3.5 w-3.5" /> Organização e cargo atual</p>
               <p className="flex items-center gap-2"><Linkedin className="h-3.5 w-3.5" /> LinkedIn para conferência</p>
               <p className="flex items-center gap-2"><ShieldCheck className="h-3.5 w-3.5" /> Selo visível após validação</p>
+              <p className="flex items-center gap-2"><BadgeCheck className="h-3.5 w-3.5" /> Vagas e ajustes de CV pelo perfil</p>
             </div>
           </section>
         </aside>
