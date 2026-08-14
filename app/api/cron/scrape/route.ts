@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { buildJobDiscoverySeed, fetchJobDescription, scrapeAllBoards } from '@/lib/scraper'
+import {
+  buildJobDiscoverySeed,
+  canonicalizeJobUrl,
+  fetchJobDescription,
+  mapWithConcurrency,
+  scrapeAllBoards,
+  shouldExpireUnseenJob,
+} from '@/lib/scraper'
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
 import { generateClubJobAlerts } from '@/lib/club-job-matching'
@@ -53,6 +60,8 @@ export async function GET(req: NextRequest) {
     scraped: 0,
     inserted: 0,
     duplicates: 0,
+    refreshed: 0,
+    expired: 0,
     enriched: 0,
     leadersBackfilled: 0,
     failed: 0,
@@ -69,27 +78,61 @@ export async function GET(req: NextRequest) {
     summary.scraped = jobs.length
     summary.discoverySource = scrapeResult.discoverySource
 
-    const uniqueUrls = Array.from(new Set(jobs.map(job => job.url)))
-    const existingUrlSet = new Set<string>()
+    const observedAt = new Date().toISOString()
+    const discoveredUrls = new Set(
+      jobs.map(job => canonicalizeJobUrl(job.url).toLowerCase())
+    )
+    const { data: existingJobs, error: existingJobsError } = await supabase
+      .from('jobs')
+      .select('id, url, created_at, posted_at, url_checked_at')
 
-    if (uniqueUrls.length > 0) {
-      const { data: existingJobs } = await supabase
-        .from('jobs')
-        .select('url')
-        .in('url', uniqueUrls)
+    if (existingJobsError) throw existingJobsError
 
-      for (const existingJob of existingJobs ?? []) {
-        if (typeof existingJob.url === 'string') {
-          existingUrlSet.add(existingJob.url.toLowerCase())
-        }
-      }
+    const existingByUrl = new Map<string, NonNullable<typeof existingJobs>[number]>()
+    for (const existingJob of existingJobs ?? []) {
+      existingByUrl.set(canonicalizeJobUrl(existingJob.url).toLowerCase(), existingJob)
     }
 
-    const newJobs = jobs.filter(job => !existingUrlSet.has(job.url.toLowerCase()))
-    summary.duplicates = jobs.length - newJobs.length
+    const seenExistingJobs = jobs.flatMap(job => {
+      const existingJob = existingByUrl.get(canonicalizeJobUrl(job.url).toLowerCase())
+      return existingJob ? [{ existingJob, discoveredJob: job }] : []
+    })
 
-    for (const job of newJobs) {
-      const { description: pageDescription, extractedSalary, httpStatus } = await fetchJobDescription(job.url)
+    const refreshResults = await mapWithConcurrency(seenExistingJobs, 6, async pair => {
+      const refresh: Record<string, unknown> = {
+        url_status: 'live',
+        url_checked_at: observedAt,
+      }
+      if (pair.discoveredJob.posted_at) refresh.posted_at = pair.discoveredJob.posted_at
+
+      const { error } = await supabase
+        .from('jobs')
+        .update(refresh)
+        .eq('id', pair.existingJob.id)
+      if (error) throw error
+    })
+
+    for (const result of refreshResults) {
+      if (result.status === 'fulfilled') summary.refreshed++
+      else summary.failed++
+    }
+
+    const newJobs = jobs.filter(job =>
+      !existingByUrl.has(canonicalizeJobUrl(job.url).toLowerCase()))
+    summary.duplicates = seenExistingJobs.length
+
+    const fetchResults = await mapWithConcurrency(newJobs, 5, async job => ({
+      job,
+      ...await fetchJobDescription(job.url),
+    }))
+
+    for (const fetchResult of fetchResults) {
+      if (fetchResult.status === 'rejected') {
+        summary.failed++
+        continue
+      }
+
+      const { job, description: pageDescription, extractedSalary, httpStatus } = fetchResult.value
       const discoverySeed = buildJobDiscoverySeed(job)
       const description = [discoverySeed, pageDescription]
         .filter(Boolean)
@@ -122,7 +165,8 @@ export async function GET(req: NextRequest) {
           enrichment_status: 'pending',
           enrichment_attempts: 0,
           url_status: urlStatus,
-          url_checked_at: new Date().toISOString(),
+          url_checked_at: observedAt,
+          posted_at: job.posted_at ?? null,
           ...salaryData,
         })
 
@@ -139,6 +183,25 @@ export async function GET(req: NextRequest) {
       console.error(`[cron] insert job ${job.url} failed:`, error)
       summary.failed++
     }
+
+    // Firecrawl is the broad inventory source. Only retire unseen jobs when it
+    // returned a non-empty result, so a provider outage cannot empty the feed.
+    if (scrapeResult.firecrawlSucceeded && scrapeResult.firecrawlCount > 0) {
+      const staleJobs = (existingJobs ?? []).filter(job =>
+        shouldExpireUnseenJob(job, discoveredUrls, new Date(observedAt)))
+      const expireResults = await mapWithConcurrency(staleJobs, 6, async job => {
+        const { error } = await supabase
+          .from('jobs')
+          .update({ url_status: 'dead', url_checked_at: observedAt })
+          .eq('id', job.id)
+        if (error) throw error
+      })
+
+      for (const result of expireResults) {
+        if (result.status === 'fulfilled') summary.expired++
+        else summary.failed++
+      }
+    }
   } catch (e) {
     console.error('[cron] scrape step failed:', e)
     summary.failed++
@@ -146,12 +209,13 @@ export async function GET(req: NextRequest) {
 
   const { data: pendingJobs } = await supabase
     .from('jobs')
-    .select('id, company, title, raw_description, enrichment_attempts, salary_min, salary_max, salary_currency')
+    .select('id, company, title, raw_description, enrichment_attempts, salary_min, salary_max, salary_currency, posted_at')
     .in('enrichment_status', ['pending', 'failed'])
     .lt('enrichment_attempts', 5)
+    .order('created_at', { ascending: false })
     .limit(20)
 
-  for (const job of pendingJobs ?? []) {
+  const enrichmentResults = await mapWithConcurrency(pendingJobs ?? [], 3, async job => {
     try {
       const result = await enrichJob({
         company: job.company,
@@ -165,17 +229,18 @@ export async function GET(req: NextRequest) {
           result.salary_max = job.salary_max
           result.salary_currency = job.salary_currency
         }
+        if (!result.posted_at && job.posted_at) result.posted_at = job.posted_at
         await supabase
           .from('jobs')
           .update({ ...result, enrichment_status: 'done' })
           .eq('id', job.id)
-        summary.enriched++
+        return 'enriched' as const
       } else {
         await supabase
           .from('jobs')
           .update({ enrichment_status: 'failed', enrichment_attempts: job.enrichment_attempts + 1 })
           .eq('id', job.id)
-        summary.failed++
+        return 'failed' as const
       }
     } catch (e) {
       console.error(`[cron] enrich job ${job.id} failed:`, e)
@@ -183,8 +248,13 @@ export async function GET(req: NextRequest) {
         .from('jobs')
         .update({ enrichment_status: 'failed', enrichment_attempts: job.enrichment_attempts + 1 })
         .eq('id', job.id)
-      summary.failed++
+      return 'failed' as const
     }
+  })
+
+  for (const result of enrichmentResults) {
+    if (result.status === 'fulfilled' && result.value === 'enriched') summary.enriched++
+    else summary.failed++
   }
 
   // Backfill salary for existing jobs that have no salary_min/salary_max
@@ -289,6 +359,10 @@ export async function GET(req: NextRequest) {
     notes: {
       firecrawlCount: scrapeResult?.firecrawlCount ?? 0,
       legacyCount: scrapeResult?.legacyCount ?? 0,
+      firecrawlSucceeded: scrapeResult?.firecrawlSucceeded ?? false,
+      legacySucceeded: scrapeResult?.legacySucceeded ?? false,
+      refreshedCount: summary.refreshed,
+      expiredCount: summary.expired,
       alertsCreated: summary.alertsCreated,
       ...(alertError ? { alertError } : {}),
       ...(scrapeResult?.errors?.length ? { errors: scrapeResult.errors } : {}),

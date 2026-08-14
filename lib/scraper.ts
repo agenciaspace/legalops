@@ -9,6 +9,8 @@ export type RawJob = {
   location?: string | null
   salary_range?: string | null
   listing_url?: string | null
+  posted_at?: string | null
+  accepts_brazil?: boolean
 }
 
 export interface ScrapeAllBoardsResult {
@@ -16,6 +18,8 @@ export interface ScrapeAllBoardsResult {
   discoverySource: 'firecrawl' | 'legacy' | 'combined'
   firecrawlCount: number
   legacyCount: number
+  firecrawlSucceeded: boolean
+  legacySucceeded: boolean
   errors: string[]
 }
 
@@ -28,6 +32,9 @@ interface FirecrawlJobListing {
   location_citation?: string
   salaryRange?: string
   salaryRange_citation?: string
+  postedDate?: string
+  postedDate_citation?: string
+  acceptsBrazilCandidates?: boolean
   applicationLink?: string
   applicationLink_citation?: string
 }
@@ -50,7 +57,22 @@ interface FirecrawlAgentStatusResponse {
 
 const FIRECRAWL_AGENT_URL = 'https://api.firecrawl.dev/v2/agent'
 
-const FIRECRAWL_AGENT_PROMPT = `Find current job listings for Legal Operations roles. Search job boards like Indeed, GoInhouse, CLOC Jobs, Legal.io, and LegalOperators for positions with titles containing "Legal Operations", "Legal Ops", "Head of Legal", "General Counsel", "Chief Legal Officer", or "CLM Manager". Return all matching job listings with their title, company, location, salary range (if available), and application link.`
+export function buildFirecrawlAgentPrompt(now = new Date()): string {
+  const today = now.toISOString().slice(0, 10)
+
+  return `You curate the LegalOps Work jobs feed for Brazilian Legal Operations professionals. Today is ${today}.
+
+Find job listings posted or updated in the last 30 days that are still accepting applications. Prioritize in this order:
+1. Roles in Brazil, in Portuguese or English, whether remote, hybrid, or onsite.
+2. LATAM roles that explicitly accept candidates based in Brazil.
+3. Fully remote global roles that explicitly accept candidates in Brazil or LATAM.
+
+Include roles whose primary work is Legal Operations, Legal Ops, operações jurídicas, operações legais, controladoria jurídica, Legal Project Management, Legal Process, Legal Innovation, Legal Technology/LegalTech, CLM or contract operations, legal spend/e-billing, legal data/BI/automation, or law department strategy and operations.
+
+Exclude generic lawyer, attorney, counsel, General Counsel, Chief Legal Officer, Head of Legal, compliance, privacy, and paralegal roles unless the title itself clearly identifies Legal Operations work. Exclude internships, expired/closed listings, duplicates, and roles whose location rules exclude Brazil/LATAM.
+
+Search public LinkedIn Jobs pages, Gupy, Indeed Brasil, company career sites, CLOC Jobs, Legal.io, LegalOperators, GoInhouse, Quero Home, and Radar da Gestão. Prefer the employer's or ATS's canonical application URL over an aggregator URL. Return the publication date as YYYY-MM-DD when available. Set acceptsBrazilCandidates to true only when the location is Brazil/LATAM or the listing explicitly accepts remote candidates based in Brazil/LATAM.`
+}
 
 const FIRECRAWL_AGENT_POLL_INTERVAL_MS = 5_000
 const FIRECRAWL_AGENT_TIMEOUT_MS = 120_000
@@ -80,26 +102,34 @@ const FIRECRAWL_EXTRACT_SCHEMA = {
             type: 'string',
             description: 'Salary or compensation range if shown on the page (e.g. "$120,000 - $180,000/year")',
           },
+          postedDate: {
+            type: 'string',
+            description: 'Publication or last update date in YYYY-MM-DD format, when available',
+          },
+          acceptsBrazilCandidates: {
+            type: 'boolean',
+            description: 'True only when candidates based in Brazil or LATAM are eligible for this role',
+          },
           applicationLink: {
             type: 'string',
             description: 'Direct link to apply or view the full job posting',
           },
         },
-        required: ['jobTitle', 'companyName', 'applicationLink'],
+        required: ['jobTitle', 'companyName', 'applicationLink', 'acceptsBrazilCandidates'],
       },
     },
   },
   required: ['jobListings'],
 }
 
-// Slugs verified live on 2026-05-06. Removed entries that returned HTTP 404
+// Slugs verified live on 2026-08-14. Removed entries that returned HTTP 404
 // (companies that migrated boards or changed slug). Re-audit periodically.
 export const COMPANY_SLUGS = {
   greenhouse: [
     'nubank', 'vtex', 'gympass', 'stripe', 'cloudflare', 'databricks',
     'brex', 'verkada', 'hive', 'harbor', 'airtable', 'figma',
   ],
-  lever: ['netflix'],
+  lever: [] as string[],
   workable: [] as string[],
   gupy: [] as string[],
 } as const
@@ -110,15 +140,67 @@ function cleanString(value: unknown): string | null {
   return trimmed.length > 0 ? trimmed : null
 }
 
+const TRACKING_QUERY_PARAMS = new Set([
+  'gh_src',
+  'jobboardsource',
+  'jobboardsourcename',
+  'ref',
+  'referrer',
+  'refid',
+  'source',
+  'sourceid',
+])
+
+export function canonicalizeJobUrl(value: string): string {
+  try {
+    const url = new URL(value.trim())
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return value.trim()
+
+    url.hash = ''
+    for (const key of Array.from(url.searchParams.keys())) {
+      const normalizedKey = key.toLowerCase()
+      if (normalizedKey.startsWith('utm_') || TRACKING_QUERY_PARAMS.has(normalizedKey)) {
+        url.searchParams.delete(key)
+      }
+    }
+
+    if (url.pathname !== '/') {
+      url.pathname = url.pathname.replace(/\/+$/, '')
+    }
+
+    const sortedParams = Array.from(url.searchParams.entries())
+      .sort(([leftKey, leftValue], [rightKey, rightValue]) =>
+        leftKey.localeCompare(rightKey) || leftValue.localeCompare(rightValue))
+    url.search = ''
+    for (const [key, paramValue] of sortedParams) {
+      url.searchParams.append(key, paramValue)
+    }
+
+    return url.toString()
+  } catch {
+    return value.trim()
+  }
+}
+
 function cleanUrl(value: unknown): string | null {
   const text = cleanString(value)
   if (!text) return null
 
   try {
-    return new URL(text).toString()
+    const url = new URL(text)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
+    return canonicalizeJobUrl(text)
   } catch {
     return null
   }
+}
+
+function cleanPostedAt(value: unknown): string | null {
+  const text = cleanString(value)
+  if (!text || !/^\d{4}-\d{2}-\d{2}(?:T|$)/.test(text)) return null
+
+  const timestamp = Date.parse(text)
+  return Number.isNaN(timestamp) ? null : new Date(timestamp).toISOString()
 }
 
 function getFirstUrl(...values: unknown[]): string | null {
@@ -131,11 +213,26 @@ function getFirstUrl(...values: unknown[]): string | null {
 }
 
 export function matchesLegalOpsTitle(title: string): boolean {
-  return /\b(?:legal\s+(?:operations?|ops)|contracts?\s*&\s*legal|legal\s+project|law\s+department\s+.*(?:operations?|strategy)|CLM\s+(?:manager|director|specialist|analyst|lead)|head\s+of\s+legal|general\s+counsel|chief\s+legal\s+officer)\b/i.test(title)
+  const normalized = title
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
+  return /\b(?:legal\s+(?:operations?|ops|operator|innovation|technology|tech|transformation)|operations?\s+(?:manager|director|lead|specialist|analyst|coordinator|supervisor),?\s+legal|contracts?\s*(?:&|and|e)\s*legal|legal\s+(?:project|process)|law\s+department\s+.*(?:operations?|strategy)|CLM\s+(?:manager|director|specialist|analyst|lead|consultant|coordinator)|operacoes?\s+(?:juridicas?|legais)|controladoria\s+juridica|inovacao\s+juridica|tecnologia\s+juridica|projetos?\s+juridicos?|legaltech)\b/i.test(normalized)
 }
 
 export function filterByKeywords(jobs: { title: string; url: string }[]): typeof jobs {
   return jobs.filter(job => matchesLegalOpsTitle(job.title))
+}
+
+export function matchesTargetMarket(location: string | null | undefined): boolean {
+  if (!location) return false
+
+  const normalized = location
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+
+  return /\b(?:brazil|brasil|latam|latin america|south america|sao paulo|rio de janeiro|belo horizonte|brasilia|curitiba|porto alegre|florianopolis|recife|salvador|fortaleza|goiania|campinas|manaus|sp|rj|mg|df|pr|rs|sc|pe|ba|ce|go|am)\b/.test(normalized)
 }
 
 export function inferSourceBoardFromUrl(url: string): SourceBoard {
@@ -191,6 +288,7 @@ export function normalizeFirecrawlJobListing(listing: FirecrawlJobListing): RawJ
     listing.companyName_citation,
     listing.location_citation,
     listing.salaryRange_citation,
+    listing.postedDate_citation,
     listing.applicationLink_citation
   )
 
@@ -202,6 +300,8 @@ export function normalizeFirecrawlJobListing(listing: FirecrawlJobListing): RawJ
     location: cleanString(listing.location),
     salary_range: cleanSalary(listing.salaryRange),
     listing_url: listingUrl,
+    posted_at: cleanPostedAt(listing.postedDate),
+    accepts_brazil: listing.acceptsBrazilCandidates === true,
   }
 }
 
@@ -226,7 +326,8 @@ export function extractFirecrawlJobsFromPayload(payload: unknown): RawJob[] {
   return dedupeJobsByUrl(
     jobListings
       .map(normalizeFirecrawlJobListing)
-      .filter((job): job is RawJob => job !== null)
+      .filter((job): job is RawJob =>
+        job !== null && (matchesTargetMarket(job.location) || job.accepts_brazil === true))
   )
 }
 
@@ -249,6 +350,10 @@ export function buildJobDiscoverySeed(job: RawJob): string {
     lines.push(`Listing page: ${job.listing_url}`)
   }
 
+  if (job.posted_at) {
+    lines.push(`Posted at: ${job.posted_at}`)
+  }
+
   lines.push(`Application link: ${job.url}`)
 
   return lines.join('\n')
@@ -258,13 +363,44 @@ export function dedupeJobsByUrl(jobs: RawJob[]): RawJob[] {
   const seen = new Map<string, RawJob>()
 
   for (const job of jobs) {
-    const key = job.url.toLowerCase()
+    const canonicalUrl = canonicalizeJobUrl(job.url)
+    const key = canonicalUrl.toLowerCase()
     if (!seen.has(key)) {
-      seen.set(key, job)
+      seen.set(key, {
+        ...job,
+        url: canonicalUrl,
+        listing_url: job.listing_url ? canonicalizeJobUrl(job.listing_url) : job.listing_url,
+      })
     }
   }
 
   return Array.from(seen.values())
+}
+
+export const STALE_JOB_AFTER_DAYS = 45
+
+export interface ExistingJobFreshness {
+  url: string
+  created_at: string
+  posted_at: string | null
+  url_checked_at: string | null
+}
+
+export function shouldExpireUnseenJob(
+  job: ExistingJobFreshness,
+  discoveredUrls: ReadonlySet<string>,
+  now = new Date(),
+): boolean {
+  const canonicalUrl = canonicalizeJobUrl(job.url).toLowerCase()
+  if (discoveredUrls.has(canonicalUrl)) return false
+
+  const cutoff = now.getTime() - STALE_JOB_AFTER_DAYS * 24 * 60 * 60 * 1000
+  const freshnessSignals = [job.created_at, job.posted_at, job.url_checked_at]
+    .filter((value): value is string => Boolean(value))
+    .map(value => Date.parse(value))
+    .filter(value => !Number.isNaN(value))
+
+  return freshnessSignals.length > 0 && Math.max(...freshnessSignals) < cutoff
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -353,7 +489,11 @@ export function parseGupyJobs(data: any, slug: string): RawJob[] {
     .filter((job: RawJob) => matchesLegalOpsTitle(job.title))
 }
 
-async function fetchJson(url: string): Promise<unknown> {
+const LEGACY_CONCURRENCY = 4
+const FETCH_RETRY_ATTEMPTS = 2
+const FETCH_RETRY_BASE_MS = 500
+
+async function fetchJsonOnce(url: string): Promise<unknown> {
   const response = await fetch(url, {
     headers: { 'User-Agent': 'LegalOpsCRM/1.0' },
     signal: AbortSignal.timeout(10_000),
@@ -370,57 +510,102 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// Random delay to avoid pattern-based rate limiting from board APIs.
-function jitter(): Promise<void> {
-  return sleep(500 + Math.floor(Math.random() * 1000))
+async function fetchJson(url: string): Promise<unknown> {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt < FETCH_RETRY_ATTEMPTS; attempt++) {
+    try {
+      return await fetchJsonOnce(url)
+    } catch (error) {
+      lastError = error
+      if (attempt < FETCH_RETRY_ATTEMPTS - 1) {
+        await sleep(FETCH_RETRY_BASE_MS * 2 ** attempt)
+      }
+    }
+  }
+
+  throw lastError
+}
+
+export async function mapWithConcurrency<T, R>(
+  items: readonly T[],
+  concurrency: number,
+  fn: (item: T) => Promise<R>,
+): Promise<PromiseSettledResult<R>[]> {
+  const results: PromiseSettledResult<R>[] = new Array(items.length)
+  let cursor = 0
+
+  async function worker() {
+    while (cursor < items.length) {
+      const index = cursor++
+      try {
+        results[index] = { status: 'fulfilled', value: await fn(items[index]) }
+      } catch (reason) {
+        results[index] = { status: 'rejected', reason }
+      }
+    }
+  }
+
+  const workerCount = Math.min(Math.max(1, Math.floor(concurrency)), items.length)
+  await Promise.all(Array.from({ length: workerCount }, () => worker()))
+  return results
+}
+
+interface BoardTask {
+  board: string
+  slug: string
+  url: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parse: (data: any, slug: string) => RawJob[]
 }
 
 export async function scrapeLegacyBoards(): Promise<RawJob[]> {
+  const tasks: BoardTask[] = [
+    ...COMPANY_SLUGS.greenhouse.map(slug => ({
+      board: 'greenhouse',
+      slug,
+      url: `https://boards-api.greenhouse.io/v1/boards/${slug}/jobs?content=true`,
+      parse: parseGreenhouseJobs,
+    })),
+    ...COMPANY_SLUGS.lever.map(slug => ({
+      board: 'lever',
+      slug,
+      url: `https://api.lever.co/v0/postings/${slug}?mode=json`,
+      parse: parseLeverJobs,
+    })),
+    ...COMPANY_SLUGS.workable.map(slug => ({
+      board: 'workable',
+      slug,
+      url: `https://${slug}.workable.com/api/v1/jobs`,
+      parse: parseWorkableJobs,
+    })),
+    ...COMPANY_SLUGS.gupy.map(slug => ({
+      board: 'gupy',
+      slug,
+      url: `https://${slug}.gupy.io/api/job-openings`,
+      parse: parseGupyJobs,
+    })),
+  ]
+
+  const settled = await mapWithConcurrency(tasks, LEGACY_CONCURRENCY, async task => {
+    const data = await fetchJson(task.url)
+    return task.parse(data, task.slug)
+  })
+
   const results: RawJob[] = []
-
-  for (const slug of COMPANY_SLUGS.greenhouse) {
-    try {
-      const data = await fetchJson(`https://boards-api.greenhouse.io/v1/boards/${slug}/jobs?content=true`)
-      results.push(...parseGreenhouseJobs(data, slug))
-    } catch (error) {
-      console.error(`[scraper] greenhouse/${slug} failed:`, error)
+  for (let index = 0; index < settled.length; index++) {
+    const result = settled[index]
+    if (result.status === 'fulfilled') {
+      results.push(...result.value)
+    } else {
+      console.error(`[scraper] ${tasks[index].board}/${tasks[index].slug} failed:`, result.reason)
     }
-    await jitter()
   }
 
-  for (const slug of COMPANY_SLUGS.lever) {
-    try {
-      const data = (await fetchJson(
-        `https://api.lever.co/v0/postings/${slug}?mode=json`
-      )) as unknown[]
-      results.push(...parseLeverJobs(data, slug))
-    } catch (error) {
-      console.error(`[scraper] lever/${slug} failed:`, error)
-    }
-    await jitter()
-  }
-
-  for (const slug of COMPANY_SLUGS.workable) {
-    try {
-      const data = await fetchJson(`https://${slug}.workable.com/api/v1/jobs`)
-      results.push(...parseWorkableJobs(data, slug))
-    } catch (error) {
-      console.error(`[scraper] workable/${slug} failed:`, error)
-    }
-    await jitter()
-  }
-
-  for (const slug of COMPANY_SLUGS.gupy) {
-    try {
-      const data = (await fetchJson(`https://${slug}.gupy.io/api/job-openings`)) as unknown[]
-      results.push(...parseGupyJobs(data, slug))
-    } catch (error) {
-      console.error(`[scraper] gupy/${slug} failed:`, error)
-    }
-    await jitter()
-  }
-
-  return dedupeJobsByUrl(results)
+  // Legacy ATS APIs expose no reliable candidate eligibility field. Keep only
+  // explicit Brazil/LATAM locations; Firecrawl handles global remote roles
+  // after verifying they accept candidates based in this market.
+  return dedupeJobsByUrl(results.filter(job => matchesTargetMarket(job.location)))
 }
 
 async function runFirecrawlAgent(apiKey: string): Promise<FirecrawlJobListing[]> {
@@ -434,7 +619,7 @@ async function runFirecrawlAgent(apiKey: string): Promise<FirecrawlJobListing[]>
     method: 'POST',
     headers,
     body: JSON.stringify({
-      prompt: FIRECRAWL_AGENT_PROMPT,
+      prompt: buildFirecrawlAgentPrompt(),
       schema: FIRECRAWL_EXTRACT_SCHEMA,
       model: 'spark-1-mini',
       maxCredits: 500,
@@ -552,6 +737,8 @@ export async function scrapeAllBoards(): Promise<ScrapeAllBoardsResult> {
     discoverySource,
     firecrawlCount: firecrawlJobs.length,
     legacyCount: legacyJobs.length,
+    firecrawlSucceeded: firecrawlResult.status === 'fulfilled',
+    legacySucceeded: legacyResult.status === 'fulfilled',
     errors,
   }
 }

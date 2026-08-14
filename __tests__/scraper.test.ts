@@ -1,13 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildFirecrawlAgentPrompt,
   buildJobDiscoverySeed,
+  canonicalizeJobUrl,
   extractFirecrawlJobsFromPayload,
   filterByKeywords,
   inferSourceBoardFromUrl,
+  mapWithConcurrency,
   matchesLegalOpsTitle,
+  matchesTargetMarket,
   normalizeFirecrawlJobListing,
   parseGreenhouseJobs,
   parseLeverJobs,
+  shouldExpireUnseenJob,
 } from '@/lib/scraper'
 
 describe('matchesLegalOpsTitle', () => {
@@ -21,12 +26,21 @@ describe('matchesLegalOpsTitle', () => {
     expect(matchesLegalOpsTitle('Contracts & Legal Operations Manager')).toBe(true)
     expect(matchesLegalOpsTitle('Legal Project & Operations Manager')).toBe(true)
     expect(matchesLegalOpsTitle('Manager, Law Department Strategy & Operations')).toBe(true)
-    expect(matchesLegalOpsTitle('Head of Legal')).toBe(true)
-    expect(matchesLegalOpsTitle('General Counsel')).toBe(true)
-    expect(matchesLegalOpsTitle('Chief Legal Officer')).toBe(true)
+    expect(matchesLegalOpsTitle('Operations Manager, Legal')).toBe(true)
     expect(matchesLegalOpsTitle('CLM Manager')).toBe(true)
+    expect(matchesLegalOpsTitle('Head of Legal')).toBe(false)
+    expect(matchesLegalOpsTitle('General Counsel')).toBe(false)
+    expect(matchesLegalOpsTitle('Chief Legal Officer')).toBe(false)
     expect(matchesLegalOpsTitle('Software Engineer')).toBe(false)
     expect(matchesLegalOpsTitle('Marketing Operations Manager')).toBe(false)
+  })
+
+  it('matches Brazilian Legal Ops titles with and without accents', () => {
+    expect(matchesLegalOpsTitle('Analista de Operações Jurídicas Sênior')).toBe(true)
+    expect(matchesLegalOpsTitle('Coordenador(a) de Controladoria Jurídica')).toBe(true)
+    expect(matchesLegalOpsTitle('Especialista em Inovação Jurídica')).toBe(true)
+    expect(matchesLegalOpsTitle('Operador de Legal Ops Pleno')).toBe(true)
+    expect(matchesLegalOpsTitle('Advogado(a) Trabalhista Sênior')).toBe(false)
   })
 })
 
@@ -42,10 +56,44 @@ describe('filterByKeywords', () => {
 
     const result = filterByKeywords(jobs)
 
-    expect(result).toHaveLength(3)
+    expect(result).toHaveLength(2)
     expect(result[0].title).toBe('Legal Operations Manager')
     expect(result[1].title).toBe('Head of Legal Ops')
-    expect(result[2].title).toBe('Head of Legal')
+  })
+})
+
+describe('buildFirecrawlAgentPrompt', () => {
+  it('anchors discovery to Brazil and a recent publication window', () => {
+    const prompt = buildFirecrawlAgentPrompt(new Date('2026-08-14T12:00:00Z'))
+
+    expect(prompt).toContain('Today is 2026-08-14')
+    expect(prompt).toContain('last 30 days')
+    expect(prompt).toContain('Roles in Brazil')
+    expect(prompt).toContain('operações jurídicas')
+    expect(prompt).toContain('Exclude generic lawyer')
+  })
+})
+
+describe('matchesTargetMarket', () => {
+  it('keeps Brazil and LATAM locations while rejecting restricted foreign roles', () => {
+    expect(matchesTargetMarket('Brazil (Remote)')).toBe(true)
+    expect(matchesTargetMarket('São Paulo, SP')).toBe(true)
+    expect(matchesTargetMarket('Latin America')).toBe(true)
+    expect(matchesTargetMarket('Bengaluru')).toBe(false)
+    expect(matchesTargetMarket('Remote - US only')).toBe(false)
+    expect(matchesTargetMarket(null)).toBe(false)
+  })
+})
+
+describe('canonicalizeJobUrl', () => {
+  it('removes tracking while preserving job-identifying query parameters', () => {
+    expect(canonicalizeJobUrl(
+      'https://Example.com/jobs/123/?utm_source=linkedin&gh_jid=123&source=club#apply',
+    )).toBe('https://example.com/jobs/123?gh_jid=123')
+
+    expect(canonicalizeJobUrl(
+      'https://br.indeed.com/viewjob?utm_campaign=jobs&jk=abc123',
+    )).toBe('https://br.indeed.com/viewjob?jk=abc123')
   })
 })
 
@@ -72,6 +120,8 @@ describe('extractFirecrawlJobsFromPayload', () => {
           location_citation: 'https://jobs.cloc.org/job/legal-operations-billing-manager-chicago-illinois-0311',
           salaryRange: '$95,100 to $130,790 per year',
           salaryRange_citation: 'https://jobs.cloc.org/job/legal-operations-billing-manager-chicago-illinois-0311',
+          postedDate: '2026-08-12',
+          acceptsBrazilCandidates: true,
           applicationLink: 'https://wd3.myworkdaysite.com/recruiting/mdlz/External/job/Global-Headquarters--Chicago-USA/Manager--Global-Legal-Financial-Operations_R-156257',
           applicationLink_citation: 'https://jobs.cloc.org/job/legal-operations-billing-manager-chicago-illinois-0311',
         },
@@ -82,6 +132,7 @@ describe('extractFirecrawlJobsFromPayload', () => {
           companyName_citation: 'https://www.legaloperators.com/jobs/operations-manager-legal-cohere-hn0',
           location: 'San Francisco, CA',
           location_citation: 'https://www.legaloperators.com/jobs/operations-manager-legal-cohere-hn0',
+          acceptsBrazilCandidates: true,
           applicationLink: 'https://www.legaloperators.com/jobs/operations-manager-legal-cohere-hn0',
           applicationLink_citation: 'https://www.legaloperators.com/jobs/operations-manager-legal-cohere-hn0',
         },
@@ -94,23 +145,37 @@ describe('extractFirecrawlJobsFromPayload', () => {
           location_citation: 'https://www.goinhouse.com/jobs/500449284-head-of-legal-operations-at-brex',
           salaryRange: '$220,000 to $261,000 Annually',
           salaryRange_citation: 'https://www.goinhouse.com/jobs/500449284-head-of-legal-operations-at-brex',
+          acceptsBrazilCandidates: true,
           applicationLink: 'https://www.brex.com/careers/8371093002?gh_jid=8371093002&source=GoInhouse.com',
           applicationLink_citation: 'https://www.goinhouse.com/jobs/500449284-head-of-legal-operations-at-brex',
+        },
+        {
+          jobTitle: 'Legal Operations Manager',
+          companyName: 'US Only Co',
+          location: 'New York, NY',
+          acceptsBrazilCandidates: false,
+          applicationLink: 'https://example.com/jobs/us-only',
         },
       ],
     }
 
     const result = extractFirecrawlJobsFromPayload(payload)
 
-    expect(result).toHaveLength(2)
+    expect(result).toHaveLength(3)
     expect(result[0]).toMatchObject({
       title: 'Legal Operations Billing, Manager',
       company: 'Mondelez International, Inc',
       source_board: 'cloc',
       location: 'Chicago, Illinois',
       salary_range: '$95,100 to $130,790 per year',
+      posted_at: '2026-08-12T00:00:00.000Z',
     })
     expect(result[1]).toMatchObject({
+      title: 'Operations Manager, Legal',
+      company: 'Cohere',
+      source_board: 'legaloperators',
+    })
+    expect(result[2]).toMatchObject({
       title: 'Head of Legal Operations',
       company: 'Brex',
       source_board: 'goinhouse',
@@ -155,6 +220,7 @@ describe('extractFirecrawlJobsFromPayload (scrape format)', () => {
           companyName: 'Deckers Brands',
           location: 'Goleta, CA',
           salaryRange: '$27 - $29 an hour',
+          acceptsBrazilCandidates: true,
           applicationLink: 'https://www.indeed.com/viewjob?jk=abc123',
         },
         {
@@ -162,6 +228,7 @@ describe('extractFirecrawlJobsFromPayload (scrape format)', () => {
           companyName: 'NGEN',
           location: 'Remote',
           salaryRange: '$210,000 to $250,000 Annually',
+          acceptsBrazilCandidates: true,
           applicationLink: 'https://www.goinhouse.com/jobs/123',
         },
         {
@@ -242,5 +309,57 @@ describe('parseLeverJobs', () => {
     expect(result).toHaveLength(1)
     expect(result[0].title).toBe('Legal Ops Specialist')
     expect(result[0].source_board).toBe('lever')
+  })
+})
+
+describe('shouldExpireUnseenJob', () => {
+  const oldJob = {
+    url: 'https://example.com/jobs/old?utm_source=linkedin',
+    created_at: '2026-03-12T00:00:00Z',
+    posted_at: null,
+    url_checked_at: null,
+  }
+
+  it('expires an old job that the successful inventory no longer sees', () => {
+    expect(shouldExpireUnseenJob(
+      oldJob,
+      new Set(),
+      new Date('2026-08-14T00:00:00Z'),
+    )).toBe(true)
+  })
+
+  it('keeps old rows when their canonical URL was rediscovered', () => {
+    expect(shouldExpireUnseenJob(
+      oldJob,
+      new Set(['https://example.com/jobs/old']),
+      new Date('2026-08-14T00:00:00Z'),
+    )).toBe(false)
+  })
+
+  it('keeps unseen jobs with a recent publication signal', () => {
+    expect(shouldExpireUnseenJob(
+      { ...oldJob, posted_at: '2026-08-10T00:00:00Z' },
+      new Set(),
+      new Date('2026-08-14T00:00:00Z'),
+    )).toBe(false)
+  })
+})
+
+describe('mapWithConcurrency', () => {
+  it('processes all items without exceeding the limit', async () => {
+    let active = 0
+    let maxActive = 0
+
+    const results = await mapWithConcurrency([1, 2, 3, 4, 5, 6], 3, async value => {
+      active++
+      maxActive = Math.max(maxActive, active)
+      await new Promise(resolve => setTimeout(resolve, 5))
+      active--
+      return value * 2
+    })
+
+    expect(maxActive).toBeLessThanOrEqual(3)
+    expect(results.map(result => result.status === 'fulfilled' ? result.value : null))
+      .toEqual([2, 4, 6, 8, 10, 12])
   })
 })
