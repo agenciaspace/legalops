@@ -27,6 +27,8 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     .from('jobs')
     .select('id', { count: 'exact', head: true })
     .eq('enrichment_status', 'done')
+    .eq('url_status', 'live')
+    .not('url_checked_at', 'is', null)
 
   if (excludedIds.length > 0) {
     countQuery = countQuery.not('id', 'in', `(${excludedIds.join(',')})`)

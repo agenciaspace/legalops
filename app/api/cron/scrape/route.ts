@@ -99,8 +99,9 @@ export async function GET(req: NextRequest) {
     })
 
     const refreshResults = await mapWithConcurrency(seenExistingJobs, 6, async pair => {
+      const { urlStatus } = await fetchJobDescription(pair.discoveredJob.url)
       const refresh: Record<string, unknown> = {
-        url_status: 'live',
+        url_status: urlStatus,
         url_checked_at: observedAt,
       }
       if (pair.discoveredJob.posted_at) refresh.posted_at = pair.discoveredJob.posted_at
@@ -132,7 +133,7 @@ export async function GET(req: NextRequest) {
         continue
       }
 
-      const { job, description: pageDescription, extractedSalary, httpStatus } = fetchResult.value
+      const { job, description: pageDescription, extractedSalary, urlStatus } = fetchResult.value
       const discoverySeed = buildJobDiscoverySeed(job)
       const description = [discoverySeed, pageDescription]
         .filter(Boolean)
@@ -149,10 +150,6 @@ export async function GET(req: NextRequest) {
           salaryData = parseSalaryValues(rangeSalary)
         }
       }
-
-      const urlStatus = httpStatus === null ? 'unknown'
-        : (httpStatus >= 200 && httpStatus < 400) ? 'live'
-        : 'dead'
 
       const { error } = await supabase
         .from('jobs')
@@ -285,14 +282,11 @@ export async function GET(req: NextRequest) {
     // Strategy 2: re-fetch the job page and extract salary from fresh HTML
     if (job.url) {
       try {
-        const { extractedSalary, httpStatus } = await fetchJobDescription(job.url)
+        const { extractedSalary, urlStatus } = await fetchJobDescription(job.url)
 
-        // Update URL status based on fresh response
-        const freshUrlStatus = httpStatus === null ? 'unknown'
-          : (httpStatus >= 200 && httpStatus < 400) ? 'live'
-          : 'dead'
+        // Update URL status based on the application page itself.
         const urlUpdate: Record<string, unknown> = {
-          url_status: freshUrlStatus,
+          url_status: urlStatus,
           url_checked_at: new Date().toISOString(),
         }
 

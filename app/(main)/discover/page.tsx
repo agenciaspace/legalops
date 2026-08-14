@@ -41,6 +41,7 @@ async function backfillMissingSalaries() {
     .from('jobs')
     .select('id, url, raw_description')
     .eq('enrichment_status', 'done')
+    .neq('url_status', 'dead')
     .is('salary_min', null)
     .is('salary_max', null)
     .limit(20)
@@ -60,11 +61,16 @@ async function backfillMissingSalaries() {
     // Strategy 2: re-fetch the job page and extract salary from fresh HTML
     if (job.url) {
       try {
-        const { extractedSalary } = await fetchJobDescription(job.url)
+        const { extractedSalary, urlStatus } = await fetchJobDescription(job.url)
         const salary = toSalaryFields(extractedSalary)
-        if (salary) {
-          await admin.from('jobs').update(salary).eq('id', job.id)
-        }
+        await admin
+          .from('jobs')
+          .update({
+            ...(salary ?? {}),
+            url_status: urlStatus,
+            url_checked_at: new Date().toISOString(),
+          })
+          .eq('id', job.id)
       } catch {
         // Fetch failed, skip
       }
@@ -109,6 +115,8 @@ export default async function DiscoverPage() {
     .from('jobs')
     .select('*')
     .eq('enrichment_status', 'done')
+    .eq('url_status', 'live')
+    .not('url_checked_at', 'is', null)
     .order('created_at', { ascending: false })
     .limit(20)
 

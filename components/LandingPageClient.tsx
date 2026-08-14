@@ -4,8 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowRight,
+  BadgeCheck,
   BriefcaseBusiness,
-  Building2,
   ExternalLink,
   MapPin,
   Search,
@@ -28,6 +28,7 @@ export interface LandingJob {
   salary_max: number | null
   salary_currency: string | null
   url_status: string | null
+  url_checked_at: string | null
   created_at: string
 }
 
@@ -50,7 +51,7 @@ const content = {
   pt: {
     eyebrow: 'LEGALOPS WORK',
     title: 'Explore as vagas',
-    subtitle: 'Oportunidades em operações jurídicas, tecnologia, dados e contratos.',
+    subtitle: 'Empresas e vagas verificadas em operações jurídicas, tecnologia, dados e contratos.',
     employerPrompt: 'Sua empresa está contratando?',
     employerLink: 'Anunciar uma vaga',
     searchLabel: 'Buscar vagas',
@@ -73,11 +74,15 @@ const content = {
     manifesto: 'Sobre o Work',
     updatedDaily: 'Crawler diário',
     lastScan: 'Última varredura',
+    company: 'Empresa',
+    verifiedCompany: 'Empresa verificada',
+    activeJob: 'Vaga ativa',
+    checked: 'Checada',
   },
   en: {
     eyebrow: 'LEGALOPS WORK',
     title: 'Explore jobs',
-    subtitle: 'Open roles in legal operations, technology, data, and contracts.',
+    subtitle: 'Verified companies and open roles in legal operations, technology, data, and contracts.',
     employerPrompt: 'Is your company hiring?',
     employerLink: 'Post a job',
     searchLabel: 'Search jobs',
@@ -100,6 +105,10 @@ const content = {
     manifesto: 'About Work',
     updatedDaily: 'Daily crawler',
     lastScan: 'Last scan',
+    company: 'Company',
+    verifiedCompany: 'Verified company',
+    activeJob: 'Active job',
+    checked: 'Checked',
   },
 } as const
 
@@ -126,6 +135,15 @@ function matchesFilter(job: LandingJob, filter: JobFilter) {
   }
   if (filter === 'hybrid') return job.remote_reality === 'hybrid_disguised'
   return job.remote_reality === 'onsite'
+}
+
+function formatCheckedAt(value: string | null, locale: LandingLocale) {
+  if (!value) return null
+  return new Intl.DateTimeFormat(locale === 'pt' ? 'pt-BR' : 'en-US', {
+    timeZone: 'America/Sao_Paulo',
+    day: '2-digit',
+    month: 'short',
+  }).format(new Date(value))
 }
 
 export function LandingPageClient({
@@ -221,6 +239,7 @@ export function LandingPageClient({
             <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {visibleJobs.map((job, index) => {
                 const salary = formatSalary(job, '')
+                const checkedAt = formatCheckedAt(job.url_checked_at, locale)
 
                 return (
                   <a
@@ -233,10 +252,12 @@ export function LandingPageClient({
                     <div className="relative aspect-[16/8.5] overflow-hidden border-b border-[#DFDFDB] bg-[#F0F0ED] p-5 text-[#20201D] transition group-hover:bg-[#ECECE8]">
                       <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(32,32,29,.06)_1px,transparent_1px),linear-gradient(90deg,rgba(32,32,29,.06)_1px,transparent_1px)] [background-size:28px_28px]" />
                       <div className="relative flex h-full flex-col justify-between">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-semibold tracking-[0.16em] text-[#E45220]">LEGALOPS WORK</span>
-                          <span className="flex h-9 w-9 items-center justify-center rounded-md border border-[#D4D4CF] bg-white/70">
-                            <BriefcaseBusiness className="h-[18px] w-[18px] text-[#53534F]" />
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[10px] font-semibold tracking-[0.16em] text-[#777772]">
+                            {copy.verifiedCompany}
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50/90 px-2 py-1 text-[9px] font-semibold text-emerald-700">
+                            <BadgeCheck className="h-3 w-3" aria-hidden="true" /> {copy.activeJob}
                           </span>
                         </div>
                         <div className="flex items-end justify-between gap-4">
@@ -253,7 +274,7 @@ export function LandingPageClient({
                     <div className="p-4">
                       <div className="flex items-start gap-2.5">
                         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#D9D9D4] bg-[#F3F3F0] text-[#E45220]">
-                          <Building2 className="h-4 w-4" />
+                          <BriefcaseBusiness className="h-4 w-4" />
                         </span>
                         <h2 className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-[#20201D]">
                           {job.title}
@@ -266,7 +287,10 @@ export function LandingPageClient({
                         {salary && <span className="rounded-full bg-[#F3F3F0] px-2 py-1">{salary}</span>}
                       </div>
                       <div className="mt-4 flex items-center justify-between border-t border-[#ECECE8] pt-3 text-[11px] text-[#777772]">
-                        <span>{sourceLabels[job.source_board] ?? job.source_board}</span>
+                        <span>
+                          {sourceLabels[job.source_board] ?? job.source_board}
+                          {checkedAt ? ` · ${copy.checked} ${checkedAt}` : ''}
+                        </span>
                         <span className="flex items-center gap-1 font-medium text-[#444440]">
                           {copy.source} <ExternalLink className="h-3 w-3" />
                         </span>

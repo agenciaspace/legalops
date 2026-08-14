@@ -1,5 +1,5 @@
 import { stripHtml, extractJobMetaFromHtml, buildMetadataBlock, type ExtractedSalary } from './utils'
-import type { SourceBoard } from './types'
+import type { SourceBoard, UrlStatus } from './types'
 
 export type RawJob = {
   title: string
@@ -747,6 +747,60 @@ export interface FetchJobResult {
   description: string
   extractedSalary: ExtractedSalary | null
   httpStatus: number | null
+  urlStatus: UrlStatus
+}
+
+const CLOSED_JOB_PAGE_SIGNALS = [
+  'this job is no longer available',
+  'this role is no longer available',
+  'this position is no longer available',
+  'this job is no longer open',
+  'the job you are looking for is no longer open',
+  'no longer accepting applications',
+  'this job has expired',
+  'this job posting has expired',
+  'this position has been filled',
+  'job posting not found',
+  'job not found',
+  'esta vaga não está mais disponível',
+  'esta vaga nao esta mais disponivel',
+  'não está mais aceitando candidaturas',
+  'nao esta mais aceitando candidaturas',
+  'processo seletivo encerrado',
+  'vaga encerrada',
+  'vaga não encontrada',
+  'vaga nao encontrada',
+] as const
+
+/**
+ * A crawler result is only considered live after the application page itself
+ * responds successfully and does not contain an explicit closure message.
+ * Network failures remain unknown so a temporary provider outage is not
+ * mistaken for a closed role.
+ */
+export function classifyJobUrlStatus(
+  httpStatus: number | null,
+  pageHtml = '',
+  responseUrl = '',
+): UrlStatus {
+  if (httpStatus === null) return 'unknown'
+  if (httpStatus === 404 || httpStatus === 410) return 'dead'
+  if (httpStatus < 200 || httpStatus >= 300) return 'unknown'
+
+  if (responseUrl) {
+    try {
+      const resolvedUrl = new URL(responseUrl)
+      const genericDestination = /^\/(?:careers?|jobs?)\/?$/i.test(resolvedUrl.pathname)
+      if (resolvedUrl.searchParams.get('error') === 'true' || genericDestination) return 'dead'
+    } catch {
+      return 'unknown'
+    }
+  }
+
+  const normalizedPage = pageHtml.toLocaleLowerCase('en-US')
+  return CLOSED_JOB_PAGE_SIGNALS.some(signal => normalizedPage.includes(signal))
+    ? 'dead'
+    : 'live'
 }
 
 export async function fetchJobDescription(url: string): Promise<FetchJobResult> {
@@ -756,9 +810,21 @@ export async function fetchJobDescription(url: string): Promise<FetchJobResult> 
       signal: AbortSignal.timeout(15_000),
     })
 
-    if (!response.ok) return { description: '', extractedSalary: null, httpStatus: response.status }
+    if (!response.ok) {
+      return {
+        description: '',
+        extractedSalary: null,
+        httpStatus: response.status,
+        urlStatus: classifyJobUrlStatus(response.status),
+      }
+    }
 
     const html = await response.text()
+    const urlStatus = classifyJobUrlStatus(response.status, html, response.url)
+
+    if (urlStatus === 'dead') {
+      return { description: '', extractedSalary: null, httpStatus: response.status, urlStatus }
+    }
 
     // Extract all structured metadata before stripping HTML
     const meta = extractJobMetaFromHtml(html)
@@ -769,8 +835,8 @@ export async function fetchJobDescription(url: string): Promise<FetchJobResult> 
       ? `${metaBlock}\n\n${text}`.slice(0, 8_000)
       : text.slice(0, 8_000)
 
-    return { description, extractedSalary: meta.salary, httpStatus: response.status }
+    return { description, extractedSalary: meta.salary, httpStatus: response.status, urlStatus }
   } catch {
-    return { description: '', extractedSalary: null, httpStatus: null }
+    return { description: '', extractedSalary: null, httpStatus: null, urlStatus: 'unknown' }
   }
 }

@@ -20,6 +20,8 @@ export async function GET(req: NextRequest) {
     .from('jobs')
     .select('*')
     .eq('enrichment_status', 'done')
+    .eq('url_status', 'live')
+    .not('url_checked_at', 'is', null)
     .order('created_at', { ascending: false })
     .limit(20)
 

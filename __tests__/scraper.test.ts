@@ -3,6 +3,7 @@ import {
   buildFirecrawlAgentPrompt,
   buildJobDiscoverySeed,
   canonicalizeJobUrl,
+  classifyJobUrlStatus,
   extractFirecrawlJobsFromPayload,
   filterByKeywords,
   inferSourceBoardFromUrl,
@@ -14,6 +15,35 @@ import {
   parseLeverJobs,
   shouldExpireUnseenJob,
 } from '@/lib/scraper'
+
+describe('classifyJobUrlStatus', () => {
+  it('only marks successfully loaded application pages as live', () => {
+    expect(classifyJobUrlStatus(200, '<h1>Legal Operations Manager</h1>')).toBe('live')
+    expect(classifyJobUrlStatus(204)).toBe('live')
+  })
+
+  it('marks definitive HTTP errors and explicit closure pages as dead', () => {
+    expect(classifyJobUrlStatus(404, '<h1>Not found</h1>')).toBe('dead')
+    expect(classifyJobUrlStatus(410, '<h1>Gone</h1>')).toBe('dead')
+    expect(classifyJobUrlStatus(200, '<p>This job is no longer available.</p>')).toBe('dead')
+    expect(classifyJobUrlStatus(200, '<p>No longer accepting applications</p>')).toBe('dead')
+    expect(classifyJobUrlStatus(200, '<p>Processo seletivo encerrado</p>')).toBe('dead')
+  })
+
+  it('marks ATS redirects to error or generic careers pages as dead', () => {
+    expect(classifyJobUrlStatus(200, '', 'https://job-boards.greenhouse.io/acme?error=true')).toBe('dead')
+    expect(classifyJobUrlStatus(200, '', 'https://acme.example/careers/')).toBe('dead')
+    expect(classifyJobUrlStatus(200, '', 'https://jobs.lever.co/acme/job-id')).toBe('live')
+  })
+
+  it('keeps network and temporary HTTP failures unknown so the crawler can retry', () => {
+    expect(classifyJobUrlStatus(null)).toBe('unknown')
+    expect(classifyJobUrlStatus(302)).toBe('unknown')
+    expect(classifyJobUrlStatus(403)).toBe('unknown')
+    expect(classifyJobUrlStatus(429)).toBe('unknown')
+    expect(classifyJobUrlStatus(503)).toBe('unknown')
+  })
+})
 
 describe('matchesLegalOpsTitle', () => {
   it('matches titles with Legal Operations or Legal Ops', () => {

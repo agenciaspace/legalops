@@ -149,7 +149,8 @@ export async function generateClubJobAlerts(userId?: string) {
       .from('jobs')
       .select('id, title, company, raw_description, remote_reality, source_board')
       .eq('enrichment_status', 'done')
-      .neq('url_status', 'dead')
+      .eq('url_status', 'live')
+      .not('url_checked_at', 'is', null)
       .order('created_at', { ascending: false })
       .limit(50),
   ])

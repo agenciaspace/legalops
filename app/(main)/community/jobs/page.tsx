@@ -26,6 +26,7 @@ type AlertJob = {
   salary_max: number | null
   salary_currency: string | null
   url_status: string | null
+  url_checked_at: string | null
 }
 
 type JobAlert = {
@@ -61,8 +62,9 @@ export default async function CommunityJobsPage() {
       .maybeSingle(),
     supabase
       .from('club_job_alerts')
-      .select('id, match_score, match_reasons, cv_suggestions, read_at, created_at, jobs!inner(id, title, company, url, source_board, remote_reality, salary_min, salary_max, salary_currency, url_status)')
-      .neq('jobs.url_status', 'dead')
+      .select('id, match_score, match_reasons, cv_suggestions, read_at, created_at, jobs!inner(id, title, company, url, source_board, remote_reality, salary_min, salary_max, salary_currency, url_status, url_checked_at)')
+      .eq('jobs.url_status', 'live')
+      .not('jobs.url_checked_at', 'is', null)
       .is('dismissed_at', null)
       .order('created_at', { ascending: false })
       .order('match_score', { ascending: false })

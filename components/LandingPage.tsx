@@ -7,7 +7,7 @@ import type { LandingCrawlerRun, LandingJob } from '@/components/LandingPageClie
 type LandingLocale = 'pt' | 'en'
 
 const JOB_SELECT =
-  'id, title, company, url, source_board, remote_reality, salary_min, salary_max, salary_currency, url_status, created_at' as const
+  'id, title, company, url, source_board, remote_reality, salary_min, salary_max, salary_currency, url_status, url_checked_at, created_at' as const
 
 async function fetchPublicJobs(): Promise<{ jobs: LandingJob[]; count: number }> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -25,7 +25,8 @@ async function fetchPublicJobs(): Promise<{ jobs: LandingJob[]; count: number }>
     .from('jobs')
     .select(JOB_SELECT, { count: 'exact' })
     .eq('enrichment_status', 'done')
-    .neq('url_status', 'dead')
+    .eq('url_status', 'live')
+    .not('url_checked_at', 'is', null)
     .order('created_at', { ascending: false })
     .limit(20)
 
@@ -37,7 +38,8 @@ async function fetchPublicJobs(): Promise<{ jobs: LandingJob[]; count: number }>
   const { data: fallbackData, count: fallbackCount } = await supabase
     .from('jobs')
     .select(JOB_SELECT, { count: 'exact' })
-    .neq('url_status', 'dead')
+    .eq('url_status', 'live')
+    .not('url_checked_at', 'is', null)
     .order('created_at', { ascending: false })
     .limit(20)
 
