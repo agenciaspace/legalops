@@ -21,6 +21,19 @@ export function getInitials(name: string) {
     .toUpperCase() || 'LO'
 }
 
+const AVATAR_TONES = [
+  'bg-[#E4EEFF] text-[#315B94]',
+  'bg-[#F3E8FF] text-[#74459A]',
+  'bg-[#E3F5EB] text-[#276A49]',
+  'bg-[#FFF0E3] text-[#9B5729]',
+  'bg-[#FFE7EB] text-[#99485A]',
+]
+
+export function getAvatarTone(name: string) {
+  const seed = Array.from(name).reduce((total, character) => total + character.charCodeAt(0), 0)
+  return AVATAR_TONES[seed % AVATAR_TONES.length]
+}
+
 export function formatCommunityDate(value: string, includeTime = false) {
   return new Intl.DateTimeFormat('pt-BR', {
     timeZone: 'America/Sao_Paulo',

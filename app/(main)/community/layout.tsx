@@ -1,26 +1,34 @@
-import Link from 'next/link'
-import { ArrowUpRight } from 'lucide-react'
 import { CommunityTabs } from '@/components/community/CommunityTabs'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { getInitials } from '@/lib/community'
 
-export default function CommunityLayout({ children }: { children: React.ReactNode }) {
+export default async function CommunityLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const [{ data: member }, { count }] = await Promise.all([
+    supabase
+      .from('community_members')
+      .select('display_name, current_role')
+      .eq('user_id', user?.id ?? '')
+      .maybeSingle(),
+    supabase
+      .from('community_members')
+      .select('user_id', { count: 'exact', head: true }),
+  ])
+
+  const memberName = member?.display_name?.trim() || user?.email?.split('@')[0] || 'Membro LegalOps'
+
   return (
-    <div className="min-h-[calc(100vh-65px)]">
-      <header className="bg-[#1A1A1A] text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-black tracking-[-0.03em]">LegalOps Club</h1>
-              <span className="rounded-full bg-[#FF6A00] px-2 py-0.5 text-[9px] font-black uppercase tracking-wider">Fundador</span>
-            </div>
-            <p className="mt-1 text-xs text-white/50">Aprenda, aplique e compartilhe.</p>
-          </div>
-          <Link href="/club" className="hidden items-center gap-1 text-xs font-bold text-white/50 transition hover:text-white sm:flex">
-            Página do Club <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-        <CommunityTabs />
-      </header>
-      {children}
+    <div className="min-h-[calc(100vh-4rem)] bg-[#F7F7F5] text-[#24231F]">
+      <div className="flex items-start">
+        <CommunityTabs
+          memberName={memberName}
+          memberRole={member?.current_role}
+          memberCount={count ?? 0}
+          initials={getInitials(memberName)}
+        />
+        <div className="min-w-0 flex-1 pt-[53px] lg:pt-0">{children}</div>
+      </div>
     </div>
   )
 }

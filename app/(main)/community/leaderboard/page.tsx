@@ -1,6 +1,6 @@
-import { Award, MessageCircle, Sparkles, Trophy } from 'lucide-react'
+import { Award, Heart, MessageCircle, Sparkles, Trophy } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { getCommunityLevel, getInitials } from '@/lib/community'
+import { getAvatarTone, getCommunityLevel, getInitials } from '@/lib/community'
 
 type RankingMember = {
   user_id: string
@@ -10,7 +10,7 @@ type RankingMember = {
   level: number
 }
 
-const medals = ['bg-amber-400 text-amber-950', 'bg-slate-300 text-slate-800', 'bg-orange-300 text-orange-950']
+const medals = ['bg-[#FFF0BF] text-[#8A6500]', 'bg-[#E9EBED] text-[#59616A]', 'bg-[#F3DED1] text-[#8A5132]']
 
 export const dynamic = 'force-dynamic'
 
@@ -25,53 +25,52 @@ export default async function LeaderboardPage() {
   const ranking = (rawRanking ?? []) as RankingMember[]
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:py-10">
-      <div className="grid gap-6 lg:grid-cols-[1fr_17rem]">
-        <section>
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-[#FF6A00]"><Trophy className="h-4 w-4" /> Ranking do Club</div>
-          <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] sm:text-4xl">Reconhecimento para quem contribui.</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-[#1A1A1A]/55">O ranking valoriza conversas úteis — não tempo de tela.</p>
+    <div className="mx-auto w-full max-w-[1000px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+      <header>
+        <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Leaderboard</h1>
+        <p className="mt-1 text-xs text-[#77746E]">Reconhecimento para quem melhora a conversa e ajuda outros membros.</p>
+      </header>
 
-          <div className="mt-8 overflow-hidden rounded-2xl border border-[#1A1A1A]/10 bg-white shadow-sm">
-            {ranking.map((member, index) => (
-              <div key={member.user_id} className="flex items-center gap-3 border-b border-[#1A1A1A]/8 px-4 py-4 last:border-b-0 sm:px-5">
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black ${index < 3 ? medals[index] : 'bg-[#F5F4F0] text-[#1A1A1A]/45'}`}>
-                  {index + 1}
-                </div>
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1A1A1A] text-xs font-black text-white">{getInitials(member.display_name)}</div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-sm font-black">{member.display_name}</h3>
-                  <p className="truncate text-[11px] text-[#1A1A1A]/40">{member.current_role || getCommunityLevel(member.level)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-black">{member.points}</p>
-                  <p className="text-[9px] font-bold uppercase tracking-wide text-[#1A1A1A]/35">pontos</p>
-                </div>
-                <div className="hidden w-24 sm:block">
-                  <p className="text-[10px] font-black text-[#FF6A00]">Nível {member.level}</p>
-                  <p className="mt-0.5 text-[9px] text-[#1A1A1A]/40">{getCommunityLevel(member.level)}</p>
-                </div>
-              </div>
-            ))}
-            {ranking.length === 0 ? <p className="p-10 text-center text-sm text-[#1A1A1A]/45">O ranking começa com a primeira contribuição.</p> : null}
+      <section className="relative mt-5 overflow-hidden rounded-xl bg-[#292825] px-5 py-6 text-white sm:px-7">
+        <div className="absolute -right-12 -top-20 h-52 w-52 rounded-full bg-[#FF5C1A]/30 blur-3xl" />
+        <div className="relative flex items-start gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#FF5C1A]"><Trophy className="h-5 w-5" /></div>
+          <div>
+            <h2 className="text-lg font-extrabold">Contribuição acima de volume.</h2>
+            <p className="mt-1 max-w-xl text-[11px] leading-5 text-white/60">Compartilhe aprendizados reais, responda com contexto e ajude a comunidade a avançar.</p>
           </div>
+        </div>
+      </section>
+
+      <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_230px]">
+        <section className="overflow-hidden rounded-xl border border-[#E1E1DD] bg-white">
+          <div className="grid grid-cols-[40px_minmax(0,1fr)_60px] gap-2 border-b border-[#ECECE8] px-4 py-3 text-[8px] font-black uppercase tracking-[0.1em] text-[#9A9791] sm:grid-cols-[40px_minmax(0,1fr)_80px_100px]">
+            <span>#</span><span>Membro</span><span className="text-right">Pontos</span><span className="hidden sm:block">Nível</span>
+          </div>
+          {ranking.map((member, index) => (
+            <div key={member.user_id} className="grid grid-cols-[40px_minmax(0,1fr)_60px] items-center gap-2 border-b border-[#ECECE8] px-4 py-3.5 last:border-b-0 sm:grid-cols-[40px_minmax(0,1fr)_80px_100px]">
+              <div className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-black ${index < 3 ? medals[index] : 'bg-[#F2F2EF] text-[#85827C]'}`}>{index + 1}</div>
+              <div className="flex min-w-0 items-center gap-2.5">
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${getAvatarTone(member.display_name)}`}>{getInitials(member.display_name)}</div>
+                <div className="min-w-0"><h2 className="truncate text-[11px] font-extrabold text-[#34332F]">{member.display_name}</h2><p className="truncate text-[8px] text-[#999690]">{member.current_role || getCommunityLevel(member.level)}</p></div>
+              </div>
+              <p className="text-right text-xs font-black text-[#34332F]">{member.points}</p>
+              <div className="hidden sm:block"><p className="text-[9px] font-extrabold text-[#D9470F]">Nível {member.level}</p><p className="mt-0.5 text-[8px] text-[#999690]">{getCommunityLevel(member.level)}</p></div>
+            </div>
+          ))}
+          {ranking.length === 0 ? <p className="p-10 text-center text-xs text-[#77746E]">O ranking começa com a primeira contribuição.</p> : null}
         </section>
 
-        <aside className="space-y-4 lg:pt-24">
-          <div className="rounded-2xl bg-[#1A1A1A] p-5 text-white">
-            <Award className="h-5 w-5 text-[#FF7A45]" />
-            <h3 className="mt-4 text-sm font-black">Como pontuar</h3>
-            <ul className="mt-4 space-y-3 text-xs text-white/60">
-              <li className="flex items-center justify-between"><span>Publicação</span><strong className="text-white">+5</strong></li>
-              <li className="flex items-center justify-between"><span>Comentário</span><strong className="text-white">+2</strong></li>
-              <li className="flex items-center justify-between"><span>Curtida recebida</span><strong className="text-white">+1</strong></li>
+        <aside className="space-y-3">
+          <section className="rounded-xl border border-[#E1E1DD] bg-white p-4">
+            <div className="flex items-center gap-2"><Award className="h-4 w-4 text-[#FF5C1A]" /><h2 className="text-xs font-extrabold">Como pontuar</h2></div>
+            <ul className="mt-3 divide-y divide-[#ECECE8] text-[10px] text-[#77746E]">
+              <li className="flex items-center justify-between py-2"><span className="flex items-center gap-1.5"><Sparkles className="h-3 w-3" /> Publicação</span><strong className="text-[#34332F]">+5</strong></li>
+              <li className="flex items-center justify-between py-2"><span className="flex items-center gap-1.5"><MessageCircle className="h-3 w-3" /> Comentário</span><strong className="text-[#34332F]">+2</strong></li>
+              <li className="flex items-center justify-between py-2"><span className="flex items-center gap-1.5"><Heart className="h-3 w-3" /> Curtida recebida</span><strong className="text-[#34332F]">+1</strong></li>
             </ul>
-          </div>
-          <div className="rounded-2xl border border-[#1A1A1A]/10 bg-white p-5">
-            <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-[#FF6A00]" /><h3 className="text-sm font-black">O que conta</h3></div>
-            <p className="mt-3 text-xs leading-5 text-[#1A1A1A]/55">Contribuição genuína. Publicações repetitivas ou sem contexto podem ser removidas.</p>
-            <div className="mt-4 flex items-center gap-1.5 text-[10px] font-bold text-[#1A1A1A]/35"><MessageCircle className="h-3.5 w-3.5" /> Qualidade acima de volume.</div>
-          </div>
+          </section>
+          <p className="rounded-xl bg-[#FFF0E9] p-3 text-[9px] leading-4 text-[#8B4B31]">Publicações repetitivas ou sem contexto podem ser removidas. Qualidade sempre vence quantidade.</p>
         </aside>
       </div>
     </div>

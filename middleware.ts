@@ -4,7 +4,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const hostname = (request.headers.get('host') ?? '').split(':')[0]
-  const isClubDomain = hostname === 'legalops.club' || hostname === 'www.legalops.club'
+  const isClubDomain = hostname === 'legalops.club'
+    || hostname === 'www.legalops.club'
+    || hostname === 'legalops.legalops.club'
 
   // Keep legalops.work as the job platform while legalops.club gets its own home.
   if (isClubDomain && pathname === '/') {

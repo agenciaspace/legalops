@@ -1,6 +1,5 @@
-import { CalendarDays, Clock3, MapPin, Plus } from 'lucide-react'
+import { CalendarDays, Clock3, Grid2X2, List, MapPin, Plus, Video } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { formatCommunityDate } from '@/lib/community'
 
 type Event = {
   id: string
@@ -20,13 +19,7 @@ function toCalendarTimestamp(value: string) {
 
 function googleCalendarUrl(event: Event) {
   const end = event.ends_at ?? new Date(new Date(event.starts_at).getTime() + 60 * 60 * 1000).toISOString()
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: event.title,
-    dates: `${toCalendarTimestamp(event.starts_at)}/${toCalendarTimestamp(end)}`,
-    details: event.description,
-    location: event.location_label,
-  })
+  const params = new URLSearchParams({ action: 'TEMPLATE', text: event.title, dates: `${toCalendarTimestamp(event.starts_at)}/${toCalendarTimestamp(end)}`, details: event.description, location: event.location_label })
   return `https://calendar.google.com/calendar/render?${params.toString()}`
 }
 
@@ -51,53 +44,65 @@ export default async function CalendarPage() {
   const events = (rawEvents ?? []) as Event[]
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:py-10">
-      <div className="max-w-2xl">
-        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-[#FF6A00]"><CalendarDays className="h-4 w-4" /> Agenda do Club</div>
-        <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] sm:text-4xl">Encontros para sair com um próximo passo.</h2>
-        <p className="mt-3 text-sm leading-6 text-[#1A1A1A]/55">Aulas, office hours e networking. Todos os horários estão em Brasília.</p>
-      </div>
-
-      <div className="mt-8 space-y-4">
-        {events.map((event, index) => {
-          const date = new Date(event.starts_at)
-          const day = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit' }).format(date)
-          const month = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', month: 'short' }).format(date).replace('.', '')
-          const time = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' }).format(date)
-          return (
-            <article key={event.id} className={`grid gap-5 rounded-2xl border bg-white p-5 shadow-sm sm:grid-cols-[5rem_1fr_auto] sm:items-center ${index === 0 ? 'border-[#FF6A00]/35 ring-2 ring-[#FF6A00]/8' : 'border-[#1A1A1A]/10'}`}>
-              <div className="flex h-20 w-20 flex-col items-center justify-center rounded-2xl bg-[#1A1A1A] text-white">
-                <span className="text-2xl font-black leading-none">{day}</span>
-                <span className="mt-1 text-[10px] font-black uppercase tracking-wider text-[#FF7A45]">{month}</span>
-              </div>
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-[#FF6A00]/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-[#C5480B]">{eventLabels[event.event_type] ?? 'Encontro'}</span>
-                  {index === 0 ? <span className="text-[9px] font-black uppercase tracking-wide text-emerald-700">Próximo</span> : null}
-                </div>
-                <h3 className="mt-2 text-lg font-black tracking-[-0.02em]">{event.title}</h3>
-                <p className="mt-2 max-w-2xl text-sm leading-5 text-[#1A1A1A]/55">{event.description}</p>
-                <div className="mt-3 flex flex-wrap gap-4 text-[11px] font-bold text-[#1A1A1A]/45">
-                  <span className="flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5" /> {time}</span>
-                  <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {event.location_label}</span>
-                  <span>Com {event.host_name}</span>
-                </div>
-              </div>
-              <a href={event.location_url ?? googleCalendarUrl(event)} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1A1A1A] px-4 py-2.5 text-xs font-black text-white transition hover:bg-[#FF6A00]">
-                <Plus className="h-3.5 w-3.5" /> {event.location_url ? 'Participar' : 'Adicionar'}
-              </a>
-            </article>
-          )
-        })}
-      </div>
-
-      {events.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-[#1A1A1A]/15 bg-white/60 p-10 text-center">
-          <CalendarDays className="mx-auto h-7 w-7 text-[#FF6A00]" />
-          <p className="mt-3 text-sm font-bold text-[#1A1A1A]/55">A próxima agenda será publicada em breve.</p>
+    <div className="mx-auto w-full max-w-[1000px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Eventos</h1>
+          <p className="mt-1 text-xs text-[#77746E]">Aulas, office hours e encontros da comunidade. Horário de Brasília.</p>
         </div>
-      ) : null}
-      <p className="mt-6 text-center text-[11px] text-[#1A1A1A]/35">Última consulta: {formatCommunityDate(new Date().toISOString(), true)}</p>
+        <div className="hidden rounded-lg border border-[#DFDFDB] bg-white p-1 sm:flex">
+          <button className="rounded-md bg-[#F1F1EE] p-1.5 text-[#33322E]" aria-label="Visualização em lista"><List className="h-3.5 w-3.5" /></button>
+          <button className="rounded-md p-1.5 text-[#999690]" aria-label="Visualização em calendário"><Grid2X2 className="h-3.5 w-3.5" /></button>
+        </div>
+      </header>
+
+      <section className="mt-5 overflow-hidden rounded-xl border border-[#E1E1DD] bg-white">
+        <div className="flex items-center justify-between border-b border-[#ECECE8] px-4 py-3.5 sm:px-5">
+          <h2 className="text-xs font-extrabold text-[#34332F]">Próximos eventos</h2>
+          <span className="rounded-md bg-[#F1F1EE] px-2 py-1 text-[8px] font-black text-[#77746E]">{events.length} AGENDADOS</span>
+        </div>
+
+        <div className="divide-y divide-[#ECECE8]">
+          {events.map((event, index) => {
+            const date = new Date(event.starts_at)
+            const weekday = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'short' }).format(date).replace('.', '')
+            const day = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit' }).format(date)
+            const month = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', month: 'short' }).format(date).replace('.', '')
+            const time = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' }).format(date)
+            return (
+              <article key={event.id} className="group grid gap-4 px-4 py-5 transition hover:bg-[#FAFAF8] sm:grid-cols-[64px_minmax(0,1fr)_auto] sm:items-center sm:px-5">
+                <div className={`flex h-16 w-16 flex-col items-center justify-center rounded-lg ${index === 0 ? 'bg-[#FFF0E9] text-[#D9470F]' : 'bg-[#F1F1EE] text-[#4C4A45]'}`}>
+                  <span className="text-[8px] font-black uppercase tracking-wider">{weekday}</span>
+                  <span className="mt-0.5 text-xl font-black leading-none">{day}</span>
+                  <span className="mt-0.5 text-[8px] font-bold uppercase">{month}</span>
+                </div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[8px] font-black uppercase tracking-[0.1em] text-[#D9470F]">{eventLabels[event.event_type] ?? 'Encontro'}</span>
+                    {index === 0 ? <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wide text-emerald-700">Próximo</span> : null}
+                  </div>
+                  <h3 className="mt-1.5 text-sm font-extrabold tracking-[-0.01em] text-[#292824]">{event.title}</h3>
+                  <p className="mt-1.5 line-clamp-2 max-w-xl text-[10px] leading-4 text-[#7F7C76]">{event.description}</p>
+                  <div className="mt-2.5 flex flex-wrap gap-3 text-[9px] font-semibold text-[#94918B]">
+                    <span className="flex items-center gap-1"><Clock3 className="h-3 w-3" /> {time}</span>
+                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {event.location_label}</span>
+                    <span>Com {event.host_name}</span>
+                  </div>
+                </div>
+                <a href={event.location_url ?? googleCalendarUrl(event)} target="_blank" rel="noreferrer" className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[#DFDFDB] bg-white px-3 text-[10px] font-extrabold text-[#34332F] transition hover:border-[#FFB99E] hover:text-[#D9470F]">
+                  {event.location_url ? <Video className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />} {event.location_url ? 'Participar' : 'Adicionar'}
+                </a>
+              </article>
+            )
+          })}
+          {events.length === 0 ? (
+            <div className="p-12 text-center">
+              <CalendarDays className="mx-auto h-7 w-7 text-[#FF5C1A]" />
+              <p className="mt-3 text-xs font-bold text-[#68655F]">A próxima agenda será publicada em breve.</p>
+            </div>
+          ) : null}
+        </div>
+      </section>
     </div>
   )
 }

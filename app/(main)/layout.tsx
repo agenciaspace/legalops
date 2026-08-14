@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { Nav } from '@/components/Nav'
+import { AppMain } from '@/components/AppMain'
 import { redirect } from 'next/navigation'
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
@@ -36,7 +37,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen bg-[#F5F4F0]">
       <Nav discoverCount={count ?? 0} newJobsCount={newJobsCount ?? 0} />
-      <main className="max-w-7xl mx-auto">{children}</main>
+      <AppMain>{children}</AppMain>
     </div>
   )
 }

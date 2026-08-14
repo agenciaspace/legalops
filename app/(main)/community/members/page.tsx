@@ -1,6 +1,6 @@
-import { BriefcaseBusiness, Search, Users } from 'lucide-react'
+import { BriefcaseBusiness, MessageCircle, Search, SlidersHorizontal, UserPlus, Users } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { getInitials } from '@/lib/community'
+import { getAvatarTone, getInitials } from '@/lib/community'
 
 type Member = {
   user_id: string
@@ -11,52 +11,74 @@ type Member = {
 
 export const dynamic = 'force-dynamic'
 
-export default async function MembersPage() {
+export default async function MembersPage({ searchParams }: { searchParams?: { q?: string } }) {
   const supabase = await createServerSupabaseClient()
-  const { data: rawMembers } = await supabase
+  const search = searchParams?.q?.trim() ?? ''
+  let membersQuery = supabase
     .from('community_members')
     .select('user_id, display_name, current_role, areas_of_expertise')
-    .order('created_at', { ascending: true })
 
+  if (search) membersQuery = membersQuery.ilike('display_name', `%${search}%`)
+
+  const { data: rawMembers } = await membersQuery.order('created_at', { ascending: true })
   const members = (rawMembers ?? []) as Member[]
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="max-w-2xl">
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-[#FF6A00]"><Users className="h-4 w-4" /> Diretório de membros</div>
-          <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] sm:text-4xl">Encontre quem entende o desafio.</h2>
-          <p className="mt-3 text-sm leading-6 text-[#1A1A1A]/55">Conecte-se por especialidade, contexto e experiência em operações jurídicas.</p>
+    <div className="mx-auto w-full max-w-[1100px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Membros</h1>
+          <p className="mt-1 text-xs text-[#77746E]">Encontre pessoas por experiência, função ou especialidade.</p>
         </div>
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#1A1A1A]/10 bg-white px-4 py-2 text-xs font-black text-[#1A1A1A]/55 shadow-sm">
-          <Users className="h-3.5 w-3.5 text-[#FF6A00]" /> {members.length} {members.length === 1 ? 'membro' : 'membros'}
-        </div>
+        <button className="inline-flex h-9 items-center justify-center gap-2 self-start rounded-lg bg-[#FF5C1A] px-3.5 text-[11px] font-extrabold text-white hover:bg-[#E84D10]">
+          <UserPlus className="h-4 w-4" /> Convidar pessoas
+        </button>
+      </header>
+
+      <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+        <form className="relative flex-1" action="/community/members">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999690]" />
+          <input name="q" defaultValue={search} placeholder="Buscar membros" className="h-10 w-full rounded-lg border border-[#DFDFDB] bg-white pl-9 pr-3 text-xs outline-none transition focus:border-[#FFB99E] focus:ring-2 focus:ring-[#FFF0E9]" />
+        </form>
+        <button className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#DFDFDB] bg-white px-3 text-[10px] font-bold text-[#66635E] hover:bg-[#FAFAF8]">
+          <SlidersHorizontal className="h-3.5 w-3.5" /> Filtros
+        </button>
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-4 flex items-center justify-between border-b border-[#E3E3DF] pb-3">
+        <p className="text-[10px] font-bold text-[#8B8882]">{members.length} {members.length === 1 ? 'membro encontrado' : 'membros encontrados'}</p>
+        <button className="text-[10px] font-bold text-[#8B8882]">Mais recentes</button>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {members.map(member => {
           const name = member.display_name?.trim() || 'Membro LegalOps'
           const areas = member.areas_of_expertise ?? []
           return (
-            <article key={member.user_id} className="flex min-h-64 flex-col rounded-2xl border border-[#1A1A1A]/10 bg-white p-5 shadow-sm">
+            <article key={member.user_id} className="group flex min-h-52 flex-col rounded-xl border border-[#E1E1DD] bg-white p-4 transition hover:border-[#CBCAC5] hover:shadow-sm">
               <div className="flex items-start justify-between gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1A1A1A] text-sm font-black text-white">{getInitials(name)}</div>
+                <div className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-black ${getAvatarTone(name)}`}>{getInitials(name)}</div>
+                <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E5E4E0] text-[#797671] opacity-60 transition hover:border-[#FFB99E] hover:text-[#D9470F] group-hover:opacity-100" aria-label={`Enviar mensagem para ${name}`}>
+                  <MessageCircle className="h-3.5 w-3.5" />
+                </button>
               </div>
-              <h3 className="mt-5 text-lg font-black tracking-[-0.02em]">{name}</h3>
-              <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-[#1A1A1A]/45"><BriefcaseBusiness className="h-3.5 w-3.5" /> {member.current_role || 'Profissional do jurídico'}</p>
-              <div className="mt-5 flex flex-wrap gap-1.5">
-                {areas.slice(0, 3).map(area => <span key={area} className="rounded-full bg-[#F5F4F0] px-2.5 py-1 text-[10px] font-bold text-[#1A1A1A]/55">{area}</span>)}
-                {areas.length === 0 ? <span className="text-[11px] text-[#1A1A1A]/30">Perfil em construção</span> : null}
+              <h2 className="mt-4 text-sm font-extrabold tracking-[-0.01em] text-[#2C2B27]">{name}</h2>
+              <p className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-[#88857F]"><BriefcaseBusiness className="h-3.5 w-3.5" /> {member.current_role || 'Profissional do jurídico'}</p>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {areas.slice(0, 3).map(area => <span key={area} className="rounded-md bg-[#F1F1EE] px-2 py-1 text-[8px] font-bold text-[#67645F]">{area}</span>)}
+                {areas.length > 3 ? <span className="rounded-md bg-[#FFF0E9] px-2 py-1 text-[8px] font-bold text-[#D9470F]">+{areas.length - 3}</span> : null}
+                {areas.length === 0 ? <span className="text-[9px] text-[#AAA7A1]">Perfil em construção</span> : null}
               </div>
+              <button className="mt-auto pt-4 text-left text-[9px] font-extrabold text-[#D9470F] opacity-0 transition group-hover:opacity-100">Ver perfil →</button>
             </article>
           )
         })}
       </div>
 
       {members.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-[#1A1A1A]/15 bg-white/60 p-10 text-center">
-          <Search className="mx-auto h-7 w-7 text-[#FF6A00]" />
-          <p className="mt-3 text-sm font-bold text-[#1A1A1A]/55">Os primeiros perfis aparecerão aqui.</p>
+        <div className="mt-5 rounded-xl border border-dashed border-[#D9D8D3] bg-white/60 p-10 text-center">
+          <Users className="mx-auto h-7 w-7 text-[#FF5C1A]" />
+          <p className="mt-3 text-xs font-bold text-[#68655F]">{search ? 'Nenhum membro corresponde à busca.' : 'Os primeiros perfis aparecerão aqui.'}</p>
         </div>
       ) : null}
     </div>
