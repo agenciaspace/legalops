@@ -2,28 +2,57 @@ interface BrandMarkProps {
   className?: string
 }
 
+interface BrandWordmarkProps {
+  className?: string
+  suffix?: 'club' | 'work'
+  accentClassName?: string
+}
+
 interface BrandLogoProps {
   className?: string
   markClassName?: string
   subtitle?: string
   subtitleClassName?: string
   titleClassName?: string
+  suffix?: 'club' | 'work'
+}
+
+const brandFont = {
+  fontFamily: 'ui-rounded, "Avenir Next Rounded", "Nunito", "Quicksand", system-ui, sans-serif',
 }
 
 export function BrandMark({ className }: BrandMarkProps) {
   return (
     <svg
-      viewBox="0 0 40 40"
+      viewBox="0 0 80 48"
       fill="none"
       aria-hidden="true"
-      className={className ?? 'h-10 w-10'}
+      className={className ?? 'h-10 w-auto'}
     >
       <path
-        d="M16 4H10A4 4 0 0 0 6 8V30A4 4 0 0 0 10 34H30A4 4 0 0 0 34 30V28A4 4 0 0 0 30 24H18A2 2 0 0 1 16 22V8A4 4 0 0 0 12 4H16Z"
-        className="fill-current"
+        d="M7 24c0-8.4 6.3-14.5 14.2-14.5 9.1 0 14.1 14.5 18.8 14.5S49.7 9.5 58.8 9.5C66.7 9.5 73 15.6 73 24s-6.3 14.5-14.2 14.5C49.7 38.5 44.7 24 40 24S30.3 38.5 21.2 38.5C13.3 38.5 7 32.4 7 24Z"
+        stroke="currentColor"
+        strokeWidth="4.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      <circle cx="27" cy="12" r="4" className="fill-current" />
+      <circle cx="76" cy="38" r="3.2" fill="#E86A4A" />
     </svg>
+  )
+}
+
+export function BrandWordmark({
+  className,
+  suffix = 'club',
+  accentClassName,
+}: BrandWordmarkProps) {
+  return (
+    <span
+      className={className ?? 'text-[22px] font-medium leading-none tracking-[-0.055em] text-[#111827]'}
+      style={brandFont}
+    >
+      legalops<span className={accentClassName ?? 'text-[#E86A4A]'}>.</span>{suffix}
+    </span>
   )
 }
 
@@ -33,16 +62,18 @@ export function BrandLogo({
   subtitle,
   subtitleClassName,
   titleClassName,
+  suffix = 'club',
 }: BrandLogoProps) {
   return (
     <div className={className ?? 'flex items-center gap-3'}>
-      <BrandMark className={markClassName ?? 'h-10 w-10 text-[#1A1A1A]'} />
+      <BrandMark className={markClassName ?? 'h-9 w-auto text-[#111827]'} />
       <div>
-        <div className={titleClassName ?? 'text-sm font-semibold tracking-[0.22em] text-[#1A1A1A] uppercase'}>
-          LegalOps
-        </div>
+        <BrandWordmark
+          suffix={suffix}
+          className={titleClassName ?? 'text-[22px] font-medium leading-none tracking-[-0.055em] text-[#111827]'}
+        />
         {subtitle ? (
-          <div className={subtitleClassName ?? 'text-sm text-[#1A1A1A]/60'}>
+          <div className={subtitleClassName ?? 'mt-1 text-xs text-[#111827]/55'}>
             {subtitle}
           </div>
         ) : null}
