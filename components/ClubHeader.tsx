@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BrandMark } from '@/components/BrandLogo'
+import { BrandWordmark } from '@/components/BrandLogo'
 
 type PublicArea = 'communities' | 'jobs' | 'employers' | 'about'
 type PublicLocale = 'pt' | 'en'
@@ -57,33 +57,33 @@ export function ClubHeader({
   ]
 
   return (
-    <header className="border-b border-[#E4E4E0] bg-white">
-      <div className="mx-auto flex h-16 max-w-[1120px] items-center justify-between px-3 sm:px-8">
+    <header className="sticky top-0 z-50 border-b border-[#DED7CC]/90 bg-[#F6F0E5]/95 backdrop-blur-xl">
+      <div className="mx-auto flex h-[68px] max-w-[1180px] items-center justify-between px-4 sm:px-8">
         <Link
           href={isWork ? '/' : '/club'}
-          className="flex shrink-0 items-center gap-2.5"
-          aria-label={isWork ? 'LegalOps Work' : 'LegalOps Club'}
+          className="flex min-w-0 shrink items-center"
+          aria-label={isWork ? 'legalops.work' : 'legalops.club'}
         >
-          <BrandMark className="h-8 w-8 text-[#20201D]" />
-          <span className="hidden text-[13px] font-bold tracking-[0.07em] text-[#20201D] sm:inline">
-            LEGALOPS <span className="text-[#E45220]">{isWork ? 'WORK' : 'CLUB'}</span>
-          </span>
+          <BrandWordmark
+            suffix={isWork ? 'work' : 'club'}
+            className="text-[20px] font-medium leading-none tracking-[-0.055em] text-[#111827] sm:text-[24px]"
+          />
         </Link>
 
-        <nav className="flex items-center gap-1 text-sm sm:gap-2" aria-label="Navegação principal">
+        <nav className="ml-4 flex items-center gap-0.5 text-sm sm:gap-1" aria-label="Navegação principal">
           {items.map(item => (
             <Link
               key={item.key}
               href={item.href}
               aria-current={active === item.key ? 'page' : undefined}
-              className={`${item.key === 'about' ? 'hidden lg:inline-flex' : item.key === 'communities' ? 'hidden min-[360px]:inline-flex' : 'inline-flex'} rounded-md px-1.5 py-2 text-xs sm:px-3 sm:text-sm ${active === item.key ? 'bg-[#F0F0ED] font-semibold text-[#20201D]' : 'text-[#686863] hover:bg-[#F5F5F2] hover:text-[#20201D]'}`}
+              className={`${item.key === 'about' ? 'hidden lg:inline-flex' : item.key === 'communities' ? 'hidden md:inline-flex' : item.key === 'employers' ? 'hidden sm:inline-flex' : 'inline-flex'} rounded-full px-2.5 py-2 text-xs transition sm:px-3 sm:text-sm ${active === item.key ? 'bg-[#111827] font-semibold text-white' : 'text-[#5F625F] hover:bg-white/75 hover:text-[#111827]'}`}
             >
               {item.label}
             </Link>
           ))}
           <Link
             href={isWork ? '/login' : '/login?next=/community'}
-            className="rounded-md border border-[#D8D8D4] bg-white px-2.5 py-2 text-xs font-semibold text-[#20201D] shadow-sm hover:bg-[#F7F7F5] sm:px-4"
+            className="ml-1 rounded-full border border-[#111827] bg-[#111827] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#252D3D] sm:px-4 sm:text-sm"
           >
             {copy.login}
           </Link>
