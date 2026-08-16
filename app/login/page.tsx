@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { BrandLogo, BrandMark } from '@/components/BrandLogo'
@@ -12,7 +12,12 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [isClub, setIsClub] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    setIsClub(window.location.hostname.endsWith('legalops.club'))
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -49,44 +54,48 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F5F4F0] p-4">
-      <div className="w-full max-w-sm">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#F5F1E8] p-4 font-[var(--font-inter)] text-[#111111]">
+      <div className="pointer-events-none absolute inset-0 opacity-45 [background-image:radial-gradient(rgba(17,17,17,.08)_0.7px,transparent_0.7px)] [background-size:20px_20px]" />
+      <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full border-[56px] border-[#E88A6A]/10" />
+
+      <div className="relative w-full max-w-md">
         <div className="mb-8 text-center">
           <BrandLogo
+            suffix={isClub ? 'club' : 'work'}
             className="flex flex-col items-center gap-4"
-            markClassName="h-14 w-14 text-[#1A1A1A]"
-            titleClassName="text-2xl font-semibold tracking-[0.18em] text-[#1A1A1A] uppercase"
-            subtitle="Sua conta para vagas, conteúdo e comunidade de Legal Operations"
-            subtitleClassName="max-w-xs text-sm leading-6 text-[#1A1A1A]/60"
+            markClassName="h-16 w-auto text-[#111111]"
+            titleClassName="inline-flex items-baseline text-[34px] font-medium leading-none tracking-[-0.065em] text-[#111111]"
+            subtitle={isClub ? 'Sua entrada para a comunidade de Legal Operations' : 'Sua conta para vagas, conteúdo e carreira em Legal Operations'}
+            subtitleClassName="max-w-sm text-sm leading-6 text-[#6D6761]"
           />
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-[#1A1A1A]/10 p-6 space-y-4 shadow-sm">
+        <form onSubmit={handleSubmit} className="space-y-4 rounded-[26px] border border-[#CEC8BD] bg-white/75 p-6 shadow-[0_20px_60px_rgba(17,17,17,0.06)] backdrop-blur sm:p-7">
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A]/70 mb-1">Email</label>
+            <label className="mb-1.5 block text-xs font-semibold text-[#69635E]">Email</label>
             <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
               placeholder="seu@email.com"
-              className="w-full border border-[#1A1A1A]/20 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
+              className="w-full rounded-2xl border border-[#CEC8BD] bg-[#FAF7F1] px-4 py-3 text-sm outline-none transition placeholder:text-[#9A938C] focus:border-[#E88A6A] focus:ring-4 focus:ring-[#E88A6A]/10"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A]/70 mb-1">Senha</label>
+            <label className="mb-1.5 block text-xs font-semibold text-[#69635E]">Senha</label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              className="w-full border border-[#1A1A1A]/20 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6A00] focus:border-transparent"
+              className="w-full rounded-2xl border border-[#CEC8BD] bg-[#FAF7F1] px-4 py-3 text-sm outline-none transition placeholder:text-[#9A938C] focus:border-[#E88A6A] focus:ring-4 focus:ring-[#E88A6A]/10"
             />
           </div>
 
           {error && (
-            <p className="text-red-700 text-xs bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>
+            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>
           )}
           {notice ? (
             <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{notice}</p>
@@ -95,7 +104,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#FF6A00] text-white rounded-xl py-2.5 text-sm font-bold hover:bg-[#E65C00] disabled:opacity-50 transition-colors shadow-sm"
+            className="w-full rounded-full bg-[#111111] py-3 text-sm font-bold text-white transition hover:bg-[#2A2927] disabled:opacity-50"
           >
             {loading ? 'Carregando...' : mode === 'login' ? 'Entrar' : 'Criar conta'}
           </button>
@@ -103,38 +112,22 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-            className="w-full text-[#1A1A1A]/60 text-xs hover:text-[#1A1A1A]/70 transition-colors"
+            className="w-full text-xs font-medium text-[#77716A] transition hover:text-[#111111]"
           >
             {mode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre'}
           </button>
         </form>
 
-        <div className="mt-6 grid grid-cols-3 gap-3">
-          <div className="bg-white/80 rounded-xl p-3 text-center border border-[#1A1A1A]/10">
-            <div className="w-8 h-8 bg-[#FF6A00]/10 rounded-lg flex items-center justify-center mx-auto mb-1.5">
-              <svg className="w-4 h-4 text-[#FF6A00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <p className="text-xs font-medium text-[#1A1A1A]/70">Descoberta</p>
-            <p className="text-xs text-[#1A1A1A]/50">Vagas automáticas</p>
-          </div>
-          <div className="bg-white/80 rounded-xl p-3 text-center border border-[#1A1A1A]/10">
-            <div className="w-8 h-8 bg-[#FF6A00]/10 rounded-lg flex items-center justify-center mx-auto mb-1.5">
-              <svg className="w-4 h-4 text-[#FF6A00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-            </div>
-            <p className="text-xs font-medium text-[#1A1A1A]/70">IA</p>
-            <p className="text-xs text-[#1A1A1A]/50">Prep & Cover</p>
-          </div>
-          <div className="bg-white/80 rounded-xl p-3 text-center border border-[#1A1A1A]/10">
-            <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center mx-auto mb-1.5">
-              <BrandMark className="h-4 w-4 text-emerald-700" />
-            </div>
-            <p className="text-xs font-medium text-[#1A1A1A]/70">Pipeline</p>
-            <p className="text-xs text-[#1A1A1A]/50">Kanban visual</p>
-          </div>
+        <div className="mt-6 flex items-center justify-center gap-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#918A83]">
+          <span>community</span>
+          <span className="h-1 w-1 rounded-full bg-[#E88A6A]" />
+          <span>knowledge</span>
+          <span className="h-1 w-1 rounded-full bg-[#E88A6A]" />
+          <span>connection</span>
+        </div>
+
+        <div className="mt-5 flex justify-center">
+          <BrandMark className="h-5 w-auto text-[#111111]/25" />
         </div>
       </div>
     </div>
