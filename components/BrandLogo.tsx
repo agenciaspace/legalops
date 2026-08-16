@@ -17,26 +17,69 @@ interface BrandLogoProps {
   suffix?: 'club' | 'work'
 }
 
-const brandFont = {
-  fontFamily: 'ui-rounded, "Avenir Next Rounded", "Nunito", "Quicksand", system-ui, sans-serif',
+const BRAND_INK = '#111111'
+const BRAND_CORAL = '#E88A6A'
+
+function BrandOpLigature({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 124 72"
+      fill="none"
+      aria-hidden="true"
+      className={className}
+      style={{ width: '1.55em', height: '1.05em', marginInline: '-0.06em -0.03em', transform: 'translateY(0.16em)' }}
+    >
+      <path
+        d="M49 48C44 54 37 58 29 58C15 58 6 49 6 36C6 22 16 12 30 12C43 12 52 20 54 32"
+        stroke="currentColor"
+        strokeWidth="9"
+        strokeLinecap="round"
+      />
+      <path
+        d="M49 48L72 22"
+        stroke="currentColor"
+        strokeWidth="9"
+        strokeLinecap="round"
+      />
+      <path
+        d="M69 36C69 22 79 12 93 12C107 12 117 22 117 36C117 50 107 59 93 59C80 59 71 51 69 39M69 36V69"
+        stroke="currentColor"
+        strokeWidth="9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
 }
 
 export function BrandMark({ className }: BrandMarkProps) {
   return (
     <svg
-      viewBox="0 0 80 48"
+      viewBox="0 0 144 104"
       fill="none"
       aria-hidden="true"
-      className={className ?? 'h-10 w-auto'}
+      className={className ?? 'h-12 w-auto'}
     >
       <path
-        d="M7 24c0-8.4 6.3-14.5 14.2-14.5 9.1 0 14.1 14.5 18.8 14.5S49.7 9.5 58.8 9.5C66.7 9.5 73 15.6 73 24s-6.3 14.5-14.2 14.5C49.7 38.5 44.7 24 40 24S30.3 38.5 21.2 38.5C13.3 38.5 7 32.4 7 24Z"
+        d="M58 68C51 77 41 82 30 82C13 82 4 70 4 53C4 34 17 21 35 21C51 21 63 31 66 46"
         stroke="currentColor"
-        strokeWidth="4.2"
+        strokeWidth="12"
+        strokeLinecap="round"
+      />
+      <path
+        d="M58 68L86 35"
+        stroke="currentColor"
+        strokeWidth="12"
+        strokeLinecap="round"
+      />
+      <path
+        d="M82 53C82 34 95 21 113 21C131 21 143 34 143 53C143 71 131 83 113 83C96 83 84 72 82 56M82 53V98"
+        stroke="currentColor"
+        strokeWidth="12"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="76" cy="38" r="3.2" fill="#E86A4A" />
+      <circle cx="116" cy="98" r="6.5" fill={BRAND_CORAL} />
     </svg>
   )
 }
@@ -48,10 +91,15 @@ export function BrandWordmark({
 }: BrandWordmarkProps) {
   return (
     <span
-      className={className ?? 'text-[22px] font-medium leading-none tracking-[-0.055em] text-[#111827]'}
-      style={brandFont}
+      className={className ?? 'inline-flex items-baseline text-[24px] font-medium leading-none tracking-[-0.065em] text-[#111111]'}
+      style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}
+      aria-label={`legalops.${suffix}`}
     >
-      legalops<span className={accentClassName ?? 'text-[#E86A4A]'}>.</span>{suffix}
+      <span>legal</span>
+      <BrandOpLigature />
+      <span>s</span>
+      <span className={accentClassName ?? 'text-[#E88A6A]'}>.</span>
+      <span>{suffix}</span>
     </span>
   )
 }
@@ -66,14 +114,14 @@ export function BrandLogo({
 }: BrandLogoProps) {
   return (
     <div className={className ?? 'flex items-center gap-3'}>
-      <BrandMark className={markClassName ?? 'h-9 w-auto text-[#111827]'} />
+      <BrandMark className={markClassName ?? 'h-10 w-auto text-[#111111]'} />
       <div>
         <BrandWordmark
           suffix={suffix}
-          className={titleClassName ?? 'text-[22px] font-medium leading-none tracking-[-0.055em] text-[#111827]'}
+          className={titleClassName ?? 'inline-flex items-baseline text-[24px] font-medium leading-none tracking-[-0.065em] text-[#111111]'}
         />
         {subtitle ? (
-          <div className={subtitleClassName ?? 'mt-1 text-xs text-[#111827]/55'}>
+          <div className={subtitleClassName ?? 'mt-1 text-xs text-[#111111]/55'} style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
             {subtitle}
           </div>
         ) : null}
@@ -81,3 +129,11 @@ export function BrandLogo({
     </div>
   )
 }
+
+export const brandColors = {
+  ink: BRAND_INK,
+  coral: BRAND_CORAL,
+  cream: '#F5F1E8',
+  warmGray: '#CEC8BD',
+  soft: '#E6DED0',
+} as const
