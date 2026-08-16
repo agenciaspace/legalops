@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Bell, ChevronDown, MessageCircle, Plus, Search, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import { BrandLogo } from '@/components/BrandLogo'
+import { BrandLogo, BrandMark, BrandWordmark } from '@/components/BrandLogo'
 
 interface NavProps {
   discoverCount: number
@@ -27,15 +27,15 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess }: NavProps) {
   const navLink = (href: string, label: string, badge?: number) => (
     <Link
       href={href}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
+      className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium transition-colors ${
         pathname === href || (href === '/community' && pathname.startsWith('/community'))
           ? 'bg-[#FF6A00]/10 text-[#FF6A00]'
-          : 'text-[#1A1A1A]/70 hover:text-[#1A1A1A] hover:bg-[#1A1A1A]/5'
+          : 'text-[#1A1A1A]/70 hover:bg-[#1A1A1A]/5 hover:text-[#1A1A1A]'
       }`}
     >
       {label}
       {badge !== undefined && badge > 0 && (
-        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-[#FF6A00] text-white text-xs font-bold">
+        <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#FF6A00] px-1 text-xs font-bold text-white">
           {badge > 99 ? '99+' : badge}
         </span>
       )}
@@ -44,38 +44,38 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess }: NavProps) {
 
   if (isCommunity) {
     return (
-      <header className="sticky top-0 z-50 h-16 border-b border-[#E6E6E3] bg-white/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 h-16 border-b border-[#CEC8BD] bg-[#F5F1E8]/95 backdrop-blur-xl">
         <div className="flex h-full items-center gap-3 px-4 lg:px-5">
-          <Link href="/community" className="flex w-auto shrink-0 items-center gap-2.5 lg:w-[232px]" aria-label="LegalOps Club — início">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF5C1A] text-[11px] font-black tracking-tight text-white">LO</div>
+          <Link href="/community" className="flex w-auto shrink-0 items-center gap-2.5 lg:w-[232px]" aria-label="legalops.club — início">
+            <BrandMark className="h-8 w-auto text-[#111111]" />
             <div className="hidden min-w-0 sm:block">
-              <p className="truncate text-[13px] font-extrabold leading-4 tracking-[-0.01em]">LegalOps Club</p>
-              <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#8A8883]">Comunidade</p>
+              <BrandWordmark className="inline-flex items-baseline text-[19px] font-medium leading-none tracking-[-0.065em] text-[#111111]" />
+              <p className="mt-1 text-[8px] font-bold uppercase tracking-[0.17em] text-[#918A83]">comunidade</p>
             </div>
-            <ChevronDown className="hidden h-3.5 w-3.5 text-[#9A9892] lg:block" />
+            <ChevronDown className="hidden h-3.5 w-3.5 text-[#918A83] lg:block" />
           </Link>
 
-          <button className="mx-auto hidden h-9 w-full max-w-md items-center gap-2 rounded-lg border border-[#DEDEDA] bg-[#F8F8F6] px-3 text-left text-xs text-[#8B8984] transition hover:border-[#C9C8C3] hover:bg-white md:flex" aria-label="Buscar na comunidade">
+          <button className="mx-auto hidden h-9 w-full max-w-md items-center gap-2 rounded-full border border-[#CEC8BD] bg-white/65 px-3 text-left text-xs text-[#77716A] transition hover:bg-white md:flex" aria-label="Buscar na comunidade">
             <Search className="h-4 w-4" />
             <span className="flex-1">Buscar na comunidade</span>
-            <kbd className="rounded border border-[#D8D7D2] bg-white px-1.5 py-0.5 font-sans text-[9px] text-[#9A9892]">⌘ K</kbd>
+            <kbd className="rounded-md border border-[#E6DED0] bg-white px-1.5 py-0.5 font-sans text-[9px] text-[#918A83]">⌘ K</kbd>
           </button>
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5">
-            <Link href="/community#new-post" className="hidden h-9 items-center gap-1.5 rounded-lg bg-[#FF5C1A] px-3.5 text-xs font-extrabold text-white transition hover:bg-[#E84D10] sm:flex">
+            <Link href="/community#new-post" className="hidden h-9 items-center gap-1.5 rounded-full bg-[#E88A6A] px-3.5 text-xs font-extrabold text-[#111111] transition hover:bg-[#DE7B5C] sm:flex">
               <Plus className="h-4 w-4" /> Novo post
             </Link>
-            <button className="flex h-9 w-9 items-center justify-center rounded-lg text-[#696762] transition hover:bg-[#F2F2EF] hover:text-[#1D1C1A] md:hidden" aria-label="Buscar">
+            <button className="flex h-9 w-9 items-center justify-center rounded-full text-[#69635E] transition hover:bg-white/70 hover:text-[#111111] md:hidden" aria-label="Buscar">
               <Search className="h-[18px] w-[18px]" />
             </button>
-            <button className="hidden h-9 w-9 items-center justify-center rounded-lg text-[#696762] transition hover:bg-[#F2F2EF] hover:text-[#1D1C1A] sm:flex" aria-label="Mensagens">
+            <button className="hidden h-9 w-9 items-center justify-center rounded-full text-[#69635E] transition hover:bg-white/70 hover:text-[#111111] sm:flex" aria-label="Mensagens">
               <MessageCircle className="h-[18px] w-[18px]" />
             </button>
-            <Link href={hasClubAccess ? '/community/jobs' : '/community?upgrade=1'} className="relative flex h-9 w-9 items-center justify-center rounded-lg text-[#696762] transition hover:bg-[#F2F2EF] hover:text-[#1D1C1A]" aria-label={jobAlertCount > 0 ? `${jobAlertCount} alertas de vagas` : 'Alertas de vagas'}>
+            <Link href={hasClubAccess ? '/community/jobs' : '/community?upgrade=1'} className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#69635E] transition hover:bg-white/70 hover:text-[#111111]" aria-label={jobAlertCount > 0 ? `${jobAlertCount} alertas de vagas` : 'Alertas de vagas'}>
               <Bell className="h-[18px] w-[18px]" />
-              {jobAlertCount > 0 ? <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#FF5C1A] ring-2 ring-white" /> : null}
+              {jobAlertCount > 0 ? <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#E88A6A] ring-2 ring-[#F5F1E8]" /> : null}
             </Link>
-            <button className="ml-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#292825] text-[10px] font-black text-white ring-2 ring-white" aria-label="Abrir menu do perfil">LO</button>
+            <button className="ml-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#111111] text-[10px] font-black text-white ring-2 ring-[#F5F1E8]" aria-label="Abrir menu do perfil">LO</button>
           </div>
         </div>
       </header>
@@ -86,11 +86,12 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess }: NavProps) {
     <header className="sticky top-0 z-50 border-b border-[#1A1A1A]/10 bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
-          <Link href="/dashboard" className="flex items-center gap-2 mr-6">
+          <Link href="/dashboard" className="mr-6 flex items-center gap-2">
             <BrandLogo
+              suffix="work"
               className="flex items-center gap-2"
-              markClassName="h-7 w-7 text-[#1A1A1A]"
-              titleClassName="text-sm font-semibold tracking-[0.18em] text-[#1A1A1A] uppercase"
+              markClassName="h-7 w-auto text-[#1A1A1A]"
+              titleClassName="inline-flex items-baseline text-[18px] font-medium leading-none tracking-[-0.06em] text-[#1A1A1A]"
             />
           </Link>
           {navLink('/community', 'Club')}
@@ -104,11 +105,11 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess }: NavProps) {
           {jobAlertCount > 0 && (
             <Link
               href="/community/jobs"
-              className="relative flex items-center justify-center p-2 rounded-xl text-[#1A1A1A]/60 hover:text-[#FF6A00] hover:bg-[#1A1A1A]/5 transition-colors"
+              className="relative flex items-center justify-center rounded-xl p-2 text-[#1A1A1A]/60 transition-colors hover:bg-[#1A1A1A]/5 hover:text-[#FF6A00]"
               title={`${jobAlertCount} alertas de vagas para o seu perfil do Club`}
             >
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF6A00] text-[9px] font-bold text-white ring-2 ring-white">
+              <Bell className="h-5 w-5" />
+              <span className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF6A00] text-[9px] font-bold text-white ring-2 ring-white">
                 {jobAlertCount > 99 ? '99+' : jobAlertCount}
               </span>
             </Link>
@@ -118,7 +119,7 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess }: NavProps) {
           </Link>
           <button
             onClick={handleSignOut}
-            className="text-xs text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition-colors px-3 py-1.5 rounded-xl hover:bg-[#1A1A1A]/5"
+            className="rounded-xl px-3 py-1.5 text-xs text-[#1A1A1A]/60 transition-colors hover:bg-[#1A1A1A]/5 hover:text-[#1A1A1A]"
           >
             Sair
           </button>
