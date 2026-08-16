@@ -55,10 +55,11 @@ export function BrandWordmark({
   inverse = false,
 }: BrandWordmarkProps) {
   const wrapperClass = className ?? 'inline-flex items-center text-[24px] font-medium leading-none text-[#111111]'
+  const needsInverse = inverse || className?.includes('text-white')
 
-  // The Club wordmark uses the traced vector from the approved artwork so the site
-  // matches the selected logo rather than approximating it with a typeface.
-  if (suffix === 'club' && !inverse) {
+  // The light-background Club wordmark is the traced vector from the approved artwork,
+  // so the live site uses the selected logo itself rather than a font approximation.
+  if (suffix === 'club' && !needsInverse) {
     return (
       <span className={wrapperClass} aria-label="legalops.club">
         <img
