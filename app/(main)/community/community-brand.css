@@ -1,0 +1,88 @@
+.legalops-club-theme {
+  --club-cream: #F5F1E8;
+  --club-ink: #111111;
+  --club-coral: #E88A6A;
+  --club-coral-dark: #C9684F;
+  --club-warm-gray: #CEC8BD;
+  --club-soft: #E6DED0;
+  background: var(--club-cream);
+  color: var(--club-ink);
+  font-family: var(--font-inter), sans-serif;
+}
+
+.legalops-club-theme h1,
+.legalops-club-theme h2,
+.legalops-club-theme h3,
+.legalops-club-theme h4,
+.legalops-club-theme [data-brand-heading] {
+  font-family: var(--font-quicksand), ui-rounded, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+.legalops-club-theme [class*="bg-[#F7F7F5]"],
+.legalops-club-theme [class*="bg-[#F5F4F0]"] {
+  background-color: var(--club-cream) !important;
+}
+
+.legalops-club-theme [class*="bg-[#F1F1EE]"],
+.legalops-club-theme [class*="bg-[#F2F2EF]"],
+.legalops-club-theme [class*="bg-[#F3F3F0]"],
+.legalops-club-theme [class*="bg-[#ECECE8]"],
+.legalops-club-theme [class*="bg-[#EFEFEB]"],
+.legalops-club-theme [class*="bg-[#FAFAF8]"] {
+  background-color: #FAF7F1 !important;
+}
+
+.legalops-club-theme [class*="bg-[#FFF0E9]"],
+.legalops-club-theme [class*="bg-[#FFF6F1]"],
+.legalops-club-theme [class*="bg-[#FFF8F5]"],
+.legalops-club-theme [class*="bg-[#FFDACC]"] {
+  background-color: #F8E7DF !important;
+}
+
+.legalops-club-theme [class*="bg-[#FF5C1A]"],
+.legalops-club-theme [class*="bg-[#FF6A00]"] {
+  background-color: var(--club-coral) !important;
+}
+
+.legalops-club-theme [class*="bg-[#292825]"],
+.legalops-club-theme [class*="bg-[#2A2926]"] {
+  background-color: var(--club-ink) !important;
+}
+
+.legalops-club-theme [class*="text-[#D9470F]"],
+.legalops-club-theme [class*="text-[#FF5C1A]"],
+.legalops-club-theme [class*="text-[#E45220]"],
+.legalops-club-theme [class*="text-[#FF8B5D]"],
+.legalops-club-theme [class*="text-[#FF7A45]"],
+.legalops-club-theme [class*="text-[#FF9A72]"] {
+  color: var(--club-coral-dark) !important;
+}
+
+.legalops-club-theme [class*="border-[#E6E6E3]"],
+.legalops-club-theme [class*="border-[#E4E4E0]"],
+.legalops-club-theme [class*="border-[#E3E2DD]"],
+.legalops-club-theme [class*="border-[#E2E2DE]"],
+.legalops-club-theme [class*="border-[#E1E1DD]"],
+.legalops-club-theme [class*="border-[#DEDEDA]"],
+.legalops-club-theme [class*="border-[#ECECE8]"],
+.legalops-club-theme [class*="border-[#E8E8E4]"] {
+  border-color: var(--club-soft) !important;
+}
+
+.legalops-club-theme [class*="border-[#FFD0BD]"],
+.legalops-club-theme [class*="border-[#FFD6C7]"] {
+  border-color: #EFC2B3 !important;
+}
+
+.legalops-club-theme input:focus,
+.legalops-club-theme textarea:focus,
+.legalops-club-theme select:focus {
+  border-color: var(--club-coral) !important;
+  --tw-ring-color: rgba(232, 138, 106, 0.2) !important;
+}
+
+.legalops-club-theme a,
+.legalops-club-theme button {
+  transition-duration: 180ms;
+}
