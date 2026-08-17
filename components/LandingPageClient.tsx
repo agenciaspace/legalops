@@ -11,6 +11,7 @@ import {
   Search,
 } from 'lucide-react'
 import { ClubHeader } from '@/components/ClubHeader'
+import { BrandWordmark } from '@/components/BrandLogo'
 import { formatSalary } from '@/lib/format-salary'
 import type { RemoteReality } from '@/lib/types'
 
@@ -49,8 +50,8 @@ const remoteLabels: Record<RemoteReality, Record<LandingLocale, string>> = {
 
 const content = {
   pt: {
-    eyebrow: 'LEGALOPS WORK',
-    title: 'Explore as vagas',
+    eyebrow: 'LEGALOPS.WORK',
+    title: 'explore as vagas.',
     subtitle: 'Empresas e vagas verificadas em operações jurídicas, tecnologia, dados e contratos.',
     employerPrompt: 'Sua empresa está contratando?',
     employerLink: 'Anunciar uma vaga',
@@ -80,8 +81,8 @@ const content = {
     checked: 'Checada',
   },
   en: {
-    eyebrow: 'LEGALOPS WORK',
-    title: 'Explore jobs',
+    eyebrow: 'LEGALOPS.WORK',
+    title: 'explore jobs.',
     subtitle: 'Verified companies and open roles in legal operations, technology, data, and contracts.',
     employerPrompt: 'Is your company hiring?',
     employerLink: 'Post a job',
@@ -174,24 +175,24 @@ export function LandingPageClient({
   return (
     <div
       lang={locale === 'pt' ? 'pt-BR' : 'en'}
-      className="min-h-screen bg-[#F7F7F5] text-[#20201D] selection:bg-[#E45220] selection:text-white"
+      className="min-h-screen bg-[#F5F1E8] text-[#111111] selection:bg-[#E88A6A] selection:text-white"
     >
-      <ClubHeader active="jobs" locale={locale} />
+      <ClubHeader active="jobs" locale={locale} product="work" />
 
       <main className="mx-auto max-w-[1120px] px-5 pb-20 pt-14 sm:px-8 sm:pt-20">
         <section className="text-center">
-          <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E45220]">
+          <p className="text-[11px] font-bold tracking-[0.18em] text-[#C9684F]">
             {copy.eyebrow}
           </p>
-          <h1 className="mt-4 text-3xl font-bold tracking-[-0.035em] text-[#20201D] sm:text-5xl">
+          <h1 className="mt-4 font-[var(--font-quicksand)] text-3xl font-semibold tracking-[-0.05em] text-[#111111] sm:text-5xl">
             {copy.title}
           </h1>
-          <p className="mx-auto mt-4 max-w-[620px] text-sm leading-6 text-[#686863] sm:text-base">
+          <p className="mx-auto mt-4 max-w-[620px] text-sm leading-6 text-[#69635E] sm:text-base">
             {copy.subtitle}
           </p>
-          <p className="mt-4 text-xs text-[#777772]">
+          <p className="mt-4 text-xs text-[#77716A]">
             {copy.employerPrompt}{' '}
-            <Link href="/for-employers" className="font-semibold text-[#20201D] underline underline-offset-4 hover:text-[#E45220]">
+            <Link href="/for-employers" className="font-semibold text-[#111111] underline underline-offset-4 hover:text-[#C9684F]">
               {copy.employerLink}
             </Link>
           </p>
@@ -201,13 +202,13 @@ export function LandingPageClient({
           <div className="mx-auto max-w-[660px]">
             <label className="relative block">
               <span className="sr-only">{copy.searchLabel}</span>
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#92928D]" />
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#817A73]" />
               <input
                 type="search"
                 value={query}
                 onChange={event => setQuery(event.target.value)}
                 placeholder={copy.searchPlaceholder}
-                className="h-12 w-full rounded-lg border border-[#D8D8D4] bg-white pl-11 pr-4 text-sm text-[#20201D] shadow-sm outline-none placeholder:text-[#9A9A95] focus:border-[#92928D] focus:ring-2 focus:ring-[#20201D]/10"
+                className="h-12 w-full rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] pl-11 pr-4 text-sm text-[#111111] shadow-sm outline-none placeholder:text-[#928B84] focus:border-[#817A73] focus:ring-2 focus:ring-[#111111]/10"
               />
             </label>
           </div>
@@ -218,18 +219,18 @@ export function LandingPageClient({
                 key={filter}
                 type="button"
                 onClick={() => setActiveFilter(filter)}
-                className={`shrink-0 rounded-full border px-3.5 py-2 text-xs font-medium transition ${activeFilter === filter ? 'border-[#20201D] bg-[#20201D] text-white' : 'border-[#DEDEDA] bg-white text-[#666661] hover:border-[#B9B9B4] hover:text-[#20201D]'}`}
+                className={`shrink-0 rounded-full border px-3.5 py-2 text-xs font-medium transition ${activeFilter === filter ? 'border-[#111111] bg-[#111111] text-white' : 'border-[#CEC8BD] bg-[#FAF7F1] text-[#66615B] hover:border-[#AFA79C] hover:text-[#111111]'}`}
               >
                 {copy.filters[filter]}
               </button>
             ))}
           </div>
 
-          <div className="mt-7 flex items-center justify-between border-b border-[#DFDFDB] pb-3">
-            <p className="text-xs font-medium text-[#777772]">
+          <div className="mt-7 flex items-center justify-between border-b border-[#CEC8BD] pb-3">
+            <p className="text-xs font-medium text-[#77716A]">
               {copy.count(normalizedQuery || activeFilter !== 'all' ? visibleJobs.length : jobCount)}
             </p>
-            <p className="text-right text-[10px] text-[#888883]">
+            <p className="text-right text-[10px] text-[#817A73]">
               {copy.updatedDaily}
               {crawlerRun ? ` · ${copy.lastScan}: ${new Intl.DateTimeFormat(locale === 'pt' ? 'pt-BR' : 'en-US', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: 'short' }).format(new Date(crawlerRun.completed_at))}` : ''}
             </p>
@@ -247,13 +248,13 @@ export function LandingPageClient({
                     href={job.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group overflow-hidden rounded-lg border border-[#DFDFDB] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition hover:-translate-y-0.5 hover:border-[#C3C3BE] hover:shadow-md"
+                    className="group overflow-hidden rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] shadow-[0_1px_2px_rgba(17,17,17,0.04)] transition hover:-translate-y-0.5 hover:border-[#AFA79C] hover:shadow-md"
                   >
-                    <div className="relative aspect-[16/8.5] overflow-hidden border-b border-[#DFDFDB] bg-[#F0F0ED] p-5 text-[#20201D] transition group-hover:bg-[#ECECE8]">
-                      <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(32,32,29,.06)_1px,transparent_1px),linear-gradient(90deg,rgba(32,32,29,.06)_1px,transparent_1px)] [background-size:28px_28px]" />
+                    <div className="relative aspect-[16/8.5] overflow-hidden border-b border-[#CEC8BD] bg-[#EEE8DE] p-5 text-[#111111] transition group-hover:bg-[#E9E2D7]">
+                      <div className="absolute inset-0 opacity-50 [background-image:linear-gradient(rgba(17,17,17,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(17,17,17,.05)_1px,transparent_1px)] [background-size:28px_28px]" />
                       <div className="relative flex h-full flex-col justify-between">
                         <div className="flex items-center justify-between gap-3">
-                          <span className="text-[10px] font-semibold tracking-[0.16em] text-[#777772]">
+                          <span className="text-[10px] font-semibold tracking-[0.16em] text-[#77716A]">
                             {copy.verifiedCompany}
                           </span>
                           <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50/90 px-2 py-1 text-[9px] font-semibold text-emerald-700">
@@ -261,10 +262,10 @@ export function LandingPageClient({
                           </span>
                         </div>
                         <div className="flex items-end justify-between gap-4">
-                          <p className="line-clamp-2 max-w-[78%] text-2xl font-black leading-7 tracking-[-0.04em]">
+                          <p className="line-clamp-2 max-w-[78%] font-[var(--font-quicksand)] text-2xl font-bold leading-7 tracking-[-0.045em]">
                             {job.company}
                           </p>
-                          <span className="pb-1 text-[10px] font-semibold text-[#90908B]">
+                          <span className="pb-1 text-[10px] font-semibold text-[#817A73]">
                             {String(index + 1).padStart(2, '0')}
                           </span>
                         </div>
@@ -273,25 +274,25 @@ export function LandingPageClient({
 
                     <div className="p-4">
                       <div className="flex items-start gap-2.5">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#D9D9D4] bg-[#F3F3F0] text-[#E45220]">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#D8D0C4] bg-[#F5F1E8] text-[#C9684F]">
                           <BriefcaseBusiness className="h-4 w-4" />
                         </span>
-                        <h2 className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-[#20201D]">
+                        <h2 className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-[#111111]">
                           {job.title}
                         </h2>
                       </div>
-                      <div className="mt-3 flex min-h-10 flex-wrap content-start gap-1.5 text-[11px] text-[#666661]">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[#F3F3F0] px-2 py-1">
+                      <div className="mt-3 flex min-h-10 flex-wrap content-start gap-1.5 text-[11px] text-[#66615B]">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#F0EAE1] px-2 py-1">
                           <MapPin className="h-3 w-3" /> {remoteLabel(job.remote_reality, locale)}
                         </span>
-                        {salary && <span className="rounded-full bg-[#F3F3F0] px-2 py-1">{salary}</span>}
+                        {salary && <span className="rounded-full bg-[#F0EAE1] px-2 py-1">{salary}</span>}
                       </div>
-                      <div className="mt-4 flex items-center justify-between border-t border-[#ECECE8] pt-3 text-[11px] text-[#777772]">
+                      <div className="mt-4 flex items-center justify-between border-t border-[#E6DED0] pt-3 text-[11px] text-[#77716A]">
                         <span>
                           {sourceLabels[job.source_board] ?? job.source_board}
                           {checkedAt ? ` · ${copy.checked} ${checkedAt}` : ''}
                         </span>
-                        <span className="flex items-center gap-1 font-medium text-[#444440]">
+                        <span className="flex items-center gap-1 font-medium text-[#44403C]">
                           {copy.source} <ExternalLink className="h-3 w-3" />
                         </span>
                       </div>
@@ -301,8 +302,8 @@ export function LandingPageClient({
               })}
             </div>
           ) : (
-            <div className="mt-8 rounded-lg border border-dashed border-[#CECEC9] bg-white px-6 py-14 text-center">
-              <p className="text-sm font-medium text-[#30302D]">{copy.empty}</p>
+            <div className="mt-8 rounded-lg border border-dashed border-[#CEC8BD] bg-[#FAF7F1] px-6 py-14 text-center">
+              <p className="text-sm font-medium text-[#2A2927]">{copy.empty}</p>
               {(query || activeFilter !== 'all') && (
                 <button
                   type="button"
@@ -310,7 +311,7 @@ export function LandingPageClient({
                     setQuery('')
                     setActiveFilter('all')
                   }}
-                  className="mt-3 text-xs font-semibold text-[#E45220] hover:underline"
+                  className="mt-3 text-xs font-semibold text-[#C9684F] hover:underline"
                 >
                   {copy.clear}
                 </button>
@@ -319,27 +320,30 @@ export function LandingPageClient({
           )}
         </section>
 
-        <section className="mt-14 rounded-lg border border-[#DFDFDB] bg-white px-6 py-7 sm:flex sm:items-center sm:justify-between sm:px-8">
+        <section className="mt-14 rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] px-6 py-7 sm:flex sm:items-center sm:justify-between sm:px-8">
           <div>
-            <h2 className="text-base font-semibold text-[#20201D]">{copy.memberTitle}</h2>
-            <p className="mt-1 max-w-[580px] text-sm leading-6 text-[#686863]">{copy.memberText}</p>
+            <h2 className="font-[var(--font-quicksand)] text-base font-semibold text-[#111111]">{copy.memberTitle}</h2>
+            <p className="mt-1 max-w-[580px] text-sm leading-6 text-[#69635E]">{copy.memberText}</p>
           </div>
           <Link
             href="/login"
-            className="mt-5 inline-flex shrink-0 items-center gap-2 rounded-md bg-[#20201D] px-4 py-2.5 text-xs font-semibold text-white hover:bg-black sm:ml-8 sm:mt-0"
+            className="mt-5 inline-flex shrink-0 items-center gap-2 rounded-full bg-[#111111] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#2A2927] sm:ml-8 sm:mt-0"
           >
             {copy.login} <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </section>
       </main>
 
-      <footer className="border-t border-[#E4E4E0] bg-white">
-        <div className="mx-auto flex max-w-[1120px] flex-col gap-4 px-5 py-7 text-xs text-[#777772] sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <span>LEGALOPS <span className="font-semibold text-[#E45220]">WORK</span></span>
+      <footer className="border-t border-[#CEC8BD] bg-[#FAF7F1]">
+        <div className="mx-auto flex max-w-[1120px] flex-col gap-4 px-5 py-7 text-xs text-[#716B65] sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <BrandWordmark
+            suffix="work"
+            className="inline-flex items-baseline text-[21px] font-medium leading-none tracking-[-0.065em] text-[#111111]"
+          />
           <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label="Links do LegalOps Work">
-            <Link href="/pricing" className="hover:text-[#20201D]">{copy.pricing}</Link>
-            <Link href="/for-employers" className="hover:text-[#20201D]">{copy.employers}</Link>
-            <Link href="/manifesto" className="hover:text-[#20201D]">{copy.manifesto}</Link>
+            <Link href="/pricing" className="hover:text-[#111111]">{copy.pricing}</Link>
+            <Link href="/for-employers" className="hover:text-[#111111]">{copy.employers}</Link>
+            <Link href="/manifesto" className="hover:text-[#111111]">{copy.manifesto}</Link>
           </nav>
         </div>
       </footer>
