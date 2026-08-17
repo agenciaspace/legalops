@@ -1,7 +1,6 @@
 import { CommunityTabs } from '@/components/community/CommunityTabs'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getInitials, hasActiveClubAccess } from '@/lib/community'
-import './community-brand.css'
 
 export default async function CommunityLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient()
@@ -21,7 +20,7 @@ export default async function CommunityLayout({ children }: { children: React.Re
   const hasPaidAccess = hasActiveClubAccess(member)
 
   return (
-    <div className="legalops-club-theme min-h-[calc(100vh-4rem)] bg-[#F5F1E8] text-[#111111]">
+    <div className="min-h-[calc(100vh-4rem)] bg-[#F3F0E8] text-[#24231F]">
       <div className="flex items-start">
         <CommunityTabs
           memberName={memberName}

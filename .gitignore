@@ -2,3 +2,7 @@ node_modules
 .next
 *.local
 supabase/.temp
+.agents/
+.aider*
+.cursorignore
+.codeiumignore
