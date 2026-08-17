@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   }
 
   let supabaseResponse = NextResponse.next({ request })
-  const publicPaths = new Set(['/', '/club', '/club/about', '/en', '/login', '/manifesto', '/pricing', '/for-employers'])
+  const publicPaths = new Set(['/', '/club', '/club/about', '/en', '/login', '/manifesto', '/pricing', '/for-employers', '/curso-ia-whatsapp'])
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
