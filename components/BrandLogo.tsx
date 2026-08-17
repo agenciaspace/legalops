@@ -4,7 +4,7 @@ interface BrandMarkProps {
 
 interface BrandWordmarkProps {
   className?: string
-  suffix?: 'club' | 'work'
+  suffix?: 'club' | 'work' | 'dev'
   accentClassName?: string
   inverse?: boolean
 }
@@ -15,7 +15,7 @@ interface BrandLogoProps {
   subtitle?: string
   subtitleClassName?: string
   titleClassName?: string
-  suffix?: 'club' | 'work'
+  suffix?: 'club' | 'work' | 'dev'
 }
 
 const BRAND_INK = '#111111'
