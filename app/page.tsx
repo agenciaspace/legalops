@@ -10,9 +10,9 @@ const workMetadata: Metadata = {
 }
 
 const courseMetadata: Metadata = {
-  title: 'IA no WhatsApp, do zero ao assistente funcional | LegalOps',
+  title: 'legalops.dev — IA no WhatsApp, do fluxo ao sistema',
   description:
-    'Aula prática sobre como construir um assistente de IA no WhatsApp com Termius, Supabase, Hostinger e um provider de IA.',
+    'Uma aula aberta para construir um assistente no WhatsApp e entender a arquitetura entre canal, backend, banco de dados e modelo de IA.',
 }
 
 export const revalidate = 60
