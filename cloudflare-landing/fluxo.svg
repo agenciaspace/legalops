@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 520" role="img" aria-labelledby="title desc">
+  <title id="title">Fluxo de configuração do assistente de IA no WhatsApp</title>
+  <desc id="desc">Uazapi conecta o WhatsApp ao servidor, que consulta o Supabase e o provider de IA antes de devolver a resposta.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1"><stop stop-color="#08111f"/><stop offset="1" stop-color="#0c192b"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#67e8f9"/></marker>
+  </defs>
+  <rect width="1600" height="520" rx="28" fill="url(#bg)"/>
+  <text x="80" y="76" fill="#67e8f9" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="800" letter-spacing="3">FLUXO COMPLETO</text>
+  <text x="80" y="115" fill="#f8fafc" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Da mensagem recebida à resposta com contexto</text>
+  <g stroke="#67e8f9" stroke-width="4" marker-end="url(#arrow)" filter="url(#glow)"><path d="M310 280H390"/><path d="M630 280H710"/><path d="M950 280H1030"/><path d="M1270 280H1350"/></g>
+  <g font-family="Inter,Arial,sans-serif">
+    <g transform="translate(70 175)"><rect width="240" height="210" rx="20" fill="#10233a" stroke="#67e8f9"/><circle cx="120" cy="58" r="30" fill="#67e8f9"/><text x="120" y="68" text-anchor="middle" fill="#08111f" font-size="28" font-weight="800">WA</text><text x="120" y="125" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">WhatsApp</text><text x="120" y="155" text-anchor="middle" fill="#94a3b8" font-size="15">mensagem do usuário</text></g>
+    <g transform="translate(390 175)"><rect width="240" height="210" rx="20" fill="#10233a" stroke="#86efac"/><circle cx="120" cy="58" r="30" fill="#86efac"/><text x="120" y="67" text-anchor="middle" fill="#08111f" font-size="20" font-weight="800">API</text><text x="120" y="125" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">Uazapi</text><text x="120" y="155" text-anchor="middle" fill="#94a3b8" font-size="15">webhook + envio</text></g>
+    <g transform="translate(710 175)"><rect width="240" height="210" rx="20" fill="#10233a" stroke="#67e8f9"/><circle cx="120" cy="58" r="30" fill="#67e8f9"/><text x="120" y="67" text-anchor="middle" fill="#08111f" font-size="17" font-weight="800">DB</text><text x="120" y="125" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">Supabase</text><text x="120" y="155" text-anchor="middle" fill="#94a3b8" font-size="15">histórico + memória</text></g>
+    <g transform="translate(1030 175)"><rect width="240" height="210" rx="20" fill="#10233a" stroke="#86efac"/><circle cx="120" cy="58" r="30" fill="#86efac"/><text x="120" y="67" text-anchor="middle" fill="#08111f" font-size="18" font-weight="800">AI</text><text x="120" y="125" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">Provider de IA</text><text x="120" y="155" text-anchor="middle" fill="#94a3b8" font-size="15">prompt + resposta</text></g>
+    <g transform="translate(1350 175)"><rect width="180" height="210" rx="20" fill="#10233a" stroke="#67e8f9"/><circle cx="90" cy="58" r="30" fill="#67e8f9"/><text x="90" y="67" text-anchor="middle" fill="#08111f" font-size="19" font-weight="800">✓</text><text x="90" y="125" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">Resposta</text><text x="90" y="155" text-anchor="middle" fill="#94a3b8" font-size="15">volta ao WhatsApp</text></g>
+  </g>
+</svg>
