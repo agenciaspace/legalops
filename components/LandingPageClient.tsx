@@ -51,12 +51,12 @@ const remoteLabels: Record<RemoteReality, Record<LandingLocale, string>> = {
 const content = {
   pt: {
     eyebrow: 'LEGALOPS.WORK',
-    title: 'explore as vagas.',
-    subtitle: 'Empresas e vagas verificadas em operações jurídicas, tecnologia, dados e contratos.',
-    employerPrompt: 'Sua empresa está contratando?',
-    employerLink: 'Anunciar uma vaga',
-    searchLabel: 'Buscar vagas',
-    searchPlaceholder: 'Cargo, empresa ou palavra-chave',
+    title: 'vagas para quem transforma o jurídico.',
+    subtitle: 'Oportunidades verificadas em Legal Ops, Legal Tech, contratos, CLM, dados, operações e gestão jurídica — em departamentos jurídicos, escritórios e empresas de tecnologia.',
+    employerPrompt: 'Seu jurídico ou escritório está contratando?',
+    employerLink: 'Publicar uma vaga',
+    searchLabel: 'Buscar vagas jurídicas e de Legal Ops',
+    searchPlaceholder: 'Legal Ops, CLM, contratos, legal tech, empresa...',
     filters: {
       all: 'Todas',
       remote: 'Remotas',
@@ -67,13 +67,13 @@ const content = {
     source: 'Abrir vaga',
     empty: 'Nenhuma vaga encontrada.',
     clear: 'Limpar busca',
-    memberTitle: 'Organize suas candidaturas',
-    memberText: 'Entre para salvar vagas e acompanhar cada processo no seu pipeline.',
+    memberTitle: 'Construa sua próxima movimentação no jurídico',
+    memberText: 'Salve vagas, acompanhe candidaturas e compare cada oportunidade com o seu perfil profissional.',
     login: 'Entrar gratuitamente',
     pricing: 'Ver planos',
     employers: 'Para empresas',
     manifesto: 'Sobre o Work',
-    updatedDaily: 'Crawler diário',
+    updatedDaily: 'Vagas verificadas diariamente',
     lastScan: 'Última varredura',
     company: 'Empresa',
     verifiedCompany: 'Empresa verificada',
@@ -82,12 +82,12 @@ const content = {
   },
   en: {
     eyebrow: 'LEGALOPS.WORK',
-    title: 'explore jobs.',
-    subtitle: 'Verified companies and open roles in legal operations, technology, data, and contracts.',
-    employerPrompt: 'Is your company hiring?',
-    employerLink: 'Post a job',
-    searchLabel: 'Search jobs',
-    searchPlaceholder: 'Role, company, or keyword',
+    title: 'jobs for people transforming legal.',
+    subtitle: 'Verified roles across Legal Operations, Legal Tech, contracts, CLM, data, operations and legal management — in legal departments, law firms and technology companies.',
+    employerPrompt: 'Is your legal team or law firm hiring?',
+    employerLink: 'Post a role',
+    searchLabel: 'Search legal operations jobs',
+    searchPlaceholder: 'Legal Ops, CLM, contracts, legal tech, company...',
     filters: {
       all: 'All',
       remote: 'Remote',
@@ -98,13 +98,13 @@ const content = {
     source: 'Open job',
     empty: 'No jobs found.',
     clear: 'Clear search',
-    memberTitle: 'Keep your applications organized',
-    memberText: 'Sign in to save jobs and track every application in your pipeline.',
+    memberTitle: 'Build your next move in legal',
+    memberText: 'Save roles, track applications and compare each opportunity with your professional profile.',
     login: 'Sign in for free',
     pricing: 'View plans',
     employers: 'For employers',
     manifesto: 'About Work',
-    updatedDaily: 'Daily crawler',
+    updatedDaily: 'Jobs verified daily',
     lastScan: 'Last scan',
     company: 'Company',
     verifiedCompany: 'Verified company',
@@ -187,7 +187,7 @@ export function LandingPageClient({
           <h1 className="mt-4 font-[var(--font-quicksand)] text-3xl font-semibold tracking-[-0.05em] text-[#111111] sm:text-5xl">
             {copy.title}
           </h1>
-          <p className="mx-auto mt-4 max-w-[620px] text-sm leading-6 text-[#69635E] sm:text-base">
+          <p className="mx-auto mt-4 max-w-[700px] text-sm leading-6 text-[#69635E] sm:text-base">
             {copy.subtitle}
           </p>
           <p className="mt-4 text-xs text-[#77716A]">
