@@ -1,4 +1,4 @@
-const UPSTREAM_ORIGIN = 'https://legalops-one.vercel.app'
+const UPSTREAM_ORIGIN = 'https://legalops.work'
 
 export default {
   async fetch(request) {
@@ -25,7 +25,8 @@ export default {
 
     if (location) {
       const redirectUrl = new URL(location, upstreamUrl)
-      if (redirectUrl.hostname.endsWith('.vercel.app')) {
+      const upstreamHost = new URL(UPSTREAM_ORIGIN).hostname
+      if (redirectUrl.hostname === upstreamHost || redirectUrl.hostname.endsWith('.vercel.app')) {
         redirectUrl.protocol = publicUrl.protocol
         redirectUrl.host = publicUrl.host
         responseHeaders.set('location', redirectUrl.toString())
