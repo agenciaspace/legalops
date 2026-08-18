@@ -21,22 +21,8 @@ interface BrandLogoProps {
 const BRAND_INK = '#111111'
 const BRAND_CORAL = '#E88A6A'
 
-function BrandOpLigature({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 124 72"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-      style={{ width: '1.55em', height: '1.05em', marginInline: '-0.06em -0.03em', transform: 'translateY(0.16em)' }}
-    >
-      <path d="M49 48C44 54 37 58 29 58C15 58 6 49 6 36C6 22 16 12 30 12C43 12 52 20 54 32" stroke="currentColor" strokeWidth="9" strokeLinecap="round" />
-      <path d="M49 48L72 22" stroke="currentColor" strokeWidth="9" strokeLinecap="round" />
-      <path d="M69 36C69 22 79 12 93 12C107 12 117 22 117 36C117 50 107 59 93 59C80 59 71 51 69 39M69 36V69" stroke="currentColor" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
+// Legacy symbol kept only for backwards compatibility with internal screens.
+// Public brand surfaces should use BrandWordmark instead.
 export function BrandMark({ className }: BrandMarkProps) {
   return (
     <svg viewBox="0 0 144 104" fill="none" aria-hidden="true" className={className ?? 'h-12 w-auto'}>
@@ -54,25 +40,7 @@ export function BrandWordmark({
   accentClassName,
   inverse = false,
 }: BrandWordmarkProps) {
-  const wrapperClass = className ?? 'inline-flex items-center text-[24px] font-medium leading-none text-[#111111]'
-  const needsInverse = inverse || className?.includes('text-white')
-
-  // The light-background Club wordmark is the traced vector from the approved artwork,
-  // so the live site uses the selected logo itself rather than a font approximation.
-  if (suffix === 'club' && !needsInverse) {
-    return (
-      <span className={wrapperClass} aria-label="legalops.club">
-        <img
-          src="/brand/legalops-club-wordmark.svg?v=20260818-1"
-          alt=""
-          aria-hidden="true"
-          // The traced SVG only has a viewBox (no intrinsic width/height). An
-          // auto width collapses to zero in the header; keep its 1068:203 ratio.
-          style={{ height: '1em', width: '5.26em', display: 'block' }}
-        />
-      </span>
-    )
-  }
+  const wrapperClass = className ?? `inline-flex items-baseline text-[24px] font-semibold leading-none tracking-[-0.055em] ${inverse ? 'text-white' : 'text-[#111111]'}`
 
   return (
     <span
@@ -80,9 +48,7 @@ export function BrandWordmark({
       style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}
       aria-label={`legalops.${suffix}`}
     >
-      <span>legal</span>
-      <BrandOpLigature />
-      <span>s</span>
+      <span>legalops</span>
       <span className={accentClassName ?? 'text-[#E88A6A]'}>.</span>
       <span>{suffix}</span>
     </span>
@@ -91,17 +57,15 @@ export function BrandWordmark({
 
 export function BrandLogo({
   className,
-  markClassName,
   subtitle,
   subtitleClassName,
   titleClassName,
   suffix = 'club',
 }: BrandLogoProps) {
   return (
-    <div className={className ?? 'flex items-center gap-3'}>
-      <BrandMark className={markClassName ?? 'h-10 w-auto text-[#111111]'} />
+    <div className={className ?? 'flex items-center'}>
       <div>
-        <BrandWordmark suffix={suffix} className={titleClassName ?? 'inline-flex items-center text-[24px] font-medium leading-none text-[#111111]'} />
+        <BrandWordmark suffix={suffix} className={titleClassName ?? 'inline-flex items-baseline text-[24px] font-semibold leading-none tracking-[-0.055em] text-[#111111]'} />
         {subtitle ? (
           <div className={subtitleClassName ?? 'mt-1 text-xs text-[#111111]/55'} style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
             {subtitle}
