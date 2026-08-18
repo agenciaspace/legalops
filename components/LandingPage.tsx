@@ -11,7 +11,6 @@ const JOB_SELECT =
 
 async function fetchPublicJobs(): Promise<{ jobs: LandingJob[]; count: number }> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  // Prefer service role key (bypasses RLS), fall back to anon key (needs public policy)
   const supabaseKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!supabaseKey || !supabaseUrl) return { jobs: [], count: 0 }
@@ -20,30 +19,18 @@ async function fetchPublicJobs(): Promise<{ jobs: LandingJob[]; count: number }>
     cookies: { getAll: () => [], setAll: () => {} },
   })
 
-  // Try enriched jobs first
+  // Discovery and URL validation are enough to publish a role. Enrichment adds
+  // salary/remote metadata later and must never block a newly found live job.
   const { data, count } = await supabase
     .from('jobs')
     .select(JOB_SELECT, { count: 'exact' })
-    .eq('enrichment_status', 'done')
     .eq('url_status', 'live')
+    .eq('eligibility_status', 'eligible')
     .not('url_checked_at', 'is', null)
     .order('created_at', { ascending: false })
     .limit(20)
 
-  if (data && data.length > 0) {
-    return { jobs: data as LandingJob[], count: count ?? 0 }
-  }
-
-  // Fallback: show any jobs regardless of enrichment status
-  const { data: fallbackData, count: fallbackCount } = await supabase
-    .from('jobs')
-    .select(JOB_SELECT, { count: 'exact' })
-    .eq('url_status', 'live')
-    .not('url_checked_at', 'is', null)
-    .order('created_at', { ascending: false })
-    .limit(20)
-
-  return { jobs: (fallbackData ?? []) as LandingJob[], count: fallbackCount ?? 0 }
+  return { jobs: (data ?? []) as LandingJob[], count: count ?? 0 }
 }
 
 async function fetchLatestCrawlerRun(): Promise<LandingCrawlerRun | null> {
