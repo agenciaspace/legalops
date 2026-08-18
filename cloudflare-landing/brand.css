@@ -2,6 +2,7 @@
 :root{--i:#111!important;--p:#faf7f1!important;--l:#cec8bd!important;--m:#69635e!important;--c:#e88a6a!important;--r:#c9684f!important;--ink:#111;--coral:#e88a6a;--deep:#c9684f;--cream:#f5f1e8;--light:#faf7f1;--line:#cec8bd;--soft:#e6ded0;--muted:#69635e}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0!important;background:var(--cream)!important;color:var(--ink)!important;font:400 16px/1.7 Inter,system-ui,sans-serif!important}
 a{color:inherit}.wrap{width:min(1180px,calc(100% - 40px))!important;max-width:1180px!important;margin:auto!important;padding-left:0!important;padding-right:0!important}
+body > .wrap:before{content:'legalops.dev';display:block;padding:22px 0 16px;color:var(--ink);font:600 24px/1 Quicksand,sans-serif;letter-spacing:-.065em}
 .nav,.header{position:relative!important;display:flex!important;align-items:center!important;justify-content:space-between!important;min-height:72px!important;margin:0!important;padding:0!important;border-bottom:1px solid var(--line)!important;background:transparent!important}
 .nav a,.header a{color:var(--muted)!important;text-decoration:none!important;font-size:13px!important;font-weight:600!important}.nav a:hover,.header a:hover{color:var(--deep)!important}
 .brand{display:inline-flex!important;align-items:center!important;color:var(--ink)!important;font:600 27px/1 Quicksand,sans-serif!important;letter-spacing:-.065em!important;white-space:nowrap}.brand .coral,.brand .dot{color:var(--coral)!important}
