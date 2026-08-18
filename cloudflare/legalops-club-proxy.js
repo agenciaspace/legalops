@@ -1,6 +1,7 @@
 // Deployed automatically from main via GitHub Actions.
 // legalops.club edge proxy — current production
 // redeploy: token-only Wrangler auth
+// diagnostic trigger
 const UPSTREAM_ORIGIN = 'https://legalops.work'
 
 export default {
