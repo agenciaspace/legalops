@@ -1,45 +1,66 @@
 import Link from 'next/link'
 
 type LegalOpsProduct = 'work' | 'club' | 'dev'
+type EcosystemLocale = 'pt' | 'en'
 
-const products: Array<{
-  key: LegalOpsProduct
-  domain: string
-  role: string
-  description: string
-  href: string
-}> = [
-  {
-    key: 'work',
-    domain: 'legalops.work',
-    role: 'vagas',
-    description: 'Encontre oportunidades para trabalhar e crescer no jurídico.',
-    href: 'https://legalops.work',
-  },
-  {
-    key: 'club',
-    domain: 'legalops.club',
-    role: 'comunidade',
-    description: 'Encontre pessoas, conversas e repertório para operar melhor.',
-    href: 'https://legalops.club',
-  },
-  {
-    key: 'dev',
-    domain: 'legalops.dev',
-    role: 'construir',
-    description: 'Aprenda a construir automações, integrações e produtos para o jurídico.',
-    href: 'https://legalops.dev',
-  },
-]
+const products = {
+  pt: [
+    {
+      key: 'work' as const,
+      domain: 'legalops.work',
+      role: 'vagas',
+      description: 'Encontre oportunidades para trabalhar e crescer no jurídico.',
+      href: 'https://legalops.work',
+    },
+    {
+      key: 'club' as const,
+      domain: 'legalops.club',
+      role: 'comunidade',
+      description: 'Encontre pessoas, conversas e repertório para operar melhor.',
+      href: 'https://legalops.club',
+    },
+    {
+      key: 'dev' as const,
+      domain: 'legalops.dev',
+      role: 'construir',
+      description: 'Aprenda a construir automações, integrações e produtos para o jurídico.',
+      href: 'https://legalops.dev',
+    },
+  ],
+  en: [
+    {
+      key: 'work' as const,
+      domain: 'legalops.work',
+      role: 'jobs',
+      description: 'Find opportunities to work and grow in legal operations.',
+      href: 'https://legalops.work',
+    },
+    {
+      key: 'club' as const,
+      domain: 'legalops.club',
+      role: 'community',
+      description: 'Meet people and exchange practical legal operations knowledge.',
+      href: 'https://legalops.club',
+    },
+    {
+      key: 'dev' as const,
+      domain: 'legalops.dev',
+      role: 'build',
+      description: 'Learn to build automations, integrations and products for legal.',
+      href: 'https://legalops.dev',
+    },
+  ],
+}
 
-export function LegalOpsEcosystem({ active }: { active: LegalOpsProduct }) {
+export function LegalOpsEcosystem({ active, locale = 'pt' }: { active: LegalOpsProduct; locale?: EcosystemLocale }) {
+  const items = products[locale]
   return (
-    <section className="border-y border-[#111111] bg-[#111111] text-white" aria-label="Ecossistema LegalOps">
+    <section className="border-y border-[#111111] bg-[#111111] text-white" aria-label={locale === 'pt' ? 'Ecossistema LegalOps' : 'LegalOps ecosystem'}>
       <div className="mx-auto grid max-w-[1180px] md:grid-cols-[190px_repeat(3,1fr)]">
         <div className="flex items-center border-b border-white/10 px-5 py-5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/50 sm:px-8 md:border-b-0 md:border-r">
-          ecossistema legalops
+          {locale === 'pt' ? 'ecossistema legalops' : 'legalops ecosystem'}
         </div>
-        {products.map(product => {
+        {items.map(product => {
           const isActive = product.key === active
           return (
             <Link
