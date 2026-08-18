@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { ClubHeader } from '@/components/ClubHeader'
 import { BrandWordmark } from '@/components/BrandLogo'
+import { LegalOpsEcosystem } from '@/components/LegalOpsEcosystem'
 import { formatSalary } from '@/lib/format-salary'
 import type { RemoteReality } from '@/lib/types'
 
@@ -50,9 +51,9 @@ const remoteLabels: Record<RemoteReality, Record<LandingLocale, string>> = {
 
 const content = {
   pt: {
-    eyebrow: 'LEGALOPS.WORK',
-    title: 'vagas para quem transforma o jurídico.',
-    subtitle: 'Oportunidades verificadas em Legal Ops, Legal Tech, contratos, CLM, dados, operações e gestão jurídica — em departamentos jurídicos, escritórios e empresas de tecnologia.',
+    eyebrow: 'LEGALOPS.WORK · VAGAS',
+    title: 'encontre sua próxima oportunidade no jurídico.',
+    subtitle: 'Vagas verificadas em Legal Ops, Legal Tech, contratos, CLM, dados, operações e gestão jurídica. Busque por função, empresa e modelo de trabalho.',
     employerPrompt: 'Seu jurídico ou escritório está contratando?',
     employerLink: 'Publicar uma vaga',
     searchLabel: 'Buscar vagas jurídicas e de Legal Ops',
@@ -67,8 +68,8 @@ const content = {
     source: 'Abrir vaga',
     empty: 'Nenhuma vaga encontrada.',
     clear: 'Limpar busca',
-    memberTitle: 'Construa sua próxima movimentação no jurídico',
-    memberText: 'Salve vagas, acompanhe candidaturas e compare cada oportunidade com o seu perfil profissional.',
+    memberTitle: 'Organize sua próxima candidatura',
+    memberText: 'Salve vagas, acompanhe candidaturas e mantenha sua busca por uma nova oportunidade em um só lugar.',
     login: 'Entrar gratuitamente',
     pricing: 'Ver planos',
     employers: 'Para empresas',
@@ -81,9 +82,9 @@ const content = {
     checked: 'Checada',
   },
   en: {
-    eyebrow: 'LEGALOPS.WORK',
-    title: 'jobs for people transforming legal.',
-    subtitle: 'Verified roles across Legal Operations, Legal Tech, contracts, CLM, data, operations and legal management — in legal departments, law firms and technology companies.',
+    eyebrow: 'LEGALOPS.WORK · JOBS',
+    title: 'find your next opportunity in legal.',
+    subtitle: 'Verified roles across Legal Operations, Legal Tech, contracts, CLM, data, operations and legal management. Search by role, company and work model.',
     employerPrompt: 'Is your legal team or law firm hiring?',
     employerLink: 'Post a role',
     searchLabel: 'Search legal operations jobs',
@@ -98,8 +99,8 @@ const content = {
     source: 'Open job',
     empty: 'No jobs found.',
     clear: 'Clear search',
-    memberTitle: 'Build your next move in legal',
-    memberText: 'Save roles, track applications and compare each opportunity with your professional profile.',
+    memberTitle: 'Organize your next application',
+    memberText: 'Save roles, track applications and keep your search for a new opportunity in one place.',
     login: 'Sign in for free',
     pricing: 'View plans',
     employers: 'For employers',
@@ -178,6 +179,7 @@ export function LandingPageClient({
       className="min-h-screen bg-[#F5F1E8] text-[#111111] selection:bg-[#E88A6A] selection:text-white"
     >
       <ClubHeader active="jobs" locale={locale} product="work" />
+      <LegalOpsEcosystem active="work" locale={locale} />
 
       <main className="mx-auto max-w-[1120px] px-5 pb-20 pt-14 sm:px-8 sm:pt-20">
         <section className="text-center">
@@ -338,10 +340,11 @@ export function LandingPageClient({
         <div className="mx-auto flex max-w-[1120px] flex-col gap-4 px-5 py-7 text-xs text-[#716B65] sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <BrandWordmark
             suffix="work"
-            className="inline-flex items-baseline text-[21px] font-medium leading-none tracking-[-0.065em] text-[#111111]"
+            className="inline-flex items-baseline text-[21px] font-semibold leading-none tracking-[-0.055em] text-[#111111]"
           />
           <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label="Links do LegalOps Work">
-            <Link href="/pricing" className="hover:text-[#111111]">{copy.pricing}</Link>
+            <Link href="https://legalops.club" className="hover:text-[#111111]">club · {locale === 'pt' ? 'comunidade' : 'community'}</Link>
+            <Link href="https://legalops.dev" className="hover:text-[#111111]">dev · {locale === 'pt' ? 'construir' : 'build'}</Link>
             <Link href="/for-employers" className="hover:text-[#111111]">{copy.employers}</Link>
             <Link href="/manifesto" className="hover:text-[#111111]">{copy.manifesto}</Link>
           </nav>
