@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function ForEmployersPage() {
   return (
-    <div className="min-h-screen bg-[#F7F7F5] text-[#20201D]">
+    <div className="min-h-screen bg-[#F5F1E8] text-[#111111]">
       <ClubHeader active="employers" />
       <EmployerHub />
     </div>
