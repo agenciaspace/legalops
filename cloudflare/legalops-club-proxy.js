@@ -1,4 +1,5 @@
 // Deployed automatically from main via GitHub Actions.
+// legalops.club edge proxy
 const UPSTREAM_ORIGIN = 'https://legalops.work'
 
 export default {
