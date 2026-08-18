@@ -1,0 +1,28 @@
+name: Test job discovery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/job-discovery.ts'
+      - 'lib/scraper.ts'
+      - '__tests__/job-discovery.test.ts'
+      - '.github/workflows/test-job-discovery.yml'
+  pull_request:
+    paths:
+      - 'lib/job-discovery.ts'
+      - 'lib/scraper.ts'
+      - '__tests__/job-discovery.test.ts'
+      - '.github/workflows/test-job-discovery.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - run: npm ci
+      - run: npx vitest run __tests__/job-discovery.test.ts
