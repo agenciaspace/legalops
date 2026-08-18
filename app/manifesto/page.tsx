@@ -5,24 +5,24 @@ import { ClubHeader } from '@/components/ClubHeader'
 
 export const metadata: Metadata = {
   title: 'Sobre | LegalOps Work',
-  description: 'Como o LegalOps Work reúne vagas, organiza os dados e se conecta ao perfil do LegalOps Club.',
+  description: 'Como o LegalOps Work reúne oportunidades de Legal Ops, Legal Tech e operações jurídicas, organiza os dados e conecta vagas ao perfil profissional.',
 }
 
 const steps = [
   {
     number: '01',
     title: 'O crawler encontra',
-    description: 'A varredura consulta os boards suportados e páginas de empresas. Cada resultado mantém o link para a publicação original.',
+    description: 'A varredura acompanha boards, páginas de carreira e fontes de empresas que contratam para Legal Ops, Legal Tech, contratos, dados e operações jurídicas.',
   },
   {
     number: '02',
     title: 'O Work organiza',
-    description: 'Cargo, empresa, modelo de trabalho e remuneração aparecem quando essas informações estão disponíveis na fonte.',
+    description: 'Cargo, empresa, modelo de trabalho, remuneração e contexto da função aparecem quando essas informações estão disponíveis na fonte.',
   },
   {
     number: '03',
     title: 'Você confere na origem',
-    description: 'A página da empresa continua sendo a referência para requisitos, validade da vaga e candidatura.',
+    description: 'A página da empresa continua sendo a referência para escopo, requisitos, validade da oportunidade e candidatura.',
   },
 ]
 
@@ -36,17 +36,17 @@ export default function ManifestoPage() {
           <div className="mx-auto max-w-[820px]">
             <p className="text-[11px] font-bold tracking-[0.18em] text-[#C9684F]">SOBRE O LEGALOPS WORK</p>
             <h1 className="mt-5 text-4xl font-semibold leading-tight tracking-[-0.055em] sm:text-6xl" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>
-              Vagas de Legal Ops reunidas em uma busca
+              Oportunidades para quem opera e transforma o jurídico, em uma busca
             </h1>
             <p className="mt-7 max-w-3xl text-lg leading-8 text-[#625E59]">
-              O Work reúne oportunidades encontradas em diferentes fontes e organiza os dados essenciais para comparação. Membros do Club podem usar o próprio perfil para receber alertas e preparar o currículo para cada vaga.
+              O Work reúne vagas de Legal Ops, Legal Tech, contratos, CLM, dados, inovação e gestão jurídica encontradas em diferentes fontes. Membros do Club podem usar o próprio perfil para acompanhar oportunidades e preparar melhor cada candidatura.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link href="/" className="inline-flex items-center gap-2 rounded-full bg-[#111111] px-5 py-3 text-sm font-bold text-white hover:bg-[#2A2927]">
                 Ver vagas <ArrowRight className="h-4 w-4" />
               </Link>
               <Link href="/for-employers" className="inline-flex items-center rounded-full border border-[#CEC8BD] bg-white/60 px-5 py-3 text-sm font-bold hover:bg-white">
-                Área para empresas
+                Contratar para o jurídico
               </Link>
             </div>
           </div>
@@ -75,22 +75,22 @@ export default function ManifestoPage() {
         <section className="border-b border-[#CEC8BD] bg-[#111111] px-5 py-16 text-white sm:px-8 sm:py-20">
           <div className="mx-auto max-w-[980px]">
             <p className="text-sm font-bold text-[#E88A6A]">Work + Club</p>
-            <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-[-0.04em]" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>O perfil controla as recomendações</h2>
+            <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-[-0.04em]" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>Seu contexto profissional torna a busca mais relevante</h2>
             <div className="mt-10 grid border-y border-white/20 md:grid-cols-3">
               <div className="border-b border-white/20 py-6 md:border-b-0 md:border-r md:pr-6">
                 <UserRound className="h-5 w-5 text-[#E88A6A]" />
                 <h3 className="mt-4 text-sm font-semibold">Perfil</h3>
-                <p className="mt-2 text-sm leading-6 text-white/60">O membro informa cargos procurados, competências, ferramentas e modelo de trabalho.</p>
+                <p className="mt-2 text-sm leading-6 text-white/60">Informe funções de interesse, competências, ferramentas, áreas do jurídico e modelo de trabalho.</p>
               </div>
               <div className="border-b border-white/20 py-6 md:border-b-0 md:border-r md:px-6">
                 <BriefcaseBusiness className="h-5 w-5 text-[#E88A6A]" />
                 <h3 className="mt-4 text-sm font-semibold">Comparação</h3>
-                <p className="mt-2 text-sm leading-6 text-white/60">Cada alerta explica quais campos do perfil têm relação com a descrição encontrada.</p>
+                <p className="mt-2 text-sm leading-6 text-white/60">Cada alerta mostra quais partes do seu histórico se conectam ao escopo e aos requisitos da oportunidade.</p>
               </div>
               <div className="py-6 md:pl-6">
                 <BellRing className="h-5 w-5 text-[#E88A6A]" />
                 <h3 className="mt-4 text-sm font-semibold">Alertas e CV</h3>
-                <p className="mt-2 text-sm leading-6 text-white/60">Membros ativos que habilitaram os alertas recebem vagas no Club e sugestões de pontos para detalhar no currículo.</p>
+                <p className="mt-2 text-sm leading-6 text-white/60">Membros que habilitam alertas recebem oportunidades no Club e indicações de pontos que podem ser descritos com mais clareza no currículo.</p>
               </div>
             </div>
           </div>
@@ -100,9 +100,9 @@ export default function ManifestoPage() {
           <div className="mx-auto grid max-w-[980px] gap-10 lg:grid-cols-2">
             <div className="border-t border-[#20201D] pt-5">
               <Building2 className="h-5 w-5 text-[#C9684F]" />
-              <h2 className="mt-5 text-2xl font-semibold tracking-[-0.04em]" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>Para empresas</h2>
+              <h2 className="mt-5 text-2xl font-semibold tracking-[-0.04em]" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>Para quem contrata no jurídico</h2>
               <p className="mt-3 text-sm leading-7 text-[#69635E]">
-                Escritórios e departamentos jurídicos podem enviar uma vaga para revisão ou consultar os perfis que autorizaram exibição no diretório.
+                Escritórios, departamentos jurídicos e empresas de Legal Tech podem enviar vagas para revisão ou consultar os perfis que autorizaram exibição no diretório.
               </p>
               <Link href="/for-employers" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[#C9684F] hover:underline">
                 Abrir área para empresas <ArrowRight className="h-4 w-4" />
@@ -110,9 +110,9 @@ export default function ManifestoPage() {
             </div>
             <div className="border-t border-[#20201D] pt-5">
               <ExternalLink className="h-5 w-5 text-[#C9684F]" />
-              <h2 className="mt-5 text-2xl font-semibold tracking-[-0.04em]" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>Limites dos dados</h2>
+              <h2 className="mt-5 text-2xl font-semibold tracking-[-0.04em]" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>Dados sem maquiagem</h2>
               <p className="mt-3 text-sm leading-7 text-[#69635E]">
-                Uma vaga pode ser alterada ou encerrada pela empresa sem aviso. Quando localidade ou remuneração não estão claras na fonte, o Work mostra essa ausência em vez de completar o dado por conta própria.
+                Uma vaga pode ser alterada ou encerrada pela empresa sem aviso. Quando localidade, remuneração ou outro dado não estão claros na fonte, o Work mostra essa ausência em vez de completar a informação por conta própria.
               </p>
             </div>
           </div>
