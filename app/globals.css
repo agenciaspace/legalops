@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Legacy screens still use the first orange palette. Keep them visually
+   consistent with the current cream / ink / coral system until each screen
+   is migrated to the shared components. */
+[class~="bg-[#FF6A00]"] { background-color: #E88A6A !important; color: #111111 !important; }
+[class*="bg-[#FF6A00]/"] { background-color: rgb(232 138 106 / 0.12) !important; }
+[class*="text-[#FF6A00]"] { color: #C9684F !important; }
+[class*="border-[#FF6A00]"] { border-color: rgb(232 138 106 / 0.45) !important; }
+[class*="focus:ring-[#FF6A00]"]:focus { --tw-ring-color: rgb(232 138 106 / 0.28) !important; }
+[class*="focus:border-[#FF6A00]"]:focus { border-color: #E88A6A !important; }
