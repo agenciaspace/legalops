@@ -280,7 +280,7 @@ export function parseJoobleJobs(payload: unknown): DiscoveredJob[] {
 
 export async function scrapeJooble(apiKey: string | null | undefined): Promise<DiscoveredJob[]> {
   if (!apiKey) return []
-  const origin = process.env.JOOBLE_API_ORIGIN?.replace(/\/$/, '') || 'https://br.jooble.org'
+  const origin = process.env.JOOBLE_API_ORIGIN?.replace(/\/$/, '') || 'https://jooble.org'
   const endpoint = `${origin}/api/${encodeURIComponent(apiKey)}`
   const payload = await fetchJson(endpoint, {
     method: 'POST',
