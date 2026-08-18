@@ -1,0 +1,85 @@
+name: Deploy legalops.dev Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare-landing/**'
+      - '.github/workflows/deploy-legalops-dev-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: 3d40d7797b3fd6d1cd2644eefea9e907
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Find the Pages project for legalops.dev
+        id: project
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          API="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects"
+          PROJECTS=$(curl -fsS "$API?per_page=100" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")
+
+          PROJECT_NAME=$(printf '%s' "$PROJECTS" | jq -r '
+            .result[]?
+            | select((.domains // []) | any(. == "legalops.dev" or . == "www.legalops.dev"))
+            | .name
+          ' | head -n1)
+
+          if [ -z "$PROJECT_NAME" ]; then
+            while IFS= read -r CANDIDATE; do
+              [ -z "$CANDIDATE" ] && continue
+              DOMAINS=$(curl -fsS "$API/$CANDIDATE/domains" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")
+              if printf '%s' "$DOMAINS" | jq -e '.result[]? | select(.name == "legalops.dev" or .name == "www.legalops.dev")' >/dev/null; then
+                PROJECT_NAME="$CANDIDATE"
+                break
+              fi
+            done < <(printf '%s' "$PROJECTS" | jq -r '.result[]?.name')
+          fi
+
+          if [ -z "$PROJECT_NAME" ]; then
+            echo "No Cloudflare Pages project associated with legalops.dev was found." >&2
+            exit 1
+          fi
+
+          echo "name=$PROJECT_NAME" >> "$GITHUB_OUTPUT"
+          echo "Found Pages project: $PROJECT_NAME"
+
+      - name: Deploy static landing
+        id: deploy
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx --yes wrangler@latest pages deploy cloudflare-landing \
+            --project-name="${{ steps.project.outputs.name }}" \
+            --branch=main \
+            --commit-hash="$GITHUB_SHA"
+
+      - name: Record Pages deploy status
+        if: always()
+        run: |
+          printf 'commit=%s\noutcome=%s\nrun_id=%s\nproject=%s\n' \
+            "$GITHUB_SHA" \
+            "${{ steps.deploy.outcome }}" \
+            "$GITHUB_RUN_ID" \
+            "${{ steps.project.outputs.name }}" \
+            > .github/cloudflare-pages-deploy-status.txt
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '4189826+github-actions[bot]@users.noreply.github.com'
+          git add .github/cloudflare-pages-deploy-status.txt
+          git diff --cached --quiet || git commit -m 'chore: record Pages deploy status [skip ci]'
+          git push
+
+      - name: Fail if deploy failed
+        if: steps.deploy.outcome != 'success'
+        run: exit 1
