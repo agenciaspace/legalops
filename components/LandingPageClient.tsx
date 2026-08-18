@@ -121,8 +121,17 @@ const sourceLabels: Record<string, string> = {
   lever: 'Lever',
   workable: 'Workable',
   gupy: 'Gupy',
-  firecrawl: 'Firecrawl',
-  company_site: 'Company site',
+  ashby: 'Ashby',
+  jooble: 'Jooble',
+  adzuna: 'Adzuna',
+  company_site: 'Site da empresa',
+  linkedin: 'LinkedIn',
+  indeed: 'Indeed',
+  cloc: 'CLOC',
+  legalio: 'Legal.io',
+  legaloperators: 'Legal Operators',
+  goinhouse: 'GoInhouse',
+  firecrawl: 'Firecrawl (legado)',
 }
 
 function remoteLabel(remoteReality: string | null, locale: LandingLocale) {
