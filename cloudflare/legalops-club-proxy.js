@@ -1,3 +1,4 @@
+// Deployed automatically from main via GitHub Actions.
 const UPSTREAM_ORIGIN = 'https://legalops.work'
 
 export default {
