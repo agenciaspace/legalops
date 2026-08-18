@@ -8,7 +8,7 @@ import { COMMUNITY_CATEGORIES } from '@/lib/community'
 
 export const metadata: Metadata = {
   title: 'Sobre — legalops.club',
-  description: 'Como funcionam as comunidades, os encontros, os resumos e o acesso ao legalops.club.',
+  description: 'Comunidade para profissionais do jurídico trocarem práticas sobre Legal Ops, Legal Tech, contratos, processos, dados, tecnologia, gestão e carreira.',
 }
 
 const roundedFont = { fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }
@@ -28,13 +28,13 @@ const topicKeys = [
 ]
 
 const membershipIncludes = [
-  { title: 'Grupos temáticos', description: 'Cada frente de trabalho tem um feed próprio para perguntas, respostas e referências.' },
-  { title: 'Participação', description: 'Membros podem publicar, comentar, reagir e acompanhar as discussões de cada grupo.' },
-  { title: 'Encontros ao vivo', description: 'A equipe agenda encontros para assuntos que precisam de demonstração ou de mais tempo.' },
-  { title: 'Resumo semanal', description: 'A IA agrupa os argumentos e mantém os links para as discussões e referências citadas.' },
-  { title: 'Diretório de membros', description: 'Os perfis verificados ajudam a identificar quem participa das conversas.' },
-  { title: 'Vagas para o seu perfil', description: 'Os crawlers do LegalOps Work encontram vagas. O Club compara cada uma com seus objetivos, competências e modelo de trabalho.' },
-  { title: 'Ajustes de currículo', description: 'Cada alerta mostra termos da vaga que já aparecem no seu perfil e pontos que merecem um exemplo mais concreto no CV.' },
+  { title: 'Grupos temáticos', description: 'Cada frente da operação jurídica tem um feed próprio para perguntas, respostas, referências, playbooks e benchmarks.' },
+  { title: 'Participação', description: 'Membros podem publicar, comentar, reagir e acompanhar discussões sobre problemas que aparecem no trabalho jurídico real.' },
+  { title: 'Encontros ao vivo', description: 'Encontros para demonstrações, casos práticos e conversas que precisam de mais contexto do que um post.' },
+  { title: 'Resumo semanal', description: 'A IA organiza os principais argumentos e mantém os links para as discussões, materiais e referências citadas.' },
+  { title: 'Diretório de membros', description: 'Perfis verificados ajudam a encontrar quem trabalha com temas, ferramentas e contextos jurídicos semelhantes aos seus.' },
+  { title: 'Vagas para o seu perfil', description: 'O LegalOps Work encontra oportunidades em Legal Ops, Legal Tech, contratos, dados e operações e compara cada uma com o seu perfil.' },
+  { title: 'Ajustes de currículo', description: 'Cada alerta destaca requisitos presentes na vaga e pontos do seu histórico que merecem exemplos mais concretos no CV.' },
 ]
 
 const checkoutEnvironmentKeys: Record<string, string | undefined> = {
@@ -61,10 +61,10 @@ export default function ClubAboutPage() {
               <Sparkles className="h-3.5 w-3.5 text-[#E88A6A]" /> SOBRE O CLUB
             </div>
             <h1 className="mt-6 max-w-[850px] text-4xl font-semibold leading-[1.02] tracking-[-0.055em] sm:text-6xl" style={roundedFont}>
-              Legal Ops fica melhor quando ninguém precisa construir sozinho<span className="text-[#E88A6A]">.</span>
+              Um lugar para quem quer fazer o jurídico funcionar melhor<span className="text-[#E88A6A]">.</span>
             </h1>
             <p className="mt-7 max-w-3xl text-base leading-7 text-[#625E59] sm:text-lg sm:leading-8">
-              O legalops.club reúne profissionais para trocar experiências reais sobre processos, tecnologia, dados, contratos, fornecedores, estratégia e carreira.
+              O legalops.club reúne profissionais de departamentos jurídicos, escritórios, Legal Ops e Legal Tech para trocar experiências reais sobre contratos, processos, dados, tecnologia, fornecedores, conhecimento, estratégia e carreira.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link href="/club#comunidades" className="inline-flex items-center gap-2 rounded-full bg-[#111111] px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#2A2927]">
@@ -81,9 +81,9 @@ export default function ClubAboutPage() {
           <div className="mx-auto grid max-w-[980px] gap-12 lg:grid-cols-[0.72fr_1.28fr]">
             <div>
               <p className="text-[11px] font-bold tracking-[0.14em] text-[#C9684F]">COMO FUNCIONA</p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em]" style={roundedFont}>Uma assinatura. Várias formas de participar.</h2>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em]" style={roundedFont}>Uma assinatura para aprender, trocar e avançar no trabalho jurídico.</h2>
               <p className="mt-5 text-sm leading-7 text-[#69635E]">
-                O perfil profissional organiza sua participação no Club e também configura os alertas de vagas. Cargos, temas, ferramentas e preferências podem ser atualizados quando quiser.
+                Seu perfil organiza os temas que você acompanha, conecta você a profissionais com desafios semelhantes e também configura alertas de oportunidades. Cargo, competências, ferramentas e preferências podem ser atualizados quando quiser.
               </p>
             </div>
 
@@ -102,12 +102,12 @@ export default function ClubAboutPage() {
         <section className="border-b border-[#CEC8BD] bg-[#111111] px-5 py-16 text-white sm:px-8 sm:py-20">
           <div className="mx-auto max-w-[980px]">
             <p className="text-[11px] font-bold tracking-[0.14em] text-[#E88A6A]">UM PERFIL, TRÊS CAMADAS</p>
-            <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.045em] sm:text-4xl" style={roundedFont}>Perfil, comunidade e oportunidades conectados.</h2>
+            <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.045em] sm:text-4xl" style={roundedFont}>Conhecimento, comunidade e oportunidades no mesmo contexto.</h2>
             <div className="mt-10 grid gap-3 md:grid-cols-3">
               {[
-                ['01', 'perfil', 'Informe o que você faz e procura', 'Cargo, temas, competências, ferramentas, localidades e modelo de trabalho.'],
-                ['02', 'comunidades', 'Participe dos grupos relacionados', 'Discussões, referências e encontros aprofundam os temas que fazem parte da sua rotina.'],
-                ['03', 'vagas', 'Receba comparação com o seu CV', 'Os alertas mostram aderência e ajudam a identificar pontos do perfil que merecem exemplos melhores.'],
+                ['01', 'perfil', 'Mostre o que você faz e quer aprender', 'Cargo, temas, competências, ferramentas, localidades e modelo de trabalho.'],
+                ['02', 'comunidades', 'Entre nas conversas que ajudam no seu trabalho', 'Discussões, referências e encontros sobre problemas de operação, tecnologia, contratos e gestão jurídica.'],
+                ['03', 'vagas', 'Compare oportunidades com o seu perfil', 'Os alertas mostram aderência e ajudam a identificar pontos do histórico que merecem exemplos melhores.'],
               ].map(([number, label, title, description]) => (
                 <div key={label} className="rounded-[22px] border border-white/10 bg-white/[0.035] p-5">
                   <span className="text-[10px] font-bold tracking-[0.12em] text-[#E88A6A]">{number} {label.toUpperCase()}</span>
@@ -123,8 +123,8 @@ export default function ClubAboutPage() {
           <div className="mx-auto grid max-w-[980px] gap-10 md:grid-cols-[0.72fr_1.28fr]">
             <div>
               <p className="text-[11px] font-bold tracking-[0.14em] text-[#C9684F]">ASSUNTOS</p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em]" style={roundedFont}>Dez comunidades no lançamento.</h2>
-              <p className="mt-5 text-sm leading-7 text-[#69635E]">A estrutura acompanha o trabalho real e pode evoluir conforme o uso da comunidade.</p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.045em]" style={roundedFont}>Comunidades organizadas em torno do trabalho jurídico real.</h2>
+              <p className="mt-5 text-sm leading-7 text-[#69635E]">A estrutura começa com dez frentes e evolui conforme os problemas, ferramentas e práticas discutidos pelos membros.</p>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               {topicKeys.map((key, index) => (
