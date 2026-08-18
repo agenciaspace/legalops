@@ -13,6 +13,11 @@ export type RawJob = {
   accepts_brazil?: boolean
 }
 
+export type JobEligibility = {
+  eligible: boolean
+  reason: 'eligible' | 'location_not_supported' | 'brazil_eligibility_not_confirmed' | 'title_not_legal_ops'
+}
+
 export interface ScrapeAllBoardsResult {
   jobs: RawJob[]
   discoverySource: 'firecrawl' | 'legacy' | 'combined'
@@ -127,12 +132,24 @@ const FIRECRAWL_EXTRACT_SCHEMA = {
 export const COMPANY_SLUGS = {
   greenhouse: [
     'nubank', 'vtex', 'gympass', 'stripe', 'cloudflare', 'databricks',
-    'brex', 'verkada', 'hive', 'harbor', 'airtable', 'figma',
+    'brex', 'verkada', 'harbor', 'airtable', 'figma',
   ],
-  lever: [] as string[],
+  // Lever exposes a complete active-postings feed per company. Keep this list
+  // deterministic and configurable instead of relying only on discovery AI.
+  lever: ['hive'] as string[],
   workable: [] as string[],
   gupy: [] as string[],
 } as const
+
+export function getConfiguredBoardSlugs(board: keyof typeof COMPANY_SLUGS): string[] {
+  const envName = `LEGALOPS_${board.toUpperCase()}_SLUGS`
+  const configured = process.env[envName]
+    ?.split(',')
+    .map(value => value.trim().toLowerCase())
+    .filter(Boolean)
+
+  return configured && configured.length > 0 ? configured : [...COMPANY_SLUGS[board]]
+}
 
 function cleanString(value: unknown): string | null {
   if (typeof value !== 'string') return null
@@ -233,6 +250,31 @@ export function matchesTargetMarket(location: string | null | undefined): boolea
     .toLowerCase()
 
   return /\b(?:brazil|brasil|latam|latin america|south america|sao paulo|rio de janeiro|belo horizonte|brasilia|curitiba|porto alegre|florianopolis|recife|salvador|fortaleza|goiania|campinas|manaus|sp|rj|mg|df|pr|rs|sc|pe|ba|ce|go|am)\b/.test(normalized)
+}
+
+export function evaluateJobEligibility(job: {
+  title: string
+  location?: string | null
+  accepts_brazil?: boolean
+}): JobEligibility {
+  if (!matchesLegalOpsTitle(job.title)) {
+    return { eligible: false, reason: 'title_not_legal_ops' }
+  }
+
+  if (job.accepts_brazil === true || matchesTargetMarket(job.location)) {
+    return { eligible: true, reason: 'eligible' }
+  }
+
+  return {
+    eligible: false,
+    reason: job.location ? 'location_not_supported' : 'brazil_eligibility_not_confirmed',
+  }
+}
+
+export function extractStoredLocation(rawDescription: string | null | undefined): string | null {
+  if (!rawDescription) return null
+  const match = rawDescription.match(/^LOCATION:\s*(.+)$/im)
+  return match?.[1]?.trim() || null
 }
 
 export function inferSourceBoardFromUrl(url: string): SourceBoard {
@@ -561,25 +603,25 @@ interface BoardTask {
 
 export async function scrapeLegacyBoards(): Promise<RawJob[]> {
   const tasks: BoardTask[] = [
-    ...COMPANY_SLUGS.greenhouse.map(slug => ({
+    ...getConfiguredBoardSlugs('greenhouse').map(slug => ({
       board: 'greenhouse',
       slug,
       url: `https://boards-api.greenhouse.io/v1/boards/${slug}/jobs?content=true`,
       parse: parseGreenhouseJobs,
     })),
-    ...COMPANY_SLUGS.lever.map(slug => ({
+    ...getConfiguredBoardSlugs('lever').map(slug => ({
       board: 'lever',
       slug,
       url: `https://api.lever.co/v0/postings/${slug}?mode=json`,
       parse: parseLeverJobs,
     })),
-    ...COMPANY_SLUGS.workable.map(slug => ({
+    ...getConfiguredBoardSlugs('workable').map(slug => ({
       board: 'workable',
       slug,
       url: `https://${slug}.workable.com/api/v1/jobs`,
       parse: parseWorkableJobs,
     })),
-    ...COMPANY_SLUGS.gupy.map(slug => ({
+    ...getConfiguredBoardSlugs('gupy').map(slug => ({
       board: 'gupy',
       slug,
       url: `https://${slug}.gupy.io/api/job-openings`,

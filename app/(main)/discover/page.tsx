@@ -116,6 +116,7 @@ export default async function DiscoverPage() {
     .select('*')
     .eq('enrichment_status', 'done')
     .eq('url_status', 'live')
+    .eq('eligibility_status', 'eligible')
     .not('url_checked_at', 'is', null)
     .order('created_at', { ascending: false })
     .limit(20)

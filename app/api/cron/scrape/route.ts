@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import {
   buildJobDiscoverySeed,
   canonicalizeJobUrl,
+  evaluateJobEligibility,
+  extractStoredLocation,
   fetchJobDescription,
   mapWithConcurrency,
   scrapeAllBoards,
@@ -84,13 +86,51 @@ export async function GET(req: NextRequest) {
     )
     const { data: existingJobs, error: existingJobsError } = await supabase
       .from('jobs')
-      .select('id, url, created_at, posted_at, url_checked_at')
+      .select('id, url, title, raw_description, location, accepts_brazil, eligibility_status, url_status, created_at, posted_at, url_checked_at')
 
     if (existingJobsError) throw existingJobsError
 
     const existingByUrl = new Map<string, NonNullable<typeof existingJobs>[number]>()
     for (const existingJob of existingJobs ?? []) {
       existingByUrl.set(canonicalizeJobUrl(existingJob.url).toLowerCase(), existingJob)
+    }
+
+    // Reconcile older rows against the same title/location policy used for
+    // newly discovered jobs. This removes stale foreign roles that predate
+    // the stricter Brazil/LATAM filter.
+    const eligibilityResults = await mapWithConcurrency(existingJobs ?? [], 6, async existingJob => {
+      let location = existingJob.location ?? extractStoredLocation(existingJob.raw_description)
+      let rawDescription = existingJob.raw_description
+
+      // Older rows may not have the discovery metadata. Fetch once so they
+      // can be classified instead of remaining permanently visible as pending.
+      if (!location && existingJob.url_status !== 'dead') {
+        const fetched = await fetchJobDescription(existingJob.url)
+        location = extractStoredLocation(fetched.description)
+        rawDescription = fetched.description || rawDescription
+      }
+
+      const eligibility = evaluateJobEligibility({
+        title: existingJob.title,
+        location,
+        accepts_brazil: existingJob.accepts_brazil === true,
+      })
+
+      const { error } = await supabase
+        .from('jobs')
+        .update({
+          ...(location ? { location } : {}),
+          ...(rawDescription !== existingJob.raw_description ? { raw_description: rawDescription } : {}),
+          eligibility_status: eligibility.eligible ? 'eligible' : 'rejected',
+          eligibility_reason: eligibility.reason,
+        })
+        .eq('id', existingJob.id)
+
+      if (error) throw error
+    })
+
+    for (const result of eligibilityResults) {
+      if (result.status === 'rejected') summary.failed++
     }
 
     const seenExistingJobs = jobs.flatMap(job => {
@@ -103,8 +143,14 @@ export async function GET(req: NextRequest) {
       const refresh: Record<string, unknown> = {
         url_status: urlStatus,
         url_checked_at: observedAt,
+        last_seen_at: observedAt,
       }
       if (pair.discoveredJob.posted_at) refresh.posted_at = pair.discoveredJob.posted_at
+      if (pair.discoveredJob.location) refresh.location = pair.discoveredJob.location
+      refresh.accepts_brazil = pair.discoveredJob.accepts_brazil === true
+      const eligibility = evaluateJobEligibility(pair.discoveredJob)
+      refresh.eligibility_status = eligibility.eligible ? 'eligible' : 'rejected'
+      refresh.eligibility_reason = eligibility.reason
 
       const { error } = await supabase
         .from('jobs')
@@ -164,6 +210,11 @@ export async function GET(req: NextRequest) {
           url_status: urlStatus,
           url_checked_at: observedAt,
           posted_at: job.posted_at ?? null,
+          location: job.location ?? null,
+          accepts_brazil: job.accepts_brazil === true,
+          eligibility_status: 'eligible',
+          eligibility_reason: 'eligible',
+          last_seen_at: observedAt,
           ...salaryData,
         })
 

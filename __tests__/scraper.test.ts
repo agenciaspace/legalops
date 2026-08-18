@@ -5,6 +5,8 @@ import {
   canonicalizeJobUrl,
   classifyJobUrlStatus,
   extractFirecrawlJobsFromPayload,
+  evaluateJobEligibility,
+  extractStoredLocation,
   filterByKeywords,
   inferSourceBoardFromUrl,
   mapWithConcurrency,
@@ -13,6 +15,7 @@ import {
   normalizeFirecrawlJobListing,
   parseGreenhouseJobs,
   parseLeverJobs,
+  getConfiguredBoardSlugs,
   shouldExpireUnseenJob,
 } from '@/lib/scraper'
 
@@ -112,6 +115,33 @@ describe('matchesTargetMarket', () => {
     expect(matchesTargetMarket('Bengaluru')).toBe(false)
     expect(matchesTargetMarket('Remote - US only')).toBe(false)
     expect(matchesTargetMarket(null)).toBe(false)
+  })
+})
+
+describe('job eligibility', () => {
+  it('rejects foreign onsite roles even when the title matches', () => {
+    expect(evaluateJobEligibility({
+      title: 'Legal Operations Analyst',
+      location: 'San Francisco',
+    })).toEqual({ eligible: false, reason: 'location_not_supported' })
+  })
+
+  it('accepts explicit Brazil eligibility for a global role', () => {
+    expect(evaluateJobEligibility({
+      title: 'Legal Operations Analyst',
+      location: 'Remote',
+      accepts_brazil: true,
+    })).toEqual({ eligible: true, reason: 'eligible' })
+  })
+
+  it('recovers location from the stored discovery metadata', () => {
+    expect(extractStoredLocation('TITLE: Legal Operations Analyst\nLOCATION: San Francisco\n')).toBe('San Francisco')
+  })
+})
+
+describe('configured ATS boards', () => {
+  it('includes the deterministic Hive Lever board by default', () => {
+    expect(getConfiguredBoardSlugs('lever')).toContain('hive')
   })
 })
 
