@@ -4,12 +4,14 @@ import { hasActiveClubAccess } from '@/lib/community'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const hostname = (request.headers.get('host') ?? '').split(':')[0]
+  const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim()
+  const hostname = (forwardedHost || request.headers.get('host') || '').split(':')[0]
   const isClubDomain = hostname === 'legalops.club'
     || hostname === 'www.legalops.club'
     || hostname === 'legalops.legalops.club'
 
   // Keep legalops.work as the job platform while legalops.club gets its own home.
+  // x-forwarded-host is honored so the Cloudflare Club proxy keeps the correct product context.
   if (isClubDomain && pathname === '/') {
     const clubUrl = request.nextUrl.clone()
     clubUrl.pathname = '/club'
