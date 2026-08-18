@@ -9,10 +9,10 @@ import { CLUB_LAUNCH_TIERS, formatBRL } from '@/lib/club-pricing'
 export const metadata: Metadata = {
   title: 'legalops.club — a comunidade de Legal Operations',
   description:
-    'Uma comunidade para profissionais de Legal Ops se conectarem, compartilharem conhecimento e construírem juntos o futuro da função.',
+    'Comunidade para profissionais de departamentos jurídicos, escritórios, Legal Ops e Legal Tech trocarem práticas sobre contratos, processos, dados, tecnologia e gestão.',
   openGraph: {
     title: 'legalops.club',
-    description: 'connect. learn. build. — a comunidade de Legal Operations.',
+    description: 'conecte. aprenda. construa. — a comunidade para quem opera e transforma o jurídico.',
     url: 'https://legalops.club',
     siteName: 'legalops.club',
     type: 'website',
@@ -26,17 +26,17 @@ const pillars = [
   {
     icon: UsersRound,
     label: 'conecte',
-    text: 'Encontre profissionais que lidam com os mesmos desafios que você.',
+    text: 'Encontre pessoas que enfrentam os mesmos desafios em contratos, intake, dados, tecnologia e gestão jurídica.',
   },
   {
     icon: BookOpen,
     label: 'aprenda',
-    text: 'Troque frameworks, referências, ferramentas e experiências reais.',
+    text: 'Troque playbooks, benchmarks, templates, ferramentas e decisões tomadas em operações jurídicas reais.',
   },
   {
     icon: Network,
     label: 'construa',
-    text: 'Transforme conversa em prática e ajude a elevar o nível de Legal Ops.',
+    text: 'Leve as conversas para processos, automações e formas melhores de operar o jurídico.',
   },
 ]
 
@@ -68,7 +68,7 @@ export default function ClubLandingPage() {
               </h1>
 
               <p className="mt-7 max-w-[650px] text-base leading-7 text-[#625E59] sm:text-lg sm:leading-8">
-                Uma comunidade feita para quem está construindo Legal Ops na prática — com pessoas, processos, tecnologia e contexto real.
+                Uma comunidade para profissionais de departamentos jurídicos, escritórios, Legal Ops e Legal Tech que querem melhorar como o jurídico trabalha — na prática.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -87,11 +87,11 @@ export default function ClubLandingPage() {
               </div>
 
               <div className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-[#77716A]">
-                <span>comunidade</span>
+                <span>departamentos jurídicos</span>
                 <span className="h-1 w-1 rounded-full bg-[#E88A6A]" />
-                <span>conhecimento</span>
+                <span>escritórios</span>
                 <span className="h-1 w-1 rounded-full bg-[#E88A6A]" />
-                <span>conexão</span>
+                <span>legal ops & tech</span>
               </div>
             </div>
 
@@ -108,7 +108,7 @@ export default function ClubLandingPage() {
                       accentClassName="text-[#E88A6A]"
                     />
                     <p className="mt-5 max-w-[340px] text-sm leading-6 text-white/65">
-                      O ponto de encontro para operadores, builders e pessoas que estão transformando o jurídico.
+                      O ponto de encontro para quem opera, lidera ou moderniza o jurídico.
                     </p>
                   </div>
 
@@ -146,10 +146,10 @@ export default function ClubLandingPage() {
           <div className="mx-auto max-w-[720px] text-center">
             <p className="text-[11px] font-bold tracking-[0.16em] text-[#C9684F]">ENCONTRE A SUA CONVERSA</p>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.05em] sm:text-5xl" style={roundedFont}>
-              Comunidades para o trabalho real.
+              Comunidades para o trabalho jurídico real.
             </h2>
             <p className="mx-auto mt-4 max-w-[610px] text-sm leading-6 text-[#6A655F] sm:text-base sm:leading-7">
-              Entre pelo assunto que mais importa agora. IA, contratos, dados, processos, fornecedores, estratégia, carreira e muito mais.
+              IA e automação, contratos e CLM, dados e métricas, intake, fornecedores, conhecimento, estratégia, carreira e outros temas que fazem parte da operação jurídica.
             </p>
           </div>
 
@@ -183,7 +183,7 @@ export default function ClubLandingPage() {
             <div>
               <p className="text-[11px] font-bold tracking-[0.14em] text-[#E88A6A]">LEGALOPS.CLUB</p>
               <h2 className="mt-3 max-w-[650px] text-2xl font-semibold tracking-[-0.045em] sm:text-4xl" style={roundedFont}>
-                Legal Ops fica melhor quando ninguém precisa construir sozinho.
+                O jurídico evolui mais rápido quando quem opera não precisa resolver tudo sozinho.
               </h2>
             </div>
             <Link
