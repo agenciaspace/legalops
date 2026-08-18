@@ -7,10 +7,10 @@ const professionalPlans = [
     name: 'Free',
     price: '$0',
     period: '/mês',
-    description: 'Para quem está começando na área de Legal Ops.',
+    description: 'Para descobrir oportunidades e construir presença profissional em Legal Ops e áreas próximas.',
     features: [
       'Perfil profissional público',
-      'Descoberta de vagas (feed básico)',
+      'Descoberta de vagas em operações jurídicas',
       '1 alias de email',
       'Acesso ao diretório de profissionais',
     ],
@@ -22,16 +22,16 @@ const professionalPlans = [
     name: 'Pro',
     price: '$29',
     period: '/mês',
-    description: 'Para profissionais que querem acelerar a carreira.',
+    description: 'Para quem está se movimentando para uma nova função no jurídico.',
     features: [
       'Tudo do Free +',
-      'Pipeline completo (Kanban)',
+      'Pipeline completo de candidaturas',
       '10 aliases de email',
-      'AI Interview Prep ilimitado',
-      'AI Cover Letter ilimitado',
-      'Alertas personalizados de vagas',
+      'Preparação para entrevistas com IA',
+      'Carta de apresentação orientada à vaga',
+      'Alertas personalizados de oportunidades',
       'Perfil destacado no diretório',
-      'Match score automático com vagas',
+      'Aderência automática entre perfil e vaga',
     ],
     cta: 'Assinar Pro',
     href: '/login',
@@ -41,15 +41,15 @@ const professionalPlans = [
     name: 'Expert',
     price: '$99',
     period: '/mês',
-    description: 'Para líderes e referências do mercado.',
+    description: 'Para líderes e especialistas que querem ampliar sua presença no ecossistema jurídico.',
     features: [
       'Tudo do Pro +',
-      'Publicação de artigos/insights',
+      'Publicação de artigos e insights',
       'Aliases de email ilimitados',
-      'AI Agent pessoal de pesquisa',
+      'Agente pessoal de pesquisa de mercado',
       'Selo "Expert" verificado',
-      'Acesso antecipado a vagas premium',
-      'Convite para eventos exclusivos',
+      'Acesso antecipado a oportunidades premium',
+      'Convites para eventos exclusivos',
     ],
     cta: 'Assinar Expert',
     href: '/login',
@@ -62,13 +62,13 @@ const employerPlans = [
     name: 'Job Post',
     price: '$299',
     period: '/vaga',
-    description: 'Publique vagas e alcance profissionais qualificados.',
+    description: 'Publique uma oportunidade para profissionais de Legal Ops, Legal Tech e operações jurídicas.',
     features: [
       'Publicação de 1 vaga',
       'Visibilidade por 30 dias',
       'Até 50 candidatos',
-      'Descrição enriquecida com IA',
-      'Match automático básico',
+      'Descrição revisada para clareza',
+      'Aderência básica por perfil',
     ],
     cta: 'Publicar vaga',
     href: '/for-employers',
@@ -78,11 +78,11 @@ const employerPlans = [
     name: 'Talent Access',
     price: '$999',
     period: '/mês',
-    description: 'Acesso completo ao pool de talentos de Legal Ops.',
+    description: 'Acesso contínuo a profissionais que trabalham na transformação do jurídico.',
     features: [
       'Vagas ilimitadas',
-      'Match automático com IA avançada',
-      'Filtros avançados de candidatos',
+      'Aderência avançada por perfil',
+      'Filtros por competências e ferramentas',
       'Contato direto com profissionais',
       'Dashboard de métricas',
       'Integração com ATS',
@@ -95,12 +95,12 @@ const employerPlans = [
     name: 'Enterprise',
     price: 'Custom',
     period: '',
-    description: 'Para grandes operações de recrutamento jurídico.',
+    description: 'Para organizações com contratação recorrente em jurídico, Legal Ops e Legal Tech.',
     features: [
       'Tudo do Talent Access +',
       'API de integração',
       'Account manager dedicado',
-      'Employer branding page',
+      'Página de employer branding',
       'Analytics avançado',
       'SLA de suporte',
     ],
@@ -195,17 +195,15 @@ export default function PricingPage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-16">
-        {/* Hero */}
         <div className="text-center">
           <h1 className="text-4xl font-semibold tracking-[-0.05em] sm:text-5xl" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>
-            Planos para cada fase da sua carreira
+            Ferramentas para construir sua carreira no jurídico moderno
           </h1>
-          <p className="mt-4 text-lg text-[#625E59]">
-            De profissional iniciante a líder referência em Legal Ops.
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#625E59]">
+            Para profissionais de Legal Ops, Legal Tech, contratos, dados e operações — e para as organizações que querem encontrá-los.
           </p>
         </div>
 
-        {/* Professional Plans */}
         <section className="mt-12">
           <h2 className="text-center text-xs font-bold uppercase tracking-widest text-[#C9684F]">
             Para Profissionais
@@ -217,13 +215,12 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Employer Plans */}
         <section className="mt-20">
           <h2 className="text-center text-xs font-bold uppercase tracking-widest text-[#C9684F]">
             Para Empresas
           </h2>
           <p className="mt-2 text-center text-lg text-[#625E59]">
-            Encontre os melhores profissionais de Legal Ops do mercado.
+            Encontre pessoas que sabem operar, modernizar e escalar o trabalho jurídico.
           </p>
           <div className="mt-6 grid gap-6 md:grid-cols-3">
             {employerPlans.map((plan) => (
@@ -232,13 +229,12 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* FAQ / CTA */}
         <section className="mt-20 rounded-[26px] border border-[#CEC8BD] bg-[#FAF7F1] px-6 py-8 text-center sm:px-8">
           <h2 className="text-3xl font-semibold tracking-[-0.04em]" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>
-            Comece grátis. Evolua quando quiser.
+            Comece pelo que você precisa agora.
           </h2>
           <p className="mt-3 text-[#625E59]">
-            Sem compromisso. Cancele a qualquer momento.
+            Descubra vagas, organize sua busca e evolua conforme sua carreira ou contratação exigir.
           </p>
           <Link
             href="/login"
