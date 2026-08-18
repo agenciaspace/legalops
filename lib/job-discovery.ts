@@ -54,6 +54,12 @@ export interface JobDiscoveryOptions {
   adzunaAppKey?: string | null
 }
 
+interface SourceOutcome {
+  ok: boolean
+  jobs: DiscoveredJob[]
+  error?: string
+}
+
 const DEFAULT_ASHBY_BOARDS = [
   'enter-ai',
   'ethereum-foundation',
@@ -89,7 +95,7 @@ function envList(name: string, fallback: readonly string[]): string[] {
     ?.split(',')
     .map(value => value.trim())
     .filter(Boolean)
-  return configured && configured.length > 0 ? configured : [...fallback]
+  return configured && configured.length > 0 ? configured : Array.from(fallback)
 }
 
 function eligibleTitle(title: string): boolean {
@@ -105,7 +111,7 @@ function cleanUrl(value: unknown, base?: string): string | null {
   if (!raw) return null
   try {
     const url = base ? new URL(raw, base) : new URL(raw)
-    if (!['http:', 'https:'].includes(url.protocol)) return null
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
     return canonicalizeJobUrl(url.toString())
   } catch {
     return null
@@ -137,13 +143,13 @@ async function fetchText(url: string): Promise<{ text: string; finalUrl: string 
 }
 
 async function fetchJson(url: string, init?: RequestInit): Promise<unknown> {
+  const headers = new Headers(init?.headers)
+  headers.set('User-Agent', 'LegalOpsWork/2.0 (+https://legalops.work)')
+  if (!headers.has('Accept')) headers.set('Accept', 'application/json')
+
   const response = await fetch(url, {
     ...init,
-    headers: {
-      'User-Agent': 'LegalOpsWork/2.0 (+https://legalops.work)',
-      Accept: 'application/json',
-      ...(init?.headers ?? {}),
-    },
+    headers,
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
   if (!response.ok) {
@@ -166,12 +172,12 @@ function dedupe(jobs: DiscoveredJob[]): DiscoveredJob[] {
       })
     }
   }
-  return [...seen.values()]
+  return Array.from(seen.values())
 }
 
 function formatLocation(parts: Array<string | null | undefined>): string | null {
   const cleaned = parts.map(part => part?.trim()).filter(Boolean) as string[]
-  return cleaned.length > 0 ? [...new Set(cleaned)].join(', ') : null
+  return cleaned.length > 0 ? Array.from(new Set(cleaned)).join(', ') : null
 }
 
 function salaryFromAshby(job: Record<string, unknown>): string | null {
@@ -196,7 +202,7 @@ export function parseAshbyJobs(payload: unknown, board: string): DiscoveredJob[]
           .filter((value): value is string => Boolean(value))
       : []
     const primaryLocation = cleanString(job.location)
-    const location = formatLocation([primaryLocation, ...secondary])
+    const location = formatLocation([primaryLocation].concat(secondary))
     const description = cleanString(job.descriptionPlain) ?? ''
     const remote = job.isRemote === true || job.workplaceType === 'Remote'
     const acceptsBrazil = locationAcceptsBrazil(location, remote ? description : '')
@@ -343,9 +349,11 @@ export async function scrapeAdzuna(appId: string | null | undefined, appKey: str
   return dedupe(parseAdzunaJobs(await fetchJson(url.toString())))
 }
 
-function arrayify<T>(value: T | T[] | null | undefined): T[] {
-  if (value == null) return []
-  return Array.isArray(value) ? value : [value]
+function objectArray(value: unknown): Record<string, unknown>[] {
+  if (Array.isArray(value)) {
+    return value.filter(item => Boolean(item) && typeof item === 'object') as Record<string, unknown>[]
+  }
+  return value && typeof value === 'object' ? [value as Record<string, unknown>] : []
 }
 
 function flattenJsonLd(value: unknown): Record<string, unknown>[] {
@@ -353,42 +361,40 @@ function flattenJsonLd(value: unknown): Record<string, unknown>[] {
   if (!value || typeof value !== 'object') return []
   const object = value as Record<string, unknown>
   const nested = Array.isArray(object['@graph']) ? flattenJsonLd(object['@graph']) : []
-  return [object, ...nested]
+  return [object].concat(nested)
 }
 
 function typeIncludesJobPosting(value: unknown): boolean {
-  return arrayify(value as string | string[]).some(type => String(type).toLowerCase() === 'jobposting')
+  const values = Array.isArray(value) ? value : [value]
+  return values.some(type => String(type).toLowerCase() === 'jobposting')
 }
 
 function jsonLdLocation(posting: Record<string, unknown>): string | null {
-  const locations = arrayify(posting.jobLocation as Record<string, unknown> | Record<string, unknown>[])
   const values: string[] = []
-  for (const location of locations) {
-    if (!location || typeof location !== 'object') continue
-    const address = location.address as Record<string, unknown> | string | undefined
+
+  for (const location of objectArray(posting.jobLocation)) {
+    const address = location.address
     if (typeof address === 'string') {
       values.push(address)
       continue
     }
     if (address && typeof address === 'object') {
+      const record = address as Record<string, unknown>
       const formatted = formatLocation([
-        cleanString(address.addressLocality),
-        cleanString(address.addressRegion),
-        cleanString(address.addressCountry),
+        cleanString(record.addressLocality),
+        cleanString(record.addressRegion),
+        cleanString(record.addressCountry),
       ])
       if (formatted) values.push(formatted)
     }
   }
 
-  const applicantLocations = arrayify(posting.applicantLocationRequirements as Record<string, unknown> | Record<string, unknown>[])
-  for (const location of applicantLocations) {
-    if (location && typeof location === 'object') {
-      const name = cleanString(location.name)
-      if (name) values.push(name)
-    }
+  for (const location of objectArray(posting.applicantLocationRequirements)) {
+    const name = cleanString(location.name)
+    if (name) values.push(name)
   }
 
-  return values.length ? [...new Set(values)].join('; ') : null
+  return values.length ? Array.from(new Set(values)).join('; ') : null
 }
 
 function jsonLdSalary(posting: Record<string, unknown>): string | null {
@@ -401,12 +407,14 @@ function jsonLdSalary(posting: Record<string, unknown>): string | null {
   const min = typeof value.minValue === 'number' ? value.minValue : null
   const max = typeof value.maxValue === 'number' ? value.maxValue : null
   const exact = typeof value.value === 'number' ? value.value : null
-  const numbers = min != null || max != null ? [min, max].filter((item): item is number => item != null) : exact != null ? [exact] : []
+  const numbers = min != null || max != null
+    ? [min, max].filter((item): item is number => item != null)
+    : exact != null ? [exact] : []
   return numbers.length ? `${numbers.join(' - ')} ${currency}`.trim() : null
 }
 
 export function extractJobPostingsFromHtml(html: string, pageUrl: string): DiscoveredJob[] {
-  const scripts = [...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)]
+  const scripts = Array.from(html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi))
   const jobs: DiscoveredJob[] = []
 
   for (const match of scripts) {
@@ -454,15 +462,23 @@ export function extractJobPostingsFromHtml(html: string, pageUrl: string): Disco
 }
 
 function sitemapUrls(xml: string): string[] {
-  return [...xml.matchAll(/<loc>\s*([^<]+?)\s*<\/loc>/gi)]
+  return Array.from(xml.matchAll(/<loc>\s*([^<]+?)\s*<\/loc>/gi))
     .map(match => match[1].replace(/&amp;/g, '&').trim())
     .filter(Boolean)
 }
 
 function htmlLinks(html: string, baseUrl: string): string[] {
-  return [...html.matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*>/gi)]
+  return Array.from(html.matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*>/gi))
     .map(match => cleanUrl(match[1], baseUrl))
     .filter((value): value is string => Boolean(value))
+}
+
+function looksLikeJobUrl(value: string): boolean {
+  try {
+    return JOB_URL_HINT.test(new URL(value).pathname)
+  } catch {
+    return false
+  }
 }
 
 async function candidateUrlsForCareerSite(site: string): Promise<string[]> {
@@ -472,10 +488,9 @@ async function candidateUrlsForCareerSite(site: string): Promise<string[]> {
   try {
     const root = await fetchText(site)
     for (const link of htmlLinks(root.text, root.finalUrl)) {
-      if (JOB_URL_HINT.test(new URL(link).pathname)) candidates.add(link)
+      if (looksLikeJobUrl(link)) candidates.add(link)
     }
-    const jobsOnRoot = extractJobPostingsFromHtml(root.text, root.finalUrl)
-    if (jobsOnRoot.length) candidates.add(root.finalUrl)
+    if (extractJobPostingsFromHtml(root.text, root.finalUrl).length) candidates.add(root.finalUrl)
   } catch (error) {
     console.error(`[discovery] career root ${site} failed:`, error)
   }
@@ -488,35 +503,32 @@ async function candidateUrlsForCareerSite(site: string): Promise<string[]> {
     const pageUrls = rootUrls.filter(url => !/sitemap/i.test(url))
 
     for (const url of pageUrls) {
-      if (JOB_URL_HINT.test(new URL(url).pathname)) candidates.add(canonicalizeJobUrl(url))
+      if (looksLikeJobUrl(url)) candidates.add(canonicalizeJobUrl(url))
     }
 
     const childResults = await mapWithConcurrency(childSitemaps, 3, async url => sitemapUrls((await fetchText(url)).text))
     for (const result of childResults) {
       if (result.status !== 'fulfilled') continue
       for (const url of result.value) {
-        try {
-          if (JOB_URL_HINT.test(new URL(url).pathname)) candidates.add(canonicalizeJobUrl(url))
-        } catch {
-          // ignore malformed sitemap URLs
-        }
+        if (looksLikeJobUrl(url)) candidates.add(canonicalizeJobUrl(url))
       }
     }
   } catch (error) {
     console.error(`[discovery] sitemap ${siteUrl.origin} failed:`, error)
   }
 
-  return [...candidates].slice(0, SITE_URL_LIMIT)
+  return Array.from(candidates).slice(0, SITE_URL_LIMIT)
 }
 
 export async function scrapeCompanySites(): Promise<DiscoveredJob[]> {
   const sites = envList('LEGALOPS_CAREER_SITES', DEFAULT_CAREER_SITES)
   const candidateResults = await mapWithConcurrency(sites, 3, candidateUrlsForCareerSite)
-  const candidates = dedupe(
-    candidateResults.flatMap(result => result.status === 'fulfilled'
-      ? result.value.map(url => ({ title: url, url, source_board: 'company_site', company: url }))
-      : [])
-  ).map(job => job.url).slice(0, 60)
+  const candidateSet = new Set<string>()
+  for (const result of candidateResults) {
+    if (result.status !== 'fulfilled') continue
+    for (const url of result.value) candidateSet.add(url)
+  }
+  const candidates = Array.from(candidateSet).slice(0, 60)
 
   const pageResults = await mapWithConcurrency(candidates, 5, async url => {
     const page = await fetchText(url)
@@ -526,59 +538,58 @@ export async function scrapeCompanySites(): Promise<DiscoveredJob[]> {
   return dedupe(pageResults.flatMap(result => result.status === 'fulfilled' ? result.value : []))
 }
 
-function outcome<T>(result: PromiseSettledResult<T>, name: string, errors: string[]): { ok: boolean; value: T | null } {
-  if (result.status === 'fulfilled') return { ok: true, value: result.value }
-  const message = result.reason instanceof Error ? result.reason.message : String(result.reason)
-  errors.push(`${name}: ${message}`)
-  console.error(`[discovery] ${name} failed:`, message)
-  return { ok: false, value: null }
+async function safeSource(name: string, run: () => Promise<DiscoveredJob[]>): Promise<SourceOutcome> {
+  try {
+    return { ok: true, jobs: await run() }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(`[discovery] ${name} failed:`, message)
+    return { ok: false, jobs: [], error: `${name}: ${message}` }
+  }
 }
 
 export async function discoverJobs(options: JobDiscoveryOptions = {}): Promise<JobDiscoveryResult> {
-  const [legacyResult, ashbyResult, companyResult, joobleResult, adzunaResult] = await Promise.allSettled([
-    scrapeLegacyBoards(),
-    scrapeAshbyBoards(),
-    scrapeCompanySites(),
-    scrapeJooble(options.joobleApiKey),
-    scrapeAdzuna(options.adzunaAppId, options.adzunaAppKey),
+  const [legacy, ashby, company, jooble, adzuna] = await Promise.all([
+    safeSource('direct_ats', async () => (await scrapeLegacyBoards()).map(job => ({ ...job, source_board: String(job.source_board) }))),
+    safeSource('ashby', scrapeAshbyBoards),
+    safeSource('company_site', scrapeCompanySites),
+    safeSource('jooble', () => scrapeJooble(options.joobleApiKey)),
+    safeSource('adzuna', () => scrapeAdzuna(options.adzunaAppId, options.adzunaAppKey)),
   ])
 
-  const errors: string[] = []
-  const legacy = outcome(legacyResult, 'direct_ats', errors)
-  const ashby = outcome(ashbyResult, 'ashby', errors)
-  const company = outcome(companyResult, 'company_site', errors)
-  const jooble = outcome(joobleResult, 'jooble', errors)
-  const adzuna = outcome(adzunaResult, 'adzuna', errors)
+  const jobs = dedupe([].concat(
+    legacy.jobs as never[],
+    ashby.jobs as never[],
+    company.jobs as never[],
+    jooble.jobs as never[],
+    adzuna.jobs as never[],
+  ) as DiscoveredJob[])
 
-  const legacyJobs: DiscoveredJob[] = (legacy.value ?? []).map(job => ({ ...job, source_board: String(job.source_board) }))
-  const ashbyJobs = ashby.value ?? []
-  const companyJobs = company.value ?? []
-  const joobleJobs = jooble.value ?? []
-  const adzunaJobs = adzuna.value ?? []
-  const jobs = dedupe([...legacyJobs, ...ashbyJobs, ...companyJobs, ...joobleJobs, ...adzunaJobs])
-
-  const directCount = legacyJobs.length + ashbyJobs.length
-  const aggregatorCount = joobleJobs.length + adzunaJobs.length
-  const activeGroups = [directCount > 0, companyJobs.length > 0, aggregatorCount > 0].filter(Boolean).length
+  const directCount = legacy.jobs.length + ashby.jobs.length
+  const aggregatorCount = jooble.jobs.length + adzuna.jobs.length
+  const activeGroups = [directCount > 0, company.jobs.length > 0, aggregatorCount > 0].filter(Boolean).length
   const discoverySource = activeGroups > 1
     ? 'combined' as const
     : directCount > 0
       ? 'direct_ats' as const
-      : companyJobs.length > 0
+      : company.jobs.length > 0
         ? 'company_site' as const
         : aggregatorCount > 0
           ? 'aggregator' as const
           : 'none' as const
 
+  const errors = [legacy.error, ashby.error, company.error, jooble.error, adzuna.error]
+    .filter((value): value is string => Boolean(value))
+
   return {
     jobs,
     discoverySource,
     counts: {
-      legacy: legacyJobs.length,
-      ashby: ashbyJobs.length,
-      companySite: companyJobs.length,
-      jooble: joobleJobs.length,
-      adzuna: adzunaJobs.length,
+      legacy: legacy.jobs.length,
+      ashby: ashby.jobs.length,
+      companySite: company.jobs.length,
+      jooble: jooble.jobs.length,
+      adzuna: adzuna.jobs.length,
     },
     succeeded: {
       legacy: legacy.ok,
