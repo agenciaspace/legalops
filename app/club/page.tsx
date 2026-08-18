@@ -27,19 +27,65 @@ const pillars = [
   {
     icon: MessageCircle,
     label: 'converse',
-    text: 'Traga uma dúvida, um problema ou uma decisão e compare caminhos com quem vive desafios parecidos.',
+    text: 'Traga uma dúvida, um problema ou uma decisão e compare caminhos com quem enfrenta situações parecidas.',
   },
   {
     icon: BookOpen,
-    label: 'troque',
-    text: 'Compartilhe playbooks, benchmarks, templates, ferramentas e aprendizados de operações jurídicas reais.',
+    label: 'compartilhe',
+    text: 'Troque playbooks, benchmarks, templates, ferramentas e aprendizados de operações jurídicas reais.',
   },
   {
     icon: UsersRound,
-    label: 'conecte',
-    text: 'Encontre profissionais de departamentos jurídicos, escritórios, Legal Ops e Legal Tech.',
+    label: 'encontre pessoas',
+    text: 'Conheça profissionais de departamentos jurídicos, escritórios, Legal Ops e Legal Tech.',
   },
 ]
+
+function ClubProductPreview() {
+  const topics = [
+    ['contratos & CLM', 'processo, adoção e dados'],
+    ['IA & automação', 'casos de uso e governança'],
+    ['carreira', 'times, liderança e oportunidades'],
+  ]
+
+  return (
+    <div className="border border-[#BEB7AA] bg-[#FAF7F1]">
+      <div className="flex items-center justify-between border-b border-[#CEC8BD] px-4 py-3">
+        <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#C9684F]">preview do club</span>
+        <span className="text-[10px] font-semibold text-[#817A73]">comunidade + escritório</span>
+      </div>
+      <div className="grid sm:grid-cols-[1.06fr_.94fr]">
+        <div className="p-4 sm:border-r sm:border-[#CEC8BD]">
+          <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-[#817A73]">conversas</p>
+          <div className="mt-3 border-t border-[#CEC8BD]">
+            {topics.map(([title, copy], index) => (
+              <div key={title} className="grid grid-cols-[28px_1fr] gap-2 border-b border-[#E6DED0] py-3">
+                <span className="text-[9px] font-bold text-[#C9684F]">0{index + 1}</span>
+                <div>
+                  <p className="text-xs font-semibold text-[#111111]">{title}</p>
+                  <p className="mt-0.5 text-[10px] leading-4 text-[#817A73]">{copy}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="border-t border-[#CEC8BD] p-4 sm:border-t-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-[#817A73]">escritório virtual</p>
+          <div className="relative mt-3 h-[154px] overflow-hidden border border-[#D8D2C7] bg-[#EEE8DC]">
+            <div className="absolute left-[12%] top-[20%] h-7 w-14 border border-[#B6AEA1] bg-[#D6C8B8]" />
+            <div className="absolute right-[12%] top-[20%] h-7 w-14 border border-[#B6AEA1] bg-[#D6C8B8]" />
+            <div className="absolute bottom-[18%] left-[12%] h-7 w-14 border border-[#B6AEA1] bg-[#D6C8B8]" />
+            <div className="absolute bottom-[18%] right-[12%] h-7 w-14 border border-[#B6AEA1] bg-[#D6C8B8]" />
+            <div className="absolute left-[31%] top-[27%] flex h-7 w-7 items-center justify-center border-2 border-[#C9684F] bg-[#E88A6A] text-[8px] font-black text-[#111111]">LO</div>
+            <div className="absolute right-[30%] top-[44%] flex h-7 w-7 items-center justify-center border-2 border-[#111111] bg-[#F5F1E8] text-[8px] font-black">LT</div>
+            <div className="absolute bottom-[22%] left-[43%] flex h-7 w-7 items-center justify-center border-2 border-[#111111] bg-[#F5F1E8] text-[8px] font-black">JR</div>
+          </div>
+          <p className="mt-3 text-[10px] leading-4 text-[#69635E]">Entre, veja quem está por aqui e trabalhe em companhia sem precisar marcar uma call.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function ClubLandingPage() {
   const firstTier = CLUB_LAUNCH_TIERS[0]
@@ -50,95 +96,51 @@ export default function ClubLandingPage() {
       <ClubHeader active="communities" />
 
       <main>
-        <section className="relative overflow-hidden border-b border-[#CEC8BD]">
-          <div className="pointer-events-none absolute inset-0 opacity-50 [background-image:radial-gradient(rgba(17,17,17,.08)_0.7px,transparent_0.7px)] [background-size:20px_20px]" />
-          <div className="pointer-events-none absolute -right-24 -top-32 h-[420px] w-[420px] rounded-full border-[72px] border-[#E88A6A]/[0.08]" />
-
-          <div className="relative mx-auto grid max-w-[1180px] gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.08fr_.92fr] lg:items-center lg:gap-16 lg:py-28">
+        <section className="border-b border-[#CEC8BD]">
+          <div className="mx-auto grid max-w-[1180px] gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.03fr_.97fr] lg:items-center lg:gap-16 lg:py-28">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#CEC8BD] bg-white/55 px-3 py-1.5 text-[11px] font-bold tracking-[0.12em] text-[#66615B]">
-                <UsersRound className="h-3.5 w-3.5 text-[#E88A6A]" />
-                LEGALOPS.CLUB · COMUNIDADE
-              </div>
-
+              <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#C9684F]">legalops.club / comunidade</p>
               <h1
-                className="mt-7 max-w-[720px] text-[42px] font-semibold leading-[0.98] tracking-[-0.065em] sm:text-[64px] lg:text-[76px]"
+                className="mt-5 max-w-[720px] text-[42px] font-semibold leading-[0.98] tracking-[-0.065em] sm:text-[62px] lg:text-[72px]"
                 style={roundedFont}
               >
-                uma comunidade para quem faz o jurídico acontecer<span className="text-[#E88A6A]">.</span>
+                troque com quem vive os mesmos problemas do jurídico<span className="text-[#E88A6A]">.</span>
               </h1>
-
-              <p className="mt-7 max-w-[650px] text-base leading-7 text-[#625E59] sm:text-lg sm:leading-8">
-                Encontre profissionais do jurídico para trocar práticas, referências, ferramentas e experiências sobre o trabalho que acontece de verdade.
+              <p className="mt-6 max-w-[650px] text-base leading-7 text-[#625E59] sm:text-lg sm:leading-8">
+                Uma comunidade para profissionais do jurídico encontrarem pessoas, referências e experiências que ajudam no trabalho real — de contratos e dados a tecnologia, gestão e carreira.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="#comunidades"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#111111] px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#2A2927]"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#111111] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#2A2927]"
                 >
                   Explorar a comunidade <ArrowRight className="h-4 w-4" />
                 </a>
                 <Link
-                  href="/login?next=/community"
-                  className="inline-flex items-center justify-center rounded-full border border-[#CEC8BD] bg-white/55 px-5 py-3 text-sm font-bold text-[#111111] transition hover:bg-white"
+                  href="/login?next=/community/office"
+                  className="inline-flex items-center justify-center rounded-lg border border-[#BEB7AA] px-5 py-3 text-sm font-bold text-[#111111] transition hover:bg-[#FAF7F1]"
                 >
-                  Entrar no Club
+                  Conhecer o escritório virtual
                 </Link>
               </div>
-
-              <div className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-[#77716A]">
-                <span>departamentos jurídicos</span>
-                <span className="h-1 w-1 rounded-full bg-[#E88A6A]" />
-                <span>escritórios</span>
-                <span className="h-1 w-1 rounded-full bg-[#E88A6A]" />
-                <span>legal ops & tech</span>
-              </div>
             </div>
 
-            <div className="mx-auto w-full max-w-[500px] lg:mx-0 lg:ml-auto">
-              <div className="relative overflow-hidden rounded-[34px] border border-[#CEC8BD] bg-[#111111] p-7 text-white shadow-[0_30px_70px_rgba(17,17,17,0.16)] sm:p-9">
-                <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full border-[40px] border-white/[0.035]" />
-                <div className="absolute -bottom-20 -left-16 h-56 w-56 rounded-full border-[42px] border-[#E88A6A]/10" />
-
-                <div className="relative">
-                  <p className="text-[10px] font-bold tracking-[0.16em] text-[#E88A6A]">COMUNIDADE PARA O JURÍDICO</p>
-                  <div className="mt-12">
-                    <BrandWordmark
-                      suffix="club"
-                      inverse
-                      className="inline-flex items-baseline text-[35px] font-semibold leading-none tracking-[-0.055em] text-white sm:text-[43px]"
-                      accentClassName="text-[#E88A6A]"
-                    />
-                    <p className="mt-5 max-w-[350px] text-sm leading-6 text-white/65">
-                      Pessoas, conversas e repertório para quem quer operar melhor o jurídico.
-                    </p>
-                  </div>
-
-                  <div className="mt-10 grid grid-cols-3 gap-2 border-t border-white/10 pt-5 text-[10px] font-bold tracking-[0.14em] text-white/55 sm:text-xs">
-                    <span>CONVERSE</span>
-                    <span>TROQUE</span>
-                    <span>CONECTE</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ClubProductPreview />
           </div>
         </section>
 
         <LegalOpsEcosystem active="club" />
 
         <section className="border-b border-[#CEC8BD] bg-[#FAF7F1]">
-          <div className="mx-auto grid max-w-[1180px] gap-px px-5 py-10 sm:px-8 sm:py-14 md:grid-cols-3">
+          <div className="mx-auto grid max-w-[1180px] px-5 sm:px-8 md:grid-cols-3">
             {pillars.map(({ icon: Icon, label, text }, index) => (
               <div
                 key={label}
-                className={`py-6 md:px-8 md:py-4 ${index > 0 ? 'border-t border-[#E6DED0] md:border-l md:border-t-0' : ''}`}
+                className={`py-10 md:px-8 md:py-14 ${index > 0 ? 'border-t border-[#E6DED0] md:border-l md:border-t-0' : ''}`}
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E88A6A]/15 text-[#C9684F]">
-                  <Icon className="h-[18px] w-[18px]" />
-                </div>
-                <h2 className="mt-5 text-xl font-semibold tracking-[-0.035em]" style={roundedFont}>
+                <Icon className="h-5 w-5 text-[#C9684F]" />
+                <h2 className="mt-8 text-xl font-semibold tracking-[-0.035em]" style={roundedFont}>
                   {label}<span className="text-[#E88A6A]">.</span>
                 </h2>
                 <p className="mt-2 max-w-[310px] text-sm leading-6 text-[#69635E]">{text}</p>
@@ -148,12 +150,14 @@ export default function ClubLandingPage() {
         </section>
 
         <section id="comunidades" className="mx-auto max-w-[1180px] scroll-mt-24 px-5 py-16 sm:px-8 sm:py-24">
-          <div className="mx-auto max-w-[720px] text-center">
-            <p className="text-[11px] font-bold tracking-[0.16em] text-[#C9684F]">ENCONTRE A SUA CONVERSA</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.05em] sm:text-5xl" style={roundedFont}>
-              O assunto muda. A comunidade continua.
-            </h2>
-            <p className="mx-auto mt-4 max-w-[610px] text-sm leading-6 text-[#6A655F] sm:text-base sm:leading-7">
+          <div className="grid gap-6 border-b border-[#CEC8BD] pb-10 md:grid-cols-[.8fr_1.2fr] md:items-end">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#C9684F]">dentro do club</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-5xl" style={roundedFont}>
+                encontre a conversa certa<span className="text-[#E88A6A]">.</span>
+              </h2>
+            </div>
+            <p className="max-w-[620px] text-sm leading-6 text-[#6A655F] sm:text-base sm:leading-7">
               IA e automação, contratos e CLM, dados e métricas, intake, fornecedores, conhecimento, estratégia, carreira e outros temas do trabalho jurídico.
             </p>
           </div>
@@ -163,41 +167,36 @@ export default function ClubLandingPage() {
           </div>
         </section>
 
-        <section id="planos" className="border-y border-[#CEC8BD] bg-[#FAF7F1] px-5 py-14 sm:px-8 sm:py-18">
-          <div className="mx-auto grid max-w-[1040px] gap-8 rounded-[28px] border border-[#CEC8BD] bg-white/65 p-7 sm:p-9 md:grid-cols-[1fr_auto] md:items-center">
+        <section id="planos" className="border-y border-[#CEC8BD] bg-[#FAF7F1]">
+          <div className="mx-auto grid max-w-[1040px] gap-8 px-5 py-14 sm:px-8 md:grid-cols-[1fr_auto] md:items-end md:py-18">
             <div>
-              <p className="text-[11px] font-bold tracking-[0.14em] text-[#C9684F]">ACESSO FUNDADOR</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl" style={roundedFont}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#C9684F]">acesso fundador</p>
+              <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl" style={roundedFont}>
                 {annualPrice}<span className="text-base font-medium text-[#77716A]"> / ano</span>
               </h2>
               <p className="mt-3 max-w-[650px] text-sm leading-6 text-[#69635E]">
-                Primeiro lote para até {firstTier.memberTo} membros. O preço de entrada permanece nas renovações de quem entrar neste lote.
+                Primeiro lote para até {firstTier.memberTo} membros. Quem entra neste lote mantém o preço de entrada nas renovações.
               </p>
             </div>
             <Link
               href="/login?next=/community"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#E88A6A] px-5 py-3 text-sm font-bold text-[#111111] transition hover:-translate-y-0.5 hover:bg-[#DE7B5C]"
-            >
-              Entrar no primeiro lote <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </section>
-
-        <section className="px-5 py-16 sm:px-8 sm:py-24">
-          <div className="mx-auto max-w-[1120px] overflow-hidden rounded-[30px] bg-[#111111] px-6 py-10 text-white sm:px-10 sm:py-12 md:flex md:items-center md:justify-between md:gap-10">
-            <div>
-              <p className="text-[11px] font-bold tracking-[0.14em] text-[#E88A6A]">LEGALOPS.CLUB · COMUNIDADE</p>
-              <h2 className="mt-3 max-w-[650px] text-2xl font-semibold tracking-[-0.045em] sm:text-4xl" style={roundedFont}>
-                Não resolva sozinho o que outros profissionais do jurídico já enfrentaram.
-              </h2>
-            </div>
-            <Link
-              href="/login?next=/community"
-              className="mt-7 inline-flex shrink-0 items-center gap-2 rounded-full bg-[#E88A6A] px-5 py-3 text-sm font-bold text-[#111111] transition hover:-translate-y-0.5 hover:bg-[#DE7B5C] md:mt-0"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#111111] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#2A2927]"
             >
               Entrar no Club <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+        </section>
+
+        <section className="mx-auto grid max-w-[1180px] gap-8 px-5 py-16 sm:px-8 sm:py-24 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#C9684F]">legalops.club / comunidade</p>
+            <h2 className="mt-3 max-w-[720px] text-3xl font-semibold tracking-[-0.05em] sm:text-5xl" style={roundedFont}>
+              não resolva sozinho o que a comunidade pode ajudar a destravar<span className="text-[#E88A6A]">.</span>
+            </h2>
+          </div>
+          <Link href="/login?next=/community" className="inline-flex items-center gap-2 border-b border-[#111111] pb-1 text-sm font-bold hover:text-[#C9684F]">
+            Entrar na comunidade <ArrowRight className="h-4 w-4" />
+          </Link>
         </section>
       </main>
 
@@ -205,8 +204,8 @@ export default function ClubLandingPage() {
         <div className="mx-auto flex max-w-[1180px] flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <BrandWordmark suffix="club" className="inline-flex items-baseline text-[23px] font-semibold leading-none tracking-[-0.055em] text-[#111111]" />
           <div className="flex flex-wrap items-center gap-5 text-xs font-semibold text-[#716B65]">
-            <Link href="https://legalops.work" className="hover:text-[#111111]">work · vagas</Link>
-            <Link href="https://legalops.dev" className="hover:text-[#111111]">dev · construir</Link>
+            <Link href="https://legalops.work" className="hover:text-[#111111]">work / vagas</Link>
+            <Link href="https://legalops.dev" className="hover:text-[#111111]">dev / construir</Link>
             <Link href="/club/about" className="hover:text-[#111111]">Sobre</Link>
             <Link href="/login?next=/community" className="hover:text-[#111111]">Entrar</Link>
           </div>
