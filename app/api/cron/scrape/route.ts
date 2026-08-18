@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import {
-  buildJobDiscoverySeed,
   canonicalizeJobUrl,
   evaluateJobEligibility,
   extractStoredLocation,
   fetchJobDescription,
   mapWithConcurrency,
-  scrapeAllBoards,
-  shouldExpireUnseenJob,
 } from '@/lib/scraper'
+import {
+  buildMultiSourceDiscoverySeed,
+  discoverJobs,
+} from '@/lib/job-discovery'
 import { enrichJob } from '@/lib/enrichment'
 import { researchSuggestedLeader } from '@/lib/leader-research'
 import { generateClubJobAlerts } from '@/lib/club-job-matching'
@@ -24,15 +25,12 @@ function parseSalaryValues(extracted: ExtractedSalary | null): {
 
   const parseNum = (val: string | null): number | null => {
     if (!val) return null
-    // Remove currency symbols and whitespace
     let cleaned = val.replace(/[R$€£₹¥A$C$S$HK$NZ$CHFkrzł₪,\s]/g, '')
-    // Handle "k" notation (e.g. "120k" → 120000)
     if (/k$/i.test(val.replace(/\s+/g, ''))) {
       cleaned = cleaned.replace(/k$/i, '')
       const num = parseFloat(cleaned)
       return isNaN(num) ? null : Math.round(num * 1000)
     }
-    // Handle Brazilian notation (dots as thousands separator)
     if (/^\d{1,3}(\.\d{3})+$/.test(cleaned)) {
       cleaned = cleaned.replace(/\./g, '')
     }
@@ -68,17 +66,37 @@ export async function GET(req: NextRequest) {
     leadersBackfilled: 0,
     failed: 0,
     alertsCreated: 0,
-    discoverySource: 'combined' as 'firecrawl' | 'legacy' | 'combined',
+    discoverySource: 'none' as 'direct_ats' | 'company_site' | 'aggregator' | 'combined' | 'none',
   }
 
-  let scrapeResult: Awaited<ReturnType<typeof scrapeAllBoards>> | null = null
+  let discoveryResult: Awaited<ReturnType<typeof discoverJobs>> | null = null
   let alertError: string | null = null
 
+  const readBackendSecret = async (name: string): Promise<string | null> => {
+    const { data, error } = await supabase.rpc('get_backend_secret', { secret_name: name })
+    if (error) {
+      console.error(`[cron] secret ${name} unavailable:`, error.message)
+      return null
+    }
+    return typeof data === 'string' && data.trim() ? data.trim() : null
+  }
+
   try {
-    scrapeResult = await scrapeAllBoards()
-    const jobs = scrapeResult.jobs
+    const [joobleApiKey, adzunaAppId, adzunaAppKey] = await Promise.all([
+      readBackendSecret('JOOBLE_API_KEY'),
+      readBackendSecret('ADZUNA_APP_ID'),
+      readBackendSecret('ADZUNA_APP_KEY'),
+    ])
+
+    discoveryResult = await discoverJobs({
+      joobleApiKey,
+      adzunaAppId,
+      adzunaAppKey,
+    })
+
+    const jobs = discoveryResult.jobs
     summary.scraped = jobs.length
-    summary.discoverySource = scrapeResult.discoverySource
+    summary.discoverySource = discoveryResult.discoverySource
 
     const observedAt = new Date().toISOString()
     const discoveredUrls = new Set(
@@ -95,15 +113,10 @@ export async function GET(req: NextRequest) {
       existingByUrl.set(canonicalizeJobUrl(existingJob.url).toLowerCase(), existingJob)
     }
 
-    // Reconcile older rows against the same title/location policy used for
-    // newly discovered jobs. This removes stale foreign roles that predate
-    // the stricter Brazil/LATAM filter.
     const eligibilityResults = await mapWithConcurrency(existingJobs ?? [], 6, async existingJob => {
       let location = existingJob.location ?? extractStoredLocation(existingJob.raw_description)
       let rawDescription = existingJob.raw_description
 
-      // Older rows may not have the discovery metadata. Fetch once so they
-      // can be classified instead of remaining permanently visible as pending.
       if (!location && existingJob.url_status !== 'dead') {
         const fetched = await fetchJobDescription(existingJob.url)
         location = extractStoredLocation(fetched.description)
@@ -141,7 +154,7 @@ export async function GET(req: NextRequest) {
     const refreshResults = await mapWithConcurrency(seenExistingJobs, 6, async pair => {
       const { urlStatus } = await fetchJobDescription(pair.discoveredJob.url)
       const refresh: Record<string, unknown> = {
-        url_status: urlStatus,
+        url_status: urlStatus === 'dead' ? 'dead' : 'live',
         url_checked_at: observedAt,
         last_seen_at: observedAt,
       }
@@ -180,22 +193,22 @@ export async function GET(req: NextRequest) {
       }
 
       const { job, description: pageDescription, extractedSalary, urlStatus } = fetchResult.value
-      const discoverySeed = buildJobDiscoverySeed(job)
+      if (urlStatus === 'dead') continue
+
+      const discoverySeed = buildMultiSourceDiscoverySeed(job)
       const description = [discoverySeed, pageDescription]
         .filter(Boolean)
         .join('\n\n')
         .slice(0, 8000)
 
-      // Pre-populate salary from HTML extraction so it's available even if AI enrichment fails
       let salaryData = parseSalaryValues(extractedSalary)
-
-      // Fallback: parse salary_range from discovery source (Firecrawl/API) when HTML extraction found nothing
       if (!salaryData.salary_min && !salaryData.salary_max && job.salary_range) {
         const rangeSalary = extractSalaryFromHtml(job.salary_range)
-        if (rangeSalary) {
-          salaryData = parseSalaryValues(rangeSalary)
-        }
+        if (rangeSalary) salaryData = parseSalaryValues(rangeSalary)
       }
+
+      const eligibility = evaluateJobEligibility(job)
+      if (!eligibility.eligible) continue
 
       const { error } = await supabase
         .from('jobs')
@@ -207,13 +220,15 @@ export async function GET(req: NextRequest) {
           raw_description: description,
           enrichment_status: 'pending',
           enrichment_attempts: 0,
-          url_status: urlStatus,
+          // A current ATS/API/JobPosting result is itself a strong live signal.
+          // Only an explicit dead page overrides it.
+          url_status: 'live',
           url_checked_at: observedAt,
           posted_at: job.posted_at ?? null,
           location: job.location ?? null,
           accepts_brazil: job.accepts_brazil === true,
           eligibility_status: 'eligible',
-          eligibility_reason: 'eligible',
+          eligibility_reason: eligibility.reason,
           last_seen_at: observedAt,
           ...salaryData,
         })
@@ -232,26 +247,37 @@ export async function GET(req: NextRequest) {
       summary.failed++
     }
 
-    // Firecrawl is the broad inventory source. Only retire unseen jobs when it
-    // returned a non-empty result, so a provider outage cannot empty the feed.
-    if (scrapeResult.firecrawlSucceeded && scrapeResult.firecrawlCount > 0) {
-      const staleJobs = (existingJobs ?? []).filter(job =>
-        shouldExpireUnseenJob(job, discoveredUrls, new Date(observedAt)))
-      const expireResults = await mapWithConcurrency(staleJobs, 6, async job => {
-        const { error } = await supabase
-          .from('jobs')
-          .update({ url_status: 'dead', url_checked_at: observedAt })
-          .eq('id', job.id)
-        if (error) throw error
-      })
+    // Revalidate older live/unknown jobs directly instead of assuming that one
+    // discovery provider has a complete inventory of the market.
+    const { data: recheckJobs } = await supabase
+      .from('jobs')
+      .select('id, url')
+      .neq('url_status', 'dead')
+      .order('url_checked_at', { ascending: true, nullsFirst: true })
+      .limit(30)
 
-      for (const result of expireResults) {
-        if (result.status === 'fulfilled') summary.expired++
-        else summary.failed++
-      }
+    const jobsToRecheck = (recheckJobs ?? []).filter(job =>
+      !discoveredUrls.has(canonicalizeJobUrl(job.url).toLowerCase()))
+
+    const recheckResults = await mapWithConcurrency(jobsToRecheck, 6, async job => {
+      const { urlStatus } = await fetchJobDescription(job.url)
+      const { error } = await supabase
+        .from('jobs')
+        .update({
+          url_status: urlStatus,
+          url_checked_at: observedAt,
+        })
+        .eq('id', job.id)
+      if (error) throw error
+      return urlStatus
+    })
+
+    for (const result of recheckResults) {
+      if (result.status === 'fulfilled' && result.value === 'dead') summary.expired++
+      else if (result.status === 'rejected') summary.failed++
     }
   } catch (e) {
-    console.error('[cron] scrape step failed:', e)
+    console.error('[cron] discovery step failed:', e)
     summary.failed++
   }
 
@@ -271,7 +297,6 @@ export async function GET(req: NextRequest) {
         jobTitle: job.title,
       })
       if (result) {
-        // Preserve HTML-extracted salary when AI enrichment returns null
         if (!result.salary_min && !result.salary_max && (job.salary_min || job.salary_max)) {
           result.salary_min = job.salary_min
           result.salary_max = job.salary_max
@@ -305,9 +330,6 @@ export async function GET(req: NextRequest) {
     else summary.failed++
   }
 
-  // Backfill salary for existing jobs that have no salary_min/salary_max
-  // First try raw_description, then re-fetch the job page for fresh HTML extraction
-  // Skip jobs with dead URLs to avoid wasting requests
   const { data: jobsMissingSalary } = await supabase
     .from('jobs')
     .select('id, url, raw_description, url_status')
@@ -318,7 +340,6 @@ export async function GET(req: NextRequest) {
     .limit(20)
 
   for (const job of jobsMissingSalary ?? []) {
-    // Strategy 1: try extracting from stored raw_description
     if (job.raw_description) {
       const extracted = extractSalaryFromHtml(job.raw_description)
       if (extracted) {
@@ -330,12 +351,9 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Strategy 2: re-fetch the job page and extract salary from fresh HTML
     if (job.url) {
       try {
         const { extractedSalary, urlStatus } = await fetchJobDescription(job.url)
-
-        // Update URL status based on the application page itself.
         const urlUpdate: Record<string, unknown> = {
           url_status: urlStatus,
           url_checked_at: new Date().toISOString(),
@@ -393,7 +411,7 @@ export async function GET(req: NextRequest) {
   }
 
   await supabase.from('crawler_runs').insert({
-    provider: 'firecrawl',
+    provider: 'multi_source',
     discovery_source: summary.discoverySource,
     scraped_count: summary.scraped,
     inserted_count: summary.inserted,
@@ -402,15 +420,13 @@ export async function GET(req: NextRequest) {
     failed_count: summary.failed,
     leaders_backfilled: summary.leadersBackfilled,
     notes: {
-      firecrawlCount: scrapeResult?.firecrawlCount ?? 0,
-      legacyCount: scrapeResult?.legacyCount ?? 0,
-      firecrawlSucceeded: scrapeResult?.firecrawlSucceeded ?? false,
-      legacySucceeded: scrapeResult?.legacySucceeded ?? false,
+      sourceCounts: discoveryResult?.counts ?? {},
+      sourceSucceeded: discoveryResult?.succeeded ?? {},
       refreshedCount: summary.refreshed,
       expiredCount: summary.expired,
       alertsCreated: summary.alertsCreated,
       ...(alertError ? { alertError } : {}),
-      ...(scrapeResult?.errors?.length ? { errors: scrapeResult.errors } : {}),
+      ...(discoveryResult?.errors?.length ? { errors: discoveryResult.errors } : {}),
     },
     started_at: startedAt,
     completed_at: new Date().toISOString(),
