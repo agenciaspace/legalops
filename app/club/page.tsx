@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, BookOpen, Network, Sparkles, UsersRound } from 'lucide-react'
-import { BrandMark, BrandWordmark } from '@/components/BrandLogo'
+import { BrandWordmark } from '@/components/BrandLogo'
 import { ClubDiscovery } from '@/components/ClubDiscovery'
 import { ClubHeader } from '@/components/ClubHeader'
 import { CLUB_LAUNCH_TIERS, formatBRL } from '@/lib/club-pricing'
@@ -101,10 +101,12 @@ export default function ClubLandingPage() {
                 <div className="absolute -bottom-20 -left-16 h-56 w-56 rounded-full border-[42px] border-[#E88A6A]/10" />
 
                 <div className="relative">
-                  <BrandMark className="h-20 w-auto text-white" />
-                  <div className="mt-10">
+                  <p className="text-[10px] font-bold tracking-[0.16em] text-[#E88A6A]">LEGALOPS / COMMUNITY</p>
+                  <div className="mt-12">
                     <BrandWordmark
-                      className="inline-flex items-baseline text-[35px] font-medium leading-none tracking-[-0.065em] text-white sm:text-[43px]"
+                      suffix="club"
+                      inverse
+                      className="inline-flex items-baseline text-[35px] font-semibold leading-none tracking-[-0.055em] text-white sm:text-[43px]"
                       accentClassName="text-[#E88A6A]"
                     />
                     <p className="mt-5 max-w-[340px] text-sm leading-6 text-white/65">
@@ -198,7 +200,7 @@ export default function ClubLandingPage() {
 
       <footer className="border-t border-[#CEC8BD] bg-[#FAF7F1] px-5 py-8 sm:px-8">
         <div className="mx-auto flex max-w-[1180px] flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <BrandWordmark className="inline-flex items-baseline text-[23px] font-medium leading-none tracking-[-0.065em] text-[#111111]" />
+          <BrandWordmark suffix="club" className="inline-flex items-baseline text-[23px] font-semibold leading-none tracking-[-0.055em] text-[#111111]" />
           <div className="flex flex-wrap items-center gap-5 text-xs font-semibold text-[#716B65]">
             <Link href="/club/about" className="hover:text-[#111111]">Sobre</Link>
             <Link href="https://legalops.work" className="hover:text-[#111111]">Vagas</Link>
