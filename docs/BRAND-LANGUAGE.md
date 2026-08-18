@@ -7,10 +7,11 @@ O objetivo não é deixar os três produtos idênticos. É fazer com que pareça
 ## 1. Marca
 
 - Escrever os produtos em minúsculas: `legalops.club`, `legalops.work`, `legalops.dev`.
-- Usar `BrandWordmark` e `BrandMark` de `components/BrandLogo.tsx`; não recriar o logo com texto, emoji ou ícone genérico.
+- Usar `BrandWordmark` de `components/BrandLogo.tsx` nas superfícies públicas; não recriar o logo com emoji, ícone genérico ou ligatura experimental.
+- O wordmark é tipográfico e simples: `legalops` + ponto coral + sufixo do produto.
 - O ponto do domínio usa coral `#E88A6A`.
-- `legalops.club` usa o wordmark vetorial aprovado em superfícies claras.
-- `legalops.work` e `legalops.dev` usam a mesma construção tipográfica e a mesma ligatura `op`.
+- `legalops.club`, `legalops.work` e `legalops.dev` usam a mesma construção tipográfica.
+- O antigo símbolo/ligatura `op` não deve ser usado como logo principal em páginas públicas.
 - Não usar sparkles, robôs, estrelas ou outros símbolos de IA como marca.
 
 ## 2. Cores
@@ -30,6 +31,7 @@ O coral é acento, não fundo dominante. Preto e creme carregam a maior parte da
 
 - Quicksand: wordmark e títulos editoriais.
 - Inter: navegação, corpo, dados, labels e interface.
+- Wordmark: minúsculo, peso 600, tracking negativo moderado; sem ligaturas customizadas.
 - Títulos: tracking negativo e frases curtas.
 - Micro-labels: caixa alta, pequenos, com tracking amplo.
 - Preferir minúsculas em headlines quando isso reforçar a voz da marca.
@@ -89,8 +91,10 @@ A navegação entre domínios deve parecer uma troca de área dentro do mesmo ec
 
 ## 7. Checklist antes de publicar
 
-- O logo vem de `BrandWordmark`/`BrandMark`?
+- O wordmark vem de `BrandWordmark`?
 - O produto está escrito em minúsculas?
+- O ponto está em coral?
+- Há algum símbolo `op` antigo sendo usado como logo principal?
 - A página usa a paleta compartilhada?
 - Quicksand está restrita à identidade/títulos e Inter ao conteúdo/interface?
 - Há algum sparkle, robô, glow, terminal decorativo ou card genérico que possa ser removido?
