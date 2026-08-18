@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { BrandLogo, BrandMark } from '@/components/BrandLogo'
+import { BrandLogo, BrandWordmark } from '@/components/BrandLogo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -62,11 +62,10 @@ export default function LoginPage() {
         <div className="mb-8 text-center">
           <BrandLogo
             suffix={isClub ? 'club' : 'work'}
-            className="flex flex-col items-center gap-4"
-            markClassName="h-16 w-auto text-[#111111]"
-            titleClassName="inline-flex items-baseline text-[34px] font-medium leading-none tracking-[-0.065em] text-[#111111]"
+            className="flex flex-col items-center"
+            titleClassName="inline-flex items-baseline text-[34px] font-semibold leading-none tracking-[-0.055em] text-[#111111]"
             subtitle={isClub ? 'Sua entrada para a comunidade de Legal Operations' : 'Sua conta para vagas, conteúdo e carreira em Legal Operations'}
-            subtitleClassName="max-w-sm text-sm leading-6 text-[#6D6761]"
+            subtitleClassName="mt-4 max-w-sm text-sm leading-6 text-[#6D6761]"
           />
         </div>
 
@@ -126,8 +125,11 @@ export default function LoginPage() {
           <span>connection</span>
         </div>
 
-        <div className="mt-5 flex justify-center">
-          <BrandMark className="h-5 w-auto text-[#111111]/25" />
+        <div className="mt-5 flex justify-center opacity-35">
+          <BrandWordmark
+            suffix={isClub ? 'club' : 'work'}
+            className="inline-flex items-baseline text-[14px] font-semibold leading-none tracking-[-0.04em] text-[#111111]"
+          />
         </div>
       </div>
     </div>
