@@ -47,7 +47,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   ])
 
   return (
-    <div className="min-h-screen bg-[#F5F4F0]">
+    <div className="min-h-screen bg-[#F5F1E8]">
       <Nav discoverCount={count ?? 0} jobAlertCount={jobAlertCount ?? 0} hasClubAccess={hasClubAccess} />
       <AppMain>{children}</AppMain>
     </div>
