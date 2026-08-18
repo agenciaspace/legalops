@@ -3,8 +3,8 @@ import { ClubHeader } from '@/components/ClubHeader'
 import { EmployerHub } from '@/components/EmployerHub'
 
 export const metadata: Metadata = {
-  title: 'Empresas | LegalOps Work',
-  description: 'Envie vagas de Legal Ops e encontre profissionais para escritórios de advocacia e departamentos jurídicos.',
+  title: 'Contratação para operações jurídicas | LegalOps Work',
+  description: 'Publique vagas e encontre profissionais de Legal Ops, Legal Tech, contratos, CLM, dados, operações e gestão para escritórios e departamentos jurídicos.',
 }
 
 export default function ForEmployersPage() {
