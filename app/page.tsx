@@ -4,15 +4,15 @@ import { LandingPage } from '@/components/LandingPage'
 import { CourseLandingPage } from '@/components/CourseLandingPage'
 
 const workMetadata: Metadata = {
-  title: 'LegalOps | Vagas de Legal Ops para buscar, aplicar e acompanhar',
+  title: 'LegalOps Work | Vagas em Legal Ops, Legal Tech e operações jurídicas',
   description:
-    'Busque vagas de Legal Ops, CLM e operações jurídicas, candidate-se e acompanhe seu pipeline gratuitamente. Assine o Pro só se quiser recursos extras com IA e outreach.',
+    'Encontre oportunidades verificadas em Legal Ops, Legal Tech, contratos, CLM, dados, inovação e gestão jurídica em departamentos jurídicos, escritórios e empresas de tecnologia.',
 }
 
 const courseMetadata: Metadata = {
-  title: 'legalops.dev — IA no WhatsApp, do fluxo ao sistema',
+  title: 'legalops.dev — automação e IA para operações jurídicas',
   description:
-    'Uma aula aberta para construir um assistente no WhatsApp e entender a arquitetura entre canal, backend, banco de dados e modelo de IA.',
+    'Projetos práticos para transformar intake, contratos, aprovações, dados e rotinas jurídicas em fluxos mais claros, integrados e controláveis.',
 }
 
 export const revalidate = 60
