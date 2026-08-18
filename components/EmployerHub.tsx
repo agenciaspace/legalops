@@ -22,13 +22,13 @@ const employerTypes: Array<{
   {
     value: 'law_firm',
     label: 'Escritório de advocacia',
-    description: 'Para equipes que atendem clientes e estruturam operações internas ou serviços de Legal Ops.',
+    description: 'Para escritórios que estão estruturando inovação, Legal Ops, gestão, conhecimento, tecnologia ou novas formas de entregar serviços jurídicos.',
     Icon: Building2,
   },
   {
     value: 'legal_department',
     label: 'Departamento jurídico',
-    description: 'Para jurídicos internos que contratam pessoas para processos, contratos, dados e tecnologia.',
+    description: 'Para jurídicos internos que contratam pessoas para contratos, Legal Ops, dados, tecnologia, fornecedores, projetos e gestão da operação.',
     Icon: BriefcaseBusiness,
   },
 ]
@@ -42,10 +42,10 @@ export function EmployerHub() {
 
   return (
     <main className="mx-auto max-w-[1120px] px-5 pb-20 pt-14 sm:px-8 sm:pt-20" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
-      <header className="mx-auto max-w-[760px] text-center">
+      <header className="mx-auto max-w-[780px] text-center">
         <p className="text-[11px] font-bold tracking-[0.18em] text-[#C9684F]">LEGALOPS WORK PARA EMPRESAS</p>
-        <h1 className="mt-4 text-3xl font-semibold tracking-[-0.05em] sm:text-5xl" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>Contrate para a operação jurídica</h1>
-        <p className="mx-auto mt-4 max-w-[650px] text-sm leading-6 text-[#69635E] sm:text-base">Escolha o tipo de organização. A partir daqui você pode enviar uma vaga para revisão ou buscar profissionais que abriram o perfil para empresas.</p>
+        <h1 className="mt-4 text-3xl font-semibold tracking-[-0.05em] sm:text-5xl" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>Contrate quem faz o jurídico funcionar melhor</h1>
+        <p className="mx-auto mt-4 max-w-[690px] text-sm leading-6 text-[#69635E] sm:text-base">Publique vagas de Legal Ops, Legal Tech, contratos, dados, operações, inovação e gestão jurídica — ou encontre profissionais que abriram o perfil para empresas.</p>
       </header>
 
       <section className="mx-auto mt-10 max-w-[780px]" aria-labelledby="employer-type-title">
@@ -79,10 +79,10 @@ export function EmployerHub() {
               <span className="text-[10px] font-bold tracking-[0.16em] text-[#E88A6A]">ANUNCIAR</span>
               <FilePlus2 className="h-5 w-5 text-[#E88A6A]" />
             </div>
-            <h2 className="mt-10 text-2xl font-semibold tracking-[-0.04em]" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>Publique uma vaga</h2>
+            <h2 className="mt-10 text-2xl font-semibold tracking-[-0.04em]" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>Publique uma vaga jurídica</h2>
           </div>
           <div className="p-5">
-            <p className="text-sm leading-6 text-[#69635E]">Envie cargo, descrição, modelo de trabalho e link de candidatura. A equipe recebe o pedido com o contexto de {selected.label.toLocaleLowerCase('pt-BR')}.</p>
+            <p className="text-sm leading-6 text-[#69635E]">Envie cargo, escopo, senioridade, modelo de trabalho, remuneração quando disponível e link de candidatura. A vaga chega ao público já dentro do contexto de {selected.label.toLocaleLowerCase('pt-BR')}.</p>
             <Link href={`/login?next=${encodeURIComponent(postPath)}`} className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#111111] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#2A2927]">
               Enviar vaga <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -95,10 +95,10 @@ export function EmployerHub() {
               <span className="text-[10px] font-bold tracking-[0.16em] text-[#C9684F]">ENCONTRAR</span>
               <UsersRound className="h-5 w-5 text-[#C9684F]" />
             </div>
-            <h2 className="mt-10 text-2xl font-semibold tracking-[-0.04em]" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>Busque pessoas</h2>
+            <h2 className="mt-10 text-2xl font-semibold tracking-[-0.04em]" style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}>Encontre profissionais do jurídico</h2>
           </div>
           <div className="p-5">
-            <p className="text-sm leading-6 text-[#69635E]">Abra o diretório com o filtro de {selected.label.toLocaleLowerCase('pt-BR')}. A busca usa cargo, experiência, competências e ferramentas informadas pelos membros.</p>
+            <p className="text-sm leading-6 text-[#69635E]">Busque por cargo, experiência, competências, ferramentas e frentes como Legal Ops, CLM, Legal Tech, contratos, dados e gestão — respeitando a visibilidade escolhida por cada membro.</p>
             <Link href={`/login?next=${encodeURIComponent(peoplePath)}`} className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#CEC8BD] bg-white px-4 py-2.5 text-xs font-bold text-[#111111] hover:bg-[#FAF7F1]">
               <Search className="h-3.5 w-3.5" /> Abrir diretório
             </Link>
