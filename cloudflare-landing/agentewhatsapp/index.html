@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#F5F1E8">
-  <title>Build 001 — assistente no WhatsApp | legalops.dev</title>
-  <meta name="description" content="Construa um assistente no WhatsApp e entenda canal, webhook, dados, contexto, modelo e operação.">
+  <title>Build 001 — intake jurídico no WhatsApp | legalops.dev</title>
+  <meta name="description" content="Construa um fluxo de intake jurídico no WhatsApp e entenda canal, webhook, dados, contexto, IA, infraestrutura, governança e revisão humana.">
   <link rel="stylesheet" href="/brand.css">
   <style>
     .build-hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
@@ -32,30 +32,30 @@
   </div></header>
   <main>
     <section class="build-hero"><div class="wrap build-hero-inner">
-      <span class="micro">BUILD 001 / AULA ABERTA</span>
-      <h1 class="build-title">assistente no<br>WhatsApp<span class="coral">.</span></h1>
-      <div class="build-lead"><p>Construa o fluxo entre canal, webhook, banco, contexto e modelo — entendendo o papel de cada peça antes de colocar o sistema em operação.</p><div class="build-actions"><a class="text-link primary" href="#etapas">começar pelas etapas →</a><a class="text-link" href="/agentewhatsapp/guia/">abrir o guia</a></div></div>
+      <span class="micro">BUILD 001 / INTAKE JURÍDICO</span>
+      <h1 class="build-title">jurídico no<br>WhatsApp<span class="coral">.</span></h1>
+      <div class="build-lead"><p>Construa um fluxo para receber solicitações jurídicas, organizar contexto, classificar o pedido, buscar informações e responder ou escalar para uma pessoa — entendendo o papel de cada camada antes de colocar o sistema em operação.</p><div class="build-actions"><a class="text-link primary" href="#etapas">começar pelas etapas →</a><a class="text-link" href="/agentewhatsapp/guia/">abrir o guia</a></div></div>
     </div></section>
-    <section class="build-strip"><div class="wrap build-strip-inner"><span class="label">BUILD 001 / ARQUITETURA</span><span>canal</span><span>dados</span><span>modelo</span><span class="active">operação</span></div></section>
+    <section class="build-strip"><div class="wrap build-strip-inner"><span class="label">BUILD 001 / ARQUITETURA</span><span>intake</span><span>dados</span><span>IA</span><span class="active">governança</span></div></section>
     <section class="architecture"><div class="wrap architecture-grid">
-      <div><span class="micro">O FLUXO</span><h2>cada camada tem um trabalho<span class="coral">.</span></h2><p class="architecture-copy">O WhatsApp é apenas a porta de entrada. O sistema precisa receber, validar, guardar contexto, decidir, responder e continuar observável.</p></div>
-      <figure class="flow-frame"><img src="/fluxo.svg" alt="Fluxo entre WhatsApp, Uazapi, Supabase, provider de IA e resposta"><figcaption class="flow-caption"><span>entrada → processamento → resposta</span><span>build 001</span></figcaption></figure>
+      <div><span class="micro">O FLUXO</span><h2>o canal é só a entrada<span class="coral">.</span></h2><p class="architecture-copy">Um fluxo jurídico precisa identificar quem pede, qual é o assunto, qual contexto pode ser usado, onde o histórico fica, quando a IA participa e em que momento a conversa precisa ir para uma pessoa.</p></div>
+      <figure class="flow-frame"><img src="/fluxo.svg" alt="Fluxo entre WhatsApp, Uazapi, Supabase, provider de IA e resposta"><figcaption class="flow-caption"><span>solicitação → contexto → resposta ou escalonamento</span><span>build 001</span></figcaption></figure>
     </div></section>
     <section class="levels-row">
-      <article class="level-block"><span class="micro">NÍVEL 01 / INTEGRAÇÃO</span><h3>conectar, armazenar e responder<span class="coral">.</span></h3><p>Uazapi recebe as mensagens, Supabase guarda o contexto e o provider de IA responde dentro de regras claras.</p></article>
-      <article class="level-block"><span class="micro">NÍVEL 02 / INFRAESTRUTURA</span><h3>hospedar e operar com autonomia<span class="coral">.</span></h3><p>Hostinger e Termius entram para publicar, observar, atualizar e recuperar o backend com segurança.</p></article>
+      <article class="level-block"><span class="micro">NÍVEL 01 / FLUXO JURÍDICO</span><h3>receber, registrar e encaminhar<span class="coral">.</span></h3><p>Uazapi recebe a solicitação, Supabase guarda o histórico e o provider de IA pode classificar, resumir ou preparar uma resposta dentro de limites definidos.</p></article>
+      <article class="level-block"><span class="micro">NÍVEL 02 / OPERAÇÃO</span><h3>publicar sem perder visibilidade<span class="coral">.</span></h3><p>Infraestrutura, logs, acesso, retenção e fallback entram para que o jurídico consiga operar, revisar e interromper o fluxo quando necessário.</p></article>
     </section>
     <section id="etapas" class="route-section"><div class="wrap">
-      <div class="route-head"><div><span class="micro">EXECUÇÃO GUIADA</span><h2>oito decisões, na ordem certa<span class="coral">.</span></h2></div><p class="route-intro">Cada etapa explica o que fazer, quando considerar pronto e qual risco precisa ser controlado antes de avançar.</p></div>
+      <div class="route-head"><div><span class="micro">EXECUÇÃO GUIADA</span><h2>oito decisões, na ordem certa<span class="coral">.</span></h2></div><p class="route-intro">Cada etapa conecta uma decisão técnica a uma pergunta de operação jurídica: o que entra, quem pode ver, onde fica, como falha e quando uma pessoa assume.</p></div>
       <div class="route-list">
-        <a class="route" href="/agentewhatsapp/01-caso-de-uso/"><span class="route-index">01</span><span class="route-layer">FUNDAÇÃO</span><div><div class="route-title">defina o caso de uso</div><div class="route-copy">Escolha um problema delimitado antes da ferramenta.</div></div><span class="route-arrow">→</span></a>
-        <a class="route" href="/agentewhatsapp/02-uazapi/"><span class="route-index">02</span><span class="route-layer">CANAL</span><div><div class="route-title">conecte o Uazapi</div><div class="route-copy">Configure número, eventos e credenciais.</div></div><span class="route-arrow">→</span></a>
-        <a class="route" href="/agentewhatsapp/03-supabase/"><span class="route-index">03</span><span class="route-layer">DADOS</span><div><div class="route-title">modele a memória</div><div class="route-copy">Estruture contatos, conversas, mensagens e retenção.</div></div><span class="route-arrow">→</span></a>
-        <a class="route" href="/agentewhatsapp/04-provider-ia/"><span class="route-index">04</span><span class="route-layer">MODELO</span><div><div class="route-title">dê contexto à IA</div><div class="route-copy">Defina instruções, limites, fallback e revisão humana.</div></div><span class="route-arrow">→</span></a>
-        <a class="route" href="/agentewhatsapp/05-webhook/"><span class="route-index">05</span><span class="route-layer">CONFIABILIDADE</span><div><div class="route-title">valide o webhook</div><div class="route-copy">Trate origem, duplicidade, falha e rastreabilidade.</div></div><span class="route-arrow">→</span></a>
-        <a class="route" href="/agentewhatsapp/06-hostinger/"><span class="route-index">06</span><span class="route-layer">INFRAESTRUTURA</span><div><div class="route-title">prepare o servidor</div><div class="route-copy">Configure acesso, HTTPS, processo e recuperação.</div></div><span class="route-arrow">→</span></a>
-        <a class="route" href="/agentewhatsapp/07-termius/"><span class="route-index">07</span><span class="route-layer">OPERAÇÃO</span><div><div class="route-title">opere com disciplina</div><div class="route-copy">Torne deploy, rollback e observabilidade reproduzíveis.</div></div><span class="route-arrow">→</span></a>
-        <a class="route" href="/agentewhatsapp/08-piloto/"><span class="route-index">08</span><span class="route-layer">APRENDIZADO</span><div><div class="route-title">execute o piloto</div><div class="route-copy">Teste pequeno, meça e mantenha uma saída humana.</div></div><span class="route-arrow">→</span></a>
+        <a class="route" href="/agentewhatsapp/01-caso-de-uso/"><span class="route-index">01</span><span class="route-layer">FUNDAÇÃO</span><div><div class="route-title">defina o caso de uso jurídico</div><div class="route-copy">Comece por um fluxo delimitado: intake, FAQ interno, status, triagem ou encaminhamento.</div></div><span class="route-arrow">→</span></a>
+        <a class="route" href="/agentewhatsapp/02-uazapi/"><span class="route-index">02</span><span class="route-layer">CANAL</span><div><div class="route-title">conecte o WhatsApp</div><div class="route-copy">Configure número, eventos e credenciais sem colocar regra jurídica no canal.</div></div><span class="route-arrow">→</span></a>
+        <a class="route" href="/agentewhatsapp/03-supabase/"><span class="route-index">03</span><span class="route-layer">DADOS</span><div><div class="route-title">modele histórico e contexto</div><div class="route-copy">Estruture solicitantes, conversas, mensagens, status, acesso e retenção.</div></div><span class="route-arrow">→</span></a>
+        <a class="route" href="/agentewhatsapp/04-provider-ia/"><span class="route-index">04</span><span class="route-layer">MODELO</span><div><div class="route-title">delimite o papel da IA</div><div class="route-copy">Defina contexto permitido, tarefas, limites, fallback, escalonamento e revisão humana.</div></div><span class="route-arrow">→</span></a>
+        <a class="route" href="/agentewhatsapp/05-webhook/"><span class="route-index">05</span><span class="route-layer">CONFIABILIDADE</span><div><div class="route-title">controle a entrada</div><div class="route-copy">Valide origem, duplicidade, estado, falhas e rastreabilidade.</div></div><span class="route-arrow">→</span></a>
+        <a class="route" href="/agentewhatsapp/06-hostinger/"><span class="route-index">06</span><span class="route-layer">INFRAESTRUTURA</span><div><div class="route-title">prepare o ambiente</div><div class="route-copy">Configure acesso, HTTPS, processo, segredos, backup e recuperação.</div></div><span class="route-arrow">→</span></a>
+        <a class="route" href="/agentewhatsapp/07-termius/"><span class="route-index">07</span><span class="route-layer">OPERAÇÃO</span><div><div class="route-title">torne a operação reproduzível</div><div class="route-copy">Padronize deploy, rollback, acesso e observabilidade.</div></div><span class="route-arrow">→</span></a>
+        <a class="route" href="/agentewhatsapp/08-piloto/"><span class="route-index">08</span><span class="route-layer">APRENDIZADO</span><div><div class="route-title">pilote com casos controlados</div><div class="route-copy">Teste com poucos usuários, acompanhe erros e mantenha uma saída clara para atendimento humano.</div></div><span class="route-arrow">→</span></a>
       </div>
     </div></section>
   </main>
