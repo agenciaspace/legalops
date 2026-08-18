@@ -66,7 +66,9 @@ export function BrandWordmark({
           src="/brand/legalops-club-wordmark.svg"
           alt=""
           aria-hidden="true"
-          style={{ height: '1em', width: 'auto', display: 'block' }}
+          // The traced SVG only has a viewBox (no intrinsic width/height). An
+          // auto width collapses to zero in the header; keep its 1068:203 ratio.
+          style={{ height: '1em', width: '5.26em', display: 'block' }}
         />
       </span>
     )
