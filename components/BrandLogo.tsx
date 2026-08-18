@@ -63,7 +63,7 @@ export function BrandWordmark({
     return (
       <span className={wrapperClass} aria-label="legalops.club">
         <img
-          src="/brand/legalops-club-wordmark.svg"
+          src="/brand/legalops-club-wordmark.svg?v=20260818-1"
           alt=""
           aria-hidden="true"
           // The traced SVG only has a viewBox (no intrinsic width/height). An
