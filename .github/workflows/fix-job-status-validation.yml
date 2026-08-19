@@ -1,0 +1,60 @@
+name: Harden job status validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-job-status-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Patch status validation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          scraper = Path('lib/scraper.ts')
+          text = scraper.read_text()
+
+          old = "  'no longer accepting applications',\n"
+          new = old + "  'applications closed',\n  'application closed',\n  'this job is closed',\n  'this position is closed',\n  'essa vaga não recebe mais candidaturas',\n  'essa vaga nao recebe mais candidaturas',\n  'vaga não recebe mais candidaturas',\n  'vaga nao recebe mais candidaturas',\n  'candidaturas encerradas',\n  'inscrições encerradas',\n  'inscricoes encerradas',\n"
+          assert old in text, 'closure signal anchor missing'
+          text = text.replace(old, new, 1)
+
+          old = "      const genericDestination = /^\\/(?:careers?|jobs?)\\/?$/i.test(resolvedUrl.pathname)\n      if (resolvedUrl.searchParams.get('error') === 'true' || genericDestination) return 'dead'"
+          new = "      const normalizedPath = resolvedUrl.pathname.replace(/\\/+$/, '')\n      const lastSegment = normalizedPath.split('/').filter(Boolean).at(-1) ?? ''\n      const genericDestination = /^(?:careers?|jobs?|job-search|search)$/i.test(lastSegment)\n      if (resolvedUrl.searchParams.get('error') === 'true' || genericDestination) return 'dead'"
+          assert old in text, 'generic destination anchor missing'
+          text = text.replace(old, new, 1)
+          scraper.write_text(text)
+
+          route = Path('app/api/cron/scrape/route.ts')
+          text = route.read_text()
+          old = "        url_status: urlStatus === 'dead' ? 'dead' : 'live',"
+          new = "        url_status: urlStatus,"
+          assert old in text, 'route live promotion anchor missing'
+          text = text.replace(old, new, 1)
+          route.write_text(text)
+
+          landing = Path('components/LandingPage.tsx')
+          text = landing.read_text()
+          old = "    .not('url_checked_at', 'is', null)\n    .order('created_at', { ascending: false })"
+          new = "    .not('url_checked_at', 'is', null)\n    .gte('url_checked_at', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())\n    .order('created_at', { ascending: false })"
+          assert old in text, 'landing freshness anchor missing'
+          text = text.replace(old, new, 1)
+          landing.write_text(text)
+          PY
+
+      - name: Commit fixes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add lib/scraper.ts app/api/cron/scrape/route.ts components/LandingPage.tsx
+          git commit -m 'fix(jobs): stop stale and closed roles appearing live'
+          git push
