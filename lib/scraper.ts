@@ -799,6 +799,17 @@ const CLOSED_JOB_PAGE_SIGNALS = [
   'this job is no longer open',
   'the job you are looking for is no longer open',
   'no longer accepting applications',
+  'applications closed',
+  'application closed',
+  'this job is closed',
+  'this position is closed',
+  'essa vaga não recebe mais candidaturas',
+  'essa vaga nao recebe mais candidaturas',
+  'vaga não recebe mais candidaturas',
+  'vaga nao recebe mais candidaturas',
+  'candidaturas encerradas',
+  'inscrições encerradas',
+  'inscricoes encerradas',
   'this job has expired',
   'this job posting has expired',
   'this position has been filled',
@@ -832,7 +843,9 @@ export function classifyJobUrlStatus(
   if (responseUrl) {
     try {
       const resolvedUrl = new URL(responseUrl)
-      const genericDestination = /^\/(?:careers?|jobs?)\/?$/i.test(resolvedUrl.pathname)
+      const normalizedPath = resolvedUrl.pathname.replace(/\/+$/, '')
+      const lastSegment = normalizedPath.split('/').filter(Boolean).at(-1) ?? ''
+      const genericDestination = /^(?:careers?|jobs?|job-search|search)$/i.test(lastSegment)
       if (resolvedUrl.searchParams.get('error') === 'true' || genericDestination) return 'dead'
     } catch {
       return 'unknown'

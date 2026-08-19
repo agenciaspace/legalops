@@ -27,6 +27,7 @@ async function fetchPublicJobs(): Promise<{ jobs: LandingJob[]; count: number }>
     .eq('url_status', 'live')
     .eq('eligibility_status', 'eligible')
     .not('url_checked_at', 'is', null)
+    .gte('url_checked_at', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())
     .order('created_at', { ascending: false })
     .limit(20)
 

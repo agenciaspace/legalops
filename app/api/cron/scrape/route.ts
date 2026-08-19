@@ -154,7 +154,7 @@ export async function GET(req: NextRequest) {
     const refreshResults = await mapWithConcurrency(seenExistingJobs, 6, async pair => {
       const { urlStatus } = await fetchJobDescription(pair.discoveredJob.url)
       const refresh: Record<string, unknown> = {
-        url_status: urlStatus === 'dead' ? 'dead' : 'live',
+        url_status: urlStatus,
         url_checked_at: observedAt,
         last_seen_at: observedAt,
       }
