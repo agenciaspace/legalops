@@ -1,9 +1,10 @@
-name: Deploy Cloudflare Worker
+name: Deploy Cloudflare Workers
 on:
   push:
     branches: [main]
     paths:
       - 'cloudflare/**'
+      - '.github/workflows/deploy-cloudflare.yml'
   workflow_dispatch:
 
 permissions:
@@ -14,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_ACCOUNT_ID: 3d40d7797b3fd6d1cd2644eefea9e907
-      CLOUDFLARE_WORKER_NAME: legalops-club-proxy
     steps:
       - uses: actions/checkout@v6
 
@@ -24,21 +24,40 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set +e
-          HTTP_CODE=$(curl -sS -o /tmp/cloudflare-response.json -w '%{http_code}' \
-            -X PUT \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            -F 'metadata={"main_module":"legalops-club-proxy.js","compatibility_date":"2026-08-13"};type=application/json' \
-            -F 'legalops-club-proxy.js=@cloudflare/legalops-club-proxy.js;filename=legalops-club-proxy.js;type=application/javascript+module' \
-            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$CLOUDFLARE_WORKER_NAME")
 
-          SUCCESS=$(jq -r '.success // false' /tmp/cloudflare-response.json 2>/dev/null)
+          deploy_worker() {
+            NAME="$1"
+            FILE="$2"
+            MODULE="$3"
+            OUT="$4"
+            HTTP_CODE=$(curl -sS -o "$OUT" -w '%{http_code}' \
+              -X PUT \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              -F "metadata={\"main_module\":\"$MODULE\",\"compatibility_date\":\"2026-08-13\"};type=application/json" \
+              -F "$MODULE=@$FILE;filename=$MODULE;type=application/javascript+module" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$NAME")
+            SUCCESS=$(jq -r '.success // false' "$OUT" 2>/dev/null)
+            echo "$HTTP_CODE $SUCCESS"
+          }
+
+          CLUB=$(deploy_worker legalops-club-proxy cloudflare/legalops-club-proxy.js legalops-club-proxy.js /tmp/club.json)
+          WORK=$(deploy_worker legalops-app cloudflare/legalops-work-proxy.js legalops-work-proxy.js /tmp/work.json)
+
+          CLUB_HTTP=$(echo "$CLUB" | awk '{print $1}')
+          CLUB_SUCCESS=$(echo "$CLUB" | awk '{print $2}')
+          WORK_HTTP=$(echo "$WORK" | awk '{print $1}')
+          WORK_SUCCESS=$(echo "$WORK" | awk '{print $2}')
+
           {
-            echo "http_status=$HTTP_CODE"
-            echo "success=$SUCCESS"
-            jq -r '.errors[]? | "error=\(.code): \(.message)"' /tmp/cloudflare-response.json 2>/dev/null || true
+            echo "club_http_status=$CLUB_HTTP"
+            echo "club_success=$CLUB_SUCCESS"
+            jq -r '.errors[]? | "club_error=\(.code): \(.message)"' /tmp/club.json 2>/dev/null || true
+            echo "work_http_status=$WORK_HTTP"
+            echo "work_success=$WORK_SUCCESS"
+            jq -r '.errors[]? | "work_error=\(.code): \(.message)"' /tmp/work.json 2>/dev/null || true
           } > .github/cloudflare-api-result.txt
 
-          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ] && [ "$SUCCESS" = "true" ]; then
+          if [ "$CLUB_SUCCESS" = "true" ] && [ "$WORK_SUCCESS" = "true" ]; then
             exit 0
           fi
           exit 1
