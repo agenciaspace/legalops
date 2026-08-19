@@ -1,0 +1,21 @@
+zone_lookup_success=true
+zone_found=true
+dns_success=true
+dns=A legalops.work -> 64.29.17.65 proxied=true
+dns=A legalops.work -> 64.29.17.1 proxied=true
+dns=CAA legalops.work -> 0 issue "sectigo.com" proxied=false
+dns=CAA legalops.work -> 0 issue "pki.goog" proxied=false
+dns=CAA legalops.work -> 0 issue "letsencrypt.org" proxied=false
+dns=MX legalops.work -> route3.mx.cloudflare.net proxied=false
+dns=MX legalops.work -> route2.mx.cloudflare.net proxied=false
+dns=MX legalops.work -> route1.mx.cloudflare.net proxied=false
+dns=TXT legalops.work -> "v=spf1 include:_spf.mx.cloudflare.net ~all" proxied=false
+dns=TXT legalops.work -> "brevo-code:a117953d2aa92517d923d151889712bf" proxied=false
+routes_success=true
+route=www.legalops.work/* script=legalops-app
+route=legalops.work/* script=legalops-app
+purge_success=false
+purge_error=10000: Authentication error
+public_http=403
+public_contains_5_vagas=false
+public_contains_1_vaga=false
