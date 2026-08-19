@@ -1,2 +1,4 @@
-http_status=200
-success=true
+club_http_status=200
+club_success=true
+work_http_status=200
+work_success=true
