@@ -70,13 +70,31 @@ jobs:
         run: |
           npx --yes wrangler@latest deploy --config cloudflare/wrangler.jsonc
 
+      - name: Verify public club routing
+        id: smoke
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          for host in legalops.club www.legalops.club; do
+            body=$(curl -fsSL --retry 5 --retry-delay 2 \
+              -H 'Cache-Control: no-cache' \
+              "https://${host}/?brandcheck=${GITHUB_RUN_ID}")
+            printf '%s' "$body" | grep -q 'legalops.club / comunidade'
+            printf '%s' "$body" | grep -q 'aria-label="legalops.club"'
+            if printf '%s' "$body" | grep -q 'LEGALOPS.WORK / VAGAS'; then
+              echo "${host} is still serving the Work landing" >&2
+              exit 1
+            fi
+          done
+
       - name: Record deploy status
         if: always()
         run: |
-          printf 'commit=%s\nworker_upload=%s\nclub_route=%s\nrun_id=%s\n' \
+          printf 'commit=%s\nworker_upload=%s\nclub_route=%s\npublic_smoke=%s\nrun_id=%s\n' \
             "$GITHUB_SHA" \
             "${{ steps.deploy.outcome }}" \
             "${{ steps.club_route.outcome }}" \
+            "${{ steps.smoke.outcome }}" \
             "$GITHUB_RUN_ID" \
             > .github/cloudflare-deploy-status.txt
           git config user.name 'github-actions[bot]'
@@ -86,5 +104,5 @@ jobs:
           git push
 
       - name: Fail if Cloudflare deployment failed
-        if: steps.deploy.outcome != 'success' || steps.club_route.outcome != 'success'
+        if: steps.deploy.outcome != 'success' || steps.club_route.outcome != 'success' || steps.smoke.outcome != 'success'
         run: exit 1
