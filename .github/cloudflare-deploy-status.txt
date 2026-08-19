@@ -1,3 +1,4 @@
-commit=4fda6a8c31de5db7f222458a98e626531e664e58
-outcome=success
-run_id=32215702413
+commit=38c50b99482b16f5e6d32cc4762f9e537613a9b0
+worker_upload=success
+club_route=success
+run_id=32215714168
