@@ -20,6 +20,9 @@ interface BrandLogoProps {
 
 const BRAND_INK = '#111111'
 const BRAND_CORAL = '#E88A6A'
+const BRAND_WORDMARK_FONT = 'var(--font-quicksand), Quicksand, ui-rounded, sans-serif'
+const BRAND_WORDMARK_WEIGHT = 600
+const BRAND_WORDMARK_TRACKING = '-0.055em'
 
 // Legacy symbol kept only for backwards compatibility with internal screens.
 // Public brand surfaces should use BrandWordmark instead.
@@ -40,12 +43,16 @@ export function BrandWordmark({
   accentClassName,
   inverse = false,
 }: BrandWordmarkProps) {
-  const wrapperClass = className ?? `inline-flex items-baseline text-[24px] font-semibold leading-none tracking-[-0.055em] ${inverse ? 'text-white' : 'text-[#111111]'}`
+  const wrapperClass = className ?? `inline-flex items-baseline text-[24px] leading-none ${inverse ? 'text-white' : 'text-[#111111]'}`
 
   return (
     <span
       className={wrapperClass}
-      style={{ fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }}
+      style={{
+        fontFamily: BRAND_WORDMARK_FONT,
+        fontWeight: BRAND_WORDMARK_WEIGHT,
+        letterSpacing: BRAND_WORDMARK_TRACKING,
+      }}
       aria-label={`legalops.${suffix}`}
     >
       <span>legalops</span>
@@ -65,7 +72,7 @@ export function BrandLogo({
   return (
     <div className={className ?? 'flex items-center'}>
       <div>
-        <BrandWordmark suffix={suffix} className={titleClassName ?? 'inline-flex items-baseline text-[24px] font-semibold leading-none tracking-[-0.055em] text-[#111111]'} />
+        <BrandWordmark suffix={suffix} className={titleClassName ?? 'inline-flex items-baseline text-[24px] leading-none text-[#111111]'} />
         {subtitle ? (
           <div className={subtitleClassName ?? 'mt-1 text-xs text-[#111111]/55'} style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
             {subtitle}
