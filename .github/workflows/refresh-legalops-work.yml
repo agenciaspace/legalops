@@ -1,0 +1,60 @@
+name: Refresh legalops.work edge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refresh-legalops-work.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Inspect and purge Cloudflare zone
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set +e
+          OUT=.github/cloudflare-work-status.txt
+          : > "$OUT"
+
+          ZONES=$(curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json' 'https://api.cloudflare.com/client/v4/zones?name=legalops.work')
+          ZONE_ID=$(printf '%s' "$ZONES" | jq -r '.result[0].id // empty')
+          ZONE_SUCCESS=$(printf '%s' "$ZONES" | jq -r '.success // false')
+          printf 'zone_lookup_success=%s\nzone_found=%s\n' "$ZONE_SUCCESS" "$([ -n "$ZONE_ID" ] && echo true || echo false)" >> "$OUT"
+
+          if [ -n "$ZONE_ID" ]; then
+            DNS=$(curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?name=legalops.work")
+            printf 'dns_success=%s\n' "$(printf '%s' "$DNS" | jq -r '.success // false')" >> "$OUT"
+            printf '%s' "$DNS" | jq -r '.result[]? | "dns=\(.type) \(.name) -> \(.content) proxied=\(.proxied)"' >> "$OUT"
+
+            ROUTES=$(curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/workers/routes")
+            printf 'routes_success=%s\n' "$(printf '%s' "$ROUTES" | jq -r '.success // false')" >> "$OUT"
+            printf '%s' "$ROUTES" | jq -r '.result[]? | "route=\(.pattern) script=\(.script // "none")"' >> "$OUT"
+
+            PURGE=$(curl -sS -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json' --data '{"purge_everything":true}' "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/purge_cache")
+            printf 'purge_success=%s\n' "$(printf '%s' "$PURGE" | jq -r '.success // false')" >> "$OUT"
+            printf '%s' "$PURGE" | jq -r '.errors[]? | "purge_error=\(.code): \(.message)"' >> "$OUT"
+          else
+            printf '%s' "$ZONES" | jq -r '.errors[]? | "zone_error=\(.code): \(.message)"' >> "$OUT"
+          fi
+
+          HTTP_CODE=$(curl -L -sS -o /tmp/work.html -w '%{http_code}' -A 'Mozilla/5.0 LegalOpsEdgeCheck/1.0' "https://legalops.work/?edgecheck=$GITHUB_RUN_ID")
+          printf 'public_http=%s\n' "$HTTP_CODE" >> "$OUT"
+          if grep -q '5 vagas' /tmp/work.html; then printf 'public_contains_5_vagas=true\n' >> "$OUT"; else printf 'public_contains_5_vagas=false\n' >> "$OUT"; fi
+          if grep -q '1 vaga' /tmp/work.html; then printf 'public_contains_1_vaga=true\n' >> "$OUT"; else printf 'public_contains_1_vaga=false\n' >> "$OUT"; fi
+
+      - name: Save status
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/cloudflare-work-status.txt
+          git diff --cached --quiet || git commit -m 'chore: record legalops.work edge status [skip ci]'
+          git push
