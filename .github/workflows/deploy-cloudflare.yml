@@ -70,7 +70,7 @@ jobs:
             body=$(curl -fsSL --retry 5 --retry-delay 2 \
               -H 'Cache-Control: no-cache' \
               "https://${host}/?brandcheck=${GITHUB_RUN_ID}")
-            printf '%s' "$body" | grep -q 'comunidade de Legal Operations'
+            printf '%s' "$body" | grep -q 'comunidade para profissionais do jurídico'
             printf '%s' "$body" | grep -q 'aria-label="legalops.club"'
             if printf '%s' "$body" | grep -q 'LEGALOPS.WORK / VAGAS'; then
               echo "${host} is still serving the Work landing" >&2
