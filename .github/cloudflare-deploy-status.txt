@@ -1,5 +1,7 @@
-commit=43be0870dde04c69c25c39a0bb3f3ae5fd1e8cb7
-worker_upload=success
-club_route=success
-public_smoke=success
-run_id=32215878545
+commit=9f6aa69067e59739b38c73a4e368177dda60f676
+build=success
+app_deploy=failure
+cron_deploy=failure
+inbound_deploy=failure
+public_smoke=failure
+run_id=32366941335
