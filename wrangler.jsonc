@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "legalops-app",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "CLOUDFLARE_ACCOUNT_ID": "3d40d7797b3fd6d1cd2644eefea9e907",
+    "CLOUDFLARE_EMAIL_SENDER_NAME": "Legal Ops",
+    "CLOUDFLARE_EMAIL_SENDER_EMAIL": "hello@mail.legalops.work"
+  },
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "routes": [
+    { "pattern": "legalops.work/*", "zone_name": "legalops.work" },
+    { "pattern": "www.legalops.work/*", "zone_name": "legalops.work" },
+    { "pattern": "legalops.club", "custom_domain": true },
+    { "pattern": "www.legalops.club", "custom_domain": true },
+    { "pattern": "legalops.legalops.club", "custom_domain": true }
+  ]
+}

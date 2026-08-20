@@ -25,11 +25,21 @@ export default function LoginPage() {
     setNotice(null)
     setLoading(true)
     const supabase = createClient()
+    const requestedPath = new URLSearchParams(window.location.search).get('next')
+    const safePath = requestedPath?.startsWith('/') && !requestedPath.startsWith('//')
+      ? requestedPath
+      : window.location.hostname.endsWith('legalops.club') ? '/community' : '/dashboard'
 
     const { data, error } =
       mode === 'login'
         ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password })
+        : await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(safePath)}`,
+            },
+          })
 
     setLoading(false)
 
@@ -44,10 +54,7 @@ export default function LoginPage() {
       return
     }
 
-    const requestedPath = new URLSearchParams(window.location.search).get('next')
-    const safePath = requestedPath?.startsWith('/') && !requestedPath.startsWith('//')
-      ? requestedPath
-      : window.location.hostname.endsWith('legalops.club') ? '/community' : '/dashboard'
+    await fetch('/api/auth/welcome', { method: 'POST' }).catch(() => undefined)
 
     router.push(safePath)
     router.refresh()

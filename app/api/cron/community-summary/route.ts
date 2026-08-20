@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { buildDiscussionSummaryFallback, parseDiscussionSummaryResponse } from '@/lib/community-summary'
-import { generateKimiText } from '@/lib/kimi'
+import { generateOpenCodeGoText } from '@/lib/opencode-go'
 
 type Post = { id: string; category: string; title: string; body: string }
 type Comment = { post_id: string; body: string }
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
   let model = 'extractive-fallback'
 
   try {
-    const response = await generateKimiText({
+    const response = await generateOpenCodeGoText({
       systemPrompt: 'Você é o curador do LegalOps Club. Sintetize apenas o conteúdo fornecido, preserve divergências e nunca invente pessoas, números ou conclusões.',
       userPrompt: `Crie o resumo semanal das discussões abaixo. Responda somente em JSON válido com esta estrutura: {"title":"...","summary":"...","key_points":["..."]}. Use pt-BR, uma síntese de 2 a 4 parágrafos e de 3 a 6 pontos-chave.\n\n${sourceText}`,
       maxTokens: 1400,
@@ -81,10 +81,10 @@ export async function GET(request: NextRequest) {
     const parsed = parseDiscussionSummaryResponse(response)
     if (parsed) {
       generated = parsed
-      model = process.env.KIMI_MODEL ?? 'moonshot-v1-8k'
+      model = process.env.OPENCODE_GO_MODEL ?? 'deepseek-v4-flash'
     }
   } catch (error) {
-    console.error('[community-summary] AI generation unavailable, using extractive fallback', error)
+    console.error('[community-summary] OpenCode Go unavailable, using extractive fallback', error)
   }
 
   const { error: insertError } = await supabase

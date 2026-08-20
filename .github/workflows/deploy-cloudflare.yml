@@ -3,6 +3,14 @@ on:
   push:
     branches: [main]
     paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - 'middleware.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'wrangler.jsonc'
+      - 'open-next.config.ts'
       - 'cloudflare/**'
       - '.github/workflows/deploy-cloudflare.yml'
   workflow_dispatch:
@@ -18,57 +26,40 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - id: deploy
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build OpenNext worker
+        id: build
+        continue-on-error: true
+        run: npm run build:cloudflare
+
+      - name: Deploy application Worker
+        id: deploy
         continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set +e
+        run: npm run deploy:cloudflare
 
-          deploy_worker() {
-            NAME="$1"
-            FILE="$2"
-            MODULE="$3"
-            OUT="$4"
-            HTTP_CODE=$(curl -sS -o "$OUT" -w '%{http_code}' \
-              -X PUT \
-              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-              -F "metadata={\"main_module\":\"$MODULE\",\"compatibility_date\":\"2026-08-13\"};type=application/json" \
-              -F "$MODULE=@$FILE;filename=$MODULE;type=application/javascript+module" \
-              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$NAME")
-            SUCCESS=$(jq -r '.success // false' "$OUT" 2>/dev/null)
-            echo "$HTTP_CODE $SUCCESS"
-          }
-
-          CLUB=$(deploy_worker legalops-club-proxy cloudflare/legalops-club-proxy.js legalops-club-proxy.js /tmp/club.json)
-          WORK=$(deploy_worker legalops-app cloudflare/legalops-work-proxy.js legalops-work-proxy.js /tmp/work.json)
-
-          CLUB_HTTP=$(echo "$CLUB" | awk '{print $1}')
-          CLUB_SUCCESS=$(echo "$CLUB" | awk '{print $2}')
-          WORK_HTTP=$(echo "$WORK" | awk '{print $1}')
-          WORK_SUCCESS=$(echo "$WORK" | awk '{print $2}')
-
-          {
-            echo "club_http_status=$CLUB_HTTP"
-            echo "club_success=$CLUB_SUCCESS"
-            jq -r '.errors[]? | "club_error=\(.code): \(.message)"' /tmp/club.json 2>/dev/null || true
-            echo "work_http_status=$WORK_HTTP"
-            echo "work_success=$WORK_SUCCESS"
-            jq -r '.errors[]? | "work_error=\(.code): \(.message)"' /tmp/work.json 2>/dev/null || true
-          } > .github/cloudflare-api-result.txt
-
-          if [ "$CLUB_SUCCESS" = "true" ] && [ "$WORK_SUCCESS" = "true" ]; then
-            exit 0
-          fi
-          exit 1
-
-      - name: Bind legalops.club custom domains
-        id: club_route
+      - name: Deploy cron Worker
+        id: deploy_cron
         continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          npx --yes wrangler@latest deploy --config cloudflare/wrangler.jsonc
+        run: npx wrangler deploy --config cloudflare/legalops-cron.wrangler.jsonc
+
+      - name: Deploy inbound email Worker
+        id: deploy_inbound
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config cloudflare/email-inbound.wrangler.jsonc
 
       - name: Verify public club routing
         id: smoke
@@ -79,7 +70,7 @@ jobs:
             body=$(curl -fsSL --retry 5 --retry-delay 2 \
               -H 'Cache-Control: no-cache' \
               "https://${host}/?brandcheck=${GITHUB_RUN_ID}")
-            printf '%s' "$body" | grep -q 'legalops.club / comunidade'
+            printf '%s' "$body" | grep -q 'comunidade de Legal Operations'
             printf '%s' "$body" | grep -q 'aria-label="legalops.club"'
             if printf '%s' "$body" | grep -q 'LEGALOPS.WORK / VAGAS'; then
               echo "${host} is still serving the Work landing" >&2
@@ -90,19 +81,21 @@ jobs:
       - name: Record deploy status
         if: always()
         run: |
-          printf 'commit=%s\nworker_upload=%s\nclub_route=%s\npublic_smoke=%s\nrun_id=%s\n' \
+          printf 'commit=%s\nbuild=%s\napp_deploy=%s\ncron_deploy=%s\ninbound_deploy=%s\npublic_smoke=%s\nrun_id=%s\n' \
             "$GITHUB_SHA" \
+            "${{ steps.build.outcome }}" \
             "${{ steps.deploy.outcome }}" \
-            "${{ steps.club_route.outcome }}" \
+            "${{ steps.deploy_cron.outcome }}" \
+            "${{ steps.deploy_inbound.outcome }}" \
             "${{ steps.smoke.outcome }}" \
             "$GITHUB_RUN_ID" \
             > .github/cloudflare-deploy-status.txt
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .github/cloudflare-deploy-status.txt .github/cloudflare-api-result.txt
+          git add .github/cloudflare-deploy-status.txt
           git diff --cached --quiet || git commit -m 'chore: record Cloudflare deploy status [skip ci]'
           git push
 
       - name: Fail if Cloudflare deployment failed
-        if: steps.deploy.outcome != 'success' || steps.club_route.outcome != 'success' || steps.smoke.outcome != 'success'
+        if: steps.build.outcome != 'success' || steps.deploy.outcome != 'success' || steps.deploy_cron.outcome != 'success' || steps.deploy_inbound.outcome != 'success' || steps.smoke.outcome != 'success'
         run: exit 1

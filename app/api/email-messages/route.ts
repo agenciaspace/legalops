@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import {
   buildHtmlEmail,
-  getBrevoSenderIdentity,
-  sendBrevoTransactionalEmail,
 } from '@/lib/brevo'
+import {
+  getCloudflareEmailSender,
+  sendCloudflareTransactionalEmail,
+} from '@/lib/cloudflare-email'
 import { getUserEmailAlias, listUserEmailMessages } from '@/lib/email-alias-store'
 import { parseEmailAddressList, validateOutboundEmailDraft } from '@/lib/email-messages'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
@@ -66,11 +68,11 @@ export async function POST(req: NextRequest) {
   }
 
   const recipients = parseEmailAddressList(to)
-  const sender = getBrevoSenderIdentity()
+  const sender = getCloudflareEmailSender()
   const htmlBody = buildHtmlEmail(messageBody)
 
   try {
-    const result = await sendBrevoTransactionalEmail({
+    const result = await sendCloudflareTransactionalEmail({
       to: recipients,
       subject: subject.trim(),
       textBody: messageBody.trim(),

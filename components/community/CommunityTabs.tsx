@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import {
   BarChart3,
   BadgeCheck,
+Bot,
   Building2,
   CalendarDays,
   ChevronDown,
@@ -18,7 +19,8 @@ import {
 
 const mainItems = [
   { href: '/community', label: 'Início', icon: Home, exact: true },
-  { href: '/community/office', label: 'Escritório', icon: Building2 },
+{ href: '/community/office', label: 'Escritório', icon: Building2 },
+  { href: '/community/agents', label: 'Agentes', icon: Bot },
   { href: '/community/summaries', label: 'Resumos IA', icon: Sparkles },
   { href: '/community/calendar', label: 'Lives', icon: CalendarDays },
   { href: '/community/members', label: 'Membros', icon: Users },

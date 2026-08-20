@@ -25,6 +25,7 @@ import {
   hasActiveClubAccess,
 } from '@/lib/community'
 import { createCommunityComment, createCommunityPost, toggleCommunityPostLike } from './actions'
+import { CommunityAgentCard } from './CommunityAgentCard'
 
 type Comment = {
   id: string
@@ -171,6 +172,8 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
               </div>
             </section>
           ) : null}
+
+          {selectedSpace ? <CommunityAgentCard category={selectedSpace} hasPaidAccess={hasPaidAccess} /> : null}
 
           {hasPaidAccess ? <details id="new-post" className="group mb-4 overflow-hidden rounded-xl border border-[#E2E2DE] bg-white" open={posts.length === 0}>
             <summary className="flex cursor-pointer list-none items-center gap-3 p-3.5 sm:px-4">

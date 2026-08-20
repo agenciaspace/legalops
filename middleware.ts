@@ -19,7 +19,11 @@ export async function middleware(request: NextRequest) {
   }
 
   let supabaseResponse = NextResponse.next({ request })
-  const publicPaths = new Set(['/', '/club', '/club/about', '/en', '/login', '/manifesto', '/pricing', '/for-employers', '/curso-ia-whatsapp'])
+  const publicPaths = new Set(['/', '/club', '/club/about', '/en', '/login', '/manifesto', '/pricing', '/for-employers', '/curso-ia-whatsapp', '/auth/confirm'])
+  const publicWebhookPaths = new Set([
+    '/api/webhooks/brevo/inbound',
+    '/api/webhooks/cloudflare/inbound',
+  ])
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,7 +45,10 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    if (pathname.startsWith('/api/')) {
+    if (publicWebhookPaths.has(pathname)) {
+      return supabaseResponse
+    }
+    if (pathname.startsWith('/api/') && !publicWebhookPaths.has(pathname)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     if (!publicPaths.has(pathname)) {
