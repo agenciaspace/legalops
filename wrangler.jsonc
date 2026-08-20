@@ -10,7 +10,9 @@
   "vars": {
     "CLOUDFLARE_ACCOUNT_ID": "3d40d7797b3fd6d1cd2644eefea9e907",
     "CLOUDFLARE_EMAIL_SENDER_NAME": "Legal Ops",
-    "CLOUDFLARE_EMAIL_SENDER_EMAIL": "hello@mail.legalops.work"
+    "CLOUDFLARE_EMAIL_SENDER_EMAIL": "hello@mail.legalops.work",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://dkjcvemtkxqweagrdmop.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_Cc0Bp-tFHkL0EH2htwJ3gA_trJ-UU8Q"
   },
   "assets": {
     "directory": ".open-next/assets",
