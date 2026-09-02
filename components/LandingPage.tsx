@@ -3,11 +3,12 @@ import { createServerClient } from '@supabase/ssr'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { LandingPageClient } from '@/components/LandingPageClient'
 import type { LandingCrawlerRun, LandingJob } from '@/components/LandingPageClient'
+import { isPublishableJobRecord } from '@/lib/job-publication'
 
 type LandingLocale = 'pt' | 'en'
 
 const JOB_SELECT =
-  'id, title, company, url, source_board, remote_reality, salary_min, salary_max, salary_currency, url_status, url_checked_at, created_at' as const
+  'id, title, company, company_logo_url, url, source_board, remote_reality, salary_min, salary_max, salary_currency, url_status, url_checked_at, created_at' as const
 
 async function fetchPublicJobs(): Promise<{ jobs: LandingJob[]; count: number }> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -21,17 +22,23 @@ async function fetchPublicJobs(): Promise<{ jobs: LandingJob[]; count: number }>
 
   // Discovery and URL validation are enough to publish a role. Enrichment adds
   // salary/remote metadata later and must never block a newly found live job.
-  const { data, count } = await supabase
+  const { data } = await supabase
     .from('jobs')
-    .select(JOB_SELECT, { count: 'exact' })
+    .select(JOB_SELECT)
     .eq('url_status', 'live')
     .eq('eligibility_status', 'eligible')
     .not('url_checked_at', 'is', null)
     .gte('url_checked_at', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())
     .order('created_at', { ascending: false })
-    .limit(20)
+    .limit(100)
 
-  return { jobs: (data ?? []) as LandingJob[], count: count ?? 0 }
+  const jobs = ((data ?? []) as LandingJob[]).filter(job => isPublishableJobRecord({
+    url: job.url,
+    urlStatus: job.url_status,
+    companyLogoUrl: job.company_logo_url,
+  }))
+
+  return { jobs, count: jobs.length }
 }
 
 async function fetchLatestCrawlerRun(): Promise<LandingCrawlerRun | null> {

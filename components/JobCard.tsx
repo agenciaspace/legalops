@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { RemoteBadge } from './RemoteBadge'
+import { CompanyLogo } from './CompanyLogo'
 import { formatSalary, hasSalary } from '@/lib/format-salary'
 import type { Job } from '@/lib/types'
 
@@ -30,12 +31,15 @@ export function JobCard({ job, onAction }: JobCardProps) {
 
   return (
     <div className={`bg-white rounded-2xl border border-[#1A1A1A]/10 p-4 shadow-sm hover:shadow-md hover:border-[#FF6A00]/30 transition-all ${isDead ? 'opacity-60' : ''}`}>
-      <div className="mb-3">
-        <h3 className="text-sm font-semibold text-[#1A1A1A] leading-tight">
-          {job.title}
-          {isDead && <span className="ml-1.5 text-xs font-normal text-amber-500">Possivelmente encerrada</span>}
-        </h3>
-        <p className="text-xs text-[#1A1A1A]/60 mt-0.5">{job.company}</p>
+      <div className="mb-3 flex items-start gap-3">
+        <CompanyLogo company={job.company} logoUrl={job.company_logo_url} className="h-9 w-9" />
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold text-[#1A1A1A] leading-tight">
+            {job.title}
+            {isDead && <span className="ml-1.5 text-xs font-normal text-amber-500">Possivelmente encerrada</span>}
+          </h3>
+          <p className="text-xs text-[#1A1A1A]/60 mt-0.5">{job.company}</p>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 mb-2">
@@ -66,7 +70,7 @@ export function JobCard({ job, onAction }: JobCardProps) {
           disabled={loading !== null}
           className="flex-1 bg-[#FF6A00] text-white text-xs font-bold py-2 rounded-xl hover:bg-[#E65C00] disabled:opacity-50 transition-colors"
         >
-          {loading === 'add' ? '...' : 'Adicionar'}
+          {loading === 'add' ? 'Criando CV...' : 'Quero participar'}
         </button>
         <button
           onClick={() => handleAction('ignore')}

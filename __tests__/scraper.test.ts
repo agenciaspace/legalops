@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   buildFirecrawlAgentPrompt,
   buildJobDiscoverySeed,
@@ -7,8 +7,10 @@ import {
   extractFirecrawlJobsFromPayload,
   evaluateJobEligibility,
   extractStoredLocation,
+  fetchJobDescription,
   filterByKeywords,
   inferSourceBoardFromUrl,
+  isPublishableJobUrlStatus,
   mapWithConcurrency,
   matchesLegalOpsTitle,
   matchesTargetMarket,
@@ -39,12 +41,68 @@ describe('classifyJobUrlStatus', () => {
     expect(classifyJobUrlStatus(200, '', 'https://jobs.lever.co/acme/job-id')).toBe('live')
   })
 
+  it('marks an empty Workday shell as dead after the posting was removed', () => {
+    expect(classifyJobUrlStatus(
+      200,
+      '<html><head><title></title><meta name="title" property="og:title"></head></html>',
+      'https://acme.wd5.myworkdayjobs.com/careers/job/remote/example_r-123',
+    )).toBe('dead')
+  })
+
+  it('marks job postings past their structured expiration date as dead', () => {
+    const expiredPosting = `
+      <script type="application/ld+json">
+        {"@type":"JobPosting","validThrough":"2026-08-19T23:59:59.000Z"}
+      </script>
+    `
+    const currentPosting = `
+      <script type="application/ld+json">
+        {"@type":"JobPosting","validThrough":"2026-08-21T23:59:59.000Z"}
+      </script>
+    `
+
+    expect(classifyJobUrlStatus(200, expiredPosting, '', new Date('2026-08-20T12:00:00Z'))).toBe('dead')
+    expect(classifyJobUrlStatus(200, currentPosting, '', new Date('2026-08-20T12:00:00Z'))).toBe('live')
+  })
+
+  it('trusts a future structured deadline over bundled Gupy translation labels', () => {
+    const openGupyPosting = `
+      <script type="application/ld+json">
+        {"@type":"JobPosting","validThrough":"2026-09-14"}
+      </script>
+      <script>{"closedApplications":"Inscrições encerradas"}</script>
+    `
+
+    expect(classifyJobUrlStatus(
+      200,
+      openGupyPosting,
+      'https://example.gupy.io/job/active',
+      new Date('2026-08-20T12:00:00Z'),
+    )).toBe('live')
+  })
+
   it('keeps network and temporary HTTP failures unknown so the crawler can retry', () => {
     expect(classifyJobUrlStatus(null)).toBe('unknown')
     expect(classifyJobUrlStatus(302)).toBe('unknown')
     expect(classifyJobUrlStatus(403)).toBe('unknown')
     expect(classifyJobUrlStatus(429)).toBe('unknown')
     expect(classifyJobUrlStatus(503)).toBe('unknown')
+  })
+
+  it('never treats a successful social-wall response as a live application page', () => {
+    expect(classifyJobUrlStatus(
+      200,
+      '<h1>Legal Operations Manager</h1>',
+      'https://www.linkedin.com/jobs/view/4454450309',
+    )).toBe('unknown')
+  })
+})
+
+describe('public job publication', () => {
+  it('only publishes URLs that were positively verified as live', () => {
+    expect(isPublishableJobUrlStatus('live')).toBe(true)
+    expect(isPublishableJobUrlStatus('unknown')).toBe(false)
+    expect(isPublishableJobUrlStatus('dead')).toBe(false)
   })
 })
 
@@ -75,6 +133,16 @@ describe('matchesLegalOpsTitle', () => {
     expect(matchesLegalOpsTitle('Operador de Legal Ops Pleno')).toBe(true)
     expect(matchesLegalOpsTitle('Advogado(a) Trabalhista Sênior')).toBe(false)
   })
+
+  it('matches adjacent operations titles found in the Brazilian LinkedIn audit', () => {
+    expect(matchesLegalOpsTitle('Controller Jurídico')).toBe(true)
+    expect(matchesLegalOpsTitle('ANL OPER JURIDICO JR')).toBe(true)
+    expect(matchesLegalOpsTitle('Legal Efficiency Specialist')).toBe(true)
+    expect(matchesLegalOpsTitle('Legal Services Analyst')).toBe(true)
+    expect(matchesLegalOpsTitle('Analista de BPO Jurídico')).toBe(true)
+    expect(matchesLegalOpsTitle('Analista de Backoffice Jurídico')).toBe(true)
+    expect(matchesLegalOpsTitle('Especialista em Jurimetria')).toBe(true)
+  })
 })
 
 describe('filterByKeywords', () => {
@@ -104,6 +172,8 @@ describe('buildFirecrawlAgentPrompt', () => {
     expect(prompt).toContain('Roles in Brazil')
     expect(prompt).toContain('operações jurídicas')
     expect(prompt).toContain('Exclude generic lawyer')
+    expect(prompt).toContain('social networks and aggregators only as discovery leads')
+    expect(prompt).toContain('applicationLink MUST be the employer')
   })
 })
 
@@ -154,6 +224,12 @@ describe('canonicalizeJobUrl', () => {
     expect(canonicalizeJobUrl(
       'https://br.indeed.com/viewjob?utm_campaign=jobs&jk=abc123',
     )).toBe('https://br.indeed.com/viewjob?jk=abc123')
+  })
+
+  it('normalizes LinkedIn job URLs to their stable numeric id', () => {
+    expect(canonicalizeJobUrl(
+      'https://br.linkedin.com/jobs/view/legal-operations-manager-at-acme-4454450309?position=1&pageNum=0&trackingId=secret',
+    )).toBe('https://www.linkedin.com/jobs/view/4454450309')
   })
 })
 
@@ -221,24 +297,19 @@ describe('extractFirecrawlJobsFromPayload', () => {
 
     const result = extractFirecrawlJobsFromPayload(payload)
 
-    expect(result).toHaveLength(3)
+    expect(result).toHaveLength(2)
     expect(result[0]).toMatchObject({
       title: 'Legal Operations Billing, Manager',
       company: 'Mondelez International, Inc',
-      source_board: 'cloc',
+      source_board: 'company_site',
       location: 'Chicago, Illinois',
       salary_range: '$95,100 to $130,790 per year',
       posted_at: '2026-08-12T00:00:00.000Z',
     })
     expect(result[1]).toMatchObject({
-      title: 'Operations Manager, Legal',
-      company: 'Cohere',
-      source_board: 'legaloperators',
-    })
-    expect(result[2]).toMatchObject({
       title: 'Head of Legal Operations',
       company: 'Brex',
-      source_board: 'goinhouse',
+      source_board: 'company_site',
       location: 'San Francisco, CA',
     })
   })
@@ -303,17 +374,43 @@ describe('extractFirecrawlJobsFromPayload (scrape format)', () => {
 
     const result = extractFirecrawlJobsFromPayload(payload)
 
-    expect(result).toHaveLength(2)
-    expect(result[0]).toMatchObject({
-      title: 'Legal Operations Assistant',
-      salary_range: '$27 - $29 an hour',
-      source_board: 'indeed',
+    expect(result).toEqual([])
+  })
+})
+
+describe('fetchJobDescription direct destination resolution', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('follows an aggregator apply link and validates the direct ATS page', async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input)
+      if (url.includes('vaga-ja.com')) {
+        return new Response('<a href="https://jobs.lever.co/acme/legal-ops">Candidatar-se</a>', { status: 200 })
+      }
+      return new Response(`
+        <script type="application/ld+json">
+          {"@type":"JobPosting","title":"Legal Operations Manager","hiringOrganization":{"@type":"Organization","name":"Acme","logo":"https://acme.com/logo.svg"}}
+        </script>
+        <h1>Legal Operations Manager</h1>
+      `, { status: 200 })
     })
-    expect(result[1]).toMatchObject({
-      title: 'Head of Legal Operations',
-      salary_range: '$210,000 to $250,000 Annually',
-      source_board: 'goinhouse',
-    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await fetchJobDescription('https://vaga-ja.com/job/123')
+
+    expect(result.urlStatus).toBe('live')
+    expect(result.finalUrl).toBe('https://jobs.lever.co/acme/legal-ops')
+    expect(result.companyLogoUrl).toBe('https://acme.com/logo.svg')
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps a LinkedIn-only lead unpublished when no direct application URL exists', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('<h1>Legal Operations Manager</h1>', { status: 200 })))
+
+    const result = await fetchJobDescription('https://www.linkedin.com/jobs/view/4454450309')
+
+    expect(result.urlStatus).toBe('unknown')
+    expect(result.companyLogoUrl).toBeNull()
   })
 })
 

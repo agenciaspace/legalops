@@ -3,27 +3,17 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { extractSalaryFromHtml, type ExtractedSalary } from '@/lib/utils'
 import { fetchJobDescription } from '@/lib/scraper'
+import { resolveCompanyLogoUrl } from '@/lib/company-logo'
+import { isPublishableJobRecord } from '@/lib/job-publication'
+import { normalizeSalaryRange, parseSalaryNumber } from '@/lib/format-salary'
 import { DiscoverClient } from './DiscoverClient'
-
-function parseSalaryNum(val: string | null): number | null {
-  if (!val) return null
-  let cleaned = val.replace(/[R$€£₹¥A$C$S$HK$NZ$CHFkrzł₪,\s]/g, '')
-  if (/k$/i.test(val.replace(/\s+/g, ''))) {
-    cleaned = cleaned.replace(/k$/i, '')
-    const num = parseFloat(cleaned)
-    return isNaN(num) ? null : Math.round(num * 1000)
-  }
-  if (/^\d{1,3}(\.\d{3})+$/.test(cleaned)) {
-    cleaned = cleaned.replace(/\./g, '')
-  }
-  const num = parseFloat(cleaned)
-  return isNaN(num) ? null : Math.round(num)
-}
 
 function toSalaryFields(extracted: ExtractedSalary | null) {
   if (!extracted) return null
-  const salary_min = parseSalaryNum(extracted.min)
-  const salary_max = parseSalaryNum(extracted.max)
+  const { salary_min, salary_max } = normalizeSalaryRange(
+    parseSalaryNumber(extracted.min),
+    parseSalaryNumber(extracted.max),
+  )
   if (!salary_min && !salary_max) return null
   return { salary_min, salary_max, salary_currency: extracted.currency ?? null }
 }
@@ -39,7 +29,7 @@ async function backfillMissingSalaries() {
   const admin = createAdminClient()
   const { data: jobs } = await admin
     .from('jobs')
-    .select('id, url, raw_description')
+    .select('id, url, company, company_logo_url, raw_description')
     .eq('enrichment_status', 'done')
     .neq('url_status', 'dead')
     .is('salary_min', null)
@@ -61,13 +51,21 @@ async function backfillMissingSalaries() {
     // Strategy 2: re-fetch the job page and extract salary from fresh HTML
     if (job.url) {
       try {
-        const { extractedSalary, urlStatus } = await fetchJobDescription(job.url)
+        const { extractedSalary, urlStatus, companyLogoUrl, finalUrl } = await fetchJobDescription(job.url)
         const salary = toSalaryFields(extractedSalary)
+        const resolvedLogo = resolveCompanyLogoUrl(job.company, job.company_logo_url, companyLogoUrl)
+        const publishable = isPublishableJobRecord({
+          url: finalUrl,
+          urlStatus,
+          companyLogoUrl: resolvedLogo,
+        })
         await admin
           .from('jobs')
           .update({
             ...(salary ?? {}),
-            url_status: urlStatus,
+            url_status: urlStatus === 'dead' ? 'dead' : publishable ? 'live' : 'unknown',
+            ...(publishable && finalUrl !== job.url ? { url: finalUrl } : {}),
+            ...(!job.company_logo_url && resolvedLogo ? { company_logo_url: resolvedLogo } : {}),
             url_checked_at: new Date().toISOString(),
           })
           .eq('id', job.id)
@@ -125,7 +123,12 @@ export default async function DiscoverPage() {
     query = query.not('id', 'in', `(${excludedIds.join(',')})`)
   }
 
-  const { data: jobs } = await query
+  const { data: rawJobs } = await query
+  const jobs = (rawJobs ?? []).filter(job => isPublishableJobRecord({
+    url: job.url,
+    urlStatus: job.url_status,
+    companyLogoUrl: job.company_logo_url,
+  }))
 
   const insertedLast7Days = (recentRuns ?? []).reduce(
     (sum, run) => sum + (typeof run.inserted_count === 'number' ? run.inserted_count : 0),
@@ -134,7 +137,7 @@ export default async function DiscoverPage() {
 
   return (
     <DiscoverClient
-      initialJobs={jobs ?? []}
+      initialJobs={jobs}
       crawlerStats={{
         latestRun: (latestRun as CrawlerRun | null) ?? null,
         insertedLast7Days,

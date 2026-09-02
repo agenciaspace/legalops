@@ -14,11 +14,15 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { formatSalary } from '@/lib/format-salary'
 import { remoteRealityLabel } from '@/lib/club-job-matching'
 import { markClubJobAlertsRead } from '../actions'
+import { JoinJobButton } from '@/components/JoinJobButton'
+import { CompanyLogo } from '@/components/CompanyLogo'
+import { isPublishableJobRecord } from '@/lib/job-publication'
 
 type AlertJob = {
   id: string
   title: string
   company: string
+  company_logo_url: string | null
   url: string
   source_board: string
   remote_reality: string | null
@@ -46,6 +50,7 @@ const sourceLabels: Record<string, string> = {
   gupy: 'Gupy',
   firecrawl: 'Firecrawl',
   company_site: 'Site da empresa',
+  linkedin: 'LinkedIn',
 }
 
 export const dynamic = 'force-dynamic'
@@ -62,7 +67,7 @@ export default async function CommunityJobsPage() {
       .maybeSingle(),
     supabase
       .from('club_job_alerts')
-      .select('id, match_score, match_reasons, cv_suggestions, read_at, created_at, jobs!inner(id, title, company, url, source_board, remote_reality, salary_min, salary_max, salary_currency, url_status, url_checked_at)')
+      .select('id, match_score, match_reasons, cv_suggestions, read_at, created_at, jobs!inner(id, title, company, company_logo_url, url, source_board, remote_reality, salary_min, salary_max, salary_currency, url_status, url_checked_at)')
       .eq('jobs.url_status', 'live')
       .not('jobs.url_checked_at', 'is', null)
       .is('dismissed_at', null)
@@ -79,7 +84,11 @@ export default async function CommunityJobsPage() {
     open_to_opportunities: boolean
     job_alerts_enabled: boolean
   } | null
-  const alerts = (rawAlerts ?? []) as unknown as JobAlert[]
+  const alerts = ((rawAlerts ?? []) as unknown as JobAlert[]).filter(alert => isPublishableJobRecord({
+    url: alert.jobs.url,
+    urlStatus: alert.jobs.url_status,
+    companyLogoUrl: alert.jobs.company_logo_url,
+  }))
   const unreadCount = alerts.filter(alert => !alert.read_at).length
   const profileReady = Boolean(
     profile?.open_to_opportunities
@@ -147,8 +156,13 @@ export default async function CommunityJobsPage() {
                       {!alert.read_at ? <span className="rounded bg-[#FFF0E9] px-2 py-1 text-[8px] font-black uppercase tracking-wider text-[#D9470F]">Nova</span> : null}
                       <span className="text-[9px] font-bold text-[#8A8782]">{sourceLabels[alert.jobs.source_board] ?? alert.jobs.source_board}</span>
                     </div>
-                    <h2 className="mt-2 text-lg font-extrabold tracking-[-0.02em] text-[#292824]">{alert.jobs.title}</h2>
-                    <p className="mt-1 text-xs font-semibold text-[#5F5C56]">{alert.jobs.company}</p>
+                    <div className="mt-2 flex items-start gap-3">
+                      <CompanyLogo company={alert.jobs.company} logoUrl={alert.jobs.company_logo_url} className="h-10 w-10" />
+                      <div className="min-w-0">
+                        <h2 className="text-lg font-extrabold tracking-[-0.02em] text-[#292824]">{alert.jobs.title}</h2>
+                        <p className="mt-1 text-xs font-semibold text-[#5F5C56]">{alert.jobs.company}</p>
+                      </div>
+                    </div>
                     <div className="mt-3 flex flex-wrap gap-2 text-[9px] font-bold text-[#77746E]">
                       <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#F4F2EC] px-2.5 py-1.5"><MapPin className="h-3 w-3" /> {remoteRealityLabel(alert.jobs.remote_reality)}</span>
                       {salary ? <span className="rounded-lg bg-[#F4F2EC] px-2.5 py-1.5">{salary}</span> : null}
@@ -176,6 +190,7 @@ export default async function CommunityJobsPage() {
                     <a href={alert.jobs.url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-extrabold text-[#D9470F] hover:underline">
                       Abrir vaga <ExternalLink className="h-3.5 w-3.5" />
                     </a>
+                    <JoinJobButton jobId={alert.jobs.id} />
                   </aside>
                 </div>
               </article>

@@ -1,4 +1,11 @@
-export type CrawlerDiscoverySource = 'firecrawl' | 'legacy' | 'combined'
+export type CrawlerDiscoverySource =
+  | 'firecrawl'
+  | 'legacy'
+  | 'direct_ats'
+  | 'company_site'
+  | 'aggregator'
+  | 'combined'
+  | 'none'
 
 export interface CrawlerRun {
   id: string
@@ -22,9 +29,13 @@ export interface CrawlerStats {
 
 export function formatCrawlerDiscoverySource(source: CrawlerDiscoverySource): string {
   switch (source) {
-    case 'combined': return 'Firecrawl + Legacy'
+    case 'combined': return 'Múltiplas fontes'
     case 'firecrawl': return 'Firecrawl'
     case 'legacy': return 'Legacy'
+    case 'direct_ats': return 'ATS direto'
+    case 'company_site': return 'Sites das empresas'
+    case 'aggregator': return 'Agregadores'
+    case 'none': return 'Sem resultados'
   }
 }
 

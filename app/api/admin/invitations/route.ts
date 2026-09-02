@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { sendClubWelcomeEmailIfNeeded } from '@/lib/welcome-email'
+import { sendClubInvitationEmail } from '@/lib/welcome-email'
 
 function getAdminEmails() {
   return new Set(
@@ -38,10 +38,14 @@ export async function POST(request: NextRequest) {
   }
 
   const admin = createAdminClient()
-  const redirectTo = `${getRequestOrigin(request)}/auth/confirm?next=${encodeURIComponent('/community')}`
-  const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo })
+  const redirectTo = `${getRequestOrigin(request)}/auth/confirm?next=${encodeURIComponent('/set-password?next=/onboard')}`
+  const { data: invited, error: inviteError } = await admin.auth.admin.generateLink({
+    type: 'invite',
+    email,
+    options: { redirectTo },
+  })
 
-  if (inviteError || !invited.user) {
+  if (inviteError || !invited.user || !invited.properties?.action_link) {
     return NextResponse.json(
       { error: inviteError?.message ?? 'Could not create invitation.' },
       { status: 502 }
@@ -62,9 +66,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await sendClubWelcomeEmailIfNeeded({ id: invited.user.id, email: invited.user.email })
+    await sendClubInvitationEmail({ email, actionLink: invited.properties.action_link })
   } catch (welcomeError) {
-    console.error('[invitations] club welcome email failed:', welcomeError)
+    console.error('[invitations] club invitation email failed:', welcomeError)
+    return NextResponse.json({ error: 'Invitation created, but the email could not be delivered.' }, { status: 502 })
   }
 
   return NextResponse.json({ ok: true, email, user_id: invited.user.id }, { status: 201 })

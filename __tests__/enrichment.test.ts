@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   parseEnrichmentResponse,
   buildEnrichmentPrompt,
-  extractKimiResponseText,
+  extractOpenRouterResponseText,
 } from '@/lib/enrichment'
 
 describe('parseEnrichmentResponse', () => {
@@ -25,6 +25,25 @@ describe('parseEnrichmentResponse', () => {
     expect(result!.salary_min).toBe(15000)
     expect(result!.remote_reality).toBe('fully_remote')
     expect(result!.benefits).toHaveLength(2)
+  })
+
+  it('normalizes an inverted salary range returned by the model', () => {
+    const result = parseEnrichmentResponse(JSON.stringify({
+      salary_min: 8790,
+      salary_max: 7550,
+      salary_currency: 'BRL',
+      benefits: [],
+      remote_label: null,
+      remote_reality: 'unknown',
+      remote_notes: null,
+      posted_at: null,
+      suggested_leader_name: null,
+      suggested_leader_title: null,
+      suggested_leader_linkedin: null,
+    }))
+
+    expect(result?.salary_min).toBe(7550)
+    expect(result?.salary_max).toBe(8790)
   })
 
   it('returns null for malformed JSON', () => {
@@ -72,14 +91,14 @@ describe('buildEnrichmentPrompt', () => {
   })
 })
 
-describe('extractKimiResponseText', () => {
+describe('extractOpenRouterResponseText', () => {
   it('supports OpenAI-style string content', () => {
-    expect(extractKimiResponseText('{"ok":true}')).toBe('{"ok":true}')
+    expect(extractOpenRouterResponseText('{"ok":true}')).toBe('{"ok":true}')
   })
 
   it('supports array-based text content', () => {
     expect(
-      extractKimiResponseText([
+      extractOpenRouterResponseText([
         { type: 'text', text: '{"foo":' },
         { type: 'text', text: '"bar"}' },
       ])

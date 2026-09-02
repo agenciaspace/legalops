@@ -223,6 +223,20 @@ describe('extractSalaryFromHtml', () => {
     expect(result!.currency).toBe('BRL')
   })
 
+  it('extracts a Brazilian range joined by "e" with decimal cents', () => {
+    const html = '<div>Entre R$ 10.000,00 e R$ 12.000,00, com bônus</div>'
+    const result = extractSalaryFromHtml(html)
+    expect(result).not.toBeNull()
+    expect(result!.min).toBe('R$ 10.000,00')
+    expect(result!.max).toBe('R$ 12.000,00')
+    expect(result!.currency).toBe('BRL')
+  })
+
+  it('does not interpret a footer WhatsApp number as compensation', () => {
+    const html = '<script>{"className":"Footer_text__wFK2V","children":"WhatsApp: (41) 9 8790-7550"}</script>'
+    expect(extractSalaryFromHtml(html)).toBeNull()
+  })
+
   // Text patterns: numeric range with currency code
   it('extracts numeric range with currency code', () => {
     const html = '<p>120,000 - 180,000 USD</p>'

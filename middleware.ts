@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
   }
 
   let supabaseResponse = NextResponse.next({ request })
-  const publicPaths = new Set(['/', '/club', '/club/about', '/en', '/login', '/manifesto', '/pricing', '/for-employers', '/curso-ia-whatsapp', '/auth/confirm'])
+  const publicPaths = new Set(['/', '/club', '/club/about', '/club/checkout', '/en', '/login', '/set-password', '/manifesto', '/pricing', '/for-employers', '/curso-ia-whatsapp', '/auth/confirm'])
   const publicWebhookPaths = new Set([
     '/api/webhooks/brevo/inbound',
     '/api/webhooks/cloudflare/inbound',
@@ -72,6 +72,30 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/community', request.url))
   }
 
+  const requiresClub = pathname === '/onboard'
+    || ['/dashboard', '/discover', '/pipeline', '/jobs', '/settings', '/professionals'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
+    || ['/api/profile', '/api/pipeline', '/api/jobs', '/api/ai'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
+    || pathname.startsWith('/community/')
+
+  let clubAccess: { club_access_status: string | null; club_access_expires_at: string | null } | null = null
+  if (requiresClub) {
+    const { data } = await supabase
+      .from('community_members')
+      .select('club_access_status, club_access_expires_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    clubAccess = data
+
+    if (!hasActiveClubAccess(clubAccess)) {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Active Club membership required' }, { status: 403 })
+      }
+      const clubUrl = new URL('/club', request.url)
+      clubUrl.searchParams.set('membership', 'required')
+      return NextResponse.redirect(clubUrl)
+    }
+  }
+
   // Check onboarding completion for non-onboarding, non-API routes
   if (
     pathname !== '/onboard' &&
@@ -93,12 +117,6 @@ export async function middleware(request: NextRequest) {
 
   // The root feed contains the public preview. Every deeper Club route is paid-only.
   if (pathname.startsWith('/community/')) {
-    const { data: clubAccess } = await supabase
-      .from('community_members')
-      .select('club_access_status, club_access_expires_at')
-      .eq('user_id', user.id)
-      .maybeSingle()
-
     if (!hasActiveClubAccess(clubAccess)) {
       const upgradeUrl = new URL('/community', request.url)
       upgradeUrl.searchParams.set('upgrade', '1')

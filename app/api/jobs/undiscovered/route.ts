@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { CrawlerRun } from '@/lib/crawler-runs'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { isPublishableJobRecord } from '@/lib/job-publication'
 
 export async function GET(req: NextRequest) {
   const supabase = await createServerSupabaseClient()
@@ -53,7 +54,11 @@ export async function GET(req: NextRequest) {
   )
 
   return NextResponse.json({
-    jobs: jobsResult.data ?? [],
+    jobs: (jobsResult.data ?? []).filter(job => isPublishableJobRecord({
+      url: job.url,
+      urlStatus: job.url_status,
+      companyLogoUrl: job.company_logo_url,
+    })),
     crawlerStats: {
       latestRun: (latestRunResult.data as CrawlerRun | null) ?? null,
       insertedLast7Days,

@@ -13,6 +13,7 @@ import { TimelineSection } from '@/components/TimelineSection'
 import { InterviewPrepSection } from '@/components/InterviewPrepSection'
 import { CoverLetterSection } from '@/components/CoverLetterSection'
 import { PaidPlanAgentsSection } from '@/components/PaidPlanAgentsSection'
+import { PersonalizedCvSection } from '@/components/PersonalizedCvSection'
 import type { PaidAgentSettings } from '@/lib/paid-agent-settings'
 import type {
   PipelineEntryWithJob,
@@ -21,6 +22,7 @@ import type {
   Contact,
   ApplicationEvent,
   UserTier,
+  PersonalizedCv,
 } from '@/lib/types'
 
 interface Props {
@@ -31,6 +33,7 @@ interface Props {
   events: ApplicationEvent[]
   userTier: UserTier
   agentSettings: PaidAgentSettings
+  personalizedCv: PersonalizedCv | null
 }
 
 type Tab = 'overview' | 'ai-tools' | 'networking'
@@ -43,6 +46,7 @@ export function JobDetailClient({
   events,
   userTier,
   agentSettings,
+  personalizedCv,
 }: Props) {
   const router = useRouter()
   const job = entry.job
@@ -137,6 +141,8 @@ export function JobDetailClient({
           <p className="text-sm font-semibold text-[#1A1A1A] mt-0.5">{events.length}</p>
         </div>
       </div>
+
+      <PersonalizedCvSection entryId={entry.id} initialCv={personalizedCv} />
 
       {/* Tab Navigation */}
       <div className="flex gap-1 bg-[#1A1A1A]/5 rounded-xl p-1">

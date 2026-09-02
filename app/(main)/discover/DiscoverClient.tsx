@@ -78,8 +78,10 @@ export function DiscoverClient({
       }),
     })
     if (res.ok) {
+      const data = await res.json()
       setJobs(prev => prev.filter(j => j.id !== jobId))
-      router.refresh()
+      if (action === 'add' && data.entry?.id) router.push(`/jobs/${data.entry.id}`)
+      else router.refresh()
     }
   }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { generateKimiText } from '@/lib/kimi'
+import { generateOpenRouterText } from '@/lib/openrouter'
 
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabaseClient()
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     : ''
 
   try {
-    const text = await generateKimiText({
+    const text = await generateOpenRouterText({
       systemPrompt: 'You are an expert career coach. Write polished Portuguese (BR) application materials with no extra commentary.',
       userPrompt: `Write a professional cover letter in Portuguese (BR) for this Legal Operations job.
 
@@ -49,10 +49,10 @@ Only output the cover letter text, no extra commentary.`,
 
     return NextResponse.json({ letter: text })
   } catch (error) {
-    console.error('[ai/cover-letter] Kimi request failed:', error)
+    console.error('[ai/cover-letter] OpenRouter request failed:', error)
 
     const status =
-      error instanceof Error && error.message.includes('KIMI_API_KEY')
+      error instanceof Error && error.message.includes('OPENROUTER_API_KEY')
         ? 503
         : 502
 

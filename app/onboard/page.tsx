@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { BrandLogo } from '@/components/BrandLogo'
 import type { LinkedInInsight, ProfessionalType } from '@/lib/types'
 
-type Step = 'basics' | 'professional' | 'expertise' | 'linkedin' | 'insights'
+type Step = 'basics' | 'professional' | 'expertise' | 'preferences' | 'cv' | 'linkedin' | 'insights'
 
 const PROFESSIONAL_TYPES: { value: ProfessionalType; label: string; description: string }[] = [
   {
@@ -82,6 +82,13 @@ export default function OnboardPage() {
   const [professionalType, setProfessionalType] = useState<ProfessionalType | null>(null)
   const [yearsExperience, setYearsExperience] = useState<number | ''>('')
   const [selectedAreas, setSelectedAreas] = useState<string[]>([])
+  const [desiredRoles, setDesiredRoles] = useState('')
+  const [skills, setSkills] = useState('')
+  const [toolsUsed, setToolsUsed] = useState('')
+  const [preferredRemote, setPreferredRemote] = useState('any')
+  const [careerSummary, setCareerSummary] = useState('')
+  const [careerHighlights, setCareerHighlights] = useState('')
+  const [baseCvText, setBaseCvText] = useState('')
   const [linkedinUrl, setLinkedinUrl] = useState('')
   const [insights, setInsights] = useState<LinkedInInsight[]>([])
   const [insightsScrapeSuccess, setInsightsScrapeSuccess] = useState(false)
@@ -112,7 +119,7 @@ export default function OnboardPage() {
   }
 
   async function handleBasicsNext() {
-    if (!fullName.trim()) { setError('Por favor, informe seu nome completo.'); return }
+    if (!fullName.trim() || !currentRole.trim()) { setError('Informe seu nome completo e cargo atual.'); return }
     setError(null)
     setSaving(true)
     try {
@@ -143,10 +150,61 @@ export default function OnboardPage() {
   }
 
   async function handleExpertiseNext() {
+    if (selectedAreas.length === 0) { setError('Selecione ao menos uma especialidade.'); return }
     setError(null)
     setSaving(true)
     try {
       await saveStep({ areas_of_expertise: selectedAreas })
+      setStep('preferences')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function commaList(value: string) {
+    return value.split(',').map(item => item.trim()).filter(Boolean)
+  }
+
+  async function handlePreferencesNext() {
+    if (commaList(desiredRoles).length === 0 || !careerSummary.trim()) {
+      setError('Informe ao menos um cargo desejado e um resumo profissional.')
+      return
+    }
+    setError(null)
+    setSaving(true)
+    try {
+      await saveStep({
+        desired_roles: commaList(desiredRoles),
+        skills: commaList(skills),
+        tools_used: commaList(toolsUsed),
+        preferred_remote: preferredRemote,
+        career_summary: careerSummary.trim(),
+        open_to_opportunities: true,
+        job_alerts_enabled: true,
+        cv_suggestions_enabled: true,
+      })
+      setStep('cv')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleCvNext() {
+    if (baseCvText.trim().length < 50) {
+      setError('Cole um CV base com pelo menos 50 caracteres para evitar currículos genéricos ou inventados.')
+      return
+    }
+    setError(null)
+    setSaving(true)
+    try {
+      await saveStep({
+        base_cv_text: baseCvText.trim(),
+        career_highlights: careerHighlights.split('\n').map(item => item.trim()).filter(Boolean),
+      })
       setStep('linkedin')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro desconhecido')
@@ -215,10 +273,12 @@ export default function OnboardPage() {
     basics: 'Dados básicos',
     professional: 'Tipo de atuação',
     expertise: 'Especialidades',
+    preferences: 'Objetivos',
+    cv: 'CV base',
     linkedin: 'LinkedIn',
     insights: 'Quick wins',
   }
-  const STEPS: Step[] = ['basics', 'professional', 'expertise', 'linkedin', 'insights']
+  const STEPS: Step[] = ['basics', 'professional', 'expertise', 'preferences', 'cv', 'linkedin', 'insights']
   const currentStepIndex = STEPS.indexOf(step)
 
   return (
@@ -234,7 +294,7 @@ export default function OnboardPage() {
       </div>
 
       {/* Step indicator */}
-      <div className="flex items-center gap-2 mb-8">
+      <div className="flex max-w-4xl flex-wrap items-center justify-center gap-2 mb-8">
         {STEPS.filter(s => s !== 'insights').map((s, i) => (
           <div key={s} className="flex items-center gap-2">
             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${
@@ -417,6 +477,70 @@ export default function OnboardPage() {
           </div>
         )}
 
+        {step === 'preferences' && (
+          <div className="space-y-5 rounded-2xl border border-[#1A1A1A]/10 bg-white p-6 shadow-sm">
+            <div>
+              <h2 className="text-lg font-semibold text-[#1A1A1A]">Objetivos e posicionamento</h2>
+              <p className="mt-0.5 text-sm text-[#1A1A1A]/60">Esses sinais definem quais vagas serão enviadas e se o CV deve destacar execução técnica, gestão ou estratégia.</p>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-[#1A1A1A]/70">Cargos desejados *</label>
+              <input value={desiredRoles} onChange={event => setDesiredRoles(event.target.value)} placeholder="Ex: Legal Ops Manager, Head of Legal Operations" className="w-full rounded-xl border border-[#1A1A1A]/20 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#FF6A00]" />
+              <p className="mt-1 text-xs text-[#1A1A1A]/50">Separe por vírgulas.</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[#1A1A1A]/70">Competências</label>
+                <input value={skills} onChange={event => setSkills(event.target.value)} placeholder="Projetos, dados, liderança" className="w-full rounded-xl border border-[#1A1A1A]/20 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#FF6A00]" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[#1A1A1A]/70">Ferramentas</label>
+                <input value={toolsUsed} onChange={event => setToolsUsed(event.target.value)} placeholder="Ironclad, Power BI, SQL" className="w-full rounded-xl border border-[#1A1A1A]/20 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#FF6A00]" />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-[#1A1A1A]/70">Modelo preferido</label>
+              <select value={preferredRemote} onChange={event => setPreferredRemote(event.target.value)} className="w-full rounded-xl border border-[#1A1A1A]/20 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#FF6A00]">
+                <option value="any">Qualquer modelo</option>
+                <option value="remote">Remoto</option>
+                <option value="hybrid">Híbrido</option>
+                <option value="onsite">Presencial</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-[#1A1A1A]/70">Resumo profissional *</label>
+              <textarea value={careerSummary} onChange={event => setCareerSummary(event.target.value)} rows={4} placeholder="Descreva seu nível, escopo, setores e tipo de impacto real." className="w-full rounded-xl border border-[#1A1A1A]/20 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#FF6A00]" />
+            </div>
+            {error && <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>}
+            <div className="flex gap-3">
+              <button onClick={() => setStep('expertise')} className="flex-1 rounded-xl border-2 border-[#1A1A1A] py-2.5 text-sm font-bold">← Voltar</button>
+              <button onClick={handlePreferencesNext} disabled={saving} className="flex-1 rounded-xl bg-[#FF6A00] py-2.5 text-sm font-bold text-white disabled:opacity-50">{saving ? 'Salvando...' : 'Continuar →'}</button>
+            </div>
+          </div>
+        )}
+
+        {step === 'cv' && (
+          <div className="space-y-5 rounded-2xl border border-[#1A1A1A]/10 bg-white p-6 shadow-sm">
+            <div>
+              <h2 className="text-lg font-semibold text-[#1A1A1A]">Sua fonte de verdade</h2>
+              <p className="mt-0.5 text-sm text-[#1A1A1A]/60">O sistema adapta a ênfase para cada vaga, mas nunca pode inventar experiência.</p>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-[#1A1A1A]/70">CV base *</label>
+              <textarea value={baseCvText} onChange={event => setBaseCvText(event.target.value)} rows={10} placeholder="Cole aqui o texto do seu currículo: cargos, empresas, datas, responsabilidades e formação." className="w-full rounded-xl border border-[#1A1A1A]/20 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#FF6A00]" />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-[#1A1A1A]/70">Resultados comprovados</label>
+              <textarea value={careerHighlights} onChange={event => setCareerHighlights(event.target.value)} rows={5} placeholder={'Um resultado por linha. Ex:\nReduzi o ciclo contratual em 30%.\nImplantei CLM para 120 usuários.'} className="w-full rounded-xl border border-[#1A1A1A]/20 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#FF6A00]" />
+            </div>
+            {error && <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>}
+            <div className="flex gap-3">
+              <button onClick={() => setStep('preferences')} className="flex-1 rounded-xl border-2 border-[#1A1A1A] py-2.5 text-sm font-bold">← Voltar</button>
+              <button onClick={handleCvNext} disabled={saving} className="flex-1 rounded-xl bg-[#FF6A00] py-2.5 text-sm font-bold text-white disabled:opacity-50">{saving ? 'Salvando...' : 'Continuar →'}</button>
+            </div>
+          </div>
+        )}
+
         {/* ─── STEP: LINKEDIN ───────────────────────────────────────────── */}
         {step === 'linkedin' && (
           <div className="bg-white rounded-2xl border border-[#1A1A1A]/10 p-6 shadow-sm space-y-5">
@@ -466,6 +590,7 @@ export default function OnboardPage() {
             >
               Pular por agora — adicionar depois nas configurações
             </button>
+            <button onClick={() => setStep('cv')} className="w-full text-xs text-[#1A1A1A]/50 hover:text-[#1A1A1A]/70">← Voltar ao CV base</button>
           </div>
         )}
 

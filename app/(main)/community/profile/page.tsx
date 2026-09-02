@@ -16,6 +16,9 @@ type Profile = {
   preferred_locations: string[] | null
   skills: string[] | null
   tools_used: string[] | null
+  career_summary: string | null
+  career_highlights: string[] | null
+  base_cv_text: string | null
   open_to_opportunities: boolean
   job_alerts_enabled: boolean
   cv_suggestions_enabled: boolean
@@ -59,7 +62,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
   const [{ data: rawProfile }, { data: rawVerification }] = await Promise.all([
     supabase
       .from('account_profiles')
-      .select('full_name, current_role, public_headline, public_bio, organization_name, linkedin_url, areas_of_expertise, professional_type, desired_roles, preferred_remote, preferred_locations, skills, tools_used, open_to_opportunities, job_alerts_enabled, cv_suggestions_enabled, is_public')
+      .select('full_name, current_role, public_headline, public_bio, organization_name, linkedin_url, areas_of_expertise, professional_type, desired_roles, preferred_remote, preferred_locations, skills, tools_used, career_summary, career_highlights, base_cv_text, open_to_opportunities, job_alerts_enabled, cv_suggestions_enabled, is_public')
       .eq('user_id', user?.id ?? '')
       .maybeSingle(),
     supabase
@@ -169,6 +172,18 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
             <label className="text-[10px] font-extrabold text-[#4D4B46]">
               Ferramentas
               <input name="tools_used" defaultValue={(profile?.tools_used ?? []).join(', ')} placeholder="Ironclad, Power BI" className="mt-1.5 h-10 w-full rounded-lg border border-[#DFDFDB] px-3 text-xs font-medium outline-none focus:border-[#FF9E77]" />
+            </label>
+            <label className="text-[10px] font-extrabold text-[#4D4B46] sm:col-span-2">
+              Resumo de carreira para personalização
+              <textarea name="career_summary" required minLength={20} maxLength={3000} rows={4} defaultValue={profile?.career_summary ?? ''} placeholder="Seu nível, escopo, setores e tipo de impacto." className="mt-1.5 w-full resize-y rounded-lg border border-[#DFDFDB] px-3 py-2.5 text-xs leading-5 outline-none focus:border-[#FF9E77]" />
+            </label>
+            <label className="text-[10px] font-extrabold text-[#4D4B46] sm:col-span-2">
+              Resultados comprovados
+              <textarea name="career_highlights" rows={5} defaultValue={(profile?.career_highlights ?? []).join('\n')} placeholder={'Um resultado por linha. Ex.:\nReduzi o ciclo contratual em 30%.'} className="mt-1.5 w-full resize-y rounded-lg border border-[#DFDFDB] px-3 py-2.5 text-xs leading-5 outline-none focus:border-[#FF9E77]" />
+            </label>
+            <label className="text-[10px] font-extrabold text-[#4D4B46] sm:col-span-2">
+              CV base — fonte de verdade
+              <textarea name="base_cv_text" required minLength={50} maxLength={30000} rows={10} defaultValue={profile?.base_cv_text ?? ''} placeholder="Cole cargos, empresas, datas, responsabilidades e formação. O sistema adapta a ênfase sem inventar fatos." className="mt-1.5 w-full resize-y rounded-lg border border-[#DFDFDB] px-3 py-2.5 text-xs leading-5 outline-none focus:border-[#FF9E77]" />
             </label>
 
             <div className="grid gap-2.5 sm:col-span-2">

@@ -6,7 +6,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { COMMUNITY_CATEGORIES, hasActiveClubAccess } from '@/lib/community'
 import { generateClubJobAlerts } from '@/lib/club-job-matching'
-import { generateOpenCodeGoText } from '@/lib/opencode-go'
+import { generateOpenRouterText } from '@/lib/openrouter'
 import { getCommunityAgent } from '@/lib/community-agents'
 
 const PROFESSIONAL_TYPES = new Set(['law_firm', 'legal_dept', 'public_sector', 'freelance', 'other'])
@@ -119,6 +119,10 @@ export async function updateCommunityProfile(formData: FormData) {
   const preferredLocations = commaSeparatedValues(formData, 'preferred_locations', 8)
   const skills = commaSeparatedValues(formData, 'skills', 15)
   const toolsUsed = commaSeparatedValues(formData, 'tools_used', 15)
+  const careerSummary = String(formData.get('career_summary') ?? '').trim()
+  const baseCvText = String(formData.get('base_cv_text') ?? '').trim()
+  const careerHighlights = String(formData.get('career_highlights') ?? '')
+    .split('\n').map(value => value.trim().slice(0, 500)).filter(Boolean).slice(0, 12)
   const professionalType = String(formData.get('professional_type') ?? '')
   const preferredRemote = String(formData.get('preferred_remote') ?? '')
   const openToOpportunities = formData.get('open_to_opportunities') === 'on'
@@ -132,7 +136,10 @@ export async function updateCommunityProfile(formData: FormData) {
     || headline.length < 3 || headline.length > 160
     || organizationName.length < 2 || organizationName.length > 120
     || bio.length < 20 || bio.length > 1200
+    || careerSummary.length < 20 || careerSummary.length > 3000
+    || baseCvText.length < 50 || baseCvText.length > 30000
     || areasOfExpertise.length === 0
+    || desiredRoles.length === 0
     || !PROFESSIONAL_TYPES.has(professionalType)
     || !REMOTE_PREFERENCES.has(preferredRemote)
   ) return
@@ -156,6 +163,9 @@ export async function updateCommunityProfile(formData: FormData) {
       preferred_locations: preferredLocations,
       skills,
       tools_used: toolsUsed,
+      career_summary: careerSummary,
+      career_highlights: careerHighlights,
+      base_cv_text: baseCvText,
       open_to_opportunities: openToOpportunities,
       job_alerts_enabled: jobAlertsEnabled,
       cv_suggestions_enabled: cvSuggestionsEnabled,
@@ -206,7 +216,7 @@ export async function askCommunityAgent(formData: FormData): Promise<{ ok: true;
   const agent = getCommunityAgent(category)
 
   try {
-    const answer = await generateOpenCodeGoText({
+    const answer = await generateOpenRouterText({
       systemPrompt: agent.systemPrompt,
       userPrompt: `Espaço da comunidade: ${COMMUNITY_CATEGORIES[category].title}\nAgente: ${agent.name}, ${agent.role}\n\nPergunta do membro:\n${question}\n\nResponda de forma prática em até 5 parágrafos curtos. Quando útil, organize em diagnóstico, opções e próximo passo.`,
       maxTokens: 900,

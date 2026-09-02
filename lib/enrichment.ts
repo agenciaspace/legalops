@@ -1,5 +1,6 @@
-import { extractKimiResponseText, generateKimiText } from './kimi'
+import { extractOpenRouterResponseText, generateOpenRouterText } from './openrouter'
 import { researchSuggestedLeader } from './leader-research'
+import { normalizeSalaryRange } from './format-salary'
 import type { RemoteReality } from './types'
 
 const VALID_REMOTE_REALITY: RemoteReality[] = [
@@ -60,10 +61,13 @@ export function parseEnrichmentResponse(text: string): EnrichmentResult | null {
     const remoteReality: RemoteReality = VALID_REMOTE_REALITY.includes(data.remote_reality)
       ? data.remote_reality
       : 'unknown'
+    const salary = normalizeSalaryRange(
+      typeof data.salary_min === 'number' ? data.salary_min : null,
+      typeof data.salary_max === 'number' ? data.salary_max : null,
+    )
 
     return {
-      salary_min: typeof data.salary_min === 'number' ? data.salary_min : null,
-      salary_max: typeof data.salary_max === 'number' ? data.salary_max : null,
+      ...salary,
       salary_currency: typeof data.salary_currency === 'string' ? data.salary_currency : null,
       benefits: Array.isArray(data.benefits) ? data.benefits.filter((b: unknown) => typeof b === 'string') : [],
       remote_label: typeof data.remote_label === 'string' ? data.remote_label : null,
@@ -79,7 +83,7 @@ export function parseEnrichmentResponse(text: string): EnrichmentResult | null {
   }
 }
 
-export { extractKimiResponseText }
+export { extractOpenRouterResponseText }
 
 function emptyEnrichmentResult(): EnrichmentResult {
   return {
@@ -120,16 +124,16 @@ export async function enrichJob({
   description,
   jobTitle,
 }: EnrichJobParams): Promise<EnrichmentResult | null> {
-  const apiKey = process.env.KIMI_API_KEY
+  const apiKey = process.env.OPENROUTER_API_KEY
   let enrichment = apiKey ? null : emptyEnrichmentResult()
 
   if (!apiKey) {
-    console.error('[enrichment] KIMI_API_KEY is not configured, skipping description extraction')
+    console.error('[enrichment] OPENROUTER_API_KEY is not configured, skipping description extraction')
   }
 
   if (apiKey) {
     try {
-      const text = await generateKimiText({
+      const text = await generateOpenRouterText({
         systemPrompt: 'You are a structured data extractor for job postings. Return only valid JSON, no explanation.',
         userPrompt: buildEnrichmentPrompt(description),
         maxTokens: 1024,
@@ -137,7 +141,7 @@ export async function enrichJob({
       })
       enrichment = parseEnrichmentResponse(text)
     } catch (error) {
-      console.error('[enrichment] Kimi request failed:', error)
+      console.error('[enrichment] OpenRouter request failed:', error)
     }
   }
 

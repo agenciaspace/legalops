@@ -1,4 +1,4 @@
-import { generateKimiText } from './kimi'
+import { generateOpenRouterText } from './openrouter'
 import type { LinkedInInsight, ProfessionalType } from './types'
 
 const PROFESSIONAL_TYPE_LABELS: Record<ProfessionalType, string> = {
@@ -134,12 +134,12 @@ export async function generateLinkedInInsights(params: {
     ...params,
   })
 
-  const apiKey = process.env.KIMI_API_KEY
+  const apiKey = process.env.OPENROUTER_API_KEY
   if (!apiKey) {
     return { insights: [], rawText: profileText }
   }
 
-  const text = await generateKimiText({
+  const text = await generateOpenRouterText({
     systemPrompt:
       'Você é um especialista em carreira jurídica. Retorne apenas JSON válido.',
     userPrompt: prompt,

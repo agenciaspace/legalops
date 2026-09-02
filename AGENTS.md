@@ -37,7 +37,7 @@ Browser
                                               +------> Supabase Auth/Postgres
                                                             |
                      Firecrawl + ATS APIs <-----------------+
-                     Kimi/Moonshot, Brevo, LinkedIn fetch
+                     OpenRouter, Cloudflare Email, LinkedIn fetch
 ```
 
 ### Shared Next.js application
@@ -90,7 +90,7 @@ entry point unless deployment configuration explicitly connects them to
 
 The middleware public allowlist currently includes:
 
-`/`, `/club`, `/club/about`, `/en`, `/login`, `/manifesto`, `/pricing`,
+`/`, `/club`, `/club/about`, `/club/checkout`, `/en`, `/login`, `/manifesto`, `/pricing`,
 `/for-employers`, `/curso-ia-whatsapp`, and `/auth/confirm`.
 
 ### Work application
@@ -106,6 +106,8 @@ The middleware public allowlist currently includes:
 
 ### Club application
 
+- `/club/checkout`: public manual PIX checkout for the founder plan; payment
+  proof is sent by email and access is activated through the admin invitation flow.
 - `/community`: public preview plus paid community entry point.
 - `/community/profile`: member profile and job-alert preferences.
 - `/community/members`: member directory.
@@ -126,7 +128,7 @@ policies and server-side checks in `lib/community.ts` and Club actions.
 - `/api/cron/community-summary`: protected by the same bearer secret; creates
   the weekly discussion summary.
 - `/api/pipeline/**`: pipeline status, notes, contacts, events and leader data.
-- `/api/ai/interview-prep` and `/api/ai/cover-letter`: authenticated Kimi-backed
+- `/api/ai/interview-prep` and `/api/ai/cover-letter`: authenticated OpenRouter-backed
   career assistance.
 - `/api/profile/**`: profile and LinkedIn insights.
 - `/api/email-aliases/**` and `/api/email-messages`: authenticated email
@@ -211,7 +213,7 @@ paths, policies and billing integration.
 4. Jobs are fetched again to verify the application page and classify URL
    status as `live`, `dead` or `unknown`.
 5. Eligibility filters require a Legal Ops title and Brazil/LATAM eligibility.
-6. Kimi enriches pending jobs with salary, benefits, remote reality and other
+6. OpenRouter enriches pending jobs with salary, benefits, remote reality and other
    structured fields; failures retry until the attempt limit.
 7. Public leader research backfills a suggested Legal Ops leader.
 8. Club job alerts are generated for active members who enabled them.
@@ -223,7 +225,7 @@ expires unseen jobs when Firecrawl returned a non-empty successful result.
 ### Weekly Club summary
 
 `/api/cron/community-summary` runs Sundays at `0 21 * * 0` (18:00 BRT). It
-loads posts/comments from the previous UTC week, asks Kimi for strict JSON,
+loads posts/comments from the previous UTC week, asks OpenRouter for strict JSON,
 falls back to an extractive summary on AI failure, and upserts one summary per
 category and period.
 
@@ -232,8 +234,7 @@ category and period.
 | Service | Code surface | Required configuration |
 |---|---|---|
 | Supabase | Auth, PostgreSQL, RLS | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, server-only `SUPABASE_SERVICE_ROLE_KEY` |
-| Kimi/Moonshot | Work enrichment, leader and career AI | `KIMI_API_KEY`, optional `KIMI_MODEL` |
-| OpenCode Go | Club summaries and subtopic agents | `OPENCODE_GO_API_KEY`, optional `OPENCODE_GO_MODEL` |
+| OpenRouter | Work enrichment, leader/career AI, Club summaries and subtopic agents | `OPENROUTER_API_KEY`, optional `OPENROUTER_MODEL`, `OPENROUTER_SITE_URL` and `OPENROUTER_APP_NAME` |
 | Firecrawl | broad job discovery | `FIRECRAWL_API_KEY` |
 | Cloudflare Email Service | transactional/inbound email | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_EMAIL_API_TOKEN`, sender settings, `CLOUDFLARE_EMAIL_WEBHOOK_TOKEN` |
 | Cloudflare Workers | Next app, cron, inbound email | Worker configuration and secrets |
@@ -245,7 +246,7 @@ provider or webhook secrets to client components or commit them.
 ## Source-of-truth rules
 
 - Current executable code and migrations take precedence over old design docs.
-  In particular, the old CRM spec mentions Anthropic; current code uses Kimi.
+  In particular, the old CRM spec mentions Anthropic; current code uses OpenRouter.
 - Add new database changes as a new timestamped migration. Do not rewrite an
   already-applied migration.
 - Preserve RLS when adding tables or changing policies. Test both anonymous,

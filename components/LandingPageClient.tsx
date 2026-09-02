@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { ClubHeader } from '@/components/ClubHeader'
 import { BrandWordmark } from '@/components/BrandLogo'
+import { CompanyLogo } from '@/components/CompanyLogo'
 import { LegalOpsEcosystem } from '@/components/LegalOpsEcosystem'
 import { formatSalary } from '@/lib/format-salary'
 import type { RemoteReality } from '@/lib/types'
@@ -23,6 +24,7 @@ export interface LandingJob {
   id: string
   title: string
   company: string
+  company_logo_url: string | null
   url: string
   source_board: string
   remote_reality: string | null
@@ -222,8 +224,9 @@ export function LandingPageClient({
                   {recentJobs.map(job => {
                     const salary = formatSalary(job, '')
                     return (
-                      <a key={job.id} href={job.url} target="_blank" rel="noopener noreferrer" className="group grid grid-cols-[1fr_auto] gap-4 px-4 py-4 hover:bg-white">
-                        <div>
+                      <a key={job.id} href={job.url} target="_blank" rel="noopener noreferrer" className="group grid grid-cols-[auto_1fr_auto] gap-3 px-4 py-4 hover:bg-white">
+                        <CompanyLogo company={job.company} logoUrl={job.company_logo_url} className="h-9 w-9" />
+                        <div className="min-w-0">
                           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#817A73]">{job.company}</p>
                           <p className="mt-1 text-sm font-semibold leading-5 text-[#111111]">{job.title}</p>
                           <p className="mt-2 text-[10px] text-[#69635E]">{remoteLabel(job.remote_reality, locale)}{salary ? ` · ${salary}` : ''}</p>
@@ -304,8 +307,9 @@ export function LandingPageClient({
                     href={job.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group grid gap-4 border-b border-[#CEC8BD] py-5 transition hover:bg-[#FAF7F1] sm:grid-cols-[1fr_auto] sm:px-3"
+                    className="group grid grid-cols-[auto_1fr] gap-3 border-b border-[#CEC8BD] py-5 transition hover:bg-[#FAF7F1] sm:grid-cols-[auto_1fr_auto] sm:px-3"
                   >
+                    <CompanyLogo company={job.company} logoUrl={job.company_logo_url} />
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                         <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#817A73]">{job.company}</span>
@@ -318,7 +322,7 @@ export function LandingPageClient({
                         <span>{sourceLabels[job.source_board] ?? job.source_board}{checkedAt ? ` · ${copy.checked} ${checkedAt}` : ''}</span>
                       </div>
                     </div>
-                    <span className="flex items-center gap-1 self-center text-[11px] font-semibold text-[#44403C] group-hover:text-[#C9684F]">
+                    <span className="col-start-2 flex items-center gap-1 self-center text-[11px] font-semibold text-[#44403C] group-hover:text-[#C9684F] sm:col-start-auto">
                       {copy.source} <ExternalLink className="h-3.5 w-3.5" />
                     </span>
                   </a>

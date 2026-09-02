@@ -12,7 +12,11 @@
     "CLOUDFLARE_EMAIL_SENDER_NAME": "Legal Ops",
     "CLOUDFLARE_EMAIL_SENDER_EMAIL": "hello@mail.legalops.work",
     "NEXT_PUBLIC_SUPABASE_URL": "https://dkjcvemtkxqweagrdmop.supabase.co",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_Cc0Bp-tFHkL0EH2htwJ3gA_trJ-UU8Q"
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_Cc0Bp-tFHkL0EH2htwJ3gA_trJ-UU8Q",
+    "OPENROUTER_MODEL": "openrouter/auto",
+    "OPENROUTER_SITE_URL": "https://legalops.work",
+    "OPENROUTER_APP_NAME": "legalops",
+    "LEGALOPS_ADMIN_EMAILS": "leonhatori@gmail.com"
   },
   "assets": {
     "directory": ".open-next/assets",

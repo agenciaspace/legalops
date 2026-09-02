@@ -1,5 +1,12 @@
 import { stripHtml, extractJobMetaFromHtml, buildMetadataBlock, type ExtractedSalary } from './utils'
 import type { SourceBoard, UrlStatus } from './types'
+import { extractCompanyLogoFromHtml, extractCompanyWebsiteFromHtml } from './company-logo'
+import {
+  extractDirectApplicationLinks,
+  isBlockedJobSourceUrl,
+  isDirectJobUrl,
+  isSafePublicHttpUrl,
+} from './job-publication'
 
 export type RawJob = {
   title: string
@@ -11,6 +18,7 @@ export type RawJob = {
   listing_url?: string | null
   posted_at?: string | null
   accepts_brazil?: boolean
+  company_logo_url?: string | null
 }
 
 export type JobEligibility = {
@@ -76,7 +84,7 @@ Include roles whose primary work is Legal Operations, Legal Ops, operações jur
 
 Exclude generic lawyer, attorney, counsel, General Counsel, Chief Legal Officer, Head of Legal, compliance, privacy, and paralegal roles unless the title itself clearly identifies Legal Operations work. Exclude internships, expired/closed listings, duplicates, and roles whose location rules exclude Brazil/LATAM.
 
-Search public LinkedIn Jobs pages, Gupy, Indeed Brasil, company career sites, CLOC Jobs, Legal.io, LegalOperators, GoInhouse, Quero Home, and Radar da Gestão. Prefer the employer's or ATS's canonical application URL over an aggregator URL. Return the publication date as YYYY-MM-DD when available. Set acceptsBrazilCandidates to true only when the location is Brazil/LATAM or the listing explicitly accepts remote candidates based in Brazil/LATAM.`
+Search public LinkedIn Jobs pages, Gupy, Indeed Brasil, company career sites, CLOC Jobs, Legal.io, LegalOperators, GoInhouse, Quero Home, and Radar da Gestão. Treat social networks and aggregators only as discovery leads. applicationLink MUST be the employer's own careers page or the canonical ATS posting, never LinkedIn, Indeed, CLOC, Legal.io, LegalOperators, GoInhouse, Jooble, Adzuna, or another repost. Omit a listing when no direct employer/ATS URL can be found. Return the publication date as YYYY-MM-DD when available. Set acceptsBrazilCandidates to true only when the location is Brazil/LATAM or the listing explicitly accepts remote candidates based in Brazil/LATAM.`
 }
 
 const FIRECRAWL_AGENT_POLL_INTERVAL_MS = 5_000
@@ -117,7 +125,7 @@ const FIRECRAWL_EXTRACT_SCHEMA = {
           },
           applicationLink: {
             type: 'string',
-            description: 'Direct link to apply or view the full job posting',
+            description: 'Canonical employer or ATS job URL; never a social-network or aggregator URL',
           },
         },
         required: ['jobTitle', 'companyName', 'applicationLink', 'acceptsBrazilCandidates'],
@@ -172,6 +180,11 @@ export function canonicalizeJobUrl(value: string): string {
   try {
     const url = new URL(value.trim())
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return value.trim()
+
+    if (url.hostname.toLowerCase().endsWith('linkedin.com')) {
+      const linkedInJobId = url.pathname.match(/\/jobs\/view\/(?:.*-)?(\d{6,})\/?$/i)?.[1]
+      if (linkedInJobId) return `https://www.linkedin.com/jobs/view/${linkedInJobId}`
+    }
 
     url.hash = ''
     for (const key of Array.from(url.searchParams.keys())) {
@@ -234,7 +247,7 @@ export function matchesLegalOpsTitle(title: string): boolean {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
 
-  return /\b(?:legal\s+(?:operations?|ops|operator|innovation|technology|tech|transformation)|operations?\s+(?:manager|director|lead|specialist|analyst|coordinator|supervisor),?\s+legal|contracts?\s*(?:&|and|e)\s*legal|legal\s+(?:project|process)|law\s+department\s+.*(?:operations?|strategy)|CLM\s+(?:manager|director|specialist|analyst|lead|consultant|coordinator)|operacoes?\s+(?:juridicas?|legais)|controladoria\s+juridica|inovacao\s+juridica|tecnologia\s+juridica|projetos?\s+juridicos?|legaltech)\b/i.test(normalized)
+  return /\b(?:legal\s+(?:operations?|ops|operator|innovation|technology|tech|transformation|efficiency|services?)|operations?\s+(?:manager|director|lead|specialist|analyst|coordinator|supervisor),?\s+legal|contracts?\s*(?:&|and|e)\s*legal|legal\s+(?:project|process)|law\s+department\s+.*(?:operations?|strategy)|CLM\s+(?:manager|director|specialist|analyst|lead|consultant|coordinator)|oper(?:acao|acoes)?\s+(?:juridicos?|juridicas?|legais)|controladoria\s+juridica|controller\s+juridic[oa]|(?:bpo|backoffice)\s+juridic[oa]|jurimetria|inovacao\s+juridica|tecnologia\s+juridica|projetos?\s+juridicos?|legaltech)\b/i.test(normalized)
 }
 
 export function filterByKeywords(jobs: { title: string; url: string }[]): typeof jobs {
@@ -321,7 +334,7 @@ export function normalizeFirecrawlJobListing(listing: FirecrawlJobListing): RawJ
   const company = cleanString(listing.companyName)
   const applicationLink = cleanUrl(listing.applicationLink)
 
-  if (!title || !company || !applicationLink || !matchesLegalOpsTitle(title)) {
+  if (!title || !company || !applicationLink || !isDirectJobUrl(applicationLink) || !matchesLegalOpsTitle(title)) {
     return null
   }
 
@@ -338,7 +351,7 @@ export function normalizeFirecrawlJobListing(listing: FirecrawlJobListing): RawJ
     title,
     company,
     url: applicationLink,
-    source_board: inferSourceBoardFromUrl(listingUrl ?? applicationLink),
+    source_board: inferSourceBoardFromUrl(applicationLink),
     location: cleanString(listing.location),
     salary_range: cleanSalary(listing.salaryRange),
     listing_url: listingUrl,
@@ -413,6 +426,8 @@ export function dedupeJobsByUrl(jobs: RawJob[]): RawJob[] {
         url: canonicalUrl,
         listing_url: job.listing_url ? canonicalizeJobUrl(job.listing_url) : job.listing_url,
       })
+    } else if (!seen.get(key)?.company_logo_url && job.company_logo_url) {
+      seen.set(key, { ...seen.get(key)!, company_logo_url: job.company_logo_url })
     }
   }
 
@@ -790,6 +805,12 @@ export interface FetchJobResult {
   extractedSalary: ExtractedSalary | null
   httpStatus: number | null
   urlStatus: UrlStatus
+  companyLogoUrl: string | null
+  finalUrl: string
+}
+
+export function isPublishableJobUrlStatus(urlStatus: UrlStatus): boolean {
+  return urlStatus === 'live'
 }
 
 const CLOSED_JOB_PAGE_SIGNALS = [
@@ -835,14 +856,21 @@ export function classifyJobUrlStatus(
   httpStatus: number | null,
   pageHtml = '',
   responseUrl = '',
+  now = new Date(),
 ): UrlStatus {
   if (httpStatus === null) return 'unknown'
   if (httpStatus === 404 || httpStatus === 410) return 'dead'
   if (httpStatus < 200 || httpStatus >= 300) return 'unknown'
+  if (responseUrl && !isDirectJobUrl(responseUrl)) return 'unknown'
 
+  let isGupyJobPage = false
+  let isWorkdayJobPage = false
   if (responseUrl) {
     try {
       const resolvedUrl = new URL(responseUrl)
+      isGupyJobPage = resolvedUrl.hostname === 'gupy.io' || resolvedUrl.hostname.endsWith('.gupy.io')
+      isWorkdayJobPage = resolvedUrl.hostname.includes('myworkdayjobs.com')
+        && resolvedUrl.pathname.toLowerCase().includes('/job/')
       const normalizedPath = resolvedUrl.pathname.replace(/\/+$/, '')
       const lastSegment = normalizedPath.split('/').filter(Boolean).at(-1) ?? ''
       const genericDestination = /^(?:careers?|jobs?|job-search|search)$/i.test(lastSegment)
@@ -852,46 +880,148 @@ export function classifyJobUrlStatus(
     }
   }
 
-  const normalizedPage = pageHtml.toLocaleLowerCase('en-US')
+  const decodedPage = pageHtml
+    .replace(/&quot;|&#34;/gi, '"')
+    .replace(/&apos;|&#39;/gi, "'")
+  if (
+    isWorkdayJobPage
+    && !/["']@type["']\s*:\s*["']JobPosting["']/i.test(decodedPage)
+    && (/<title>\s*<\/title>/i.test(decodedPage) || /<meta\s+name=["']title["']\s+property=["']og:title["']\s*\/?>/i.test(decodedPage))
+  ) {
+    return 'dead'
+  }
+  const validThroughPattern = /["']validThrough["']\s*:\s*["']([^"']+)["']/gi
+  let hasCurrentStructuredDeadline = false
+  let validThroughMatch = validThroughPattern.exec(decodedPage)
+  while (validThroughMatch) {
+    const rawDate = validThroughMatch[1].trim()
+    const expiration = Date.parse(
+      /^\d{4}-\d{2}-\d{2}$/.test(rawDate)
+        ? `${rawDate}T23:59:59.999Z`
+        : rawDate,
+    )
+    if (!Number.isNaN(expiration) && expiration < now.getTime()) return 'dead'
+    if (!Number.isNaN(expiration)) hasCurrentStructuredDeadline = true
+    validThroughMatch = validThroughPattern.exec(decodedPage)
+  }
+
+  // Gupy bundles the label "Inscrições encerradas" in its translation
+  // dictionary even on open postings. A current JobPosting.validThrough value
+  // is the authoritative state for these pages.
+  if (isGupyJobPage && hasCurrentStructuredDeadline) return 'live'
+
+  const normalizedPage = decodedPage.toLocaleLowerCase('en-US')
   return CLOSED_JOB_PAGE_SIGNALS.some(signal => normalizedPage.includes(signal))
     ? 'dead'
     : 'live'
 }
 
-export async function fetchJobDescription(url: string): Promise<FetchJobResult> {
-  try {
-    const response = await fetch(url, {
+interface FetchedPage {
+  status: number
+  url: string
+  html: string
+}
+
+async function fetchPublicPage(url: string): Promise<FetchedPage | null> {
+  if (!isSafePublicHttpUrl(url)) return null
+
+  let currentUrl = url
+  for (let redirectCount = 0; redirectCount <= 5; redirectCount++) {
+    const response = await fetch(currentUrl, {
       headers: { 'User-Agent': 'LegalOpsCRM/1.0' },
+      redirect: 'manual',
       signal: AbortSignal.timeout(15_000),
     })
 
-    if (!response.ok) {
-      return {
-        description: '',
-        extractedSalary: null,
-        httpStatus: response.status,
-        urlStatus: classifyJobUrlStatus(response.status),
-      }
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location')
+      if (!location) return { status: response.status, url: currentUrl, html: '' }
+      const nextUrl = new URL(location, currentUrl).toString()
+      if (!isSafePublicHttpUrl(nextUrl)) return null
+      currentUrl = nextUrl
+      continue
     }
 
-    const html = await response.text()
-    const urlStatus = classifyJobUrlStatus(response.status, html, response.url)
-
-    if (urlStatus === 'dead') {
-      return { description: '', extractedSalary: null, httpStatus: response.status, urlStatus }
+    return {
+      status: response.status,
+      url: response.url || currentUrl,
+      html: response.ok ? await response.text() : '',
     }
+  }
 
-    // Extract all structured metadata before stripping HTML
-    const meta = extractJobMetaFromHtml(html)
-    const metaBlock = buildMetadataBlock(meta)
-    const text = stripHtml(html)
+  return null
+}
 
-    const description = metaBlock
-      ? `${metaBlock}\n\n${text}`.slice(0, 8_000)
-      : text.slice(0, 8_000)
+async function extractLogoWithCompanyFallback(html: string, pageUrl: string): Promise<string | null> {
+  const pageLogo = extractCompanyLogoFromHtml(html, pageUrl)
+  if (pageLogo) return pageLogo
 
-    return { description, extractedSalary: meta.salary, httpStatus: response.status, urlStatus }
+  const companyWebsite = extractCompanyWebsiteFromHtml(html, pageUrl)
+  if (!companyWebsite || !isDirectJobUrl(companyWebsite)) return null
+
+  try {
+    const companyPage = await fetchPublicPage(companyWebsite)
+    if (!companyPage || companyPage.status < 200 || companyPage.status >= 300) return null
+    return extractCompanyLogoFromHtml(companyPage.html, companyPage.url)
   } catch {
-    return { description: '', extractedSalary: null, httpStatus: null, urlStatus: 'unknown' }
+    return null
+  }
+}
+
+export async function fetchJobDescription(url: string): Promise<FetchJobResult> {
+  const emptyResult = (overrides: Partial<FetchJobResult> = {}): FetchJobResult => ({
+    description: '',
+    extractedSalary: null,
+    httpStatus: null,
+    urlStatus: 'unknown',
+    companyLogoUrl: null,
+    finalUrl: url,
+    ...overrides,
+  })
+
+  try {
+    let page = await fetchPublicPage(url)
+    if (!page) return emptyResult()
+
+    // Social networks and aggregators are discovery inputs, never public job
+    // destinations. Follow an explicit apply link to the employer/ATS page.
+    if (isBlockedJobSourceUrl(page.url)) {
+      const directCandidates = extractDirectApplicationLinks(page.html, page.url)
+      page = null
+      for (const candidate of directCandidates.slice(0, 5)) {
+        const candidatePage = await fetchPublicPage(candidate)
+        if (candidatePage && isDirectJobUrl(candidatePage.url)) {
+          page = candidatePage
+          break
+        }
+      }
+      if (!page) return emptyResult()
+    }
+
+    const finalUrl = canonicalizeJobUrl(page.url)
+    const urlStatus = classifyJobUrlStatus(page.status, page.html, finalUrl)
+
+    if (urlStatus !== 'live') {
+      return emptyResult({ httpStatus: page.status, urlStatus, finalUrl })
+    }
+
+    // Extract all structured metadata before stripping HTML.
+    const meta = extractJobMetaFromHtml(page.html)
+    const metaBlock = buildMetadataBlock(meta)
+    const pageText = stripHtml(page.html)
+    const description = metaBlock
+      ? `${metaBlock}\n\n${pageText}`.slice(0, 8_000)
+      : pageText.slice(0, 8_000)
+
+    return {
+      description,
+      extractedSalary: meta.salary,
+      httpStatus: page.status,
+      urlStatus,
+      companyLogoUrl: await extractLogoWithCompanyFallback(page.html, finalUrl),
+      finalUrl,
+    }
+  } catch {
+    return emptyResult()
   }
 }

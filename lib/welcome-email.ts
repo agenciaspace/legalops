@@ -5,6 +5,31 @@ import { hasActiveClubAccess } from '@/lib/community'
 
 const ACCOUNT_WELCOME_SUBJECT = 'Sua conta LegalOps está pronta'
 const CLUB_WELCOME_SUBJECT = 'Bem-vindo ao LegalOps Club'
+const CLUB_INVITATION_SUBJECT = 'Seu convite para o LegalOps Club'
+
+function escapeHtmlAttribute(value: string) {
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+export async function sendClubInvitationEmail({ email, actionLink }: { email: string; actionLink: string }) {
+  const textBody = [
+    'Olá!',
+    '',
+    'Seu acesso ao LegalOps Club foi liberado.',
+    'Use o link abaixo para ativar a conta, criar sua senha e montar o perfil que será usado nas vagas e currículos personalizados:',
+    '',
+    actionLink,
+    '',
+    'Se você não esperava este convite, ignore esta mensagem.',
+  ].join('\n')
+  const htmlBody = `${buildHtmlEmail(textBody)}<p><a href="${escapeHtmlAttribute(actionLink)}">Ativar meu acesso ao LegalOps Club</a></p>`
+  return sendCloudflareTransactionalEmail({
+    to: [email],
+    subject: CLUB_INVITATION_SUBJECT,
+    textBody,
+    htmlBody,
+  })
+}
 
 function buildAccountWelcomeEmail(email: string) {
   const textBody = [

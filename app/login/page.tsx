@@ -8,9 +8,7 @@ import { BrandLogo, BrandWordmark } from '@/components/BrandLogo'
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [error, setError] = useState<string | null>(null)
-  const [notice, setNotice] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [isClub, setIsClub] = useState(false)
   const router = useRouter()
@@ -22,7 +20,6 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    setNotice(null)
     setLoading(true)
     const supabase = createClient()
     const requestedPath = new URLSearchParams(window.location.search).get('next')
@@ -30,16 +27,7 @@ export default function LoginPage() {
       ? requestedPath
       : window.location.hostname.endsWith('legalops.club') ? '/community' : '/dashboard'
 
-    const { data, error } =
-      mode === 'login'
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(safePath)}`,
-            },
-          })
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     setLoading(false)
 
@@ -47,14 +35,6 @@ export default function LoginPage() {
       setError(error.message)
       return
     }
-
-    if (mode === 'signup' && !data.session) {
-      setNotice('Conta criada. Confira seu email para confirmar o acesso e depois entre aqui.')
-      setMode('login')
-      return
-    }
-
-    await fetch('/api/auth/welcome', { method: 'POST' }).catch(() => undefined)
 
     router.push(safePath)
     router.refresh()
@@ -103,25 +83,16 @@ export default function LoginPage() {
           {error && (
             <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>
           )}
-          {notice ? (
-            <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{notice}</p>
-          ) : null}
-
           <button
             type="submit"
             disabled={loading}
             className="w-full rounded-full bg-[#111111] py-3 text-sm font-bold text-white transition hover:bg-[#2A2927] disabled:opacity-50"
           >
-            {loading ? 'Carregando...' : mode === 'login' ? 'Entrar' : 'Criar conta'}
+            {loading ? 'Carregando...' : 'Entrar'}
           </button>
-
-          <button
-            type="button"
-            onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-            className="w-full text-xs font-medium text-[#77716A] transition hover:text-[#111111]"
-          >
-            {mode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre'}
-          </button>
+          <p className="text-center text-xs leading-5 text-[#77716A]">
+            O cadastro é liberado pelo LegalOps Club. Novos membros recebem um convite por email.
+          </p>
         </form>
 
         <div className="mt-6 flex items-center justify-center gap-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#918A83]">

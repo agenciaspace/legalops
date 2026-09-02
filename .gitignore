@@ -3,6 +3,7 @@ node_modules
 .open-next
 .wrangler
 *.local
+*.tsbuildinfo
 supabase/.temp
 .agents/
 .aider*

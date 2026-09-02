@@ -2,14 +2,15 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import {
   sendWelcomeEmailIfNeeded,
   sendClubWelcomeEmailIfNeeded,
+  sendClubInvitationEmail,
 } from '@/lib/welcome-email'
 
 const sendCloudflareTransactionalEmailMock =
-  vi.fn(async () => ({ messageId: 'msg-1', payload: {} }))
+  vi.fn(async (_input: unknown) => ({ messageId: 'msg-1', payload: {} }))
 
 vi.mock('@/lib/cloudflare-email', () => ({
-  sendCloudflareTransactionalEmail: (...args: unknown[]) =>
-    sendCloudflareTransactionalEmailMock(...args),
+  sendCloudflareTransactionalEmail: (input: unknown) =>
+    sendCloudflareTransactionalEmailMock(input),
 }))
 
 vi.mock('@/lib/supabase-admin', () => ({
@@ -48,6 +49,22 @@ const ACTIVE_MEMBER = {
 beforeEach(() => {
   vi.clearAllMocks()
   adminClient = chainableClient([ACTIVE_MEMBER])
+})
+
+describe('sendClubInvitationEmail', () => {
+  it('sends the generated Auth link through the configured transactional channel', async () => {
+    await sendClubInvitationEmail({
+      email: 'ana@example.com',
+      actionLink: 'https://project.supabase.co/auth/v1/verify?token=abc&type=invite',
+    })
+
+    expect(sendCloudflareTransactionalEmailMock).toHaveBeenCalledWith(expect.objectContaining({
+      to: ['ana@example.com'],
+      subject: 'Seu convite para o LegalOps Club',
+      textBody: expect.stringContaining('token=abc'),
+      htmlBody: expect.stringContaining('href="https://project.supabase.co/auth/v1/verify?token=abc&amp;type=invite"'),
+    }))
+  })
 })
 
 describe('sendWelcomeEmailIfNeeded', () => {

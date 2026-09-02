@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import type { PipelineStatus } from '@/lib/types'
+import { createPersonalizedCvForEntry } from '@/lib/personalized-cv'
 
 const VALID_STATUSES: PipelineStatus[] = ['researching', 'discarded']
 
@@ -24,6 +25,20 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     if (error.code === '23505') {
+      const { data: existing } = await supabase.from('user_pipeline_entries')
+        .select('*').eq('user_id', user.id).eq('job_id', body.job_id).maybeSingle()
+      if (existing && status === 'researching') {
+        const cv = await createPersonalizedCvForEntry({
+          userId: user.id,
+          jobId: body.job_id,
+          pipelineEntryId: existing.id,
+          useAi: false,
+        }).catch(cvError => {
+          console.error('[pipeline] Could not create personalized CV:', cvError)
+          return null
+        })
+        return NextResponse.json({ entry: existing, cv, already_exists: true })
+      }
       return NextResponse.json({ error: 'Already in pipeline' }, { status: 409 })
     }
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -48,5 +63,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ entry })
+  const cv = status === 'researching'
+    ? await createPersonalizedCvForEntry({
+        userId: user.id,
+        jobId: body.job_id,
+        pipelineEntryId: entry.id,
+        useAi: false,
+      }).catch(cvError => {
+        console.error('[pipeline] Could not create personalized CV:', cvError)
+        return null
+      })
+    : null
+
+  return NextResponse.json({ entry, cv }, { status: 201 })
 }

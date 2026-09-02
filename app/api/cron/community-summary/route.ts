@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { buildDiscussionSummaryFallback, parseDiscussionSummaryResponse } from '@/lib/community-summary'
-import { generateOpenCodeGoText } from '@/lib/opencode-go'
+import { generateOpenRouterText, getOpenRouterModel } from '@/lib/openrouter'
 
 type Post = { id: string; category: string; title: string; body: string }
 type Comment = { post_id: string; body: string }
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
   let model = 'extractive-fallback'
 
   try {
-    const response = await generateOpenCodeGoText({
+    const response = await generateOpenRouterText({
       systemPrompt: 'Você é o curador do LegalOps Club. Sintetize apenas o conteúdo fornecido, preserve divergências e nunca invente pessoas, números ou conclusões.',
       userPrompt: `Crie o resumo semanal das discussões abaixo. Responda somente em JSON válido com esta estrutura: {"title":"...","summary":"...","key_points":["..."]}. Use pt-BR, uma síntese de 2 a 4 parágrafos e de 3 a 6 pontos-chave.\n\n${sourceText}`,
       maxTokens: 1400,
@@ -81,10 +81,10 @@ export async function GET(request: NextRequest) {
     const parsed = parseDiscussionSummaryResponse(response)
     if (parsed) {
       generated = parsed
-      model = process.env.OPENCODE_GO_MODEL ?? 'deepseek-v4-flash'
+      model = getOpenRouterModel()
     }
   } catch (error) {
-    console.error('[community-summary] OpenCode Go unavailable, using extractive fallback', error)
+    console.error('[community-summary] OpenRouter unavailable, using extractive fallback', error)
   }
 
   const { error: insertError } = await supabase

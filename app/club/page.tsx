@@ -179,10 +179,10 @@ export default function ClubLandingPage() {
               </p>
             </div>
             <Link
-              href="/login?next=/community"
+              href="/club/checkout"
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#111111] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#2A2927]"
             >
-              Entrar no Club <ArrowRight className="h-4 w-4" />
+              Participar do Club <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </section>
@@ -194,8 +194,8 @@ export default function ClubLandingPage() {
               não resolva sozinho o que a comunidade pode ajudar a destravar<span className="text-[#E88A6A]">.</span>
             </h2>
           </div>
-          <Link href="/login?next=/community" className="inline-flex items-center gap-2 border-b border-[#111111] pb-1 text-sm font-bold hover:text-[#C9684F]">
-            Entrar na comunidade <ArrowRight className="h-4 w-4" />
+          <Link href="/club/checkout" className="inline-flex items-center gap-2 border-b border-[#111111] pb-1 text-sm font-bold hover:text-[#C9684F]">
+            Participar da comunidade <ArrowRight className="h-4 w-4" />
           </Link>
         </section>
       </main>

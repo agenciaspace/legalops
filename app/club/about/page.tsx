@@ -37,16 +37,9 @@ const membershipIncludes = [
   { title: 'Ajustes de currículo', description: 'Cada alerta destaca requisitos presentes na vaga e pontos do seu histórico que merecem exemplos mais concretos no CV.' },
 ]
 
-const checkoutEnvironmentKeys: Record<string, string | undefined> = {
-  founder_199: process.env.CLUB_CHECKOUT_FOUNDER_199_URL,
-  founder_299: process.env.CLUB_CHECKOUT_FOUNDER_299_URL,
-  pioneer_499: process.env.CLUB_CHECKOUT_PIONEER_499_URL,
-  launch_699: process.env.CLUB_CHECKOUT_LAUNCH_699_URL,
-}
-
 export default function ClubAboutPage() {
   const firstTier = CLUB_LAUNCH_TIERS[0]
-  const checkoutHref = checkoutEnvironmentKeys[firstTier.id] ?? '/login?next=/community'
+  const checkoutHref = '/club/checkout'
 
   return (
     <div className="min-h-screen bg-[#F5F1E8] text-[#111111]" style={bodyFont}>

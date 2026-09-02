@@ -32,11 +32,13 @@ export default async function JobDetailPage({
     { data: notes },
     { data: contacts },
     { data: events },
+    { data: personalizedCv },
   ] = await Promise.all([
     supabase.from('leaders').select('*').eq('entry_id', id).maybeSingle(),
     supabase.from('job_notes').select('*').eq('entry_id', id).order('created_at', { ascending: false }),
     supabase.from('contacts').select('*').eq('entry_id', id).order('created_at', { ascending: false }),
     supabase.from('application_events').select('*').eq('entry_id', id).order('event_date', { ascending: false }),
+    supabase.from('personalized_cvs').select('id, user_id, job_id, pipeline_entry_id, status, job_track, headline, summary, content, markdown, model, generated_at').eq('pipeline_entry_id', id).eq('user_id', user.id).maybeSingle(),
   ])
 
   return (
@@ -48,6 +50,7 @@ export default async function JobDetailPage({
       events={events ?? []}
       userTier={tier}
       agentSettings={agentSettings}
+      personalizedCv={personalizedCv as never}
     />
   )
 }

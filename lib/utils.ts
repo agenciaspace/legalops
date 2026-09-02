@@ -295,7 +295,7 @@ function extractSalaryPattern(html: string): ExtractedSalary | null {
   }
 
   // Pattern 2: "to" / "a" separator — "$95,000 to $130,000", "R$8.000 a R$15.000"
-  const toRange = /((?:R\$|A\$|C\$|S\$|HK\$|NZ\$|\$|€|£|₹|¥|₪|zł|kr|CHF)\s*[\d.,]+\s*(?:k|K|mil)?)\s+(?:to|a|até|bis|~)\s+((?:R\$|A\$|C\$|S\$|HK\$|NZ\$|\$|€|£|₹|¥|₪|zł|kr|CHF)\s*[\d.,]+\s*(?:k|K|mil)?)\s*(?:(${CURRENCY_CODES})\b)?/i
+  const toRange = /((?:R\$|A\$|C\$|S\$|HK\$|NZ\$|\$|€|£|₹|¥|₪|zł|kr|CHF)\s*\d(?:[\d.,]*\d)?\s*(?:k|K|mil)?)\s+(?:to|a|e|até|bis|~)\s+((?:R\$|A\$|C\$|S\$|HK\$|NZ\$|\$|€|£|₹|¥|₪|zł|kr|CHF)\s*\d(?:[\d.,]*\d)?\s*(?:k|K|mil)?)\s*(?:(${CURRENCY_CODES})\b)?/i
   const toMatch = text.match(toRange)
   if (toMatch) {
     return buildRangeResult(toMatch[1].trim(), toMatch[2].trim(), toMatch[3] ?? null)
@@ -313,7 +313,7 @@ function extractSalaryPattern(html: string): ExtractedSalary | null {
 
   // Pattern 4: Labeled ranges — "Salary: $120k - $180k", "Remuneração: R$8.000 a R$15.000"
   // "Compensation: 120,000-180,000", "OTE: $200k - $280k", "Base: $150,000 - $200,000"
-  const labeledRange = /(?:salary|salário|salario|remuneração|remuneracao|compensation|compensação|compensacao|base\s*(?:salary|pay)|ote|ctc|pay|faixa\s*salarial|vencimento)\s*(?:range)?[:\s]+\s*((?:R\$|A\$|C\$|S\$|HK\$|NZ\$|\$|€|£|₹|¥|₪|zł|kr|CHF)?\s*[\d.,]+\s*(?:k|K|mil)?)\s*[-–—]\s*((?:R\$|A\$|C\$|S\$|HK\$|NZ\$|\$|€|£|₹|¥|₪|zł|kr|CHF)?\s*[\d.,]+\s*(?:k|K|mil)?)\s*(?:(${CURRENCY_CODES})\b)?/i
+  const labeledRange = /\b(?:salary|salário|salario|remuneração|remuneracao|compensation|compensação|compensacao|base\s*(?:salary|pay)|ote|ctc|pay|faixa\s*salarial|vencimento)\b\s*(?:range)?[:\s]+\s*((?:R\$|A\$|C\$|S\$|HK\$|NZ\$|\$|€|£|₹|¥|₪|zł|kr|CHF)?\s*[\d.,]+\s*(?:k|K|mil)?)\s*[-–—]\s*((?:R\$|A\$|C\$|S\$|HK\$|NZ\$|\$|€|£|₹|¥|₪|zł|kr|CHF)?\s*[\d.,]+\s*(?:k|K|mil)?)\s*(?:(${CURRENCY_CODES})\b)?/i
   const labeledMatch = text.match(labeledRange)
   if (labeledMatch) {
     return buildRangeResult(labeledMatch[1].trim(), labeledMatch[2].trim(), labeledMatch[3] ?? null)
@@ -335,7 +335,7 @@ function extractSalaryPattern(html: string): ExtractedSalary | null {
 
   // Pattern 6: "Salary: $150,000" or "Remuneração: R$12.000" (single value with label, no period)
   const labeledSingle = new RegExp(
-    `(?:salary|salário|salario|remuneração|remuneracao|compensation|compensação|compensacao|base\\s*(?:salary|pay)|ote|ctc|pay|faixa\\s*salarial|vencimento)\\s*(?:range)?[:\\s]+\\s*((?:R\\$|A\\$|C\\$|S\\$|HK\\$|NZ\\$|\\$|€|£|₹|¥|₪|zł|kr|CHF)\\s*[\\d.,]+\\s*(?:k|K|mil)?)\\s*(?:(${CURRENCY_CODES})\\b)?`,
+    `\\b(?:salary|salário|salario|remuneração|remuneracao|compensation|compensação|compensacao|base\\s*(?:salary|pay)|ote|ctc|pay|faixa\\s*salarial|vencimento)\\b\\s*(?:range)?[:\\s]+\\s*((?:R\\$|A\\$|C\\$|S\\$|HK\\$|NZ\\$|\\$|€|£|₹|¥|₪|zł|kr|CHF)\\s*[\\d.,]+\\s*(?:k|K|mil)?)\\s*(?:(${CURRENCY_CODES})\\b)?`,
     'i'
   )
   const labeledSingleMatch = text.match(labeledSingle)
@@ -346,7 +346,7 @@ function extractSalaryPattern(html: string): ExtractedSalary | null {
   }
 
   // Pattern 7: Numeric range near salary keyword (within 50 chars) — "Salary ... 120k-180k"
-  const nearSalaryKeyword = /(?:salary|salário|remuneração|compensation|pay|ote|ctc|faixa)[^.]{0,50}?([\d.,]+\s*(?:k|K|mil)?)\s*[-–—]\s*([\d.,]+\s*(?:k|K|mil)?)/i
+  const nearSalaryKeyword = /\b(?:salary|salário|remuneração|compensation|pay|ote|ctc|faixa)\b[^.]{0,50}?([\d.,]+\s*(?:k|K|mil)?)\s*[-–—]\s*([\d.,]+\s*(?:k|K|mil)?)/i
   const nearMatch = text.match(nearSalaryKeyword)
   if (nearMatch) {
     const min = nearMatch[1].trim()

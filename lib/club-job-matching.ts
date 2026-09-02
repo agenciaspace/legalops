@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase-admin'
+import { isPublishableJobRecord } from '@/lib/job-publication'
 import type { RemoteReality } from '@/lib/types'
 
 export type ClubJobProfile = {
@@ -28,6 +29,8 @@ export type ClubJobMatch = {
   reasons: string[]
   cvSuggestions: string[]
 }
+
+export const CLUB_JOB_ALERT_MIN_SCORE = 55
 
 const STOP_WORDS = new Set([
   'and', 'assistant', 'associate', 'da', 'das', 'de', 'do', 'dos', 'em', 'especialista',
@@ -147,7 +150,7 @@ export async function generateClubJobAlerts(userId?: string) {
       .eq('job_alerts_enabled', true),
     admin
       .from('jobs')
-      .select('id, title, company, raw_description, remote_reality, source_board')
+      .select('id, title, company, company_logo_url, url, raw_description, remote_reality, source_board, url_status')
       .eq('enrichment_status', 'done')
       .eq('url_status', 'live')
       .not('url_checked_at', 'is', null)
@@ -160,16 +163,21 @@ export async function generateClubJobAlerts(userId?: string) {
 
   const alerts = (profiles ?? []).flatMap(rawProfile => {
     const profile = rawProfile as ClubJobProfile
-    return (jobs ?? []).map(rawJob => {
+    return (jobs ?? []).filter(rawJob => isPublishableJobRecord({
+      url: rawJob.url,
+      urlStatus: rawJob.url_status,
+      companyLogoUrl: rawJob.company_logo_url,
+    })).flatMap(rawJob => {
       const job = rawJob as MatchableJob
       const match = buildClubJobMatch(profile, job)
-      return {
+      if (match.score < CLUB_JOB_ALERT_MIN_SCORE) return []
+      return [{
         user_id: profile.user_id,
         job_id: job.id,
         match_score: match.score,
         match_reasons: match.reasons,
         cv_suggestions: match.cvSuggestions,
-      }
+      }]
     })
   })
 
@@ -179,7 +187,7 @@ export async function generateClubJobAlerts(userId?: string) {
 
   const { data: inserted, error: insertError } = await admin
     .from('club_job_alerts')
-    .upsert(alerts, { onConflict: 'user_id,job_id', ignoreDuplicates: true })
+    .upsert(alerts, { onConflict: 'user_id,job_id' })
     .select('id')
 
   if (insertError) throw insertError

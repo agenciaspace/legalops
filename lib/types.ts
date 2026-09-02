@@ -48,6 +48,7 @@ export interface Job {
   id: string
   title: string
   company: string
+  company_logo_url?: string | null
   url: string
   source_board: SourceBoard
   salary_min: number | null
@@ -83,6 +84,28 @@ export interface PipelineEntry {
 export interface PipelineEntryWithJob extends PipelineEntry {
   job: Job
   email_alias?: UserEmailAlias | null
+}
+
+export interface PersonalizedCv {
+  id: string
+  user_id: string
+  job_id: string
+  pipeline_entry_id: string
+  status: 'pending' | 'ready' | 'failed'
+  job_track: 'technical' | 'strategic' | 'hybrid' | 'operational'
+  headline: string | null
+  summary: string | null
+  content: {
+    headline?: string
+    summary?: string
+    skills?: string[]
+    highlights?: string[]
+    keywords?: string[]
+    markdown?: string
+  }
+  markdown: string
+  model: string | null
+  generated_at: string | null
 }
 
 export interface Leader {
@@ -165,6 +188,14 @@ export interface AccountProfile {
     insights?: LinkedInInsight[]
   } | null
   onboarding_completed: boolean
+  desired_roles?: string[]
+  preferred_remote?: RemotePreference | null
+  preferred_locations?: string[]
+  skills?: string[]
+  tools_used?: string[]
+  career_summary?: string | null
+  career_highlights?: string[]
+  base_cv_text?: string | null
   created_at: string
   updated_at: string
 }
