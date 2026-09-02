@@ -17,4 +17,4 @@ CREATE INDEX IF NOT EXISTS jobs_feed_eligibility_idx
   ON public.jobs (eligibility_status, url_status, created_at DESC);
 
 COMMENT ON COLUMN public.jobs.eligibility_status IS
-  'Crawler market/title decision: pending, eligible, rejected, or stale.';
+  'Crawler market/title decision: pending, eligible, rejected, or stale.';;

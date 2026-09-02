@@ -17,4 +17,4 @@ begin
       check (company_logo_url is null or company_logo_url ~ '^https://');
   end if;
 end
-$$;
+$$;;

@@ -11,4 +11,4 @@ ALTER TABLE public.crawler_runs
     'aggregator',
     'combined',
     'none'
-  ));
+  ));;

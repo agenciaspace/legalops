@@ -9,4 +9,4 @@ CREATE POLICY "jobs_read_public" ON public.jobs
   USING (
     url_status = 'live'
     AND eligibility_status = 'eligible'
-  );
+  );;

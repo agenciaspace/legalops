@@ -65,3 +65,4 @@ CREATE TRIGGER account_profiles_sync_community_member
   AFTER INSERT OR UPDATE OF full_name, "current_role", areas_of_expertise, public_headline, public_bio, organization_name, linkedin_url, linkedin_data
   ON public.account_profiles
   FOR EACH ROW EXECUTE FUNCTION public.sync_community_member_profile();
+;

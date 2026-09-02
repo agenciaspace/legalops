@@ -55,3 +55,4 @@ ON CONFLICT (slug) DO UPDATE SET
   body = EXCLUDED.body,
   visibility = EXCLUDED.visibility,
   updated_at = now();
+;

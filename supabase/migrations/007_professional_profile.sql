@@ -2,7 +2,7 @@
 
 ALTER TABLE account_profiles
   ADD COLUMN IF NOT EXISTS full_name text,
-  ADD COLUMN IF NOT EXISTS current_role text,
+  ADD COLUMN IF NOT EXISTS "current_role" text,
   ADD COLUMN IF NOT EXISTS professional_type text
     CHECK (professional_type IN ('law_firm', 'legal_dept', 'public_sector', 'freelance', 'other')),
   ADD COLUMN IF NOT EXISTS years_experience int,

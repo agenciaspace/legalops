@@ -26,4 +26,4 @@ alter table public.jobs
   ) not valid;
 
 alter table public.jobs
-  validate constraint jobs_live_requires_direct_url_and_logo;
+  validate constraint jobs_live_requires_direct_url_and_logo;;

@@ -88,3 +88,4 @@ DROP TRIGGER IF EXISTS personalized_cvs_set_updated_at ON public.personalized_cv
 CREATE TRIGGER personalized_cvs_set_updated_at
   BEFORE UPDATE ON public.personalized_cvs
   FOR EACH ROW EXECUTE FUNCTION public.set_row_updated_at();
+;

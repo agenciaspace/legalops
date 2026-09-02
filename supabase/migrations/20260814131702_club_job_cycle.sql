@@ -115,4 +115,4 @@ CREATE POLICY employer_job_requests_owner_insert
 
 REVOKE ALL ON public.employer_job_requests FROM anon, authenticated;
 GRANT SELECT, INSERT ON public.employer_job_requests TO authenticated;
-GRANT ALL ON public.employer_job_requests TO service_role;
+GRANT ALL ON public.employer_job_requests TO service_role;;

@@ -12,3 +12,4 @@ CREATE POLICY account_profiles_owner_update
   ON public.account_profiles FOR UPDATE TO authenticated
   USING ((SELECT auth.uid()) = user_id)
   WITH CHECK ((SELECT auth.uid()) = user_id);
+;
