@@ -6,7 +6,7 @@ A regra principal é simples:
 
 - `legalops.club` = **comunidade**
 - `legalops.work` = **vagas**
-- `legalops.dev` = **construir**
+- `legalops.dev` = **open source Legal Tech / construir junto**
 
 Os três produtos devem parecer partes do mesmo ecossistema. Cada domínio tem uma função clara e não deve tentar vender a função dos outros dois.
 
@@ -14,9 +14,11 @@ Os três produtos devem parecer partes do mesmo ecossistema. Cada domínio tem u
 
 Toda landing pública deve tornar esta relação visível no primeiro viewport ou imediatamente depois dele:
 
-`club / comunidade` · `work / vagas` · `dev / construir`
+`club / comunidade` · `work / vagas` · `dev / open source`
 
 A navegação entre os domínios deve parecer uma troca de área dentro do mesmo produto-mãe, não uma visita a outra empresa.
+
+A tese do ecossistema é que código sozinho deixou de ser a principal barreira para criar software. O diferencial do LegalOps está na combinação de comunidade, conhecimento vertical, problemas reais, distribuição e construção colaborativa.
 
 ### Club
 
@@ -32,9 +34,10 @@ Pode falar sobre:
 - eventos;
 - membros;
 - escritório virtual;
-- troca prática entre profissionais.
+- troca prática entre profissionais;
+- problemas reais que podem virar produtos e projetos no `legalops.dev`.
 
-Evitar usar `construir` como promessa principal. Se uma conversa levar a uma automação ou produto, o próximo passo natural é `legalops.dev`.
+Evitar usar `construir` como promessa principal. O Club é onde as pessoas e os problemas se encontram. Quando uma conversa leva a uma automação ou produto, o próximo passo natural é o `legalops.dev`.
 
 ### Work
 
@@ -55,24 +58,70 @@ A primeira dobra deve mostrar vagas reais sempre que existirem.
 
 ### Dev
 
-Promessa: aprender a construir tecnologia para o jurídico construindo projetos reais.
+Promessa principal:
+
+> **Open source Legal Tech, built by the people who run Legal.**
+
+O `legalops.dev` é a base open source do ecossistema. Não é principalmente um curso, um catálogo de ferramentas ou uma coleção de tutoriais. É onde problemas reais do jurídico viram produtos abertos que podem ser usados, adaptados, implantados e melhorados coletivamente.
 
 Pode falar sobre:
 
-- builds;
+- produtos open source;
+- repositórios;
+- código;
+- issues e pull requests;
+- contributors;
+- roadmaps;
+- demos e deploys;
 - automações;
 - integrações;
 - agentes;
 - APIs;
 - dados;
 - produtos internos;
-- infraestrutura;
-- guias e código;
+- componentes reutilizáveis;
+- documentação;
 - governança dentro de projetos concretos.
+
+Aprender continua sendo uma consequência importante de participar, mas não deve ser a promessa principal do Dev. A proposta é **construir junto** e criar uma base de Legal Tech que o mercado possa usar e evoluir.
 
 Evitar abrir com jargão de implementação, como `instrumentar um fluxo`, `orquestrar uma jornada` ou perguntas que pressupõem que o visitante já sabe qual arquitetura quer construir.
 
-## 2. Marca
+Evitar também apresentar produtos futuros como se já estivessem disponíveis. Diferenciar claramente `disponível`, `em construção`, `proposto` e `roadmap`.
+
+## 2. Como Club e Dev se conectam
+
+O fluxo desejado é:
+
+```text
+problema real no jurídico
+        ↓
+conversa no legalops.club
+        ↓
+projeto / repo no legalops.dev
+        ↓
+contribuições da comunidade
+        ↓
+uso real
+        ↓
+feedback + produto melhor
+```
+
+O código é aberto. O efeito de rede vem das pessoas que entendem o problema, usam a solução, contribuem e ajudam a distribuí-la.
+
+O `legalops.dev` deve permitir que uma pessoa entre em diferentes níveis:
+
+- usar um produto;
+- fazer deploy;
+- adaptar para sua empresa;
+- abrir uma issue;
+- contribuir código;
+- contribuir requisitos, testes, documentação ou conhecimento jurídico;
+- propor um novo produto.
+
+Não presumir que contributor significa developer. Legal Ops, advogados, profissionais de inovação, dados, segurança, produto e tecnologia também são contributors.
+
+## 3. Marca
 
 - Escrever sempre em minúsculas: `legalops.club`, `legalops.work`, `legalops.dev`.
 - Usar `BrandWordmark` de `components/BrandLogo.tsx` nas superfícies React públicas.
@@ -81,7 +130,7 @@ Evitar abrir com jargão de implementação, como `instrumentar um fluxo`, `orqu
 - Não usar a antiga ligatura/símbolo `op` como marca principal.
 - Não usar robô, sparkle, estrela, terminal ou símbolo genérico de IA como logo.
 
-## 3. Tokens
+## 4. Tokens
 
 ### Cores
 
@@ -101,7 +150,7 @@ O coral é pontuação visual. Não deve dominar grandes áreas da interface.
 
 - Quicksand: wordmark e títulos editoriais.
 - Inter: corpo, navegação, filtros, dados e UI.
-- Headlines: tracking negativo, frases curtas, normalmente em minúsculas.
+- Headlines: tracking negativo, frases curtas, normalmente em minúsculas, exceto quando a tagline oficial do Dev for usada exatamente como definida.
 - Micro-labels: 9–11 px, uppercase, tracking amplo.
 
 ### Espaçamento
@@ -126,7 +175,7 @@ Use uma escala previsível:
 - evite sombra em componentes normais;
 - quando precisar de elevação, use contraste de superfície antes de usar shadow.
 
-## 4. Regra de composição
+## 5. Regra de composição
 
 A interface deve parecer editorial e orientada a produto.
 
@@ -137,6 +186,7 @@ Preferir:
 - grids simples;
 - listas e tabelas quando a informação é estrutural;
 - screenshots, previews e dados reais do produto;
+- estado real de repositórios e produtos no Dev;
 - uma superfície escura forte por página, quando necessário;
 - cards apenas quando o próprio objeto é naturalmente um card.
 
@@ -152,7 +202,7 @@ Evitar:
 - animação sem função;
 - sombras para diferenciar cada bloco.
 
-## 5. Template obrigatório das landings
+## 6. Template obrigatório das landings
 
 As três homes públicas devem seguir a mesma arquitetura.
 
@@ -164,7 +214,7 @@ As três homes públicas devem seguir a mesma arquitetura.
 
 - comunidade;
 - vagas;
-- construir;
+- open source;
 - ação de entrada quando existir conta/autenticação.
 
 O produto atual é indicado por underline coral, não por um grande pill preto.
@@ -196,7 +246,7 @@ No máximo três princípios. Devem explicar como o produto é usado, não lista
 
 - Club: comunidades, membros, conversas, escritório virtual.
 - Work: vagas reais e busca.
-- Dev: builds, arquitetura e projetos reais.
+- Dev: registry de produtos open source, repositórios, contributors, status, demos, documentação e roadmaps.
 
 ### 6. Próximo passo
 
@@ -204,9 +254,9 @@ CTA simples, ligada à ação principal daquele produto.
 
 - Club: entrar na comunidade.
 - Work: ver vagas / criar perfil.
-- Dev: abrir um build / começar a construir.
+- Dev: explorar produtos / abrir o código / contribuir.
 
-## 6. Voz comercial
+## 7. Voz comercial
 
 O texto precisa responder rapidamente:
 
@@ -225,9 +275,12 @@ O texto precisa responder rapidamente:
 - converse;
 - compartilhe;
 - construa;
+- contribua;
+- use;
+- adapte;
+- faça deploy;
 - teste;
-- conecte;
-- adapte.
+- conecte.
 
 ### Evitar
 
@@ -240,7 +293,7 @@ O texto precisa responder rapidamente:
 - `otimize seus processos` sem explicar quais processos e como;
 - perguntas que exigem vocabulário técnico antes de apresentar o benefício.
 
-## 7. Exemplos de primeira dobra
+## 8. Exemplos de primeira dobra
 
 ### Club
 
@@ -264,15 +317,17 @@ Produto no hero: vagas reais verificadas recentemente.
 
 ### Dev
 
-Micro-label: `legalops.dev / construir`
+Micro-label: `legalops.dev / open source`
 
-Headline: `construa o que o jurídico precisa.`
+Headline oficial: `Open source Legal Tech, built by the people who run Legal.`
 
-CTA: `explorar builds`
+CTA primária: `explorar produtos`
 
-Produto no hero: preview do build atual com as camadas reais do sistema.
+CTA secundária: `contribuir no GitHub`
 
-## 8. Checklist antes de publicar
+Produto no hero: preview de um produto/repositório real, com status, código, documentação e forma de contribuição.
+
+## 9. Checklist antes de publicar
 
 - A função do domínio está óbvia em até 5 segundos?
 - Os outros dois produtos aparecem como partes do mesmo ecossistema?
@@ -284,5 +339,6 @@ Produto no hero: preview do build atual com as camadas reais do sistema.
 - Há termos técnicos antes de o benefício estar claro?
 - Club está vendendo comunidade?
 - Work está vendendo vagas?
-- Dev está vendendo construir?
+- Dev está vendendo open source Legal Tech e construção colaborativa?
+- O Dev diferencia claramente o que existe do que está em roadmap?
 - A página ainda funciona e comunica bem sem animação e sem efeitos?
