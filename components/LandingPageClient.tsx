@@ -370,7 +370,7 @@ export function LandingPageClient({
           />
           <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label="Links do LegalOps Work">
             <Link href="https://legalops.club" className="hover:text-[#111111]">club / {locale === 'pt' ? 'comunidade' : 'community'}</Link>
-            <Link href="https://legalops.dev" className="hover:text-[#111111]">dev / {locale === 'pt' ? 'construir' : 'build'}</Link>
+            <Link href="https://legalops.dev" className="hover:text-[#111111]">dev / open source</Link>
             <Link href="/for-employers" className="hover:text-[#111111]">{copy.employers}</Link>
             <Link href="/manifesto" className="hover:text-[#111111]">{copy.manifesto}</Link>
           </nav>
