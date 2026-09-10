@@ -205,7 +205,7 @@ export default function ClubLandingPage() {
           <BrandWordmark suffix="club" className="inline-flex items-baseline text-[23px] font-semibold leading-none tracking-[-0.055em] text-[#111111]" />
           <div className="flex flex-wrap items-center gap-5 text-xs font-semibold text-[#716B65]">
             <Link href="https://legalops.work" className="hover:text-[#111111]">work / vagas</Link>
-            <Link href="https://legalops.dev" className="hover:text-[#111111]">dev / construir</Link>
+            <Link href="https://legalops.dev" className="hover:text-[#111111]">dev / open source</Link>
             <Link href="/club/about" className="hover:text-[#111111]">Sobre</Link>
             <Link href="/login?next=/community" className="hover:text-[#111111]">Entrar</Link>
           </div>
