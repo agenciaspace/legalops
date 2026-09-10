@@ -20,6 +20,11 @@ export async function middleware(request: NextRequest) {
 
   let supabaseResponse = NextResponse.next({ request })
   const publicPaths = new Set(['/', '/club', '/club/about', '/club/checkout', '/en', '/login', '/set-password', '/manifesto', '/pricing', '/for-employers', '/curso-ia-whatsapp', '/auth/confirm'])
+  const isPublicPage = publicPaths.has(pathname)
+    || pathname === '/bench'
+    || (pathname.startsWith('/bench/') && !pathname.startsWith('/bench/manage'))
+    || pathname === '/regions'
+    || (pathname.startsWith('/regions/') && !pathname.startsWith('/regions/manage'))
   const publicWebhookPaths = new Set([
     '/api/webhooks/brevo/inbound',
     '/api/webhooks/cloudflare/inbound',
@@ -51,7 +56,7 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/api/') && !publicWebhookPaths.has(pathname)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    if (!publicPaths.has(pathname)) {
+    if (!isPublicPage) {
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`)
       return NextResponse.redirect(loginUrl)
@@ -100,7 +105,7 @@ export async function middleware(request: NextRequest) {
   if (
     pathname !== '/onboard' &&
     !pathname.startsWith('/api/') &&
-    !publicPaths.has(pathname)
+    !isPublicPage
   ) {
     const { data: profile } = await supabase
       .from('account_profiles')
