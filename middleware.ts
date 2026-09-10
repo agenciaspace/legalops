@@ -24,6 +24,7 @@ export async function middleware(request: NextRequest) {
     || pathname === '/bench'
     || (pathname.startsWith('/bench/') && !pathname.startsWith('/bench/manage'))
     || pathname === '/regions'
+    || (pathname.startsWith('/regions/') && !pathname.startsWith('/regions/manage'))
   const publicWebhookPaths = new Set([
     '/api/webhooks/brevo/inbound',
     '/api/webhooks/cloudflare/inbound',
