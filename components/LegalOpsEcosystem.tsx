@@ -9,7 +9,7 @@ const products = {
       key: 'club' as const,
       domain: 'legalops.club',
       role: 'comunidade',
-      description: 'Pessoas, conversas e repertório para quem vive o jurídico.',
+      description: 'Pessoas que operam o jurídico, compartilham problemas reais e constroem repertório juntas.',
       href: 'https://legalops.club',
     },
     {
@@ -22,8 +22,8 @@ const products = {
     {
       key: 'dev' as const,
       domain: 'legalops.dev',
-      role: 'construir',
-      description: 'Projetos e guias para construir tecnologia para o jurídico.',
+      role: 'open source',
+      description: 'Produtos Legal Tech abertos, construídos em comunidade por quem opera o jurídico.',
       href: 'https://legalops.dev',
     },
   ],
@@ -32,7 +32,7 @@ const products = {
       key: 'club' as const,
       domain: 'legalops.club',
       role: 'community',
-      description: 'People, conversations and practical legal operations knowledge.',
+      description: 'People who run legal, share real problems and build practical knowledge together.',
       href: 'https://legalops.club',
     },
     {
@@ -45,8 +45,8 @@ const products = {
     {
       key: 'dev' as const,
       domain: 'legalops.dev',
-      role: 'build',
-      description: 'Projects and guides for building technology for legal.',
+      role: 'open source',
+      description: 'Open source Legal Tech built by the people who run Legal.',
       href: 'https://legalops.dev',
     },
   ],
@@ -77,7 +77,7 @@ export function LegalOpsEcosystem({ active, locale = 'pt' }: { active: LegalOpsP
                 </span>
                 <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#E88A6A]">{product.role}</span>
               </div>
-              <p className="mt-1.5 max-w-[260px] text-[11px] leading-4 text-white/42 transition group-hover:text-white/62">
+              <p className="mt-1.5 max-w-[290px] text-[11px] leading-4 text-white/42 transition group-hover:text-white/62">
                 {product.description}
               </p>
             </Link>
