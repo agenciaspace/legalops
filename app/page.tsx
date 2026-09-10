@@ -9,10 +9,10 @@ const workMetadata: Metadata = {
     'Encontre oportunidades verificadas em Legal Ops, Legal Tech, contratos, CLM, dados, inovação e gestão jurídica em departamentos jurídicos, escritórios e empresas de tecnologia.',
 }
 
-const courseMetadata: Metadata = {
-  title: 'legalops.dev — automação e IA para operações jurídicas',
+const devMetadata: Metadata = {
+  title: 'legalops.dev — open source Legal Tech',
   description:
-    'Projetos práticos para transformar intake, contratos, aprovações, dados e rotinas jurídicas em fluxos mais claros, integrados e controláveis.',
+    'Open source Legal Tech, built by the people who run Legal. Produtos jurídicos abertos para usar, adaptar e construir em comunidade.',
 }
 
 export const revalidate = 60
@@ -21,7 +21,7 @@ export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   const host = headers().get('host')?.split(':')[0].toLowerCase()
-  return host === 'legalops.dev' || host === 'www.legalops.dev' ? courseMetadata : workMetadata
+  return host === 'legalops.dev' || host === 'www.legalops.dev' ? devMetadata : workMetadata
 }
 
 export default function Home() {
