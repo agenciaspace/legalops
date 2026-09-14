@@ -2,7 +2,7 @@
 create table if not exists public.community_event_rsvps (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.community_events(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
   response text not null default 'pending' check (response in ('pending', 'confirmed', 'declined')),
   guest_name text not null check (char_length(guest_name) between 2 and 120),
   guest_role text not null check (char_length(guest_role) between 2 and 120),

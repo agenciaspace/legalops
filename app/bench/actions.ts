@@ -11,6 +11,19 @@ const REGION_STATUSES = new Set(['forming', 'active', 'paused', 'archived'])
 const LEADER_ROLES = new Set(['lead', 'co_lead', 'organizer'])
 const LEADER_DECISIONS = new Set(['active', 'declined', 'paused'])
 
+export async function registerNubankBench(formData: FormData) {
+  const name = clean(formData.get('full_name'), 120)
+  const email = normalizeEmail(formData.get('email'))
+  const role = clean(formData.get('current_role'), 120)
+  const organization = clean(formData.get('organization'), 120)
+  if (name.length < 2 || !EMAIL_RE.test(email) || role.length < 2 || organization.length < 2) redirect('/bench/nubank-2026-09-17?error=1')
+  const admin = createAdminClient()
+  const { data: event } = await admin.from('community_events').select('id').eq('slug', 'bench-nubank-2026-09-17').maybeSingle()
+  if (!event) redirect('/bench/nubank-2026-09-17?error=1')
+  await admin.from('community_event_rsvps').insert({ event_id: event.id, response: 'confirmed', guest_name: name, guest_email: email, guest_role: role, organization_name: organization, guest_phone: clean(formData.get('phone'), 40) || null, dietary_restrictions: clean(formData.get('dietary'), 500) || null, accessibility_needs: clean(formData.get('accessibility'), 500) || null, arrival_notes: clean(formData.get('notes'), 1000) || null, confirmed_at: new Date().toISOString() })
+  redirect('/bench/nubank-2026-09-17?registered=1')
+}
+
 function clean(value: FormDataEntryValue | null, max = 500) {
   return String(value ?? '').trim().slice(0, max)
 }
