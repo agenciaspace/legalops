@@ -6,6 +6,7 @@ import { ClubDiscovery } from '@/components/ClubDiscovery'
 import { ClubHeader } from '@/components/ClubHeader'
 import { LegalOpsEcosystem } from '@/components/LegalOpsEcosystem'
 import { CLUB_LAUNCH_TIERS, formatBRL } from '@/lib/club-pricing'
+import { createAdminClient } from '@/lib/supabase-admin'
 
 export const metadata: Metadata = {
   title: 'legalops.club — comunidade para profissionais do jurídico',
@@ -19,6 +20,8 @@ export const metadata: Metadata = {
     type: 'website',
   },
 }
+
+export const dynamic = 'force-dynamic'
 
 const roundedFont = { fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }
 const bodyFont = { fontFamily: 'var(--font-inter), sans-serif' }
@@ -87,11 +90,12 @@ function ClubProductPreview() {
   )
 }
 
-export default function ClubLandingPage() {
+export default async function ClubLandingPage() {
   const firstTier = CLUB_LAUNCH_TIERS[0]
   const annualPrice = formatBRL(firstTier.annualPrice)
-  const whatsappInterestUrl = process.env.NEXT_PUBLIC_CLUB_WHATSAPP_URL
-    || 'https://wa.me/?text=Quero%20entrar%20no%20grupo%20de%20interessados%20do%20LegalOps.club'
+  const admin = createAdminClient()
+  const { data: launch } = await admin.from('club_launch_config').select('whatsapp_invite_url').eq('id', true).maybeSingle()
+  const whatsappInterestUrl = launch?.whatsapp_invite_url || 'mailto:leonhatori@gmail.com?subject=Quero%20entrar%20no%20LegalOps%20Club'
 
   return (
     <div className="min-h-screen bg-[#F5F1E8] text-[#111111]" style={bodyFont}>
@@ -194,7 +198,7 @@ export default function ClubLandingPage() {
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#C9684F]">grupo de interessados</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl" style={roundedFont}>quer acompanhar a abertura do Club?</h2>
-              <p className="mt-2 max-w-[620px] text-sm leading-6 text-[#69635E]">Entre no WhatsApp para receber novidades, datas dos próximos encontros e o convite do grupo quando ele estiver pronto.</p>
+              <p className="mt-2 max-w-[620px] text-sm leading-6 text-[#69635E]">Receba novidades, datas dos próximos encontros e o convite do grupo oficial.</p>
             </div>
             <a href={whatsappInterestUrl} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#1F8F55] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#187645]"><MessageCircle className="h-4 w-4" /> Entrar no WhatsApp</a>
           </div>

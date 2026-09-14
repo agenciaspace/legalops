@@ -19,12 +19,9 @@ export async function middleware(request: NextRequest) {
   }
 
   let supabaseResponse = NextResponse.next({ request })
-  const publicPaths = new Set(['/', '/club', '/club/about', '/club/checkout', '/en', '/login', '/set-password', '/manifesto', '/pricing', '/for-employers', '/curso-ia-whatsapp', '/auth/confirm'])
+  const publicPaths = new Set(['/', '/club', '/club/checkout', '/login', '/set-password', '/auth/confirm'])
   const isPublicPage = publicPaths.has(pathname)
-    || pathname === '/bench'
-    || (pathname.startsWith('/bench/') && !pathname.startsWith('/bench/manage'))
-    || pathname === '/regions'
-    || (pathname.startsWith('/regions/') && !pathname.startsWith('/regions/manage'))
+    || pathname === '/bench/nubank-2026-09-17'
   const publicWebhookPaths = new Set([
     '/api/webhooks/brevo/inbound',
     '/api/webhooks/cloudflare/inbound',
