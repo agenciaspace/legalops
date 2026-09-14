@@ -69,6 +69,40 @@ export async function createCommunityPost(formData: FormData) {
   }
 }
 
+export async function confirmBenchAttendance(formData: FormData) {
+  const { supabase, user } = await getAuthenticatedMember()
+  const eventId = String(formData.get('event_id') ?? '')
+  const values = {
+    event_id: eventId,
+    user_id: user.id,
+    response: 'confirmed',
+    guest_name: String(formData.get('name') ?? '').trim().slice(0, 120),
+    guest_email: String(formData.get('email') ?? '').trim().slice(0, 240),
+    guest_role: String(formData.get('role') ?? '').trim().slice(0, 120),
+    organization_name: String(formData.get('organization') ?? '').trim().slice(0, 120),
+    guest_phone: String(formData.get('phone') ?? '').trim().slice(0, 40) || null,
+    dietary_restrictions: String(formData.get('dietary') ?? '').trim().slice(0, 500) || null,
+    accessibility_needs: String(formData.get('accessibility') ?? '').trim().slice(0, 500) || null,
+    arrival_notes: String(formData.get('notes') ?? '').trim().slice(0, 1000) || null,
+    confirmed_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }
+  if (!eventId || values.guest_name.length < 2 || values.guest_role.length < 2 || values.organization_name.length < 2 || !values.guest_email.includes('@')) return { ok: false, message: 'Revise os campos obrigatórios.' }
+  const { error } = await supabase.from('community_event_rsvps').upsert(values, { onConflict: 'event_id,user_id' })
+  if (error) return { ok: false, message: 'Não foi possível salvar agora. Tente novamente.' }
+  revalidatePath('/community/bench')
+  return { ok: true, message: 'Presença confirmada. Nos vemos no Bench!' }
+}
+
+export async function declineBenchAttendance(formData: FormData) {
+  const { supabase, user } = await getAuthenticatedMember()
+  const eventId = String(formData.get('event_id') ?? '')
+  const { error } = await supabase.from('community_event_rsvps').update({ response: 'declined', confirmed_at: null, updated_at: new Date().toISOString() }).eq('event_id', eventId).eq('user_id', user.id)
+  if (error) return { ok: false, message: 'Não foi possível atualizar agora.' }
+  revalidatePath('/community/bench')
+  return { ok: true, message: 'Tudo bem — sua resposta foi atualizada.' }
+}
+
 export async function toggleCommunityPostLike(formData: FormData) {
   const postId = String(formData.get('post_id') ?? '')
   if (!postId) return

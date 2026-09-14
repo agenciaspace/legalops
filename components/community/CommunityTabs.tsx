@@ -23,6 +23,7 @@ const mainItems = [
   { href: '/community/agents', label: 'Agentes', icon: Bot },
   { href: '/community/summaries', label: 'Resumos IA', icon: Sparkles },
   { href: '/community/calendar', label: 'Lives', icon: CalendarDays },
+  { href: '/community/bench', label: 'Bench Nubank', icon: Users },
   { href: '/community/members', label: 'Membros', icon: Users },
   { href: '/community/profile', label: 'Meu perfil', icon: BadgeCheck },
 ]
