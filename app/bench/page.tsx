@@ -89,6 +89,9 @@ export default async function BenchPage({ searchParams }: { searchParams?: Recor
                 <a href="#temas" className="inline-flex items-center gap-2 rounded-lg bg-[#111111] px-5 py-3 text-sm font-bold text-white hover:bg-[#2A2927]">
                   Ver temas <ArrowRight className="h-4 w-4" />
                 </a>
+                <Link href="/community/bench" className="inline-flex items-center gap-2 rounded-lg border border-[#C9684F] bg-[#FFF4EE] px-5 py-3 text-sm font-bold text-[#A94E38] hover:bg-[#FFE9DE]">
+                  Primeiro Bench: Nubank <CalendarDays className="h-4 w-4" />
+                </Link>
                 <Link href="/regions" className="inline-flex items-center gap-2 rounded-lg border border-[#BEB7AA] px-5 py-3 text-sm font-bold hover:bg-[#FAF7F1]">
                   <MapPin className="h-4 w-4" /> Comunidades regionais
                 </Link>
