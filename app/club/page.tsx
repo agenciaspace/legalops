@@ -90,6 +90,8 @@ function ClubProductPreview() {
 export default function ClubLandingPage() {
   const firstTier = CLUB_LAUNCH_TIERS[0]
   const annualPrice = formatBRL(firstTier.annualPrice)
+  const whatsappInterestUrl = process.env.NEXT_PUBLIC_CLUB_WHATSAPP_URL
+    || 'https://wa.me/?text=Quero%20entrar%20no%20grupo%20de%20interessados%20do%20LegalOps.club'
 
   return (
     <div className="min-h-screen bg-[#F5F1E8] text-[#111111]" style={bodyFont}>
@@ -184,6 +186,17 @@ export default function ClubLandingPage() {
             >
               Participar do Club <ArrowRight className="h-4 w-4" />
             </Link>
+          </div>
+        </section>
+
+        <section className="border-b border-[#CEC8BD] bg-[#EDE5D8]">
+          <div className="mx-auto flex max-w-[1040px] flex-col gap-6 px-5 py-12 sm:px-8 md:flex-row md:items-center md:justify-between md:py-14">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#C9684F]">grupo de interessados</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl" style={roundedFont}>quer acompanhar a abertura do Club?</h2>
+              <p className="mt-2 max-w-[620px] text-sm leading-6 text-[#69635E]">Entre no WhatsApp para receber novidades, datas dos próximos encontros e o convite do grupo quando ele estiver pronto.</p>
+            </div>
+            <a href={whatsappInterestUrl} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#1F8F55] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#187645]"><MessageCircle className="h-4 w-4" /> Entrar no WhatsApp</a>
           </div>
         </section>
 
