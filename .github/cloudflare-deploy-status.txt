@@ -1,7 +1,7 @@
-commit=db49c36012d25c7e9c45b485f73ed89f16b9f7c1
+commit=6e9712d417a3dc0e64712a2e7e3f6967686a176a
 build=success
 app_deploy=success
 cron_deploy=success
 inbound_deploy=success
 public_smoke=success
-run_id=34988081798
+run_id=34989472312
