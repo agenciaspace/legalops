@@ -106,3 +106,10 @@ o texto de tradução “Inscrições encerradas” do status real de uma vaga G
 Não reativar esse agendamento: ele sobrescrevia verificações do Worker atual.
 
 A rotina normal deve rodar diariamente. Durante smoke tests, o horário pode ser temporariamente alterado e deve ser restaurado depois da validação.
+
+A migração `20260916185243_allow_verified_linkedin_jobs.sql` alinha a constraint
+do banco à validação do coletor: aceita páginas individuais `/jobs/view/` e
+mantém o bloqueio de buscas, login e outros agregadores, com logo obrigatório.
+Na correção de 16/09/2026, 21 anúncios elegíveis foram verificados e gravados,
+e o catálogo passou de 3 para 24 vagas ativas. Duplicatas conhecidas de
+KLA, Jusbrasil, LBCA e TOTVS foram descartadas dessa importação.
