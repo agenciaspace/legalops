@@ -6,6 +6,7 @@ import {
 } from '@/lib/openrouter'
 
 afterEach(() => {
+  vi.restoreAllMocks()
   vi.unstubAllGlobals()
   vi.unstubAllEnvs()
 })
@@ -35,7 +36,9 @@ describe('OpenRouter response helpers', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    await expect(generateOpenRouterText({ userPrompt: 'Pergunta' })).resolves.toBe('Resposta')
+    const timeout = vi.spyOn(AbortSignal, 'timeout')
+    await expect(generateOpenRouterText({ userPrompt: 'Pergunta', timeoutMs: 35000 })).resolves.toBe('Resposta')
+    expect(timeout).toHaveBeenCalledWith(35000)
     expect(fetchMock).toHaveBeenCalledWith(
       'https://openrouter.ai/api/v1/chat/completions',
       expect.objectContaining({

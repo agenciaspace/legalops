@@ -54,7 +54,6 @@ export async function generateOpenRouterText({
 
   const response = await fetch(OPENROUTER_API_URL, {
     method: 'POST',
-    ...(timeoutMs ? { signal: AbortSignal.timeout(timeoutMs) } : {}),
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
@@ -84,7 +83,7 @@ export async function generateOpenRouterText({
         },
       ],
     }),
-    signal: AbortSignal.timeout(30000),
+    signal: AbortSignal.timeout(timeoutMs ?? 30000),
   })
 
   if (!response.ok) {
