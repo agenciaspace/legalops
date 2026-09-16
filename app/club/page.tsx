@@ -20,19 +20,19 @@ const headingFont = { fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif
 const plannedFeatures = [
   {
     title: 'seu agente',
-    description: 'No Pro, cada usuário terá um agente pessoal de IA. Você poderá pedir um resumo do que perdeu, procurar uma referência que alguém compartilhou ou tirar uma dúvida sobre as conversas. Ele vai acompanhar os assuntos que você escolher.',
+    description: 'Seu agente guarda o histórico das suas conversas e o contexto que você escolher compartilhar. Peça um resumo das discussões recentes do site, procure uma referência ou organize os próximos passos do seu trabalho.',
   },
   {
     title: 'conexão com o Work',
-    description: 'Seu agente poderá relacionar oportunidades ao seu perfil e ajudar a acompanhar os próximos passos da sua carreira. A consulta às vagas públicas do Work continua aberta.',
+    description: 'Consulte vagas verificadas do Work na mesma conversa. O agente usa seu perfil para contextualizar as oportunidades e explicar o que merece atenção.',
   },
   {
     title: 'conexão com o Dev',
-    description: 'Um problema discutido no Club pode levar a um projeto no Dev. O agente poderá encontrar referências, documentação e formas de contribuir. O código dos projetos continua aberto para todos.',
+    description: 'Leve uma dúvida sobre contratos para a conversa e encontre referências do OpenCLM, com links para a página do projeto e seu código aberto. O agente orienta; não instala nem altera o projeto por você.',
   },
   {
     title: 'assuntos que você quer seguir',
-    description: 'Contratos, IA, gestão jurídica, carreira: você escolhe o que quer acompanhar. No Pro, o agente vai reunir novidades e referências desses assuntos para você retomar o que ficou para trás.',
+    description: 'Escolha os assuntos e descreva seu foco atual. Essas preferências ficam salvas e ajudam o agente a priorizar as referências consultadas em cada resposta.',
   },
 ]
 
@@ -62,13 +62,13 @@ export default function ClubLandingPage() {
             <a href="#pro" className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold underline decoration-[#C9684F] underline-offset-4">Conheça a proposta do Pro ↓</a>
           </div>
           <aside className="rounded-lg border border-[#CEC8BD] bg-[#EDE5D8] p-7 sm:p-9" aria-label="Exemplo ilustrativo das funcionalidades previstas">
-            <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#716B65]">Pro · agente pessoal em preparação</p>
+            <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#716B65]">Pro · agente pessoal</p>
             <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-[-.04em]" style={headingFont}>o que eu perdi essa semana?</h2>
-            <p className="mt-4 text-sm leading-6 text-[#625E59]">Essa é uma das perguntas que você poderá fazer ao seu agente. Ele vai reunir o que aconteceu nos assuntos que você acompanha e indicar onde continuar a leitura.</p>
+            <p className="mt-4 text-sm leading-6 text-[#625E59]">Peça ao seu agente para consultar as discussões recentes do site. A resposta traz referências para você conferir o contexto e continuar a leitura.</p>
             <div className="mt-7 space-y-5 border-t border-[#C9C0B1] pt-6">
               {[
-                ['Sobre contratos, por exemplo', 'Você poderá pedir as referências de uma discussão sobre IA que não conseguiu acompanhar.'],
-                ['E os encontros?', 'Você também poderá acompanhar os convites organizados pela liderança da sua região.'],
+                ['Sobre contratos, por exemplo', 'Peça referências das discussões e compare com os recursos do OpenCLM.'],
+                ['E os encontros?', 'Os encontros estão no calendário da comunidade. A organização por lideranças regionais continua em preparação.'],
               ].map(([title, description]) => (
                 <div key={title}><h3 className="text-sm font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-[#625E59]">{description}</p></div>
               ))}
@@ -89,13 +89,14 @@ export default function ClubLandingPage() {
         <section aria-label="Comunidade e Pro" className="mx-auto max-w-[1180px] px-5 pt-14 sm:px-8">
           <div className="grid border-y border-[#CEC8BD] md:grid-cols-2">
             <div className="py-8 md:pr-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Comunidade · gratuita</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>pessoas e conversas</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Perfil profissional, troca de experiências, encontros e contato com outros membros. A entrada depende do seu perfil e das regras da comunidade.</p></div>
-            <div className="border-t border-[#CEC8BD] py-8 md:border-l md:border-t-0 md:pl-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Club Pro</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>agente e integrações</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Assistência pessoal para acompanhar assuntos, recuperar contexto e conectar oportunidades e projetos. Estamos preparando essa versão.</p></div>
+            <div className="border-t border-[#CEC8BD] py-8 md:border-l md:border-t-0 md:pl-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Club Pro</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>agente e integrações</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Agente privado com histórico e preferências, referências das discussões do site, vagas do Work e conteúdo do OpenCLM no Dev.</p></div>
           </div>
         </section>
         <section id="pro" className="mx-auto max-w-[1180px] scroll-mt-8 px-5 py-14 sm:px-8 sm:py-20">
-          <p className="text-xs font-semibold uppercase tracking-[.15em] text-[#A24D36]">Club Pro · em preparação</p>
+          <p className="text-xs font-semibold uppercase tracking-[.15em] text-[#A24D36]">Club Pro · primeira versão</p>
           <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-[-.045em] sm:text-5xl" style={headingFont}>um agente para acompanhar seu contexto<span className="text-[#E88A6A]">.</span></h2>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#625E59] sm:text-base">Pro será a versão paga, com agente pessoal e integrações com Work, Dev e outros serviços. Para quem quer ajuda para acompanhar as conversas e conectar o que aprende às oportunidades e projetos. Estamos definindo o pacote e o preço de lançamento.</p>
+          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#625E59] sm:text-base">Converse com seu agente, salve o contexto e consulte fontes do Club, Work e Dev. A primeira versão inclui até 30 perguntas por dia. A leitura automática do WhatsApp e o aplicativo próprio ainda estão em preparação.</p>
+          <Link href="/club/checkout" className="mt-6 inline-flex min-h-12 items-center rounded-lg bg-[#111] px-6 py-3 text-sm font-semibold text-white">Ver plano Pro e pagamento por PIX →</Link>
           <div className="mt-10 border-t border-[#CEC8BD]">
             {plannedFeatures.map((feature, index) => (
               <article key={feature.title} className="grid gap-4 border-b border-[#CEC8BD] py-8 md:grid-cols-[.8fr_1.2fr] md:gap-12">
@@ -111,7 +112,7 @@ export default function ClubLandingPage() {
         <section className="bg-[#111111] text-[#F5F1E8]">
           <div className="mx-auto max-w-[1180px] px-5 py-14 sm:px-8 sm:py-20">
             <h2 className="max-w-3xl text-3xl font-semibold tracking-[-.045em] sm:text-5xl" style={headingFont}>pra quando você ficar uns dias fora.</h2>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-[#CEC8BD]">A ideia do Pro é ajudar você a recuperar informações importantes depois de uns dias fora. Seu agente vai resumir as novidades dos assuntos que você segue, com o caminho para voltar à conversa e consultar os materiais.</p>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-[#CEC8BD]">Peça um resumo das discussões recentes do site e consulte os links usados na resposta. Seu histórico fica salvo para retomar a conversa quando precisar.</p>
           </div>
         </section>
         <section className="mx-auto max-w-[1180px] px-5 py-14 sm:px-8 sm:py-20">

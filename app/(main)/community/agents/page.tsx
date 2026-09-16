@@ -22,10 +22,11 @@ export default async function CommunityAgentsPage() {
     <main className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-6 lg:px-8 lg:py-9">
       <header className="max-w-2xl">
         <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.14em] text-[#D9470F]"><Sparkles className="h-3.5 w-3.5" /> LegalOps Club agents</div>
-        <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] text-[#24231F] sm:text-4xl">One specialist for each space.</h1>
-        <p className="mt-3 text-sm leading-6 text-[#77746E]">Agents are dedicated members of the Club: each one has a narrow mandate, its own operating lens and a clear home in the community. Ask for structure, options and next steps, not legal advice.</p>
+        <h1 className="mt-3 text-3xl font-black tracking-[-0.04em] text-[#24231F] sm:text-4xl">Um agente para cada assunto.</h1>
+        <p className="mt-3 text-sm leading-6 text-[#77746E]">Use os agentes por assunto para organizar dúvidas e próximos passos. Para conversar com seu histórico, perfil e fontes do Club, Work e Dev, abra seu agente pessoal.</p>
       </header>
 
+      <Link href="/community/assistant" className="mt-5 inline-flex rounded-lg bg-[#111] px-5 py-3 text-sm font-semibold text-white">Abrir meu agente pessoal →</Link>
       <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {COMMUNITY_AGENTS.map(agent => {
           const category = COMMUNITY_CATEGORIES[agent.category]

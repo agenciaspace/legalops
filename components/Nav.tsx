@@ -10,9 +10,10 @@ interface NavProps {
   discoverCount: number
   jobAlertCount: number
   hasClubAccess: boolean
+  isClubAdmin?: boolean
 }
 
-export function Nav({ discoverCount, jobAlertCount, hasClubAccess }: NavProps) {
+export function Nav({ discoverCount, jobAlertCount, hasClubAccess, isClubAdmin = false }: NavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const isCommunity = pathname.startsWith('/community')
@@ -55,27 +56,18 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess }: NavProps) {
             <ChevronDown className="hidden h-3.5 w-3.5 text-[#918A83] lg:block" />
           </Link>
 
-          <button className="mx-auto hidden h-9 w-full max-w-md items-center gap-2 rounded-full border border-[#CEC8BD] bg-white/65 px-3 text-left text-xs text-[#77716A] transition hover:bg-white md:flex" aria-label="Buscar na comunidade">
-            <Search className="h-4 w-4" />
-            <span className="flex-1">Buscar na comunidade</span>
-            <kbd className="rounded-md border border-[#E6DED0] bg-white px-1.5 py-0.5 font-sans text-[9px] text-[#918A83]">⌘ K</kbd>
-          </button>
+          <form action="/community" method="get" className="mx-auto hidden h-9 w-full max-w-md items-center gap-2 rounded-full border border-[#CEC8BD] bg-white/65 px-3 text-xs md:flex"><Search className="h-4 w-4" /><input name="q" aria-label="Buscar na comunidade" placeholder="Buscar na comunidade" maxLength={80} className="min-w-0 flex-1 bg-transparent outline-none"/><button type="submit" className="font-semibold">Buscar</button></form>
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5">
             <Link href="/community#new-post" className="hidden h-9 items-center gap-1.5 rounded-full bg-[#E88A6A] px-3.5 text-xs font-extrabold text-[#111111] transition hover:bg-[#DE7B5C] sm:flex">
               <Plus className="h-4 w-4" /> Novo post
             </Link>
-            <button className="flex h-9 w-9 items-center justify-center rounded-full text-[#69635E] transition hover:bg-white/70 hover:text-[#111111] md:hidden" aria-label="Buscar">
-              <Search className="h-[18px] w-[18px]" />
-            </button>
-            <button className="hidden h-9 w-9 items-center justify-center rounded-full text-[#69635E] transition hover:bg-white/70 hover:text-[#111111] sm:flex" aria-label="Mensagens">
-              <MessageCircle className="h-[18px] w-[18px]" />
-            </button>
+            <Link href="/community#community-search" className="flex h-9 w-9 items-center justify-center rounded-full text-[#69635E] md:hidden" aria-label="Buscar na comunidade"><Search className="h-[18px] w-[18px]" /></Link>
             <Link href={hasClubAccess ? '/community/jobs' : '/club#pro'} className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#69635E] transition hover:bg-white/70 hover:text-[#111111]" aria-label={jobAlertCount > 0 ? `${jobAlertCount} alertas de vagas` : 'Alertas de vagas'}>
               <Bell className="h-[18px] w-[18px]" />
               {jobAlertCount > 0 ? <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#E88A6A] ring-2 ring-[#F5F1E8]" /> : null}
             </Link>
-            <button className="ml-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#111111] text-[10px] font-black text-white ring-2 ring-[#F5F1E8]" aria-label="Abrir menu do perfil">LO</button>
+            <details className="relative"><summary className="ml-0.5 flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full bg-[#111111] text-[10px] font-black text-white" aria-label="Abrir menu do perfil">LO</summary><div className="absolute right-0 top-12 w-52 rounded-xl border border-[#CEC8BD] bg-white p-2 text-sm shadow-lg"><Link href="/community/profile" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu perfil</Link><Link href="/club/checkout" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu Pro</Link>{isClubAdmin&&<Link href="/club/admin/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Pagamentos do Pro</Link>}<button onClick={handleSignOut} className="w-full rounded-lg p-3 text-left hover:bg-[#F5F1E8]">Sair</button></div></details>
           </div>
         </div>
       </header>

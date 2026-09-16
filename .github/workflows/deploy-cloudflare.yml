@@ -12,6 +12,7 @@ on:
       - 'package-lock.json'
       - 'wrangler.jsonc'
       - 'open-next.config.ts'
+      - 'next.config.mjs'
       - 'cloudflare/**'
       - '.github/workflows/deploy-cloudflare.yml'
   workflow_dispatch:

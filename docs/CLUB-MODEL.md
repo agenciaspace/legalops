@@ -30,9 +30,10 @@ Exemplos de direção do produto:
 - Dev: relacionar problemas discutidos a projetos, documentação e contribuições.
 - Club: recuperar conversas, referências e novidades dos assuntos acompanhados.
 
-O agente pessoal integrado continua em preparação; os agentes temáticos atuais
-não equivalem ao produto completo. Distinguir funcionalidades disponíveis de
-funcionalidades planejadas em todas as páginas e ofertas.
+A primeira versão do agente pessoal tem histórico privado, contexto e assuntos
+salvos, consulta às publicações do site, vagas verificadas do Work e referências
+do OpenCLM. Limite: 30 perguntas por dia (reinício às 00h UTC). Leitura automática
+do WhatsApp e aplicativo próprio continuam planejados; não fazem parte da oferta.
 
 Consultar vagas públicas no Work e acessar projetos open source do Dev não
 exigem Pro. O valor pago está na assistência e nas integrações personalizadas.
@@ -56,7 +57,8 @@ URLs and imported data never automatically confer a verified badge.
 The database RPC admits only the authenticated, confirmed-email user and ignores
 billing and Pro fields. Existing active/complimentary benefits were migrated to
 independent Pro status; future Pro expiry does not expire community membership.
-No Pro price or checkout is currently defined.
+PIX checkout and manual activation are implemented. Price and period must be
+explicitly configured before opening sales; no legacy founder price is assumed.
 
 Validation: `npm test`, `npm run build`, and the rollback-only database assertions
 in `supabase/tests/club_admission.sql`. The authenticated SECURITY DEFINER RPC is
@@ -70,3 +72,26 @@ ou conexão com projetos. Apresentar o benefício concreto e um próximo passo c
 Evitar chamadas que desestimulem a contratação, como “não é preciso contratar”.
 Manter a participação gratuita e a diferença entre recursos prontos e planejados;
 não inventar disponibilidade, preço, urgência ou obrigação de pagar.
+
+## Venda por PIX (16/09/2026)
+
+Leon autorizou abrir vendas pela chave `leonhatori@gmail.com`. Preço e período
+ainda aguardam decisão. A oferta fica inativa até ambos serem definidos.
+
+- `/club/checkout`: conta e perfil completos, pedido com preço/período fixados,
+  upload privado de comprovante PDF/PNG/JPG até 5 MB e status da conferência.
+- `/club/admin/pro`: administradores configuram oferta, conferem o recebimento
+  no banco e aprovam/rejeitam com motivo. Não há conciliação bancária automática.
+- A aprovação inicia o período ou soma meses ao prazo ainda vigente. Sem
+  renovação automática. Expirar o Pro preserva a comunidade gratuita.
+- `/community/assistant`: agente pessoal; `/api/club/agent` valida Pro no servidor.
+  Apagar histórico não reinicia a cota. Falhas do provedor devolvem a pergunta.
+- A ativação aparece no checkout; email de ativação ainda não está implementado.
+
+Dados: `club_pro_offer`, `club_pro_orders`, bucket privado `club-pro-receipts`,
+`club_agent_preferences`, `club_agent_turns` e `club_agent_usage`. RPCs de
+aprovação e consumo são restritas a service role. Recibos só são baixados por
+administradores autenticados através de links temporários.
+
+Validação: testes Vitest de autorização, pedidos e agente; rollback SQL em
+`supabase/tests/club_pro.sql` verifica aprovação única, isolamento e cota diária.

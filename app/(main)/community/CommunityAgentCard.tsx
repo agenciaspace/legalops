@@ -47,7 +47,7 @@ export function CommunityAgentCard({ category, hasPaidAccess }: { category: stri
 
       {!hasPaidAccess ? (
         <div className="flex items-center gap-2 px-4 py-3 text-[10px] font-bold text-[#77746E] sm:px-5">
-          <Lock className="h-3.5 w-3.5 text-[#AAA7A1]" /><span>Quer ajuda para aplicar esse assunto no seu trabalho? <Link href="/club#pro" className="font-extrabold text-[#D9470F] underline">Conheça os agentes do Pro →</Link></span>
+          <Lock className="h-3.5 w-3.5 text-[#AAA7A1]" /><span>Quer ajuda para aplicar esse assunto no seu trabalho? <Link href="/club/checkout" className="font-extrabold text-[#D9470F] underline">Assinar Pro e acessar os agentes →</Link></span>
         </div>
       ) : (
         <div className="p-4 sm:p-5">

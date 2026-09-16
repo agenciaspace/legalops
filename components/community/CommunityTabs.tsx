@@ -18,6 +18,7 @@ Bot,
 } from 'lucide-react'
 
 const mainItems = [
+  { href: '/community/assistant', label: 'Meu agente · Pro', icon: Bot, pro: true },
   { href: '/community', label: 'Início', icon: Home, exact: true },
 { href: '/community/office', label: 'Escritório', icon: Building2 },
   { href: '/community/agents', label: 'Agentes · Pro', icon: Bot, pro: true },
@@ -98,7 +99,7 @@ export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memb
             const Icon = item.icon
             const locked = !hasPaidAccess && 'pro' in item && item.pro
             return (
-              <Link key={item.href} href={locked ? '/club#pro' : item.href} className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-bold ${active ? 'border-[#DF4D1E] text-[#1F211E]' : 'border-transparent text-[#686661]'}`}>
+              <Link key={item.href} href={locked ? '/club/checkout' : item.href} className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-bold ${active ? 'border-[#DF4D1E] text-[#1F211E]' : 'border-transparent text-[#686661]'}`}>
                 <Icon className="h-3.5 w-3.5" /> {item.label} {locked ? <Lock className="h-3 w-3 text-[#AAA7A1]" /> : null}
               </Link>
             )
@@ -114,7 +115,7 @@ export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memb
               const Icon = item.icon
               const locked = !hasPaidAccess && 'pro' in item && item.pro
               return (
-                <Link key={item.href} href={locked ? '/club#pro' : item.href} className={itemClass(active)}>
+                <Link key={item.href} href={locked ? '/club/checkout' : item.href} className={itemClass(active)}>
                   <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.3 : 1.8} />
                   <span className="flex-1">{item.label}</span>
                   {item.label === 'Membros' && memberCount > 0 ? <span className="text-[10px] font-bold text-[#9B9993]">{memberCount}</span> : null}
@@ -153,8 +154,8 @@ export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memb
           ) : (
             <div className="border-t-2 border-[#DF4D1E] bg-[#1F211E] p-3 text-white">
               <div className="flex items-center gap-2 text-[11px] font-extrabold"><Lock className="h-3.5 w-3.5 text-[#FF7A45]" /> Club Pro</div>
-              <p className="mt-2 text-[10px] leading-4 text-white/60">Ficou sem tempo de acompanhar? O Pro está sendo preparado para reunir os assuntos, oportunidades e projetos que importam para você.</p>
-              <Link href="/club#pro" className="mt-3 inline-flex text-[10px] font-extrabold text-[#FF8B5D] hover:text-white">Conhecer o Pro →</Link>
+              <p className="mt-2 text-[10px] leading-4 text-white/60">Recupere o contexto das discussões, consulte vagas e encontre referências do Dev com seu agente pessoal.</p>
+              <Link href="/club/checkout" className="mt-3 inline-flex text-[10px] font-extrabold text-[#FF8B5D] hover:text-white">Assinar Pro →</Link>
             </div>
           )}
         </nav>

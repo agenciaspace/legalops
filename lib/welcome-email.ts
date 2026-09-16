@@ -75,7 +75,7 @@ function buildClubWelcomeEmail(email: string, displayName?: string | null, whats
     '2. Apresente-se no espaço Apresentações: https://legalops.club/community',
     whatsappInviteUrl ? `3. Entre na comunidade do WhatsApp: ${whatsappInviteUrl}` : '3. Encontre o link do WhatsApp na página inicial da comunidade.',
     '',
-    'Quer ajuda para acompanhar os assuntos, oportunidades e projetos do seu interesse? Conheça o Club Pro e os recursos em preparação: https://legalops.club/club#pro',
+    'Quer ajuda para acompanhar os assuntos, oportunidades e projetos do seu interesse? Conheça o agente pessoal do Club Pro: https://legalops.club/club/checkout',
     '',
     'Comunidade: https://legalops.club',
     'Oportunidades: https://legalops.work',

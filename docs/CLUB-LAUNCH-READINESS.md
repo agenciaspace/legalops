@@ -62,3 +62,15 @@
 - Pro price, billing period and usage allowance.
 - Whether the first assistant release includes WhatsApp ingestion or starts with
   website content plus Work/Dev. The public promise must match the chosen scope.
+
+## Atualização — primeira oferta Pro por PIX
+
+Implementados checkout com comprovante privado, administração de preço/período,
+aprovação manual e expiração independente da comunidade. Agente pessoal com
+histórico, preferências, fontes do Club/Work/OpenCLM e limite de 30 perguntas/dia.
+Os itens anteriores são o diagnóstico anterior a esta implementação.
+
+Preço e período ainda não definidos pelo Leon; oferta permanece inativa.
+WhatsApp automático, aplicativo próprio e email de ativação não fazem parte
+desta primeira entrega. Recebimento das boas-vindas na caixa do Leon segue
+sem confirmação.

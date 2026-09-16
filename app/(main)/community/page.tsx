@@ -65,9 +65,10 @@ type Member = {
 
 export const dynamic = 'force-dynamic'
 
-export default async function CommunityPage({ searchParams }: { searchParams?: { space?: string; upgrade?: string } }) {
+export default async function CommunityPage({ searchParams }: { searchParams?: { space?: string; upgrade?: string; q?: string } }) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const search = (searchParams?.q ?? '').replace(/[^a-zA-Z0-9À-ÿ\s-]/g, ' ').trim().slice(0,80)
   const requestedSpace = searchParams?.space
   const selectedSpace = requestedSpace && COMMUNITY_CATEGORIES[requestedSpace] ? requestedSpace : null
   const { data: clubAccess } = await supabase
@@ -87,6 +88,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
     .from('community_posts')
     .select('id, author_name, author_role, category, title, body, is_pinned, created_at, community_comments(id, author_name, body, created_at), community_post_likes(user_id)')
 
+  if (search) postsQuery = postsQuery.or(`title.ilike.%${search}%,body.ilike.%${search}%`)
   if (selectedSpace) postsQuery = postsQuery.eq('category', selectedSpace)
 
   const [{ data: rawPosts }, { data: rawEvent }, { data: rawMembers }] = await Promise.all([
@@ -127,7 +129,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
           <header className="mb-5 flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">{activeSpace?.title ?? 'Início'}</h1>
+                <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">{search ? `Busca: ${search}` : activeSpace?.title ?? 'Início'}</h1>
                 {selectedSpace === 'anuncio' ? <span className="rounded bg-[#FFF0E9] px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-[#D9470F]">Oficial</span> : null}
               </div>
               <p className="mt-1 text-xs leading-5 text-[#77746E]">
@@ -139,6 +141,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
             </button>
           </header>
 
+          <form id="community-search" action="/community" className="mb-5 flex scroll-mt-32 gap-2 md:hidden"><input name="q" defaultValue={search} aria-label="Buscar publicações" placeholder="Buscar publicações" maxLength={80} className="min-w-0 flex-1 rounded-lg border border-[#CEC8BD] bg-white px-3 py-2 text-sm"/><button className="rounded-lg bg-[#111] px-3 py-2 text-xs font-semibold text-white">Buscar</button></form>
           {!hasCommunityAccess ? (
             <section className="mb-4 overflow-hidden rounded-xl border border-[#FFD0BD] bg-[#FFF6F1] p-4 sm:p-5">
               <div className="flex items-start gap-3">
@@ -254,7 +257,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
               const likedByUser = likes.some(like => like.user_id === user?.id)
 
               return (
-                <article key={post.id} className="rounded-xl border border-[#E1E1DD] bg-white p-4 transition hover:border-[#D2D1CC] sm:p-5">
+                <article id={`post-${post.id}`} key={post.id} className="rounded-xl border border-[#E1E1DD] bg-white p-4 transition hover:border-[#D2D1CC] sm:p-5">
                   <div className="flex items-start gap-3">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-black ${getAvatarTone(post.author_name)}`}>
                       {getInitials(post.author_name)}
@@ -326,6 +329,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
         </section>
 
         <aside className="hidden space-y-4 xl:sticky xl:top-[5.75rem] xl:block">
+          <form id="community-search" action="/community" className="mb-5 flex scroll-mt-32 gap-2 md:hidden"><input name="q" defaultValue={search} aria-label="Buscar publicações" placeholder="Buscar publicações" maxLength={80} className="min-w-0 flex-1 rounded-lg border border-[#CEC8BD] bg-white px-3 py-2 text-sm"/><button className="rounded-lg bg-[#111] px-3 py-2 text-xs font-semibold text-white">Buscar</button></form>
           {!hasCommunityAccess ? (
             <section className="rounded-xl bg-[#292825] p-5 text-white">
               <Lock className="h-5 w-5 text-[#FF7A45]" />

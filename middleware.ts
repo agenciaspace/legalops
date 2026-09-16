@@ -77,7 +77,7 @@ export async function middleware(request: NextRequest) {
 
   const requiresClub = pathname === '/onboard'
     || ['/dashboard', '/discover', '/pipeline', '/jobs', '/settings', '/professionals'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
-    || ['/api/profile', '/api/pipeline', '/api/jobs', '/api/ai'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
+    || ['/api/club', '/api/profile', '/api/pipeline', '/api/jobs', '/api/ai'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
     || pathname === '/community' || pathname.startsWith('/community/')
 
   let clubAccess: { club_access_status: string | null; club_access_expires_at: string | null; club_pro_status: string | null; club_pro_expires_at: string | null } | null = null
@@ -106,7 +106,7 @@ export async function middleware(request: NextRequest) {
   // Check onboarding completion for non-onboarding, non-API routes
   if (
     pathname !== '/onboard' &&
-    pathname !== '/club/entrar' &&
+    !pathname.startsWith('/club/') &&
     !pathname.startsWith('/community') &&
     !pathname.startsWith('/api/') &&
     !isPublicPage

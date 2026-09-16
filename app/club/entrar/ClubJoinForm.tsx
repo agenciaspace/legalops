@@ -7,7 +7,7 @@ import { CLUB_INTERESTS, CLUB_SECTORS } from '@/lib/club-membership'
 import { joinClub } from './actions'
 type Profile = { full_name?: string | null; current_role?: string | null; organization_name?: string | null; linkedin_url?: string | null; public_bio?: string | null; preferred_locations?: string[] | null; areas_of_expertise?: string[] | null }
 const input = 'mt-2 w-full rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] px-3 py-3 text-sm font-normal'
-export function ClubJoinForm({ profile }: { profile: Profile }) {
+export function ClubJoinForm({ profile, destination = '/community' }: { profile: Profile; destination?: string }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -17,7 +17,7 @@ export function ClubJoinForm({ profile }: { profile: Profile }) {
     try {
       const result = await joinClub({ ...Object.fromEntries(form.entries()), interests: form.getAll('interests'), accepted_rules: form.get('accepted_rules') === 'on' })
       if (!result.ok) { setError(result.error ?? 'Confira os dados.'); return }
-      router.push('/community'); router.refresh()
+      router.push(destination); router.refresh()
     } catch { setError('Não foi possível salvar. Tente novamente.') }
     finally { setBusy(false) }
   }

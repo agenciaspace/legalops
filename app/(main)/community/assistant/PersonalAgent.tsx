@@ -1,0 +1,36 @@
+'use client'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { COMMUNITY_CATEGORIES } from '@/lib/community'
+import { PRO_DAILY_QUESTIONS } from '@/lib/club-pro'
+import type { AgentTurn } from '@/lib/club-personal-agent'
+export function PersonalAgent() {
+  const [turns,setTurns]=useState<AgentTurn[]>([])
+  const [question,setQuestion]=useState('')
+  const [focus,setFocus]=useState('')
+  const [topics,setTopics]=useState<string[]>([])
+  const [used,setUsed]=useState(0)
+  const [loading,setLoading]=useState(true)
+  const [sending,setSending]=useState(false)
+  const [saving,setSaving]=useState(false)
+  const [error,setError]=useState('')
+  const [notice,setNotice]=useState('')
+  async function load() {
+    setLoading(true);setError('')
+    try {const response=await fetch('/api/club/agent');const data=await response.json();if(!response.ok)throw new Error(data.error);setTurns(data.turns);setFocus(data.preferences.focus);setTopics(data.preferences.topics);setUsed(data.used)}catch(error){setError(error instanceof Error?error.message:'Não conseguimos carregar o agente.')}finally{setLoading(false)}
+  }
+  useEffect(()=>{void load()},[])
+  async function ask(event:React.FormEvent) {
+    event.preventDefault();setSending(true);setError('');setNotice('')
+    try {const response=await fetch('/api/club/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})});const data=await response.json();if(!response.ok)throw new Error(data.error);setTurns(current=>[...current,data.turn]);setQuestion('');setUsed(current=>current+1)}catch(error){setError(error instanceof Error?error.message:'Não conseguimos conectar. Tente novamente.')}finally{setSending(false)}
+  }
+  return <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6"><header><p className="text-xs font-bold uppercase tracking-widest text-[#D9470F]">Club Pro</p><h1 className="mt-2 text-3xl font-semibold">Seu agente</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-[#69635E]">Retome uma conversa, encontre uma referência ou pense no próximo passo. Seu histórico e contexto ficam separados dos outros membros.</p><p className="mt-2 text-xs text-[#69635E]">{used}/{PRO_DAILY_QUESTIONS} perguntas hoje · limite renova às 21h de Brasília · <Link href="/club/checkout" className="underline">Meu Pro</Link></p></header>
+    <details className="mt-6 rounded-xl border border-[#CEC8BD] bg-white p-4"><summary className="cursor-pointer text-sm font-semibold">O que seu agente precisa saber sobre você</summary><p className="mt-3 text-xs leading-5 text-[#69635E]">Este contexto é salvo para as próximas conversas. Não inclua senhas nem dados confidenciais de clientes.</p><form onSubmit={async event=>{event.preventDefault();setSaving(true);setNotice('');try{const response=await fetch('/api/club/agent',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({focus,topics})});if(!response.ok)throw new Error();setNotice('Contexto salvo.')}catch{setError('Não conseguimos salvar seu contexto.')}finally{setSaving(false)}}}><label className="mt-4 block text-sm">Seu foco atual<textarea value={focus} onChange={event=>setFocus(event.target.value)} rows={3} maxLength={2000} placeholder="Ex.: estou implantando um CLM e quero referências de aprovação e métricas." className="mt-2 w-full rounded-lg border border-[#CEC8BD] p-3 text-sm"/></label><fieldset className="mt-4"><legend className="text-sm font-semibold">Assuntos que quer acompanhar</legend><div className="mt-3 grid gap-2 sm:grid-cols-2">{Object.entries(COMMUNITY_CATEGORIES).map(([key,category])=><label key={key} className="flex items-center gap-2 text-xs"><input type="checkbox" checked={topics.includes(key)} onChange={event=>setTopics(current=>event.target.checked?[...current,key].slice(0,12):current.filter(value=>value!==key))}/>{category.label}</label>)}</div></fieldset><button disabled={saving||loading} className="mt-4 min-h-11 rounded-lg bg-[#292824] px-4 text-sm font-semibold text-white disabled:opacity-50">{saving?'Salvando…':'Salvar contexto'}</button></form></details>
+    {notice&&<p role="status" className="mt-4 text-sm text-green-800">{notice}</p>}
+    {loading?<p className="mt-8 text-sm">Carregando seu histórico…</p>:<section aria-label="Conversa com seu agente" className="mt-6 space-y-5">{!turns.length&&<div className="rounded-xl border border-[#CEC8BD] bg-white p-5"><h2 className="font-semibold">Por onde começamos?</h2><div className="mt-4 flex flex-wrap gap-2">{['O que foi discutido recentemente sobre contratos?','Quais vagas têm relação com meu perfil?','Como o OpenCLM pode ajudar meu time?'].map(example=><button key={example} onClick={()=>setQuestion(example)} className="rounded-lg border border-[#CEC8BD] p-3 text-left text-xs leading-5 hover:bg-[#F5F1E8]">{example}</button>)}</div></div>}{turns.map(turn=><article key={turn.id} className="rounded-xl border border-[#CEC8BD] bg-white p-5"><h2 className="whitespace-pre-wrap text-sm font-semibold">{turn.question}</h2><p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[#48443E]">{turn.answer}</p>{turn.sources?.length>0&&<details className="mt-4 border-t border-[#E8E2D9] pt-3"><summary className="cursor-pointer text-xs font-semibold">Fontes consultadas</summary><ol className="mt-3 space-y-2">{turn.sources.map((source,index)=><li key={`${source.url}-${index}`} className="text-xs leading-5"><a href={source.url} target="_blank" rel="noopener noreferrer" className="underline">[{index+1}] {source.title}</a></li>)}</ol></details>}</article>)}</section>}
+    <form onSubmit={ask} className="mt-6 rounded-xl border border-[#CEC8BD] bg-white p-4"><label className="block text-sm font-semibold" htmlFor="agent-question">Sua pergunta</label><textarea id="agent-question" value={question} onChange={event=>setQuestion(event.target.value)} required minLength={3} maxLength={2000} rows={3} className="mt-3 w-full rounded-lg border border-[#CEC8BD] p-3 text-sm"/><button disabled={sending||loading||used>=PRO_DAILY_QUESTIONS} className="mt-3 min-h-11 rounded-lg bg-[#111] px-5 text-sm font-semibold text-white disabled:opacity-50">{sending?'Consultando seu contexto…':'Perguntar ao meu agente'}</button></form>
+    {error&&<div role="alert" className="mt-4 text-sm text-red-700">{error}<button onClick={()=>void load()} className="ml-2 min-h-11 underline">Atualizar</button></div>}
+    <p className="mt-4 text-xs leading-6 text-[#77746E]">O agente consulta discussões recentes do site, vagas verificadas e referências do Dev. As fontes da rodada aparecem em cada resposta. WhatsApp ainda não é consultado. Confira as referências antes de aplicar uma sugestão.</p>
+    <details className="mt-6 text-xs text-[#69635E]"><summary className="cursor-pointer">Gerenciar meu histórico</summary><p className="mt-3">Apagar remove as conversas concluídas desta conta. Seu contexto salvo e o limite diário são mantidos.</p><button disabled={sending} onClick={async()=>{if(!window.confirm('Apagar seu histórico de conversas?'))return;try{const response=await fetch('/api/club/agent',{method:'DELETE'});if(!response.ok)throw new Error();setTurns([]);setNotice('Histórico apagado.')}catch{setError('Não conseguimos apagar o histórico.')}}} className="mt-2 min-h-11 text-red-700 underline">Apagar meu histórico</button></details>
+  </main>
+}

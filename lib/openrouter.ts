@@ -22,6 +22,7 @@ interface GenerateOpenRouterTextParams {
   model?: string
   maxTokens?: number
   temperature?: number
+  timeoutMs?: number
 }
 
 export function extractOpenRouterResponseText(content: OpenRouterMessageContent): string {
@@ -44,6 +45,7 @@ export async function generateOpenRouterText({
   model,
   maxTokens = 1024,
   temperature = 0,
+  timeoutMs,
 }: GenerateOpenRouterTextParams): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY
   if (!apiKey) {
@@ -52,6 +54,7 @@ export async function generateOpenRouterText({
 
   const response = await fetch(OPENROUTER_API_URL, {
     method: 'POST',
+    ...(timeoutMs ? { signal: AbortSignal.timeout(timeoutMs) } : {}),
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
