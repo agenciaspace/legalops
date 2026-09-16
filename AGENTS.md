@@ -293,3 +293,11 @@ members.
   paid-access, cron or webhook flow.
 - Commit only files belonging to the current task and preserve unrelated
   worktree changes.
+
+### Public auth build configuration
+
+`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` must be present
+in the GitHub Actions build environment, as well as Wrangler runtime vars.
+Runtime-only values leave browser signup and login unable to initialize.
+`scripts/verify-public-auth-build.mjs` checks compiled client chunks before deploy.
+When changing authentication, submit the browser form; rendering it is not enough.
