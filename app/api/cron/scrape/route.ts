@@ -20,7 +20,7 @@ import { researchSuggestedLeader } from '@/lib/leader-research'
 import { generateClubJobAlerts } from '@/lib/club-job-matching'
 import { extractSalaryFromHtml, type ExtractedSalary } from '@/lib/utils'
 import { resolveCompanyLogoUrl } from '@/lib/company-logo'
-import { isDirectJobUrl, isPublishableJobRecord } from '@/lib/job-publication'
+import { isPublishableJobUrl, isPublishableJobRecord } from '@/lib/job-publication'
 import { normalizeSalaryRange, parseSalaryNumber } from '@/lib/format-salary'
 
 function parseSalaryValues(extracted: ExtractedSalary | null): {
@@ -182,7 +182,7 @@ export async function GET(req: NextRequest) {
       )
       const finalUrl = fetched.finalUrl
       const finalUrlOwner = existingByUrl.get(canonicalizeJobUrl(finalUrl).toLowerCase())
-      const canAdoptFinalUrl = isDirectJobUrl(finalUrl) && (!finalUrlOwner || finalUrlOwner.id === pair.existingJob.id)
+      const canAdoptFinalUrl = isPublishableJobUrl(finalUrl) && (!finalUrlOwner || finalUrlOwner.id === pair.existingJob.id)
       const publishable = canAdoptFinalUrl && isPublishableJobRecord({
         url: finalUrl,
         urlStatus: fetched.urlStatus,
@@ -312,7 +312,7 @@ export async function GET(req: NextRequest) {
       } = await fetchJobDescription(job.url)
       const companyLogoUrl = resolveCompanyLogoUrl(job.company, job.company_logo_url, fetchedLogoUrl)
       const finalUrlOwner = existingByUrl.get(canonicalizeJobUrl(finalUrl).toLowerCase())
-      const canAdoptFinalUrl = isDirectJobUrl(finalUrl) && (!finalUrlOwner || finalUrlOwner.id === job.id)
+      const canAdoptFinalUrl = isPublishableJobUrl(finalUrl) && (!finalUrlOwner || finalUrlOwner.id === job.id)
       const publishable = canAdoptFinalUrl && isPublishableJobRecord({
         url: finalUrl,
         urlStatus: fetchedUrlStatus,

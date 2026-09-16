@@ -96,6 +96,10 @@ const DEFAULT_GUPY_SEARCH_TERMS = [
   'legal operations',
   'operações jurídicas',
   'controladoria jurídica',
+  'controller jurídico',
+  'backoffice jurídico',
+  'jurimetria',
+  'inovação jurídica',
 ]
 
 const DEFAULT_LINKEDIN_SEARCHES = [
@@ -214,8 +218,8 @@ async function fetchJson(url: string, init?: RequestInit): Promise<unknown> {
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
   if (!response.ok) {
-    const body = await response.text().catch(() => '')
-    throw new Error(`HTTP ${response.status} for ${url}${body ? `: ${body.slice(0, 160)}` : ''}`)
+    // Provider URLs can include API keys in the path or query string.
+    throw new Error(`HTTP ${response.status} from ${new URL(url).hostname}`)
   }
   return response.json()
 }

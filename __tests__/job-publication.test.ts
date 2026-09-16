@@ -33,7 +33,7 @@ describe('job publication policy', () => {
     ])
   })
 
-  it('requires a verified direct URL and a logo before publication', () => {
+  it('requires a verified employer or LinkedIn job URL and a logo before publication', () => {
     expect(isPublishableJobRecord({
       url: 'https://jobs.lever.co/acme/legal-ops',
       urlStatus: 'live',
@@ -41,6 +41,11 @@ describe('job publication policy', () => {
     })).toBe(true)
     expect(isPublishableJobRecord({
       url: 'https://www.linkedin.com/jobs/view/123456',
+      urlStatus: 'live',
+      companyLogoUrl: 'https://acme.com/logo.svg',
+    })).toBe(true)
+    expect(isPublishableJobRecord({
+      url: 'https://www.linkedin.com/jobs/search',
       urlStatus: 'live',
       companyLogoUrl: 'https://acme.com/logo.svg',
     })).toBe(false)

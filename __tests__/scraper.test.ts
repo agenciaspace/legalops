@@ -172,8 +172,8 @@ describe('buildFirecrawlAgentPrompt', () => {
     expect(prompt).toContain('Roles in Brazil')
     expect(prompt).toContain('operações jurídicas')
     expect(prompt).toContain('Exclude generic lawyer')
-    expect(prompt).toContain('social networks and aggregators only as discovery leads')
-    expect(prompt).toContain('applicationLink MUST be the employer')
+    expect(prompt).toContain('Prefer the employer')
+    expect(prompt).toContain('public LinkedIn /jobs/view/ posting')
   })
 })
 
@@ -404,13 +404,52 @@ describe('fetchJobDescription direct destination resolution', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
-  it('keeps a LinkedIn-only lead unpublished when no direct application URL exists', async () => {
+  it('keeps a LinkedIn login wall unpublished without structured job details', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('<h1>Legal Operations Manager</h1>', { status: 200 })))
 
     const result = await fetchJobDescription('https://www.linkedin.com/jobs/view/4454450309')
 
     expect(result.urlStatus).toBe('unknown')
     expect(result.companyLogoUrl).toBeNull()
+  })
+
+  it('publishes a current LinkedIn job with employer details even without an external apply link', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(`
+      <script type="application/ld+json">${JSON.stringify({
+        '@type': 'JobPosting', title: 'Analista de Legal Ops', description: 'Operações jurídicas no Brasil.',
+        hiringOrganization: { name: 'Acme', logo: 'https://acme.com/logo.svg' }, validThrough: '2099-10-01',
+      })}</script>
+      <button>Candidatar-se</button>
+    `, { status: 200 })))
+    const result = await fetchJobDescription('https://www.linkedin.com/jobs/view/4463171016')
+    expect(result.urlStatus).toBe('live')
+    expect(result.finalUrl).toBe('https://www.linkedin.com/jobs/view/4463171016')
+    expect(result.companyLogoUrl).toBe('https://acme.com/logo.svg')
+  })
+
+  it('validates complete public LinkedIn details when JSON-LD is absent', async () => {
+    const html = `
+      <h1 class="topcard__title">Analista de Legal Ops</h1>
+      <a class="topcard__org-name-link">Acme</a>
+      <div class="show-more-less-html__markup">Atuação em operações jurídicas, com melhoria de processos, indicadores e organização das demandas do departamento jurídico no Brasil.</div>
+      <button id="topbar-apply">Candidatar-se</button>
+      <a data-semaphore-content-urn="urn:li:jobPosting:4463171016"></a>
+      <img class="sub-nav-cta__image" data-delayed-url="https://media.licdn.com/company-logo.png">
+      <link rel="icon" href="https://linkedin.com/favicon.ico">
+    `
+    const url = 'https://www.linkedin.com/jobs/view/4463171016'
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(html, { status: 200 })))
+    expect(await fetchJobDescription(url)).toMatchObject({ urlStatus: 'live', companyLogoUrl: 'https://media.licdn.com/company-logo.png' })
+    expect(classifyJobUrlStatus(200, html.replace('topbar-apply', 'login'), url)).toBe('unknown')
+    expect(classifyJobUrlStatus(200, html.replace('topcard__org-name-link', 'unrelated'), url)).toBe('unknown')
+    expect(classifyJobUrlStatus(200, html, url.replace('4463171016', '4463171017'))).toBe('unknown')
+    expect(classifyJobUrlStatus(200, html + '<p>No longer accepting applications</p>', url)).toBe('dead')
+  })
+
+  it('rejects expired LinkedIn postings and redirects to job search pages', async () => {
+    const posting = '<script type="application/ld+json">{"@type":"JobPosting","title":"Legal Ops","description":"Legal operations","hiringOrganization":{"name":"Acme"},"validThrough":"2020-01-01"}</script>'
+    expect(classifyJobUrlStatus(200, posting, 'https://www.linkedin.com/jobs/view/4463171016')).toBe('dead')
+    expect(classifyJobUrlStatus(200, posting, 'https://www.linkedin.com/jobs/search')).toBe('unknown')
   })
 })
 

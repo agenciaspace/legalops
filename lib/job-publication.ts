@@ -65,6 +65,61 @@ export function isDirectJobUrl(value: string): boolean {
   return isSafePublicHttpUrl(value) && !isBlockedJobSourceUrl(value)
 }
 
+export function isLinkedInJobUrl(value: string): boolean {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:'
+      && hostMatches(url.hostname.toLowerCase(), 'linkedin.com')
+      && /^\/jobs\/view\/(?:[^/]+-)?\d{6,}\/?$/.test(url.pathname)
+  } catch {
+    return false
+  }
+}
+
+export function isPublishableJobUrl(value: string): boolean {
+  return isDirectJobUrl(value) || isLinkedInJobUrl(value)
+}
+
+export function hasStructuredJobDetails(html: string): boolean {
+  function containsPosting(value: unknown): boolean {
+    if (Array.isArray(value)) return value.some(containsPosting)
+    if (!value || typeof value !== 'object') return false
+    const record = value as Record<string, unknown>
+    const organization = record.hiringOrganization as Record<string, unknown> | undefined
+    const types = Array.isArray(record['@type']) ? record['@type'] : [record['@type']]
+    return (types.includes('JobPosting')
+      && typeof record.title === 'string' && Boolean(record.title.trim())
+      && typeof record.description === 'string' && Boolean(record.description.trim())
+      && typeof organization?.name === 'string' && Boolean(organization.name.trim()))
+      || containsPosting(record['@graph'])
+  }
+  for (const match of Array.from(html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi))) {
+    try {
+      if (containsPosting(JSON.parse(match[1]))) return true
+    } catch {
+      // Incomplete metadata does not establish that a job page is available.
+    }
+  }
+  return false
+}
+
+export function hasPublicLinkedInJobDetails(html: string, pageUrl: string): boolean {
+  if (hasStructuredJobDetails(html)) return true
+  const jobId = new URL(pageUrl).pathname.match(/(\d{6,})\/?$/)?.[1]
+  const visible = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+  const textForClass = (className: string) => {
+    const match = visible.match(new RegExp(`<([a-z][a-z0-9]*)\\b[^>]*class=["'][^"']*\\b${className}\\b[^"']*["'][^>]*>([\\s\\S]*?)<\\/\\1>`, 'i'))
+    return match?.[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() ?? ''
+  }
+  // Public LinkedIn detail pages sometimes omit JSON-LD. Require the complete
+  // detail view and its matching job ID, rather than accepting a login/search page.
+  return Boolean(jobId && visible.includes(`urn:li:jobPosting:${jobId}"`)
+    && textForClass('topcard__title')
+    && textForClass('topcard__org-name-link')
+    && textForClass('show-more-less-html__markup').length >= 100
+    && /<button\b[^>]*id=["']topbar-apply["'][^>]*>/i.test(visible))
+}
+
 function htmlAttribute(tag: string, name: string): string | null {
   const match = tag.match(new RegExp(`\\b${name}\\s*=\\s*(["'])([\\s\\S]*?)\\1`, 'i'))
   return match?.[2]?.replace(/&amp;/gi, '&').trim() || null
@@ -97,5 +152,5 @@ export function isPublishableJobRecord(job: {
   urlStatus: string | null
   companyLogoUrl?: string | null
 }): boolean {
-  return job.urlStatus === 'live' && isDirectJobUrl(job.url) && Boolean(job.companyLogoUrl)
+  return job.urlStatus === 'live' && isPublishableJobUrl(job.url) && Boolean(job.companyLogoUrl)
 }

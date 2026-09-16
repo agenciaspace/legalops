@@ -5,6 +5,9 @@ import {
   extractDirectApplicationLinks,
   isBlockedJobSourceUrl,
   isDirectJobUrl,
+  isLinkedInJobUrl,
+  isPublishableJobUrl,
+  hasPublicLinkedInJobDetails,
   isSafePublicHttpUrl,
 } from './job-publication'
 
@@ -84,7 +87,7 @@ Include roles whose primary work is Legal Operations, Legal Ops, operações jur
 
 Exclude generic lawyer, attorney, counsel, General Counsel, Chief Legal Officer, Head of Legal, compliance, privacy, and paralegal roles unless the title itself clearly identifies Legal Operations work. Exclude internships, expired/closed listings, duplicates, and roles whose location rules exclude Brazil/LATAM.
 
-Search public LinkedIn Jobs pages, Gupy, Indeed Brasil, company career sites, CLOC Jobs, Legal.io, LegalOperators, GoInhouse, Quero Home, and Radar da Gestão. Treat social networks and aggregators only as discovery leads. applicationLink MUST be the employer's own careers page or the canonical ATS posting, never LinkedIn, Indeed, CLOC, Legal.io, LegalOperators, GoInhouse, Jooble, Adzuna, or another repost. Omit a listing when no direct employer/ATS URL can be found. Return the publication date as YYYY-MM-DD when available. Set acceptsBrazilCandidates to true only when the location is Brazil/LATAM or the listing explicitly accepts remote candidates based in Brazil/LATAM.`
+Search public LinkedIn Jobs pages, Gupy, Indeed Brasil, company career sites, CLOC Jobs, Legal.io, LegalOperators, GoInhouse, Quero Home, and Radar da Gestão. Prefer the employer's careers page or canonical ATS posting as applicationLink. A public LinkedIn /jobs/view/ posting is also acceptable when it contains the job description, employer identity and an active application path. Never return a search page, login page, or a repost on Indeed, CLOC, Legal.io, LegalOperators, GoInhouse, Jooble or Adzuna. Return the publication date as YYYY-MM-DD when available. Set acceptsBrazilCandidates to true only when the location is Brazil/LATAM or the listing explicitly accepts remote candidates based in Brazil/LATAM.`
 }
 
 const FIRECRAWL_AGENT_POLL_INTERVAL_MS = 5_000
@@ -861,7 +864,8 @@ export function classifyJobUrlStatus(
   if (httpStatus === null) return 'unknown'
   if (httpStatus === 404 || httpStatus === 410) return 'dead'
   if (httpStatus < 200 || httpStatus >= 300) return 'unknown'
-  if (responseUrl && !isDirectJobUrl(responseUrl)) return 'unknown'
+  if (responseUrl && !isPublishableJobUrl(responseUrl)) return 'unknown'
+  if (isLinkedInJobUrl(responseUrl) && !hasPublicLinkedInJobDetails(pageHtml, responseUrl)) return 'unknown'
 
   let isGupyJobPage = false
   let isWorkdayJobPage = false
@@ -983,9 +987,9 @@ export async function fetchJobDescription(url: string): Promise<FetchJobResult> 
     let page = await fetchPublicPage(url)
     if (!page) return emptyResult()
 
-    // Social networks and aggregators are discovery inputs, never public job
-    // destinations. Follow an explicit apply link to the employer/ATS page.
-    if (isBlockedJobSourceUrl(page.url)) {
+    // Verified LinkedIn job pages can be the original posting. Search pages,
+    // login walls and aggregators still require a direct employer/ATS link.
+    if (isBlockedJobSourceUrl(page.url) && !isLinkedInJobUrl(page.url)) {
       const directCandidates = extractDirectApplicationLinks(page.html, page.url)
       page = null
       for (const candidate of directCandidates.slice(0, 5)) {

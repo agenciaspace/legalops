@@ -110,6 +110,17 @@ export function extractCompanyLogoFromHtml(html: string, pageUrl: string): strin
     }
   }
 
+  if (/(^|\.)linkedin\.com$/.test(new URL(pageUrl).hostname)) {
+    for (const match of Array.from(html.matchAll(/<img\b[^>]*>/gi))) {
+      const tag = match[0]
+      if (!/\b(?:sub-nav-cta__image|topcard__org-logo)\b/.test(attribute(tag, 'class') ?? '')) continue
+      const logo = safeImageUrl(attribute(tag, 'data-delayed-url') ?? attribute(tag, 'src'), pageUrl)
+      if (logo) return logo
+    }
+    // The LinkedIn favicon is not the hiring company's logo.
+    return null
+  }
+
   // A square site icon is a better small-card logo than a wide social preview.
   for (const tag of Array.from(html.matchAll(/<link\b[^>]*>/gi), match => match[0])) {
     if (!(attribute(tag, 'rel') ?? '').toLowerCase().includes('icon')) continue

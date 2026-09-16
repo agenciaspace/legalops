@@ -73,6 +73,13 @@ Antes de inserir, uma vaga precisa:
 
 ## Publicação
 
+As páginas originais de vagas no LinkedIn também podem ser publicadas. O
+coletor exige uma URL `/jobs/view/` e título, descrição e empresa disponíveis
+em `JobPosting` ou na página pública completa, com identificador correspondente
+e botão de candidatura. Também verifica prazo e sinais de encerramento. Páginas
+de busca e login não servem como comprovação de vaga ativa. A fonte aparece no
+card; sites de empresas e ATS continuam aceitos.
+
 A landing pública busca:
 
 - `url_status = live`;
@@ -90,6 +97,12 @@ Vagas encontradas novamente recebem `last_seen_at`. Vagas antigas que não apare
 
 ## Agendamento
 
-O cron de descoberta é `/api/cron/scrape`, configurado em `vercel.json`.
+O cron de descoberta é `/api/cron/scrape`, acionado pelo Worker
+`legalops-cron` às 07h BRT, conforme `cloudflare/legalops-cron.wrangler.jsonc`.
+
+O agendamento legado da Vercel foi desativado em 16/09/2026. Ele ainda executava
+um deployment antigo, sem LinkedIn/Gupy Portal e sem a correção que diferencia
+o texto de tradução “Inscrições encerradas” do status real de uma vaga Gupy.
+Não reativar esse agendamento: ele sobrescrevia verificações do Worker atual.
 
 A rotina normal deve rodar diariamente. Durante smoke tests, o horário pode ser temporariamente alterado e deve ser restaurado depois da validação.
