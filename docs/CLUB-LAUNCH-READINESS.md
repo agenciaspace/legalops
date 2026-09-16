@@ -74,3 +74,20 @@ Preço e período ainda não definidos pelo Leon; oferta permanece inativa.
 WhatsApp automático, aplicativo próprio e email de ativação não fazem parte
 desta primeira entrega. Recebimento das boas-vindas na caixa do Leon segue
 sem confirmação.
+
+### Verificação publicada — 16/09/2026
+
+- Aplicação `5b988bd`, deploy Cloudflare `35150664320` concluído com sucesso.
+- 225 testes Vitest aprovados; build Next/OpenNext e typecheck aprovados.
+- Conta temporária confirmou login, contexto persistido, resposta real do
+  OpenRouter sobre OpenCLM com fonte, histórico após recarga e cota 1/30.
+- Exclusão do histórico manteve a cota. API sem login retornou 401; conta sem
+  Pro retornou 403. Administração redirecionou usuário não autorizado.
+- Checkout móvel sem transbordamento; pedido privado de teste mostrou a chave
+  PIX correta e rejeitou arquivo com extensão PDF e conteúdo inválido.
+- Aprovação, isolamento, concorrência e cota passaram no teste SQL com rollback.
+  Um PIX real, upload válido no Storage e aprovação pela tela administrativa
+  ainda não foram exercitados ponta a ponta; não houve pagamento de teste.
+- Conta, sessões, pedido e uso temporários removidos; bucket de recibos vazio.
+- Oferta permanece inativa, sem preço e período. Não anunciar vendas abertas
+  até Leon defini-los e a oferta ser ativada.
