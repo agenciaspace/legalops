@@ -52,7 +52,11 @@ const products = {
   ],
 }
 
-export function LegalOpsEcosystem({ active, locale = 'pt' }: { active: LegalOpsProduct; locale?: EcosystemLocale }) {
+export function LegalOpsEcosystem({ active, locale = 'pt', descriptions }: {
+  active: LegalOpsProduct
+  locale?: EcosystemLocale
+  descriptions?: Partial<Record<LegalOpsProduct, string>>
+}) {
   const items = products[locale]
 
   return (
@@ -78,7 +82,7 @@ export function LegalOpsEcosystem({ active, locale = 'pt' }: { active: LegalOpsP
                 <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#E88A6A]">{product.role}</span>
               </div>
               <p className="mt-1.5 max-w-[290px] text-[11px] leading-4 text-white/42 transition group-hover:text-white/62">
-                {product.description}
+                {descriptions?.[product.key] ?? product.description}
               </p>
             </Link>
           )

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ArrowUpRight, MessageCircle } from 'lucide-react'
 import { BrandWordmark } from '@/components/BrandLogo'
+import { LegalOpsEcosystem } from '@/components/LegalOpsEcosystem'
 import { createAdminClient } from '@/lib/supabase-admin'
 
 export const metadata: Metadata = {
@@ -101,18 +102,11 @@ export default async function ClubLandingPage() {
             </div>
           </aside>
         </section>
-        <nav aria-label="Ecossistema legalops" className="mx-auto grid max-w-[1180px] gap-6 px-5 pb-12 sm:grid-cols-3 sm:px-8">
-          {[
-            ['legalops.club', 'comunidade', 'Trocas entre profissionais do jurídico.', 'https://legalops.club'],
-            ['legalops.work', 'vagas', 'Vagas e acompanhamento de candidaturas.', 'https://legalops.work'],
-            ['legalops.dev', 'open source', 'Projetos abertos de tecnologia jurídica.', 'https://legalops.dev'],
-          ].map(([name, label, description, href]) => (
-            <a key={name} href={href} aria-current={name === 'legalops.club' ? 'page' : undefined} className={`border-t-2 pt-4 ${name === 'legalops.club' ? 'border-[#C9684F]' : 'border-[#CEC8BD]'}`}>
-              <span className="text-sm font-semibold">{name} / {label}</span>
-              <p className="mt-2 text-xs leading-5 text-[#625E59]">{description}</p>
-            </a>
-          ))}
-        </nav>
+        <LegalOpsEcosystem active="club" descriptions={{
+          club: 'Trocas entre profissionais do jurídico.',
+          work: 'Vagas e acompanhamento de candidaturas.',
+          dev: 'Projetos abertos de tecnologia jurídica.',
+        }} />
         <section className="border-y border-[#CEC8BD] bg-[#FAF7F1]">
           <div className="mx-auto grid max-w-[1180px] gap-6 px-5 py-10 sm:px-8 sm:py-12 md:grid-cols-[.6fr_1.4fr] md:items-center">
             <h2 className="text-2xl font-semibold tracking-[-.035em]" style={headingFont}>quem pode participar?</h2>
