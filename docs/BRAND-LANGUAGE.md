@@ -39,6 +39,11 @@ Pode falar sobre:
 
 Evitar usar `construir` como promessa principal. O Club é onde as pessoas e os problemas se encontram. Quando uma conversa leva a uma automação ou produto, o próximo passo natural é o `legalops.dev`.
 
+O cadastro na comunidade é aberto a perfis compatíveis, com LinkedIn e contexto
+profissional. Pro é a camada paga do agente pessoal e das integrações com Work,
+Dev e outros serviços. Não vender o simples pertencimento à comunidade como Pro.
+Ver `docs/CLUB-MODEL.md` para a premissa de produto atual.
+
 ### Work
 
 Promessa: encontrar e organizar oportunidades profissionais no jurídico.

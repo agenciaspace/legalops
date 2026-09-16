@@ -71,7 +71,7 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess }: NavProps) {
             <button className="hidden h-9 w-9 items-center justify-center rounded-full text-[#69635E] transition hover:bg-white/70 hover:text-[#111111] sm:flex" aria-label="Mensagens">
               <MessageCircle className="h-[18px] w-[18px]" />
             </button>
-            <Link href={hasClubAccess ? '/community/jobs' : '/community?upgrade=1'} className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#69635E] transition hover:bg-white/70 hover:text-[#111111]" aria-label={jobAlertCount > 0 ? `${jobAlertCount} alertas de vagas` : 'Alertas de vagas'}>
+            <Link href={hasClubAccess ? '/community/jobs' : '/club#pro'} className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#69635E] transition hover:bg-white/70 hover:text-[#111111]" aria-label={jobAlertCount > 0 ? `${jobAlertCount} alertas de vagas` : 'Alertas de vagas'}>
               <Bell className="h-[18px] w-[18px]" />
               {jobAlertCount > 0 ? <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#E88A6A] ring-2 ring-[#F5F1E8]" /> : null}
             </Link>

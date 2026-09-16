@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
       display_name: email.split('@')[0],
       club_plan: 'free',
       club_access_status: 'complimentary',
+      club_pro_status: 'complimentary',
     }, { onConflict: 'user_id' })
 
   if (memberError) {

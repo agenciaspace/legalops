@@ -1,0 +1,45 @@
+'use client'
+import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { BrandWordmark } from '@/components/BrandLogo'
+import { CLUB_INTERESTS, CLUB_SECTORS } from '@/lib/club-membership'
+import { joinClub } from './actions'
+type Profile = { full_name?: string | null; current_role?: string | null; organization_name?: string | null; linkedin_url?: string | null; public_bio?: string | null; preferred_locations?: string[] | null; areas_of_expertise?: string[] | null }
+const input = 'mt-2 w-full rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] px-3 py-3 text-sm font-normal'
+export function ClubJoinForm({ profile }: { profile: Profile }) {
+  const router = useRouter()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setBusy(true); setError('')
+    const form = new FormData(event.currentTarget)
+    try {
+      const result = await joinClub({ ...Object.fromEntries(form.entries()), interests: form.getAll('interests'), accepted_rules: form.get('accepted_rules') === 'on' })
+      if (!result.ok) { setError(result.error ?? 'Confira os dados.'); return }
+      router.push('/community'); router.refresh()
+    } catch { setError('Não foi possível salvar. Tente novamente.') }
+    finally { setBusy(false) }
+  }
+  return <main className="min-h-screen bg-[#F5F1E8] px-5 py-12 text-[#111111]">
+    <div className="mx-auto max-w-2xl"><Link href="/club"><BrandWordmark suffix="club" className="text-3xl" /></Link>
+      <h1 className="mt-10 font-[var(--font-quicksand)] text-4xl font-semibold tracking-tight">conte um pouco sobre você<span className="text-[#E88A6A]">.</span></h1>
+      <p className="mt-4 text-sm leading-7 text-[#69635E]">O Club reúne quem trabalha, estuda ou desenvolve soluções para o jurídico. Seu perfil ajuda os outros membros a entender seu contexto. Não precisamos de currículo nem de pagamento para sua entrada.</p>
+      <form onSubmit={submit} className="mt-8 space-y-6">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <label className="text-sm font-semibold">Nome completo<input className={input} name="full_name" required minLength={3} maxLength={160} autoComplete="name" defaultValue={profile.full_name ?? ''} /></label>
+          <label className="text-sm font-semibold">Cargo ou atuação atual<input className={input} name="current_role" required minLength={2} maxLength={160} defaultValue={profile.current_role ?? ''} placeholder="Ex.: analista, estudante, consultor" /></label>
+          <label className="text-sm font-semibold">Organização ou contexto profissional<input className={input} name="organization_name" required minLength={2} maxLength={180} defaultValue={profile.organization_name ?? ''} placeholder="Empresa, autônomo, em transição…" /></label>
+          <label className="text-sm font-semibold">Cidade e estado/região<input className={input} name="city" required minLength={2} maxLength={120} defaultValue={profile.preferred_locations?.[0] ?? ''} placeholder="Ex.: São Paulo, SP" /></label>
+        </div>
+        <label className="block text-sm font-semibold">Perfil pessoal no LinkedIn<input className={input} type="url" name="linkedin_url" required maxLength={500} defaultValue={profile.linkedin_url ?? ''} placeholder="https://www.linkedin.com/in/seu-perfil" /></label>
+        <label className="block text-sm font-semibold">Sua relação com o jurídico<select name="sector" required className={input} defaultValue=""><option value="" disabled>Selecione sua atuação</option>{CLUB_SECTORS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label className="block text-sm font-semibold">Apresentação<textarea className={input} name="public_bio" rows={4} required minLength={30} maxLength={1500} defaultValue={profile.public_bio ?? ''} placeholder="Com o que você trabalha ou estuda? Que experiências e dúvidas quer compartilhar?" /></label>
+        <fieldset><legend className="text-sm font-semibold">Assuntos de interesse</legend><div className="mt-3 grid gap-3 sm:grid-cols-2">{CLUB_INTERESTS.map(interest => <label key={interest} className="flex items-center gap-3 text-sm"><input type="checkbox" name="interests" value={interest} defaultChecked={profile.areas_of_expertise?.includes(interest)} />{interest}</label>)}</div></fieldset>
+        <div className="border-y border-[#CEC8BD] py-5"><p className="text-sm leading-6 text-[#69635E]">Respeite os colegas, preserve dados de clientes e evite spam. Divulgação comercial deve ser combinada com a administração. Seus dados de apresentação ficam disponíveis aos membros; currículo e email não fazem parte do diretório.</p><label className="mt-4 flex items-start gap-3 text-sm"><input className="mt-1" type="checkbox" name="accepted_rules" required /><span>Meus dados são verdadeiros, minha atuação tem relação com a comunidade e concordo com essas regras.</span></label></div>
+        {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+        <button disabled={busy} className="w-full rounded-lg bg-[#111111] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Salvando…' : 'Entrar na comunidade gratuita'}</button>
+      </form>
+    </div>
+  </main>
+}

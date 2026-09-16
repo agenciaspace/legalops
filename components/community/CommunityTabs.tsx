@@ -20,8 +20,8 @@ Bot,
 const mainItems = [
   { href: '/community', label: 'Início', icon: Home, exact: true },
 { href: '/community/office', label: 'Escritório', icon: Building2 },
-  { href: '/community/agents', label: 'Agentes', icon: Bot },
-  { href: '/community/summaries', label: 'Resumos IA', icon: Sparkles },
+  { href: '/community/agents', label: 'Agentes · Pro', icon: Bot, pro: true },
+  { href: '/community/summaries', label: 'Resumos IA · Pro', icon: Sparkles, pro: true },
   { href: '/community/calendar', label: 'Lives', icon: CalendarDays },
   { href: '/community/bench', label: 'Bench Nubank', icon: Users },
   { href: '/community/members', label: 'Membros', icon: Users },
@@ -96,9 +96,9 @@ export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memb
           {mainItems.map(item => {
             const active = item.exact ? pathname === item.href && !selectedSpace : pathname.startsWith(item.href)
             const Icon = item.icon
-            const locked = !hasPaidAccess && !item.exact
+            const locked = !hasPaidAccess && 'pro' in item && item.pro
             return (
-              <Link key={item.href} href={locked ? '/community?upgrade=1' : item.href} className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-bold ${active ? 'border-[#DF4D1E] text-[#1F211E]' : 'border-transparent text-[#686661]'}`}>
+              <Link key={item.href} href={locked ? '/club#pro' : item.href} className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-bold ${active ? 'border-[#DF4D1E] text-[#1F211E]' : 'border-transparent text-[#686661]'}`}>
                 <Icon className="h-3.5 w-3.5" /> {item.label} {locked ? <Lock className="h-3 w-3 text-[#AAA7A1]" /> : null}
               </Link>
             )
@@ -112,9 +112,9 @@ export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memb
             {mainItems.map(item => {
               const active = item.exact ? pathname === item.href && !selectedSpace : pathname.startsWith(item.href)
               const Icon = item.icon
-              const locked = !hasPaidAccess && !item.exact
+              const locked = !hasPaidAccess && 'pro' in item && item.pro
               return (
-                <Link key={item.href} href={locked ? '/community?upgrade=1' : item.href} className={itemClass(active)}>
+                <Link key={item.href} href={locked ? '/club#pro' : item.href} className={itemClass(active)}>
                   <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.3 : 1.8} />
                   <span className="flex-1">{item.label}</span>
                   {item.label === 'Membros' && memberCount > 0 ? <span className="text-[10px] font-bold text-[#9B9993]">{memberCount}</span> : null}
@@ -152,9 +152,9 @@ export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memb
             </div>
           ) : (
             <div className="border-t-2 border-[#DF4D1E] bg-[#1F211E] p-3 text-white">
-              <div className="flex items-center gap-2 text-[11px] font-extrabold"><Lock className="h-3.5 w-3.5 text-[#FF7A45]" /> Acesso completo</div>
-              <p className="mt-2 text-[10px] leading-4 text-white/60">Desbloqueie conversas, resumos por IA, lives e a rede validada.</p>
-              <Link href="/club#planos" className="mt-3 inline-flex text-[10px] font-extrabold text-[#FF8B5D] hover:text-white">Ver planos →</Link>
+              <div className="flex items-center gap-2 text-[11px] font-extrabold"><Lock className="h-3.5 w-3.5 text-[#FF7A45]" /> Club Pro</div>
+              <p className="mt-2 text-[10px] leading-4 text-white/60">Agente pessoal e integrações com Work e Dev. Conheça o que estamos preparando.</p>
+              <Link href="/club#pro" className="mt-3 inline-flex text-[10px] font-extrabold text-[#FF8B5D] hover:text-white">Conhecer o Pro →</Link>
             </div>
           )}
         </nav>

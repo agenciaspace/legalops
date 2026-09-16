@@ -3,22 +3,23 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { sendWelcomeEmailIfNeeded, sendClubWelcomeEmailIfNeeded } from '@/lib/welcome-email'
 
 const safeNextPath = (value: string | null) => {
-  if (!value || !value.startsWith('/') || value.startsWith('//')) return '/dashboard'
+  if (!value || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return '/club/entrar'
   return value
 }
 
 export async function GET(request: NextRequest) {
   const tokenHash = request.nextUrl.searchParams.get('token_hash')
+  const code = request.nextUrl.searchParams.get('code')
   const type = request.nextUrl.searchParams.get('type')
   const nextPath = safeNextPath(request.nextUrl.searchParams.get('next'))
 
-  if (!tokenHash || !type) {
+  if (!code && (!tokenHash || !type)) {
     return NextResponse.redirect(new URL(`/login?error=invalid_confirmation`, request.url))
   }
 
   const supabase = await createServerSupabaseClient()
-  const { data, error } = await supabase.auth.verifyOtp({
-    token_hash: tokenHash,
+  const { data, error } = code ? await supabase.auth.exchangeCodeForSession(code) : await supabase.auth.verifyOtp({
+    token_hash: tokenHash!,
     type: type as 'email' | 'invite' | 'recovery' | 'signup' | 'email_change',
   })
 

@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { COMMUNITY_CATEGORIES, hasActiveClubAccess } from '@/lib/community'
 import { generateClubJobAlerts } from '@/lib/club-job-matching'
 import { generateOpenRouterText } from '@/lib/openrouter'
+import { hasClubProAccess, normalizeLinkedInProfile } from '@/lib/club-membership'
 import { getCommunityAgent } from '@/lib/community-agents'
 
 const PROFESSIONAL_TYPES = new Set(['law_firm', 'legal_dept', 'public_sector', 'freelance', 'other'])
@@ -20,18 +21,19 @@ function commaSeparatedValues(formData: FormData, field: string, limit: number) 
     .slice(0, limit)
 }
 
-async function getAuthenticatedMember() {
+async function getAuthenticatedMember(requirePro = false) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login?next=/community')
 
   const { data: clubAccess } = await supabase
     .from('community_members')
-    .select('club_access_status, club_access_expires_at')
+    .select('club_access_status, club_access_expires_at, club_pro_status, club_pro_expires_at')
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (!hasActiveClubAccess(clubAccess)) redirect('/community?upgrade=1')
+  if (!hasActiveClubAccess(clubAccess)) redirect('/club/entrar')
+  if (requirePro && !hasClubProAccess(clubAccess)) redirect('/club#pro')
 
   const { data: profile } = await supabase
     .from('account_profiles')
@@ -170,15 +172,14 @@ export async function updateCommunityProfile(formData: FormData) {
     || headline.length < 3 || headline.length > 160
     || organizationName.length < 2 || organizationName.length > 120
     || bio.length < 20 || bio.length > 1200
-    || careerSummary.length < 20 || careerSummary.length > 3000
-    || baseCvText.length < 50 || baseCvText.length > 30000
+    || (careerSummary.length > 0 && careerSummary.length < 20) || careerSummary.length > 3000
+    || (baseCvText.length > 0 && baseCvText.length < 50) || baseCvText.length > 30000
     || areasOfExpertise.length === 0
-    || desiredRoles.length === 0
     || !PROFESSIONAL_TYPES.has(professionalType)
     || !REMOTE_PREFERENCES.has(preferredRemote)
   ) return
 
-  if (linkedinUrl && !/^https:\/\/(www\.)?linkedin\.com\//i.test(linkedinUrl)) return
+  if (!normalizeLinkedInProfile(linkedinUrl)) return
 
   const { supabase, user } = await getAuthenticatedMember()
   const { error } = await supabase
@@ -189,7 +190,7 @@ export async function updateCommunityProfile(formData: FormData) {
       public_headline: headline,
       organization_name: organizationName,
       public_bio: bio,
-      linkedin_url: linkedinUrl || null,
+      linkedin_url: normalizeLinkedInProfile(linkedinUrl),
       areas_of_expertise: areasOfExpertise,
       professional_type: professionalType,
       desired_roles: desiredRoles,
@@ -224,7 +225,7 @@ export async function updateCommunityProfile(formData: FormData) {
 }
 
 export async function markClubJobAlertsRead() {
-  const { user } = await getAuthenticatedMember()
+  const { user } = await getAuthenticatedMember(true)
   const admin = createAdminClient()
   const { error } = await admin
     .from('club_job_alerts')
@@ -246,7 +247,7 @@ export async function askCommunityAgent(formData: FormData): Promise<{ ok: true;
     return { ok: false, error: 'Escreva uma pergunta de 3 a 2.000 caracteres.' }
   }
 
-  await getAuthenticatedMember()
+  await getAuthenticatedMember(true)
   const agent = getCommunityAgent(category)
 
   try {

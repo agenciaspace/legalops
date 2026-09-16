@@ -1,3 +1,4 @@
+import { hasClubProAccess } from '@/lib/club-membership'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { Nav } from '@/components/Nav'
 import { AppMain } from '@/components/AppMain'
@@ -16,7 +17,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       .eq('user_id', user.id),
     supabase
       .from('community_members')
-      .select('club_access_status, club_access_expires_at')
+      .select('club_access_status, club_access_expires_at, club_pro_status, club_pro_expires_at')
       .eq('user_id', user.id)
       .maybeSingle(),
   ])
@@ -34,7 +35,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     countQuery = countQuery.not('id', 'in', `(${excludedIds.join(',')})`)
   }
 
-  const hasClubAccess = hasActiveClubAccess(clubAccess)
+  const hasClubAccess = hasActiveClubAccess(clubAccess) && hasClubProAccess(clubAccess)
   const [{ count }, { count: jobAlertCount }] = await Promise.all([
     countQuery,
     hasClubAccess

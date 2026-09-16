@@ -46,7 +46,7 @@ export function CommunityAgentCard({ category, hasPaidAccess }: { category: stri
 
       {!hasPaidAccess ? (
         <div className="flex items-center gap-2 px-4 py-3 text-[10px] font-bold text-[#77746E] sm:px-5">
-          <Lock className="h-3.5 w-3.5 text-[#AAA7A1]" /> Assistência dos agentes disponível para membros ativos.
+          <Lock className="h-3.5 w-3.5 text-[#AAA7A1]" /> Assistência dos agentes faz parte do Club Pro.
         </div>
       ) : (
         <div className="p-4 sm:p-5">

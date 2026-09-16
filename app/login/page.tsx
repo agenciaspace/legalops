@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { BrandLogo, BrandWordmark } from '@/components/BrandLogo'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -91,7 +92,7 @@ export default function LoginPage() {
             {loading ? 'Carregando...' : 'Entrar'}
           </button>
           <p className="text-center text-xs leading-5 text-[#77716A]">
-            O cadastro é liberado pelo LegalOps Club. Novos membros recebem um convite por email.
+            Ainda não tem conta? <Link href="/cadastro" className="font-semibold underline">Cadastre-se gratuitamente no Club.</Link>
           </p>
         </form>
 

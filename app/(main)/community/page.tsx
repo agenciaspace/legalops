@@ -1,4 +1,6 @@
+import { hasClubProAccess } from '@/lib/club-membership'
 import Link from 'next/link'
+import { createAdminClient } from '@/lib/supabase-admin'
 import {
   ArrowRight,
   Heart,
@@ -70,10 +72,16 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
   const selectedSpace = requestedSpace && COMMUNITY_CATEGORIES[requestedSpace] ? requestedSpace : null
   const { data: clubAccess } = await supabase
     .from('community_members')
-    .select('club_access_status, club_access_expires_at')
+    .select('club_access_status, club_access_expires_at, club_pro_status, club_pro_expires_at')
     .eq('user_id', user?.id ?? '')
     .maybeSingle()
-  const hasPaidAccess = hasActiveClubAccess(clubAccess)
+  const hasCommunityAccess = hasActiveClubAccess(clubAccess)
+  const hasProAccess = hasCommunityAccess && hasClubProAccess(clubAccess)
+
+  const { data: launchConfig } = hasCommunityAccess
+    ? await createAdminClient().from('club_launch_config').select('whatsapp_invite_url').eq('id', true).maybeSingle()
+    : { data: null }
+  const whatsappUrl = launchConfig?.whatsapp_invite_url?.startsWith('https://chat.whatsapp.com/') ? launchConfig.whatsapp_invite_url : null
 
   let postsQuery = supabase
     .from('community_posts')
@@ -131,16 +139,16 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
             </button>
           </header>
 
-          {!hasPaidAccess ? (
+          {!hasCommunityAccess ? (
             <section className="mb-4 overflow-hidden rounded-xl border border-[#FFD0BD] bg-[#FFF6F1] p-4 sm:p-5">
               <div className="flex items-start gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#292825] text-white"><Lock className="h-4 w-4" /></div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#D9470F]">Prévia aberta</p>
-                  <h2 className="mt-1 text-sm font-extrabold text-[#292824]">Você está vendo uma parte do conteúdo.</h2>
-                  <p className="mt-1 text-[11px] leading-5 text-[#77746E]">Assinantes acessam as conversas completas, lives, resumos, diretório de membros e alertas de vagas comparados com o perfil.</p>
-                  <Link href="/club#planos" className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[#FF5C1A] px-3 py-2 text-[10px] font-extrabold text-white hover:bg-[#E84D10]">
-                    Ver lotes de lançamento <ArrowRight className="h-3.5 w-3.5" />
+                  <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#D9470F]">Seu perfil no Club</p>
+                  <h2 className="mt-1 text-sm font-extrabold text-[#292824]">Complete seu perfil para participar.</h2>
+                  <p className="mt-1 text-[11px] leading-5 text-[#77746E]">A comunidade é gratuita para perfis ligados ao jurídico. Informe seu LinkedIn e contexto profissional para entrar.</p>
+                  <Link href="/club/entrar" className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[#FF5C1A] px-3 py-2 text-[10px] font-extrabold text-white hover:bg-[#E84D10]">
+                    Completar meu perfil <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
               </div>
@@ -161,7 +169,8 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                       <Link href="/community?space=apresentacoes" className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-white hover:text-[#FF9A72]">
                         Começar por aqui <ArrowRight className="h-3.5 w-3.5" />
                       </Link>
-                      {hasPaidAccess ? (
+                      {whatsappUrl ? <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-white hover:text-[#FF9A72]">Entrar no WhatsApp <ArrowRight className="h-3.5 w-3.5" /></a> : null}
+                      {hasProAccess ? (
                         <Link href="/community/jobs" className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#FF9A72] hover:text-white">
                           Ver vagas para o meu perfil <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
@@ -173,9 +182,9 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
             </section>
           ) : null}
 
-          {selectedSpace ? <CommunityAgentCard category={selectedSpace} hasPaidAccess={hasPaidAccess} /> : null}
+          {selectedSpace ? <CommunityAgentCard category={selectedSpace} hasPaidAccess={hasProAccess} /> : null}
 
-          {hasPaidAccess ? <details id="new-post" className="group mb-4 overflow-hidden rounded-xl border border-[#E2E2DE] bg-white" open={posts.length === 0}>
+          {hasCommunityAccess ? <details id="new-post" className="group mb-4 overflow-hidden rounded-xl border border-[#E2E2DE] bg-white" open={posts.length === 0}>
             <summary className="flex cursor-pointer list-none items-center gap-3 p-3.5 sm:px-4">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FF5C1A] text-[10px] font-black text-white">
                 {getInitials(user?.email?.split('@')[0] ?? 'LO')}
@@ -271,7 +280,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                     <p className="mt-2 whitespace-pre-wrap text-[13px] leading-[1.65] text-[#68655F]">{post.body}</p>
                   </div>
 
-                  {hasPaidAccess ? <div className="mt-5 flex items-center gap-4 border-t border-[#ECECE8] pb-0 pt-3 text-[10px] font-bold text-[#77746E] sm:ml-[52px]">
+                  {hasCommunityAccess ? <div className="mt-5 flex items-center gap-4 border-t border-[#ECECE8] pb-0 pt-3 text-[10px] font-bold text-[#77746E] sm:ml-[52px]">
                     <form action={toggleCommunityPostLike}>
                       <input type="hidden" name="post_id" value={post.id} />
                       <button className={`flex items-center gap-1.5 rounded-md px-1 py-1 transition hover:text-[#D9470F] ${likedByUser ? 'text-[#D9470F]' : ''}`} aria-label={likedByUser ? 'Remover curtida' : 'Curtir'}>
@@ -285,7 +294,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                     </div>
                   )}
 
-                  {hasPaidAccess && comments.length > 0 ? (
+                  {hasCommunityAccess && comments.length > 0 ? (
                     <div className="mt-3 space-y-2 border-t border-[#ECECE8] pt-3 sm:ml-[52px]">
                       {comments.slice(-3).map(comment => (
                         <div key={comment.id} className="flex gap-2 rounded-lg bg-[#F7F7F5] px-3 py-2.5 text-[11px] leading-5">
@@ -296,7 +305,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                     </div>
                   ) : null}
 
-                  {hasPaidAccess ? <form action={createCommunityComment} className="mt-3 flex gap-2 sm:ml-[52px]">
+                  {hasCommunityAccess ? <form action={createCommunityComment} className="mt-3 flex gap-2 sm:ml-[52px]">
                     <input type="hidden" name="post_id" value={post.id} />
                     <input
                       name="body"
@@ -317,12 +326,12 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
         </section>
 
         <aside className="hidden space-y-4 xl:sticky xl:top-[5.75rem] xl:block">
-          {!hasPaidAccess ? (
+          {!hasCommunityAccess ? (
             <section className="rounded-xl bg-[#292825] p-5 text-white">
               <Lock className="h-5 w-5 text-[#FF7A45]" />
               <h2 className="mt-4 text-sm font-extrabold">O restante acontece por dentro.</h2>
-              <p className="mt-2 text-[10px] leading-5 text-white/60">A assinatura anual inclui as conversas completas, lives, resumos, diretório validado e alertas de vagas com ajustes de CV.</p>
-              <Link href="/club#planos" className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-extrabold text-[#FF8B5D] hover:text-white">Escolher meu lote <ArrowRight className="h-3.5 w-3.5" /></Link>
+              <p className="mt-2 text-[10px] leading-5 text-white/60">Conversas, encontros e diretório fazem parte da comunidade gratuita. O Pro acrescenta assistência e integrações personalizadas.</p>
+              <Link href="/club/entrar" className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-extrabold text-[#FF8B5D] hover:text-white">Completar meu perfil <ArrowRight className="h-3.5 w-3.5" /></Link>
             </section>
           ) : <>
           <section className="rounded-xl border border-[#E1E1DD] bg-white p-4">

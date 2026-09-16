@@ -91,7 +91,7 @@ describe('sendWelcomeEmailIfNeeded', () => {
     expect(sendCloudflareTransactionalEmailMock).toHaveBeenCalledWith({
       to: ['ana@example.com'],
       subject: 'Sua conta LegalOps está pronta',
-      textBody: expect.stringContaining('https://legalops.work/dashboard'),
+      textBody: expect.stringContaining('https://legalops.club/club/entrar'),
       htmlBody: expect.stringContaining('<p>'),
     })
   })

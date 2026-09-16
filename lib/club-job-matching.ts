@@ -131,7 +131,8 @@ export async function generateClubJobAlerts(userId?: string) {
     .from('community_members')
     .select('user_id')
     .in('club_access_status', ['active', 'complimentary'])
-    .or(`club_access_expires_at.is.null,club_access_expires_at.gt.${now}`)
+    .in('club_pro_status', ['active', 'complimentary'])
+    .or(`club_pro_expires_at.is.null,club_pro_expires_at.gt.${now}`)
 
   if (userId) memberQuery = memberQuery.eq('user_id', userId)
 

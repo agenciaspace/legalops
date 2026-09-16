@@ -43,12 +43,12 @@ const verificationCopy: Record<string, { label: string; description: string; ton
   },
   rejected: {
     label: 'Revisão necessária',
-    description: 'Revise os dados profissionais e envie novamente.',
+    description: 'Fale com a administração para revisar seu cadastro.',
     tone: 'border-rose-200 bg-rose-50 text-rose-800',
   },
   unverified: {
     label: 'Perfil não validado',
-    description: 'Complete os dados e informe seu LinkedIn para solicitar validação.',
+    description: 'O LinkedIn informado não representa uma conferência de identidade. Mantenha seu perfil atualizado.',
     tone: 'border-stone-200 bg-stone-50 text-stone-700',
   },
 }
@@ -90,7 +90,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
     <div className="mx-auto w-full max-w-[980px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
       <header>
         <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Meu perfil</h1>
-        <p className="mt-1 text-xs text-[#77746E]">O mesmo perfil apresenta você no Club e define quais vagas e ajustes de CV chegam até você.</p>
+        <p className="mt-1 text-xs text-[#77746E]">Apresente seu contexto à comunidade. Os campos de carreira são opcionais e podem apoiar os recursos personalizados do Pro.</p>
       </header>
 
       {searchParams?.saved ? (
@@ -174,16 +174,16 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
               <input name="tools_used" defaultValue={(profile?.tools_used ?? []).join(', ')} placeholder="Ironclad, Power BI" className="mt-1.5 h-10 w-full rounded-lg border border-[#DFDFDB] px-3 text-xs font-medium outline-none focus:border-[#FF9E77]" />
             </label>
             <label className="text-[10px] font-extrabold text-[#4D4B46] sm:col-span-2">
-              Resumo de carreira para personalização
-              <textarea name="career_summary" required minLength={20} maxLength={3000} rows={4} defaultValue={profile?.career_summary ?? ''} placeholder="Seu nível, escopo, setores e tipo de impacto." className="mt-1.5 w-full resize-y rounded-lg border border-[#DFDFDB] px-3 py-2.5 text-xs leading-5 outline-none focus:border-[#FF9E77]" />
+              Resumo de carreira (opcional)
+              <textarea name="career_summary" minLength={20} maxLength={3000} rows={4} defaultValue={profile?.career_summary ?? ''} placeholder="Seu nível, escopo, setores e tipo de impacto." className="mt-1.5 w-full resize-y rounded-lg border border-[#DFDFDB] px-3 py-2.5 text-xs leading-5 outline-none focus:border-[#FF9E77]" />
             </label>
             <label className="text-[10px] font-extrabold text-[#4D4B46] sm:col-span-2">
               Resultados comprovados
               <textarea name="career_highlights" rows={5} defaultValue={(profile?.career_highlights ?? []).join('\n')} placeholder={'Um resultado por linha. Ex.:\nReduzi o ciclo contratual em 30%.'} className="mt-1.5 w-full resize-y rounded-lg border border-[#DFDFDB] px-3 py-2.5 text-xs leading-5 outline-none focus:border-[#FF9E77]" />
             </label>
             <label className="text-[10px] font-extrabold text-[#4D4B46] sm:col-span-2">
-              CV base — fonte de verdade
-              <textarea name="base_cv_text" required minLength={50} maxLength={30000} rows={10} defaultValue={profile?.base_cv_text ?? ''} placeholder="Cole cargos, empresas, datas, responsabilidades e formação. O sistema adapta a ênfase sem inventar fatos." className="mt-1.5 w-full resize-y rounded-lg border border-[#DFDFDB] px-3 py-2.5 text-xs leading-5 outline-none focus:border-[#FF9E77]" />
+              CV base (opcional, para personalização)
+              <textarea name="base_cv_text" minLength={50} maxLength={30000} rows={10} defaultValue={profile?.base_cv_text ?? ''} placeholder="Cole cargos, empresas, datas, responsabilidades e formação. O sistema adapta a ênfase sem inventar fatos." className="mt-1.5 w-full resize-y rounded-lg border border-[#DFDFDB] px-3 py-2.5 text-xs leading-5 outline-none focus:border-[#FF9E77]" />
             </label>
 
             <div className="grid gap-2.5 sm:col-span-2">
@@ -193,7 +193,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
               </label>
               <label className="flex items-start gap-3 rounded-lg border border-[#E4E3DF] bg-[#FAFAF8] p-3 text-[10px] leading-4 text-[#5F5C56]">
                 <input type="checkbox" name="job_alerts_enabled" defaultChecked={profile?.job_alerts_enabled ?? true} className="mt-0.5 h-4 w-4 accent-[#FF5C1A]" />
-                <span><strong className="block text-[#292824]">Receber alertas no Club</strong>Mostre vagas novas na área “Vagas para você”.</span>
+                <span><strong className="block text-[#292824]">Receber alertas no Club Pro</strong>Preferência usada quando o Pro estiver ativo: vagas novas na área “Vagas para você”.</span>
               </label>
               <label className="flex items-start gap-3 rounded-lg border border-[#E4E3DF] bg-[#FAFAF8] p-3 text-[10px] leading-4 text-[#5F5C56]">
                 <input type="checkbox" name="cv_suggestions_enabled" defaultChecked={profile?.cv_suggestions_enabled ?? true} className="mt-0.5 h-4 w-4 accent-[#FF5C1A]" />

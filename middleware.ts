@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { hasActiveClubAccess } from '@/lib/community'
+import { hasClubProAccess, isClubProPath } from '@/lib/club-membership'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -19,7 +20,7 @@ export async function middleware(request: NextRequest) {
   }
 
   let supabaseResponse = NextResponse.next({ request })
-  const publicPaths = new Set(['/', '/club', '/club/checkout', '/login', '/set-password', '/auth/confirm'])
+  const publicPaths = new Set(['/', '/club', '/club/about', '/club/checkout', '/cadastro', '/login', '/set-password', '/auth/confirm'])
   const isPublicPage = publicPaths.has(pathname)
     || pathname === '/bench/nubank-2026-09-17'
   const publicWebhookPaths = new Set([
@@ -62,11 +63,11 @@ export async function middleware(request: NextRequest) {
   }
 
   // Authenticated user on login → redirect to app
-  if (pathname === '/login') {
+  if (pathname === '/login' || pathname === '/cadastro') {
     const requestedPath = request.nextUrl.searchParams.get('next')
-    const destination = requestedPath?.startsWith('/') && !requestedPath.startsWith('//')
+    const destination = requestedPath?.startsWith('/') && !requestedPath.startsWith('//') && !requestedPath.includes('\\')
       ? requestedPath
-      : isClubDomain ? '/community' : '/dashboard'
+      : isClubDomain || pathname === '/cadastro' ? '/club/entrar' : '/dashboard'
     return NextResponse.redirect(new URL(destination, request.url))
   }
 
@@ -77,30 +78,36 @@ export async function middleware(request: NextRequest) {
   const requiresClub = pathname === '/onboard'
     || ['/dashboard', '/discover', '/pipeline', '/jobs', '/settings', '/professionals'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
     || ['/api/profile', '/api/pipeline', '/api/jobs', '/api/ai'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
-    || pathname.startsWith('/community/')
+    || pathname === '/community' || pathname.startsWith('/community/')
 
-  let clubAccess: { club_access_status: string | null; club_access_expires_at: string | null } | null = null
+  let clubAccess: { club_access_status: string | null; club_access_expires_at: string | null; club_pro_status: string | null; club_pro_expires_at: string | null } | null = null
   if (requiresClub) {
     const { data } = await supabase
       .from('community_members')
-      .select('club_access_status, club_access_expires_at')
+      .select('club_access_status, club_access_expires_at, club_pro_status, club_pro_expires_at')
       .eq('user_id', user.id)
       .maybeSingle()
     clubAccess = data
 
     if (!hasActiveClubAccess(clubAccess)) {
       if (pathname.startsWith('/api/')) {
-        return NextResponse.json({ error: 'Active Club membership required' }, { status: 403 })
+        return NextResponse.json({ error: 'Complete seu perfil para entrar na comunidade.' }, { status: 403 })
       }
-      const clubUrl = new URL('/club', request.url)
-      clubUrl.searchParams.set('membership', 'required')
+      const clubUrl = new URL('/club/entrar', request.url)
       return NextResponse.redirect(clubUrl)
     }
+  }
+
+  if (isClubProPath(pathname) && !hasClubProAccess(clubAccess)) {
+    if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Este recurso faz parte do Club Pro.' }, { status: 403 })
+    return NextResponse.redirect(new URL('/club#pro', request.url))
   }
 
   // Check onboarding completion for non-onboarding, non-API routes
   if (
     pathname !== '/onboard' &&
+    pathname !== '/club/entrar' &&
+    !pathname.startsWith('/community') &&
     !pathname.startsWith('/api/') &&
     !isPublicPage
   ) {
@@ -114,15 +121,6 @@ export async function middleware(request: NextRequest) {
       const onboardUrl = new URL('/onboard', request.url)
       onboardUrl.searchParams.set('next', pathname)
       return NextResponse.redirect(onboardUrl)
-    }
-  }
-
-  // The root feed contains the public preview. Every deeper Club route is paid-only.
-  if (pathname.startsWith('/community/')) {
-    if (!hasActiveClubAccess(clubAccess)) {
-      const upgradeUrl = new URL('/community', request.url)
-      upgradeUrl.searchParams.set('upgrade', '1')
-      return NextResponse.redirect(upgradeUrl)
     }
   }
 

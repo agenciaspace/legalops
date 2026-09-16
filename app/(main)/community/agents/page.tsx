@@ -1,3 +1,4 @@
+import { hasClubProAccess } from '@/lib/club-membership'
 import Link from 'next/link'
 import { ArrowRight, Bot, Lock, Sparkles } from 'lucide-react'
 import { COMMUNITY_AGENTS } from '@/lib/community-agents'
@@ -12,10 +13,10 @@ export default async function CommunityAgentsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   const { data: member } = await supabase
     .from('community_members')
-    .select('club_access_status, club_access_expires_at')
+    .select('club_access_status, club_access_expires_at, club_pro_status, club_pro_expires_at')
     .eq('user_id', user?.id ?? '')
     .maybeSingle()
-  const hasPaidAccess = hasActiveClubAccess(member)
+  const hasPaidAccess = hasActiveClubAccess(member) && hasClubProAccess(member)
 
   return (
     <main className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-6 lg:px-8 lg:py-9">
@@ -40,7 +41,7 @@ export default async function CommunityAgentsPage() {
               {hasPaidAccess ? (
                 <Link href={`/community?space=${agent.category}`} className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-extrabold text-[#D9470F] hover:text-[#292825]">Abrir espaço <ArrowRight className="h-3.5 w-3.5" /></Link>
               ) : (
-                <span className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold text-[#9A9791]"><Lock className="h-3 w-3" /> Disponível para membros ativos</span>
+                <span className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-bold text-[#9A9791]"><Lock className="h-3 w-3" /> Disponível no Pro</span>
               )}
             </article>
           )

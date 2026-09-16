@@ -1,15 +1,15 @@
 import type { Metadata } from 'next'
-import { ArrowUpRight, MessageCircle } from 'lucide-react'
+import Link from 'next/link'
 import { BrandWordmark } from '@/components/BrandLogo'
 import { LegalOpsEcosystem } from '@/components/LegalOpsEcosystem'
-import { createAdminClient } from '@/lib/supabase-admin'
+
 
 export const metadata: Metadata = {
   title: 'legalops.club | comunidade para profissionais do jurídico',
-  description: 'Uma comunidade para trocar experiências sobre o trabalho no jurídico. Vamos ter app, agente pessoal, assuntos para acompanhar e encontros com líderes da sua região.',
+  description: 'Comunidade gratuita para perfis ligados ao jurídico, com LinkedIn e apresentação profissional. Pro reúne agente pessoal e integrações com Work e Dev.',
   openGraph: {
     title: 'legalops.club | vamos falar de trabalho no jurídico',
-    description: 'Converse com outros profissionais do jurídico. Conheça o que estamos preparando para a comunidade: agente pessoal, app e encontros por região.',
+    description: 'Cadastre-se na comunidade com seu perfil profissional. Conheça também o Pro: agente pessoal e integrações em preparação.',
     url: 'https://legalops.club',
     siteName: 'legalops.club',
     type: 'website',
@@ -20,59 +20,32 @@ const headingFont = { fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif
 const plannedFeatures = [
   {
     title: 'seu agente',
-    description: 'Cada membro terá um agente de IA. Você poderá pedir um resumo do que perdeu, procurar uma referência que alguém compartilhou ou tirar uma dúvida sobre as conversas. Ele vai acompanhar os assuntos que você escolher.',
+    description: 'No Pro, cada usuário terá um agente pessoal de IA. Você poderá pedir um resumo do que perdeu, procurar uma referência que alguém compartilhou ou tirar uma dúvida sobre as conversas. Ele vai acompanhar os assuntos que você escolher.',
   },
   {
-    title: 'líderes na sua região',
-    description: 'Vamos definir lideranças por região para organizar encontros e aproximar quem trabalha por perto. Você poderá ver quem é responsável pela sua região e acompanhar a programação local.',
+    title: 'conexão com o Work',
+    description: 'Seu agente poderá relacionar oportunidades ao seu perfil e ajudar a acompanhar os próximos passos da sua carreira. A consulta às vagas públicas do Work continua aberta.',
   },
   {
-    title: 'acesso pelo app',
-    description: 'O club também terá um app. Você poderá abrir suas conversas, consultar o agente e ver as novidades dos assuntos que acompanha pelo celular.',
+    title: 'conexão com o Dev',
+    description: 'Um problema discutido no Club pode levar a um projeto no Dev. O agente poderá encontrar referências, documentação e formas de contribuir. O código dos projetos continua aberto para todos.',
   },
   {
     title: 'assuntos que você quer seguir',
-    description: 'Contratos, IA, gestão jurídica, carreira: você escolhe o que quer acompanhar. As conversas e os materiais vão ficar organizados por assunto para você conseguir encontrá-los depois.',
+    description: 'Contratos, IA, gestão jurídica, carreira: você escolhe o que quer acompanhar. No Pro, o agente vai reunir novidades e referências desses assuntos para você retomar o que ficou para trás.',
   },
 ]
 
-function GroupInvitation({ url }: { url: string | null }) {
-  const style = 'inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#187645] sm:w-auto'
-  return (
-    <div>
-      {url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" className={style + ' bg-[#187645] text-white hover:bg-[#125C35]'}>
-          <MessageCircle aria-hidden="true" className="h-5 w-5" /> Entrar no WhatsApp <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
-        </a>
-      ) : (
-        <button disabled className={style + ' cursor-not-allowed bg-[#DCD9CF] text-[#615F57]'}>
-          <MessageCircle aria-hidden="true" className="h-5 w-5" /> Estamos preparando o WhatsApp
-        </button>
-      )}
-      <p className="mt-3 max-w-md text-xs leading-5 text-[#716B65]">
-        {url ? 'O link abre o convite no WhatsApp.' : 'Vamos colocar o convite aqui assim que estiver pronto.'}
-      </p>
-    </div>
-  )
+function SignupLink() {
+  return <Link href="/cadastro" className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#111111] px-6 py-3 text-sm font-semibold text-white hover:bg-[#2A2927] sm:w-auto">Criar meu perfil gratuito →</Link>
 }
 
-export default async function ClubLandingPage() {
-  let inviteUrl: string | null = null
-  try {
-    const admin = createAdminClient()
-    const { data } = await admin.from('club_launch_config').select('whatsapp_invite_url').eq('id', true).maybeSingle()
-    if (typeof data?.whatsapp_invite_url === 'string' && /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+$/.test(data.whatsapp_invite_url)) {
-      inviteUrl = data.whatsapp_invite_url
-    }
-  } catch {
-    // Keep the landing available when the invitation cannot be loaded.
-  }
-
+export default function ClubLandingPage() {
   return (
     <div className="min-h-screen bg-[#F5F1E8] text-[#111111]" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
       <header className="mx-auto flex max-w-[1180px] items-center justify-between gap-4 border-b border-[#CEC8BD] px-5 py-6 sm:px-8">
         <BrandWordmark suffix="club" className="inline-flex items-baseline text-[25px] leading-none sm:text-[30px]" />
-        <span className="text-[10px] font-semibold uppercase tracking-[.12em] text-[#716B65]">Em lançamento</span>
+        <Link href="/login?next=/community" className="text-sm font-semibold underline underline-offset-4">Entrar</Link>
       </header>
       <main>
         <section className="mx-auto grid max-w-[1180px] gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[1.2fr_.8fr] lg:items-center lg:gap-16 lg:py-24">
@@ -84,12 +57,12 @@ export default async function ClubLandingPage() {
             <p className="mt-6 max-w-xl text-base leading-7 text-[#625E59] sm:text-lg sm:leading-8">
               Aqui você vai poder perguntar como outros profissionais estão resolvendo um problema parecido com o seu. Ou compartilhar algo que funcionou no seu time.
             </p>
-            <p className="mt-4 max-w-xl text-sm leading-6 text-[#625E59]">A comunidade começa no WhatsApp. Estamos preparando também um app, com um agente para cada membro e acompanhamento dos assuntos que você escolher.</p>
-            <div className="mt-8"><GroupInvitation url={inviteUrl} /></div>
-            <a href="#funcionalidades" className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold underline decoration-[#C9684F] underline-offset-4">Veja o que estamos preparando ↓</a>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-[#625E59]">A participação na comunidade é gratuita para perfis ligados ao jurídico. Cadastre seu LinkedIn, conte com o que você trabalha e escolha os assuntos que quer acompanhar.</p>
+            <div className="mt-8"><SignupLink /></div>
+            <a href="#pro" className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold underline decoration-[#C9684F] underline-offset-4">Conheça a proposta do Pro ↓</a>
           </div>
           <aside className="rounded-lg border border-[#CEC8BD] bg-[#EDE5D8] p-7 sm:p-9" aria-label="Exemplo ilustrativo das funcionalidades previstas">
-            <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#716B65]">Um exemplo do que vem por aí</p>
+            <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#716B65]">Pro · agente pessoal em preparação</p>
             <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-[-.04em]" style={headingFont}>o que eu perdi essa semana?</h2>
             <p className="mt-4 text-sm leading-6 text-[#625E59]">Essa é uma das perguntas que você poderá fazer ao seu agente. Ele vai reunir o que aconteceu nos assuntos que você acompanha e indicar onde continuar a leitura.</p>
             <div className="mt-7 space-y-5 border-t border-[#C9C0B1] pt-6">
@@ -107,16 +80,22 @@ export default async function ClubLandingPage() {
           work: 'Vagas e acompanhamento de candidaturas.',
           dev: 'Projetos abertos de tecnologia jurídica.',
         }} />
-        <section className="border-y border-[#CEC8BD] bg-[#FAF7F1]">
+        <section id="como-funciona" className="border-y border-[#CEC8BD] bg-[#FAF7F1]">
           <div className="mx-auto grid max-w-[1180px] gap-6 px-5 py-10 sm:px-8 sm:py-12 md:grid-cols-[.6fr_1.4fr] md:items-center">
             <h2 className="text-2xl font-semibold tracking-[-.035em]" style={headingFont}>quem pode participar?</h2>
-            <p className="text-sm leading-7 text-[#625E59] sm:text-base">Quem trabalha em departamento jurídico, escritório, Legal Ops ou Legal Tech e tem vontade de trocar experiências com outros profissionais. Os assuntos vão de contratos e gestão até tecnologia e carreira.</p>
+            <p className="text-sm leading-7 text-[#625E59] sm:text-base">Quem trabalha, estuda ou desenvolve soluções para o jurídico: departamentos, escritórios, Legal Ops, Legal Tech, consultoria e pesquisa. O cadastro pede LinkedIn pessoal, atuação, organização ou contexto profissional, cidade, apresentação e interesses. Não é preciso contratar Pro.</p>
           </div>
         </section>
-        <section id="funcionalidades" className="mx-auto max-w-[1180px] scroll-mt-8 px-5 py-14 sm:px-8 sm:py-20">
-          <p className="text-xs font-semibold uppercase tracking-[.15em] text-[#A24D36]">O que estamos preparando</p>
-          <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-[-.045em] sm:text-5xl" style={headingFont}>como o club vai funcionar<span className="text-[#E88A6A]">.</span></h2>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#625E59] sm:text-base">Esses recursos ainda estão em preparação. Vamos avisar no WhatsApp quando cada um estiver disponível.</p>
+        <section aria-label="Comunidade e Pro" className="mx-auto max-w-[1180px] px-5 pt-14 sm:px-8">
+          <div className="grid border-y border-[#CEC8BD] md:grid-cols-2">
+            <div className="py-8 md:pr-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Comunidade · gratuita</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>pessoas e conversas</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Perfil profissional, troca de experiências, encontros e contato com outros membros. A entrada depende do seu perfil e das regras da comunidade.</p></div>
+            <div className="border-t border-[#CEC8BD] py-8 md:border-l md:border-t-0 md:pl-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Pro · opcional</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>agente e integrações</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Assistência pessoal para acompanhar assuntos, recuperar contexto e conectar oportunidades e projetos. Estamos preparando essa versão.</p></div>
+          </div>
+        </section>
+        <section id="pro" className="mx-auto max-w-[1180px] scroll-mt-8 px-5 py-14 sm:px-8 sm:py-20">
+          <p className="text-xs font-semibold uppercase tracking-[.15em] text-[#A24D36]">Club Pro · em preparação</p>
+          <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-[-.045em] sm:text-5xl" style={headingFont}>um agente para acompanhar seu contexto<span className="text-[#E88A6A]">.</span></h2>
+          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#625E59] sm:text-base">Pro será a versão paga, com agente pessoal e integrações com Work, Dev e outros serviços. O pacote completo e o preço ainda estão em definição. A comunidade, as vagas públicas e os projetos abertos continuam acessíveis sem Pro.</p>
           <div className="mt-10 border-t border-[#CEC8BD]">
             {plannedFeatures.map((feature, index) => (
               <article key={feature.title} className="grid gap-4 border-b border-[#CEC8BD] py-8 md:grid-cols-[.8fr_1.2fr] md:gap-12">
@@ -132,13 +111,13 @@ export default async function ClubLandingPage() {
         <section className="bg-[#111111] text-[#F5F1E8]">
           <div className="mx-auto max-w-[1180px] px-5 py-14 sm:px-8 sm:py-20">
             <h2 className="max-w-3xl text-3xl font-semibold tracking-[-.045em] sm:text-5xl" style={headingFont}>pra quando você ficar uns dias fora.</h2>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-[#CEC8BD]">A ideia é que você não perca uma informação importante só porque passou uns dias sem abrir o grupo. Seu agente vai resumir as novidades dos assuntos que você segue, com o caminho para voltar à conversa e consultar os materiais.</p>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-[#CEC8BD]">A ideia do Pro é ajudar você a recuperar informações importantes depois de uns dias fora. Seu agente vai resumir as novidades dos assuntos que você segue, com o caminho para voltar à conversa e consultar os materiais.</p>
           </div>
         </section>
         <section className="mx-auto max-w-[1180px] px-5 py-14 sm:px-8 sm:py-20">
           <h2 className="max-w-2xl text-3xl font-semibold tracking-[-.045em] sm:text-5xl" style={headingFont}>venha pro club<span className="text-[#E88A6A]">.</span></h2>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-[#625E59]">É pelo WhatsApp que vamos começar a reunir o pessoal e combinar os primeiros encontros. Por lá também vamos contar quando o app e os outros recursos estiverem prontos.</p>
-          <div className="mt-7"><GroupInvitation url={inviteUrl} /></div>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-[#625E59]">Crie sua conta, confirme o email e complete o perfil. As conversas, os encontros e o diretório fazem parte da comunidade gratuita. O app e as lideranças regionais seguem em preparação; o agente pessoal faz parte do Pro.</p>
+          <div className="mt-7"><SignupLink /></div>
         </section>
       </main>
       <footer className="border-t border-[#CEC8BD] px-5 py-6 sm:px-8">
