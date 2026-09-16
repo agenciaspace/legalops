@@ -153,7 +153,7 @@ export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memb
           ) : (
             <div className="border-t-2 border-[#DF4D1E] bg-[#1F211E] p-3 text-white">
               <div className="flex items-center gap-2 text-[11px] font-extrabold"><Lock className="h-3.5 w-3.5 text-[#FF7A45]" /> Club Pro</div>
-              <p className="mt-2 text-[10px] leading-4 text-white/60">Agente pessoal e integrações com Work e Dev. Conheça o que estamos preparando.</p>
+              <p className="mt-2 text-[10px] leading-4 text-white/60">Ficou sem tempo de acompanhar? O Pro está sendo preparado para reunir os assuntos, oportunidades e projetos que importam para você.</p>
               <Link href="/club#pro" className="mt-3 inline-flex text-[10px] font-extrabold text-[#FF8B5D] hover:text-white">Conhecer o Pro →</Link>
             </div>
           )}

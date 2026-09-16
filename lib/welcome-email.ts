@@ -57,7 +57,7 @@ function buildAccountWelcomeEmail(email: string) {
   }
 }
 
-function buildClubWelcomeEmail(email: string, displayName?: string | null) {
+function buildClubWelcomeEmail(email: string, displayName?: string | null, whatsappInviteUrl?: string | null) {
   const greeting = displayName?.trim() ? `Olá, ${displayName.trim()}!` : 'Olá!'
 
   const textBody = [
@@ -73,9 +73,9 @@ function buildClubWelcomeEmail(email: string, displayName?: string | null) {
     'Primeiros passos:',
     '1. Complete seu perfil público: https://legalops.club/community/profile',
     '2. Apresente-se no espaço Apresentações: https://legalops.club/community',
-    '3. Encontre o link do WhatsApp na página inicial da comunidade.',
+    whatsappInviteUrl ? `3. Entre na comunidade do WhatsApp: ${whatsappInviteUrl}` : '3. Encontre o link do WhatsApp na página inicial da comunidade.',
     '',
-    'O Club Pro é separado da comunidade gratuita. É a versão com agente e recursos personalizados do ecossistema; as novas integrações ainda estão em preparação.',
+    'Quer ajuda para acompanhar os assuntos, oportunidades e projetos do seu interesse? Conheça o Club Pro e os recursos em preparação: https://legalops.club/club#pro',
     '',
     'Comunidade: https://legalops.club',
     'Oportunidades: https://legalops.work',
@@ -88,7 +88,7 @@ function buildClubWelcomeEmail(email: string, displayName?: string | null) {
   return {
     subject: CLUB_WELCOME_SUBJECT,
     textBody,
-    htmlBody: buildHtmlEmail(textBody),
+    htmlBody: `${buildHtmlEmail(textBody)}${whatsappInviteUrl ? `<p><a href="${escapeHtmlAttribute(whatsappInviteUrl)}">Entrar na comunidade do WhatsApp</a></p>` : ''}`,
   }
 }
 
@@ -142,7 +142,12 @@ export async function sendClubWelcomeEmailIfNeeded(user: { id: string; email?: s
   if (member.club_welcome_email_sent_at) return false
   if (!hasActiveClubAccess(member)) return false
 
-  const message = buildClubWelcomeEmail(email, member.display_name)
+  const { data: config, error: configError } = await admin
+    .from('club_launch_config').select('whatsapp_invite_url').eq('id', true).maybeSingle()
+  if (configError) throw configError
+  const invite = config?.whatsapp_invite_url
+  const whatsappInviteUrl = typeof invite === 'string' && /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+$/.test(invite) ? invite : null
+  const message = buildClubWelcomeEmail(email, member.display_name, whatsappInviteUrl)
   const result = await sendCloudflareTransactionalEmail({
     to: [email],
     subject: message.subject,

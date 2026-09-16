@@ -91,6 +91,10 @@ export async function sendCloudflareTransactionalEmail(args: {
     throw new Error(payload ? getErrorMessage(payload) : `Cloudflare Email Service failed with status ${response.status}.`)
   }
 
+  if (payload.result?.permanent_bounces?.length) {
+    throw new Error('Email rejected by the destination server; delivery was not completed.')
+  }
+
   return {
     messageId: payload.result?.message_id ?? null,
     payload,

@@ -62,3 +62,11 @@ Validation: `npm test`, `npm run build`, and the rollback-only database assertio
 in `supabase/tests/club_admission.sql`. The authenticated SECURITY DEFINER RPC is
 intentional: it grants only free membership after these checks; users cannot
 update Pro fields. See [Supabase advisory rationale](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable).
+
+## Conversão para Pro (16/09/2026)
+
+Destacar o Pro quando a pessoa busca assistência, contexto, vagas personalizadas
+ou conexão com projetos. Apresentar o benefício concreto e um próximo passo claro.
+Evitar chamadas que desestimulem a contratação, como “não é preciso contratar”.
+Manter a participação gratuita e a diferença entre recursos prontos e planejados;
+não inventar disponibilidade, preço, urgência ou obrigação de pagar.

@@ -9,11 +9,13 @@ export async function POST() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const [sent, clubSent] = await Promise.all([
+    const [accountResult, clubResult] = await Promise.allSettled([
       sendWelcomeEmailIfNeeded(user),
       sendClubWelcomeEmailIfNeeded(user),
     ])
-    return NextResponse.json({ ok: true, sent, clubSent })
+    if (clubResult.status === 'rejected') throw clubResult.reason
+    if (accountResult.status === 'rejected') console.error('[auth/welcome] account email failed:', accountResult.reason)
+    return NextResponse.json({ ok: true, sent: accountResult.status === 'fulfilled' && accountResult.value, clubSent: clubResult.value })
   } catch (error) {
     console.error('[auth/welcome] failed to send welcome email:', error)
     return NextResponse.json({ error: 'Welcome email unavailable.' }, { status: 503 })

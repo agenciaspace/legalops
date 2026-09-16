@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { Bot, Lock, Send, Sparkles } from 'lucide-react'
 import { askCommunityAgent } from './actions'
 import { getCommunityAgent } from '@/lib/community-agents'
@@ -46,7 +47,7 @@ export function CommunityAgentCard({ category, hasPaidAccess }: { category: stri
 
       {!hasPaidAccess ? (
         <div className="flex items-center gap-2 px-4 py-3 text-[10px] font-bold text-[#77746E] sm:px-5">
-          <Lock className="h-3.5 w-3.5 text-[#AAA7A1]" /> Assistência dos agentes faz parte do Club Pro.
+          <Lock className="h-3.5 w-3.5 text-[#AAA7A1]" /><span>Quer ajuda para aplicar esse assunto no seu trabalho? <Link href="/club#pro" className="font-extrabold text-[#D9470F] underline">Conheça os agentes do Pro →</Link></span>
         </div>
       ) : (
         <div className="p-4 sm:p-5">

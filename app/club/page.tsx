@@ -83,19 +83,19 @@ export default function ClubLandingPage() {
         <section id="como-funciona" className="border-y border-[#CEC8BD] bg-[#FAF7F1]">
           <div className="mx-auto grid max-w-[1180px] gap-6 px-5 py-10 sm:px-8 sm:py-12 md:grid-cols-[.6fr_1.4fr] md:items-center">
             <h2 className="text-2xl font-semibold tracking-[-.035em]" style={headingFont}>quem pode participar?</h2>
-            <p className="text-sm leading-7 text-[#625E59] sm:text-base">Quem trabalha, estuda ou desenvolve soluções para o jurídico: departamentos, escritórios, Legal Ops, Legal Tech, consultoria e pesquisa. O cadastro pede LinkedIn pessoal, atuação, organização ou contexto profissional, cidade, apresentação e interesses. Não é preciso contratar Pro.</p>
+            <p className="text-sm leading-7 text-[#625E59] sm:text-base">Quem trabalha, estuda ou desenvolve soluções para o jurídico: departamentos, escritórios, Legal Ops, Legal Tech, consultoria e pesquisa. O cadastro pede LinkedIn pessoal, atuação, organização ou contexto profissional, cidade, apresentação e interesses.</p>
           </div>
         </section>
         <section aria-label="Comunidade e Pro" className="mx-auto max-w-[1180px] px-5 pt-14 sm:px-8">
           <div className="grid border-y border-[#CEC8BD] md:grid-cols-2">
             <div className="py-8 md:pr-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Comunidade · gratuita</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>pessoas e conversas</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Perfil profissional, troca de experiências, encontros e contato com outros membros. A entrada depende do seu perfil e das regras da comunidade.</p></div>
-            <div className="border-t border-[#CEC8BD] py-8 md:border-l md:border-t-0 md:pl-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Pro · opcional</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>agente e integrações</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Assistência pessoal para acompanhar assuntos, recuperar contexto e conectar oportunidades e projetos. Estamos preparando essa versão.</p></div>
+            <div className="border-t border-[#CEC8BD] py-8 md:border-l md:border-t-0 md:pl-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Club Pro</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>agente e integrações</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Assistência pessoal para acompanhar assuntos, recuperar contexto e conectar oportunidades e projetos. Estamos preparando essa versão.</p></div>
           </div>
         </section>
         <section id="pro" className="mx-auto max-w-[1180px] scroll-mt-8 px-5 py-14 sm:px-8 sm:py-20">
           <p className="text-xs font-semibold uppercase tracking-[.15em] text-[#A24D36]">Club Pro · em preparação</p>
           <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-[-.045em] sm:text-5xl" style={headingFont}>um agente para acompanhar seu contexto<span className="text-[#E88A6A]">.</span></h2>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#625E59] sm:text-base">Pro será a versão paga, com agente pessoal e integrações com Work, Dev e outros serviços. O pacote completo e o preço ainda estão em definição. A comunidade, as vagas públicas e os projetos abertos continuam acessíveis sem Pro.</p>
+          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#625E59] sm:text-base">Pro será a versão paga, com agente pessoal e integrações com Work, Dev e outros serviços. Para quem quer ajuda para acompanhar as conversas e conectar o que aprende às oportunidades e projetos. Estamos definindo o pacote e o preço de lançamento.</p>
           <div className="mt-10 border-t border-[#CEC8BD]">
             {plannedFeatures.map((feature, index) => (
               <article key={feature.title} className="grid gap-4 border-b border-[#CEC8BD] py-8 md:grid-cols-[.8fr_1.2fr] md:gap-12">

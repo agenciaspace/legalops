@@ -1,3 +1,4 @@
+import { ClubWelcomeNotice } from '@/components/community/ClubWelcomeNotice'
 import { hasClubProAccess } from '@/lib/club-membership'
 import { CommunityTabs } from '@/components/community/CommunityTabs'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
@@ -30,7 +31,7 @@ export default async function CommunityLayout({ children }: { children: React.Re
           initials={getInitials(memberName)}
           hasPaidAccess={hasPaidAccess}
         />
-        <div className="min-w-0 flex-1 pt-[53px] lg:pt-0">{children}</div>
+        <div className="min-w-0 flex-1 pt-[53px] lg:pt-0"><ClubWelcomeNotice />{children}</div>
       </div>
     </div>
   )

@@ -19,10 +19,10 @@ vi.mock('@/lib/supabase-admin', () => ({
 
 function chainableClient(rows: unknown[] | null, updateResult: unknown = [{ user_id: 'user-1' }]) {
   const client = {
-    from: vi.fn(() => ({
+    from: vi.fn((table: string) => ({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
-          maybeSingle: vi.fn(async () => ({ data: rows?.[0] ?? null, error: null })),
+          maybeSingle: vi.fn(async () => ({ data: table === 'club_launch_config' ? { whatsapp_invite_url: 'https://chat.whatsapp.com/TestInvite' } : rows?.[0] ?? null, error: null })),
         })),
       })),
       update: vi.fn(() => ({
@@ -163,4 +163,9 @@ describe('sendClubWelcomeEmailIfNeeded', () => {
       expect.objectContaining({ textBody: expect.stringContaining('Olá!') })
     )
   })
+})
+
+it('includes the direct WhatsApp invitation for active members', async () => {
+  await sendClubWelcomeEmailIfNeeded({ id: 'user-1', email: 'ana@example.com' })
+  expect(sendCloudflareTransactionalEmailMock).toHaveBeenCalledWith(expect.objectContaining({ textBody: expect.stringContaining('https://chat.whatsapp.com/TestInvite'), htmlBody: expect.stringContaining('href="https://chat.whatsapp.com/TestInvite"') }))
 })
