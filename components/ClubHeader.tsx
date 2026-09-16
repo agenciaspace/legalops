@@ -40,7 +40,7 @@ export function ClubHeader({
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#CEC8BD] bg-[#F5F1E8]/95 backdrop-blur-xl">
-      <div className="mx-auto flex h-[72px] max-w-[1180px] items-center justify-between gap-4 px-5 sm:px-8">
+      <div className="mx-auto flex min-h-[72px] max-w-[1180px] flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3 sm:flex-nowrap sm:px-8 sm:py-0">
         <Link
           href={isWork ? '/' : '/club'}
           className="min-w-0 shrink-0"
@@ -52,7 +52,7 @@ export function ClubHeader({
           />
         </Link>
 
-        <nav className="flex min-w-0 items-center gap-1 font-[var(--font-inter)]" aria-label={locale === 'pt' ? 'Ecossistema LegalOps' : 'LegalOps ecosystem'}>
+        <nav className="flex w-full min-w-0 items-center justify-between gap-1 font-[var(--font-inter)] sm:w-auto" aria-label={locale === 'pt' ? 'Ecossistema LegalOps' : 'LegalOps ecosystem'}>
           {items.map(item => {
             const selected = item.key === currentProduct
             return (

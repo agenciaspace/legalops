@@ -8,7 +8,7 @@ import { isPublishableJobRecord } from '@/lib/job-publication'
 type LandingLocale = 'pt' | 'en'
 
 const JOB_SELECT =
-  'id, title, company, company_logo_url, url, source_board, remote_reality, salary_min, salary_max, salary_currency, url_status, url_checked_at, created_at' as const
+  'id, title, company, company_logo_url, url, source_board, location, remote_reality, salary_min, salary_max, salary_currency, url_status, url_checked_at, created_at' as const
 
 async function fetchPublicJobs(): Promise<{ jobs: LandingJob[]; count: number }> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL

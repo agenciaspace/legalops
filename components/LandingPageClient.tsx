@@ -27,6 +27,7 @@ export interface LandingJob {
   company_logo_url: string | null
   url: string
   source_board: string
+  location?: string | null
   remote_reality: string | null
   salary_min: number | null
   salary_max: number | null
@@ -141,6 +142,14 @@ function remoteLabel(remoteReality: string | null, locale: LandingLocale) {
   return remoteLabels[key]?.[locale] ?? remoteLabels.unknown[locale]
 }
 
+function locationLabel(job: LandingJob, locale: LandingLocale) {
+  const workplace = remoteLabel(job.remote_reality, locale)
+  if (!job.location) return workplace
+  return !job.remote_reality || job.remote_reality === 'unknown'
+    ? job.location
+    : `${job.location} · ${workplace}`
+}
+
 function matchesFilter(job: LandingJob, filter: JobFilter) {
   if (filter === 'all') return true
   if (filter === 'remote') {
@@ -179,7 +188,7 @@ export function LandingPageClient({
     if (!matchesFilter(job, activeFilter)) return false
     if (!normalizedQuery) return true
 
-    return `${job.title} ${job.company} ${remoteLabel(job.remote_reality, locale)}`
+    return `${job.title} ${job.company} ${locationLabel(job, locale)}`
       .toLocaleLowerCase(locale === 'pt' ? 'pt-BR' : 'en-US')
       .includes(normalizedQuery)
   })
@@ -229,7 +238,7 @@ export function LandingPageClient({
                         <div className="min-w-0">
                           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#817A73]">{job.company}</p>
                           <p className="mt-1 text-sm font-semibold leading-5 text-[#111111]">{job.title}</p>
-                          <p className="mt-2 text-[10px] text-[#69635E]">{remoteLabel(job.remote_reality, locale)}{salary ? ` · ${salary}` : ''}</p>
+                          <p className="mt-2 text-[10px] text-[#69635E]">{locationLabel(job, locale)}{salary ? ` · ${salary}` : ''}</p>
                         </div>
                         <ArrowRight className="mt-1 h-4 w-4 text-[#817A73] transition group-hover:translate-x-0.5 group-hover:text-[#C9684F]" />
                       </a>
@@ -317,7 +326,7 @@ export function LandingPageClient({
                       </div>
                       <h3 className="mt-1.5 font-[var(--font-quicksand)] text-lg font-semibold tracking-[-0.025em] text-[#111111]">{job.title}</h3>
                       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[#69635E]">
-                        <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {remoteLabel(job.remote_reality, locale)}</span>
+                        <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5 shrink-0" /> {locationLabel(job, locale)}</span>
                         {salary ? <span>{salary}</span> : null}
                         <span>{sourceLabels[job.source_board] ?? job.source_board}{checkedAt ? ` · ${copy.checked} ${checkedAt}` : ''}</span>
                       </div>
