@@ -6,7 +6,7 @@ import { CommunityTabs } from '@/components/community/CommunityTabs'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getInitials, hasActiveClubAccess } from '@/lib/community'
 
-export const metadata: Metadata = { title: 'Comunidade | legalops.club', description: 'Posts, Bench e Pro em áreas próprias.', manifest: '/club-pwa/manifest.webmanifest', appleWebApp: { capable: true, title: 'LegalOps Club', statusBarStyle: 'default' }, icons: { apple: '/club-pwa/icon-192.png' } }
+export const metadata: Metadata = { title: 'Comunidade | legalops.club', description: 'Posts, Bench e Pro em áreas próprias.', manifest: '/club-pwa/manifest.webmanifest', appleWebApp: { capable: true, title: 'LegalOps Club', statusBarStyle: 'default' }, icons: { icon: '/club-pwa/icon-192.png', apple: '/club-pwa/icon-192.png' } }
 
 export default async function CommunityLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient()
