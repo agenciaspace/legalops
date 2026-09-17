@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/agenciaspace/clm-bench",
-  "revision": "34e07c56d0236f4aaaa6dc9244883639735edad4",
+  "revision": "5965e1759f2e13b8af428d821574ecc6cd94766a",
   "paths": [
     "cloudflare-landing/bench"
   ]

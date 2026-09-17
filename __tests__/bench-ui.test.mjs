@@ -53,3 +53,18 @@ it('keeps checklist focus and saves the private diagnosis locally', () => {
   expect(document.getElementById('stack-count').textContent).toContain('2 ferramentas');
   expect(JSON.parse(localStorage.getItem('legalops-clm-bench-v2')).profile.existing_tools).toBe('CRM\nERP\nCRM');
 });
+
+it('selects catalog tools, keeps their own scores and prevents a fifth option', () => {
+  document.getElementById('reset').click();
+  const search=document.getElementById('tool-search');
+  const add=(name)=>{search.value=name;search.dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#tool-cards [data-toggle-vendor]').click()};
+  add('Docusign');add('Icertis');
+  expect(document.getElementById('selection-count').textContent).toBe('4 selecionadas');
+  expect(document.getElementById('score-head').textContent).toContain('Docusign CLM');
+  const score=document.querySelector('[data-vendor="2"][data-score="0"]');
+  expect(score.value).toBe('');score.value='3';score.dispatchEvent(new Event('change',{bubbles:true}));
+  add('Juro');expect(document.getElementById('catalog-message').textContent).toContain('até quatro');
+  document.querySelector('#selected-tools [data-toggle-vendor="docusign-clm"]').click();add('Docusign');
+  expect(document.querySelector('[data-vendor="3"][data-score="0"]').value).toBe('3');
+  expect(document.querySelector('[data-vendor="2"][data-score="0"]').value).toBe('');
+});

@@ -32,6 +32,6 @@ it('returns only the generic offline page when the network is unavailable',async
 })
 it('provides an installable manifest with resolvable 192 and 512 icons',()=>{
  const m=JSON.parse(readFileSync('public/club-pwa/manifest.webmanifest','utf8'))
- expect(m.display).toBe('standalone');expect(m.start_url).toBe('/community/bench')
+ expect(m.display).toBe('standalone');expect(m.start_url).toBe('/community/calendar')
  for(const size of [192,512]) {const icon=m.icons.find((i:any)=>i.sizes===`${size}x${size}` && i.purpose==='any');const png=readFileSync(`public${icon.src}`);expect(png.readUInt32BE(16)).toBe(size);expect(png.readUInt32BE(20)).toBe(size)}
 })

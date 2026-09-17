@@ -10,7 +10,7 @@ Implementation: `c45c9badbc6cb144e2409ffac2c96fe14d2a3d9e`.
   Public deployment: https://legalops.dev/bench/.
 - Contributions accept private contact information and enter moderation;
   only explicitly approved public copies appear in the public feed.
-- Club navigation separates Posts, Bench and Pro. Responsive Bench links
+- Club navigation separates Posts, Events and Pro. Bench is a section inside Events; the previous `/community/bench` address redirects to `/community/calendar#bench`. Responsive Bench links
   assessment, presentation and contributions, with a separate real-event card.
 - Member profile requests a photo and workplace description. Existing posts
   read current author photo, name, role, organization and description.
@@ -63,3 +63,10 @@ Posts, agent responses and submissions require a connection. The model uses
 saved preferences plus eight recent turns; displaying older history does not
 expand that model context. Original vendor scores remain editorial hypotheses;
 unassessed criteria stay empty rather than implying evidence.
+
+## Events and expanded catalog update
+
+- Events contains the Bench resources and meeting section; the featured Bench meeting is excluded from duplicate cards in Other meetings. PWA starts in Events.
+- The public catalog covers all 239 G2 CLM category listings found across 16 pages, grouped by exact names, plus the original Luminance entry: 234 selectable options. It preserves source URLs and flags insufficient descriptions or adjacent scope. No G2 ratings become capability scores.
+- Selection supports two to four tools, saves evaluations by ID, and keeps old shared scenarios compatible. Shared links exclude private company context and inactive evaluations.
+- Verified locally at 390 px and 320 px: no page overflow, adding Icertis and Docusign, rejecting a fifth tool, and sharing four selected IDs without private fields. Standalone model/catalog suite: 13 passing tests.

@@ -1,6 +1,6 @@
 /* Cache only the public offline page and icons. Never store authenticated HTML,
    API responses, user data, RSC payloads, or form submissions. */
-const CACHE = 'legalops-club-shell-v2';
+const CACHE = 'legalops-club-shell-v3';
 const OFFLINE = '/club-pwa/offline.html';
 const STATIC = [OFFLINE, '/club-pwa/icon-192.png', '/club-pwa/icon-512.png', '/club-pwa/icon-maskable.png'];
 self.addEventListener('install', event => {

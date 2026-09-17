@@ -1,16 +1,16 @@
 import {afterEach,beforeEach,expect,it,vi} from 'vitest'
 import {cleanup,fireEvent,render,screen,waitFor} from '@testing-library/react'
-const state=vi.hoisted(()=>({path:'/community/bench',search:new URLSearchParams(),confirm:vi.fn(),decline:vi.fn()}))
+const state=vi.hoisted(()=>({path:'/community/calendar',search:new URLSearchParams(),confirm:vi.fn(),decline:vi.fn()}))
 vi.mock('next/navigation',()=>({usePathname:()=>state.path,useSearchParams:()=>state.search}))
 vi.mock('@/app/(main)/community/actions',()=>({confirmBenchAttendance:state.confirm,declineBenchAttendance:state.decline}))
 import {CommunityTabs} from '@/components/community/CommunityTabs'
 import BenchClient from '@/app/(main)/community/bench/BenchClient'
 import {ClubPwa} from '@/components/community/ClubPwa'
 afterEach(cleanup)
-beforeEach(()=>{vi.clearAllMocks();state.path='/community/bench';state.search=new URLSearchParams()})
-it('separates Posts, Bench and Pro, and limits post categories to the feed',()=>{
+beforeEach(()=>{vi.clearAllMocks();state.path='/community/calendar';state.search=new URLSearchParams()})
+it('separates Posts, Events and Pro, and limits post categories to the feed',()=>{
   const {rerender}=render(<CommunityTabs />)
-  expect(screen.getAllByRole('link',{name:/Bench/})[0]).toHaveAttribute('aria-current','page')
+  expect(screen.getAllByRole('link',{name:/Eventos/})[0]).toHaveAttribute('aria-current','page')
   expect(screen.queryByText('Assuntos dos posts')).not.toBeInTheDocument()
   expect(screen.queryByText('Assinar Pro →')).not.toBeInTheDocument()
   state.path='/community';rerender(<CommunityTabs />)

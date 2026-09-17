@@ -2,9 +2,9 @@
   "id": "/community",
   "name": "legalops.club",
   "short_name": "LegalOps",
-  "description": "Posts da comunidade, Bench e assistência Pro.",
+  "description": "Posts, eventos com Bench e assistência Pro.",
   "lang": "pt-BR",
-  "start_url": "/community/bench",
+  "start_url": "/community/calendar",
   "scope": "/",
   "display": "standalone",
   "background_color": "#F5F1E8",
@@ -16,7 +16,7 @@
     {"src":"/club-pwa/icon-maskable.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ],
   "shortcuts": [
-    {"name":"Bench","url":"/community/bench"},
+    {"name":"Eventos","url":"/community/calendar"},
     {"name":"Posts","url":"/community"},
     {"name":"Pro","url":"/community/pro"}
   ]

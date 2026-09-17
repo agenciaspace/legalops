@@ -1,8 +1,10 @@
-import { CalendarDays, Clock3, Grid2X2, List, MapPin, Plus, Video } from 'lucide-react'
+import { CalendarDays, Clock3, MapPin, Plus, Video } from 'lucide-react'
+import BenchSection from './BenchSection'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 type Event = {
   id: string
+  slug: string
   title: string
   description: string
   host_name: string
@@ -31,34 +33,34 @@ const eventLabels: Record<string, string> = {
 }
 
 export const dynamic = 'force-dynamic'
+export const metadata = {title:'Eventos | legalops.club',description:'Bench, encontros e agenda da comunidade.'}
 
 export default async function CalendarPage() {
   const supabase = await createServerSupabaseClient()
   const { data: rawEvents } = await supabase
     .from('community_events')
-    .select('id, title, description, host_name, starts_at, ends_at, location_label, location_url, event_type')
+    .select('id, slug, title, description, host_name, starts_at, ends_at, location_label, location_url, event_type')
     .eq('is_published', true)
     .gte('starts_at', new Date().toISOString())
     .order('starts_at', { ascending: true })
 
-  const events = (rawEvents ?? []) as Event[]
+  const events = ((rawEvents ?? []) as Event[]).filter(event => event.slug !== 'bench-nubank-2026-09-17')
 
   return (
     <div className="mx-auto w-full max-w-[1000px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Lives</h1>
-          <p className="mt-1 text-xs text-[#77746E]">Conversas ao vivo, office hours e encontros da comunidade. Horário de Brasília.</p>
+          <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Eventos</h1>
+          <p className="mt-1 text-xs text-[#77746E]">Encontros, Bench e conversas da comunidade. Horários de Brasília.</p>
         </div>
-        <div className="hidden rounded-lg border border-[#DFDFDB] bg-white p-1 sm:flex">
-          <button className="rounded-md bg-[#F1F1EE] p-1.5 text-[#33322E]" aria-label="Visualização em lista"><List className="h-3.5 w-3.5" /></button>
-          <button className="rounded-md p-1.5 text-[#999690]" aria-label="Visualização em calendário"><Grid2X2 className="h-3.5 w-3.5" /></button>
-        </div>
+
       </header>
 
-      <section className="mt-5 overflow-hidden rounded-xl border border-[#E1E1DD] bg-white">
+      <nav aria-label="Seções de eventos" className="mt-5 flex flex-wrap gap-2"><a href="#bench" className="inline-flex min-h-12 items-center rounded-xl border border-[#CEC8BD] bg-white px-4 text-sm font-semibold">Bench</a><a href="#outros-eventos" className="inline-flex min-h-12 items-center rounded-xl border border-[#CEC8BD] bg-white px-4 text-sm font-semibold">Outros encontros</a></nav>
+      <BenchSection />
+      <section id="outros-eventos" className="scroll-mt-24 mt-8 overflow-hidden rounded-xl border border-[#E1E1DD] bg-white">
         <div className="flex items-center justify-between border-b border-[#ECECE8] px-4 py-3.5 sm:px-5">
-          <h2 className="text-xs font-extrabold text-[#34332F]">Próximas lives</h2>
+          <h2 className="text-xs font-extrabold text-[#34332F]">Outros encontros</h2>
           <span className="rounded-md bg-[#F1F1EE] px-2 py-1 text-[8px] font-black text-[#77746E]">{events.length} AGENDADOS</span>
         </div>
 
@@ -82,14 +84,14 @@ export default async function CalendarPage() {
                     {index === 0 ? <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wide text-emerald-700">Próximo</span> : null}
                   </div>
                   <h3 className="mt-1.5 text-sm font-extrabold tracking-[-0.01em] text-[#292824]">{event.title}</h3>
-                  <p className="mt-1.5 line-clamp-2 max-w-xl text-[10px] leading-4 text-[#7F7C76]">{event.description}</p>
-                  <div className="mt-2.5 flex flex-wrap gap-3 text-[9px] font-semibold text-[#94918B]">
+                  <p className="mt-1.5 line-clamp-2 max-w-xl text-sm leading-6 text-[#7F7C76]">{event.description}</p>
+                  <div className="mt-2.5 flex flex-wrap gap-3 text-xs font-semibold text-[#94918B]">
                     <span className="flex items-center gap-1"><Clock3 className="h-3 w-3" /> {time}</span>
                     <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {event.location_label}</span>
                     <span>Com {event.host_name}</span>
                   </div>
                 </div>
-                <a href={event.location_url ?? googleCalendarUrl(event)} target="_blank" rel="noreferrer" className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[#DFDFDB] bg-white px-3 text-[10px] font-extrabold text-[#34332F] transition hover:border-[#FFB99E] hover:text-[#D9470F]">
+                <a href={event.location_url ?? googleCalendarUrl(event)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-lg border border-[#DFDFDB] bg-white px-3 text-[10px] font-extrabold text-[#34332F] transition hover:border-[#FFB99E] hover:text-[#D9470F]">
                   {event.location_url ? <Video className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />} {event.location_url ? 'Participar' : 'Adicionar'}
                 </a>
               </article>

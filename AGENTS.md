@@ -121,7 +121,7 @@ The middleware public allowlist currently includes:
 - `/club/checkout`: manual PIX orders and private receipt upload. Offer stays inactive until an explicit price and period are configured.
 - `/club/admin/pro`: allowlisted admins configure the offer and approve bank-verified payments.
 - `/community`, `/community/profile`, `/community/members`, `/community/calendar`: free member features.
-- `/community/bench`: responsive member hub linking the public open-source CLM assessment.
+- `/community/calendar#bench`: Bench section within Events, linking the public open-source CLM assessment. `/community/bench` redirects here.
 - `/community/pro`: Pro hub; separate from community posts and Bench.
 - `/community/assistant`, `/community/agents`, `/community/jobs`, `/community/summaries`: Pro features.
 - `/api/club/agent`: private preferences/history and source-backed personal agent; 30 questions per UTC day.
@@ -312,7 +312,7 @@ When changing authentication, submit the browser form; rendering it is not enoug
 
 ## Club mobile and identity (2026-09-17)
 
-- Posts, Bench and Pro are separate primary navigation destinations. Mobile uses
+- Posts, Events and Pro are separate primary navigation destinations. Bench is a section within Events. Mobile uses
   a bottom bar; secondary member pages live in More.
 - The Club PWA manifest is `/club-pwa/manifest.webmanifest`. `/club-sw.js`
   caches only its generic offline page and icons, never authenticated pages,

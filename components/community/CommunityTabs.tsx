@@ -8,11 +8,10 @@ import { COMMUNITY_CATEGORIES } from '@/lib/community'
 
 const primary = [
   { href: '/community', label: 'Posts', icon: MessageCircle, description: 'Conversas e experiências da comunidade' },
-  { href: '/community/bench', label: 'Bench', icon: Users, description: 'Encontros e comparações de ferramentas' },
+  { href: '/community/calendar', label: 'Eventos', icon: CalendarDays, description: 'Bench e encontros da comunidade' },
   { href: '/community/pro', label: 'Pro', icon: Sparkles, description: 'Seu agente e acompanhamento pessoal' },
 ]
 const secondary = [
-  { href: '/community/calendar', label: 'Agenda', icon: CalendarDays },
   { href: '/community/members', label: 'Membros', icon: Users },
   { href: '/community/profile', label: 'Meu perfil', icon: BadgeCheck },
 ]
