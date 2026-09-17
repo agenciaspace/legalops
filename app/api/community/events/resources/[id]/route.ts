@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { hasActiveClubAccess } from '@/lib/community'
 
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
@@ -17,7 +17,10 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     admin.from('community_event_rsvps').select('id').eq('event_id', resource.event_id).eq('user_id', user.id).eq('response', 'confirmed').maybeSingle(),
   ])
   if (!organizer && !attendance) return new NextResponse('Forbidden', { status: 403 })
-  const { data: signed, error } = await admin.storage.from('community-event-files').createSignedUrl(resource.storage_path, 300, { download: true })
+  const download = new URL(request.url).searchParams.get('download') === '1'
+  const { data: signed, error } = await admin.storage.from('community-event-files').createSignedUrl(resource.storage_path, 300, { download })
   if (error || !signed?.signedUrl) return new NextResponse('Not found', { status: 404 })
-  return NextResponse.redirect(signed.signedUrl)
+  const response = NextResponse.redirect(signed.signedUrl)
+  response.headers.set('Cache-Control', 'private, no-store')
+  return response
 }

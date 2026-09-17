@@ -96,35 +96,6 @@ export async function registerPublicEvent(formData: FormData) {
   redirect(`/community/events/${event.slug}?registered=1`)
 }
 
-export async function shareEventResource(formData: FormData) {
-  const eventId = String(formData.get('event_id') ?? '').trim()
-  const title = String(formData.get('title') ?? '').trim().slice(0, 160)
-  const description = String(formData.get('description') ?? '').trim().slice(0, 1000)
-  const files = formData.getAll('files').filter((entry): entry is File => entry instanceof File && entry.size > 0)
-  const kind = String(formData.get('kind') ?? 'link')
-  if (!eventId || title.length < 2 || files.length < 1 || files.length > 20 || files.some(file => file.size > 10 * 1024 * 1024) || !['foto', 'documento', 'outro'].includes(kind)) return
-  const { supabase, user } = await getAuthenticatedMember()
-  const [{ data: attendance }, { data: eventAdmin }] = await Promise.all([
-    supabase.from('community_event_rsvps').select('id').eq('event_id', eventId).eq('user_id', user.id).eq('response', 'confirmed').maybeSingle(),
-    supabase.from('community_event_admins').select('event_id').eq('event_id', eventId).eq('user_id', user.id).maybeSingle(),
-  ])
-  if (!attendance && !eventAdmin) return
-  const { data: event } = await supabase.from('community_events').select('slug').eq('id', eventId).eq('is_published', true).maybeSingle()
-  if (!event) return
-  const admin = createAdminClient()
-  const uploaded: string[] = []
-  for (const file of files) {
-    const extension = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8) : 'bin'
-    const storagePath = `${eventId}/${user.id}/${crypto.randomUUID()}.${extension || 'bin'}`
-    const { error: uploadError } = await admin.storage.from('community-event-files').upload(storagePath, new Uint8Array(await file.arrayBuffer()), { contentType: file.type, upsert: false })
-    if (uploadError) { if (uploaded.length) await admin.storage.from('community-event-files').remove(uploaded); return }
-    uploaded.push(storagePath)
-    const { error } = await admin.from('community_event_resources').insert({ event_id: eventId, uploader_id: user.id, kind, title: files.length > 1 ? `${title} · ${file.name}` : title, description, storage_path: storagePath, resource_url: null })
-    if (error) { await admin.storage.from('community-event-files').remove(uploaded); return }
-  }
-  revalidatePath(`/community/events/${event.slug}`)
-  redirect(`/community/events/${event.slug}?shared=1`)
-}
 
 export async function confirmBenchAttendance(formData: FormData) {
   const { supabase, user } = await getAuthenticatedMember()
