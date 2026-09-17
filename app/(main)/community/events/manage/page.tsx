@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { hasActiveClubAccess } from '@/lib/community'
+import { isDirectoryMember } from '@/lib/community-directory'
 import { isLegalOpsAdminEmail } from '@/lib/legalops-admin'
 import { addEventOrganizer, updateEventConfiguration } from './actions'
 
@@ -21,7 +22,8 @@ export default async function EventManagePage({ searchParams }: { searchParams?:
   ])
   const events = isLegalOpsAdminEmail(user.email) ? allEvents ?? [] : (allEvents ?? []).filter(event => (owned ?? []).some(item => item.event_id === event.id))
   const selected = events.find(event => event.id === searchParams?.event) ?? events[0]
-  const { data: members } = selected ? await admin.from('community_members').select('user_id,display_name,current_role,organization_name').order('display_name').limit(200) : { data: [] }
+  const { data: rawMembers } = selected ? await admin.from('community_members').select('user_id,display_name,current_role,organization_name,organization_description,club_access_status,club_access_expires_at').order('display_name').limit(200) : { data: [] }
+  const members = (rawMembers ?? []).filter(isDirectoryMember)
   const { data: organizers } = selected ? await admin.from('community_event_admins').select('user_id,role').eq('event_id', selected.id) : { data: [] }
   return <main className="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 lg:py-12">
     <div className="flex flex-wrap items-center justify-between gap-3"><div><Link href="/community/calendar" className="text-xs font-bold text-[#D9470F]">← Eventos</Link><h1 className="mt-3 text-3xl font-extrabold tracking-[-0.04em]">Configurar evento</h1><p className="mt-2 text-sm text-[#716B65]">Defina como as pessoas se inscrevem e participam.</p></div><Link href="/community/events/new" className="rounded-lg bg-[#24231F] px-4 py-3 text-xs font-bold text-white">Criar evento</Link></div>
