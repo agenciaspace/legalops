@@ -49,7 +49,7 @@ it('exposes only the exact Bench intake path and keeps moderation authenticated'
 })
 
 it('serves public PWA assets without exposing community data', async () => {
-  for (const path of ['/club-sw.js','/club-pwa/manifest.webmanifest','/club-pwa/offline.html','/club-pwa/icon-192.png']) expect((await request(path)).status).toBe(200)
+  for (const path of ['/icon.svg','/icon.svg?brand=current','/club-sw.js','/club-pwa/manifest.webmanifest','/club-pwa/offline.html','/club-pwa/icon-192.png']) expect((await request(path)).status).toBe(200)
   expect((await request('/club-pwa/private')).headers.get('location')).toContain('/login')
   expect((await request('/community/bench')).headers.get('location')).toContain('/login')
   state.user={id:'free'};state.member={club_access_status:'active',club_pro_status:'inactive'}

@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
 
   // Public Bench has its own input limits and publishes only reviewed content.
   // Keep this exact path independent of Club authentication and paid access.
-  if (pathname === '/club-sw.js' || /^\/club-pwa\/(manifest\.webmanifest|offline\.html|icon-(192|512|maskable)\.png)$/.test(pathname)) return NextResponse.next({ request })
+  if (pathname === '/icon.svg' || pathname === '/club-sw.js' || /^\/club-pwa\/(manifest\.webmanifest|offline\.html|icon-(192|512|maskable)\.png)$/.test(pathname)) return NextResponse.next({ request })
 
   if (pathname === '/api/bench/contributions') return NextResponse.next({ request })
 

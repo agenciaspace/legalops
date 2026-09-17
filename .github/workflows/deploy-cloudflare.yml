@@ -86,6 +86,8 @@ jobs:
               exit 1
             fi
           done
+          icon=$(curl -fsS --retry 5 --retry-delay 2 "https://legalops.club/icon.svg?brandcheck=${GITHUB_RUN_ID}")
+          printf '%s' "$icon" | grep -q '<svg'
 
       - name: Record deploy status
         if: always()

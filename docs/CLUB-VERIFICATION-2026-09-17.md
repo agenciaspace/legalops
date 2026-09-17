@@ -51,6 +51,11 @@ Implementation: `c45c9badbc6cb144e2409ffac2c96fe14d2a3d9e`.
 - Photo/description prominence on existing posts verified by rendering the real
   server page against isolated fixtures. No test post was sent to the community.
 
+The final brand check also found `/icon.svg` redirecting anonymous visitors to
+login. Its exact public route is now allowlisted and checked by deployment smoke
+tests. The shared favicon uses the general LegalOps wordmark; community metadata
+selects the Club icon.
+
 ## Limits
 
 PWA verification used Chromium emulation, not installation on a physical phone.
