@@ -2,178 +2,67 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import {
-  BarChart3,
-  BadgeCheck,
-Bot,
-  Building2,
-  CalendarDays,
-  ChevronDown,
-  Home,
-  Lightbulb,
-  Lock,
-  Settings,
-  Sparkles,
-  Users,
-} from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { BadgeCheck, CalendarDays, Menu, MessageCircle, Sparkles, Users, X } from 'lucide-react'
+import { COMMUNITY_CATEGORIES } from '@/lib/community'
 
-const mainItems = [
-  { href: '/community/assistant', label: 'Meu agente · Pro', icon: Bot, pro: true },
-  { href: '/community', label: 'Início', icon: Home, exact: true },
-{ href: '/community/office', label: 'Escritório', icon: Building2 },
-  { href: '/community/agents', label: 'Agentes · Pro', icon: Bot, pro: true },
-  { href: '/community/summaries', label: 'Resumos IA · Pro', icon: Sparkles, pro: true },
-  { href: '/community/calendar', label: 'Lives', icon: CalendarDays },
-  { href: '/community/bench', label: 'Bench Nubank', icon: Users },
+const primary = [
+  { href: '/community', label: 'Posts', icon: MessageCircle, description: 'Conversas e experiências da comunidade' },
+  { href: '/community/bench', label: 'Bench', icon: Users, description: 'Encontros e comparações de ferramentas' },
+  { href: '/community/pro', label: 'Pro', icon: Sparkles, description: 'Seu agente e acompanhamento pessoal' },
+]
+const secondary = [
+  { href: '/community/calendar', label: 'Agenda', icon: CalendarDays },
   { href: '/community/members', label: 'Membros', icon: Users },
   { href: '/community/profile', label: 'Meu perfil', icon: BadgeCheck },
 ]
 
-const spaceGroups = [
-  {
-    label: 'Comece aqui',
-    items: [
-      { space: 'anuncio', label: 'Anúncios' },
-      { space: 'apresentacoes', label: 'Apresente-se' },
-    ],
-  },
-  {
-    label: 'Conversas centrais',
-    items: [
-      { space: 'discussao', label: 'Discussões gerais' },
-      { space: 'cases', label: 'Cases & playbooks' },
-    ],
-  },
-  {
-    label: 'Temas latentes',
-    items: [
-      { space: 'ia-automacao', label: 'IA & automação' },
-      { space: 'dados-metricas', label: 'Dados, métricas & BI' },
-      { space: 'contratos-clm', label: 'Contratos & CLM' },
-    ],
-  },
-  {
-    label: 'Operação',
-    items: [
-      { space: 'processos-projetos', label: 'Processos & projetos' },
-      { space: 'ferramentas', label: 'Tech stack & integrações' },
-      { space: 'financeiro-fornecedores', label: 'Spend & fornecedores' },
-      { space: 'governanca-conhecimento', label: 'Governança & conhecimento' },
-    ],
-  },
-  {
-    label: 'Estratégia & pessoas',
-    items: [
-      { space: 'estrategia-maturidade', label: 'Estratégia & maturidade' },
-      { space: 'modelos-entrega', label: 'Modelos de entrega' },
-      { space: 'carreira', label: 'Pessoas & liderança' },
-    ],
-  },
-]
-
-type CommunityTabsProps = {
-  memberName?: string
-  memberRole?: string | null
-  memberCount?: number
-  initials?: string
-  hasPaidAccess?: boolean
-}
-
-export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memberCount = 0, initials = 'LO', hasPaidAccess = false }: CommunityTabsProps) {
+type Props = { memberName?: string; memberRole?: string | null; memberCount?: number; initials?: string; hasPaidAccess?: boolean }
+export function CommunityTabs({ memberName = 'Membro LegalOps', memberRole, memberCount = 0, initials = 'LO', hasPaidAccess = false }: Props) {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const selectedSpace = searchParams.get('space')
-
-  const itemClass = (active: boolean) => `group flex items-center gap-2.5 border-l-2 px-2.5 py-2 text-[13px] font-semibold transition ${
-    active
-      ? 'border-[#DF4D1E] bg-[#E9E4D9] text-[#1F211E]'
-      : 'border-transparent text-[#66645E] hover:border-[#BCB7AB] hover:text-[#1F211E]'
-  }`
-
-  return (
-    <>
-      <nav aria-label="Navegação móvel do Club" className="fixed inset-x-0 top-16 z-40 overflow-x-auto border-b border-[#1F211E] bg-[#F3F0E8] px-3 lg:hidden">
-        <div className="flex min-w-max items-center gap-1 py-2">
-          {mainItems.map(item => {
-            const active = item.exact ? pathname === item.href && !selectedSpace : pathname.startsWith(item.href)
-            const Icon = item.icon
-            const locked = !hasPaidAccess && 'pro' in item && item.pro
-            return (
-              <Link key={item.href} href={locked ? '/club/checkout' : item.href} className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-bold ${active ? 'border-[#DF4D1E] text-[#1F211E]' : 'border-transparent text-[#686661]'}`}>
-                <Icon className="h-3.5 w-3.5" /> {item.label} {locked ? <Lock className="h-3 w-3 text-[#AAA7A1]" /> : null}
-              </Link>
-            )
-          })}
-        </div>
+  const search = useSearchParams()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuButton = useRef<HTMLButtonElement>(null)
+  const panel = useRef<HTMLDivElement>(null)
+  const inPosts = pathname === '/community'
+  const inPro = ['/community/pro','/community/assistant','/community/agents','/community/summaries','/community/jobs'].some(path => pathname === path || pathname.startsWith(path + '/'))
+  const active = (href: string) => href === '/community' ? inPosts : href === '/community/pro' ? inPro : pathname === href || pathname.startsWith(href + '/')
+  useEffect(() => { setMenuOpen(false) }, [pathname, search])
+  useEffect(() => {
+    if (!menuOpen) return
+    panel.current?.querySelector<HTMLAnchorElement>('a')?.focus()
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { setMenuOpen(false); menuButton.current?.focus() }
+      if (event.key !== 'Tab') return
+      const links = panel.current?.querySelectorAll<HTMLElement>('a,button')
+      if (!links?.length) return
+      const first = links[0], last = links[links.length - 1]
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [menuOpen])
+  const linkClass = (selected: boolean) => `flex min-h-12 items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold ${selected ? 'bg-[#24231F] text-white' : 'text-[#625E59] hover:bg-[#E9E4D9]'}`
+  const menuLinks = <>
+    {secondary.map(item => <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className={linkClass(active(item.href))} aria-current={active(item.href) ? 'page' : undefined}><item.icon className="h-5 w-5 shrink-0" />{item.label}{item.label === 'Membros' && memberCount > 0 ? <span className="ml-auto text-xs">{memberCount}</span> : null}</Link>)}
+    <Link href="/community/office" className={linkClass(active('/community/office'))} onClick={() => setMenuOpen(false)}>Escritório da comunidade</Link>
+    <Link href="/dashboard" className={linkClass(false)} onClick={() => setMenuOpen(false)}>Abrir legalops.work ↗</Link>
+  </>
+  return <>
+    <nav aria-label="Áreas do Club" className="club-bottom-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[#CEC8BD] bg-[#F5F1E8] px-2 pt-1 lg:hidden">
+      {primary.map(item => <Link key={item.href} href={item.href} aria-current={active(item.href) ? 'page' : undefined} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg text-xs font-semibold ${active(item.href) ? 'bg-[#E9E4D9] text-[#A94E38]' : 'text-[#625E59]'}`}><item.icon className="h-5 w-5" />{item.label}</Link>)}
+      <button ref={menuButton} type="button" aria-expanded={menuOpen} aria-controls="club-mobile-menu" onClick={() => setMenuOpen(value => !value)} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg text-xs font-semibold text-[#625E59]">{menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}Mais</button>
+    </nav>
+    {menuOpen ? <div className="fixed inset-0 z-50 bg-black/30 lg:hidden" onClick={() => {setMenuOpen(false);menuButton.current?.focus()}}><div id="club-mobile-menu" ref={panel} role="dialog" aria-modal="true" aria-label="Mais opções do Club" className="club-mobile-menu absolute inset-x-3 bottom-3 max-h-[80dvh] overflow-y-auto rounded-2xl border border-[#CEC8BD] bg-[#F5F1E8] p-4 shadow-xl" onClick={event => event.stopPropagation()}>{menuLinks}<button className="mt-2 min-h-12 w-full rounded-lg border border-[#CEC8BD] text-sm font-semibold" onClick={() => {setMenuOpen(false);menuButton.current?.focus()}}>Fechar menu</button></div></div> : null}
+    <aside className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-60 shrink-0 flex-col border-r border-[#CEC8BD] bg-[#F3F0E8] lg:flex">
+      <nav aria-label="Áreas do Club" className="min-h-0 flex-1 overflow-y-auto p-4">
+        <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-[#817A73]">Seu Club</p>
+        <div className="space-y-2">{primary.map(item => <Link key={item.href} href={item.href} aria-current={active(item.href) ? 'page' : undefined} className={linkClass(active(item.href))}><item.icon className="h-5 w-5 shrink-0" /><span>{item.label}<span className={`mt-1 block text-xs font-normal leading-5 ${active(item.href) ? 'text-white/75' : 'text-[#77746E]'}`}>{item.description}</span></span></Link>)}</div>
+        {inPosts ? <details className="mt-5 border-t border-[#CEC8BD] pt-3" open><summary className="min-h-11 cursor-pointer px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[#817A73]">Assuntos dos posts</summary><div className="space-y-1">{Object.entries(COMMUNITY_CATEGORIES).map(([key, value]) => <Link key={key} href={`/community?space=${key}`} className={linkClass(search.get('space') === key)} aria-current={search.get('space') === key ? 'page' : undefined}>{value.label}</Link>)}</div></details> : null}
+        <div className="mt-5 space-y-1 border-t border-[#CEC8BD] pt-3">{menuLinks}</div>
       </nav>
-
-      <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-[252px] shrink-0 flex-col border-r border-[#1F211E] bg-[#F3F0E8] lg:flex">
-        <nav aria-label="Navegação do Club" className="min-h-0 flex-1 overflow-y-auto px-3 pb-5 pt-4">
-          <div className="space-y-0.5">
-            {mainItems.map(item => {
-              const active = item.exact ? pathname === item.href && !selectedSpace : pathname.startsWith(item.href)
-              const Icon = item.icon
-              const locked = !hasPaidAccess && 'pro' in item && item.pro
-              return (
-                <Link key={item.href} href={locked ? '/club/checkout' : item.href} className={itemClass(active)}>
-                  <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.3 : 1.8} />
-                  <span className="flex-1">{item.label}</span>
-                  {item.label === 'Membros' && memberCount > 0 ? <span className="text-[10px] font-bold text-[#9B9993]">{memberCount}</span> : null}
-                  {locked ? <Lock className="h-3 w-3 text-[#AAA7A1]" /> : null}
-                </Link>
-              )
-            })}
-          </div>
-
-          <div className="my-4 h-px bg-[#1F211E]/20" />
-
-          {spaceGroups.map(group => (
-            <div key={group.label} className="mb-5">
-              <button className="mb-1.5 flex w-full items-center gap-1 px-2.5 text-left text-[9px] font-black uppercase tracking-[0.12em] text-[#8A867D]">
-                <ChevronDown className="h-3 w-3" /> {group.label}
-              </button>
-              <div className="space-y-0.5">
-                {group.items.map(item => {
-                  const active = pathname === '/community' && selectedSpace === item.space
-                  return (
-                    <Link key={item.space} href={`/community?space=${item.space}`} className={itemClass(active)}>
-                      <span className={`h-1.5 w-1.5 shrink-0 ${active ? 'bg-[#DF4D1E]' : 'bg-[#BCB7AB]'}`} />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
-
-          {hasPaidAccess ? (
-            <div className="border-t border-[#1F211E]/25 pt-3">
-              <div className="flex items-center gap-2 text-[11px] font-extrabold text-[#23221F]"><Lightbulb className="h-3.5 w-3.5 text-[#FF5C1A]" /> Dica da comunidade</div>
-              <p className="mt-2 text-[10px] leading-4 text-[#77746E]">Comece por uma pergunta real. Contexto gera conversas melhores.</p>
-            </div>
-          ) : (
-            <div className="border-t-2 border-[#DF4D1E] bg-[#1F211E] p-3 text-white">
-              <div className="flex items-center gap-2 text-[11px] font-extrabold"><Lock className="h-3.5 w-3.5 text-[#FF7A45]" /> Club Pro</div>
-              <p className="mt-2 text-[10px] leading-4 text-white/60">Recupere o contexto das discussões, consulte vagas e encontre referências do Dev com seu agente pessoal.</p>
-              <Link href="/club/checkout" className="mt-3 inline-flex text-[10px] font-extrabold text-[#FF8B5D] hover:text-white">Assinar Pro →</Link>
-            </div>
-          )}
-        </nav>
-
-        <div className="border-t border-[#1F211E] p-3">
-          <div className="flex items-center gap-2.5 px-2 py-2 hover:bg-[#E9E4D9]">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center bg-[#1F211E] text-[10px] font-black text-white">{initials}</div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-extrabold text-[#272622]">{memberName}</p>
-              <p className="truncate text-[9px] text-[#8C8983]">{memberRole || 'Membro do LegalOps Club'}</p>
-            </div>
-            <Settings className="h-3.5 w-3.5 text-[#8C8983]" />
-          </div>
-          <Link href="/dashboard" className="mt-1 flex items-center gap-2 px-2 py-1.5 text-[10px] font-bold text-[#898681] hover:text-[#D9470F]">
-            <BarChart3 className="h-3.5 w-3.5" /> Abrir plataforma de carreira
-          </Link>
-        </div>
-      </aside>
-    </>
-  )
+      <Link href="/community/profile" className="flex min-h-20 items-center gap-3 border-t border-[#CEC8BD] p-4"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#24231F] text-xs font-bold text-white">{initials}</span><span className="min-w-0"><span className="block truncate text-sm font-semibold">{memberName}</span><span className="block truncate text-xs text-[#817A73]">{hasPaidAccess ? 'Pro ativo' : memberRole || 'Membro do Club'}</span></span></Link>
+    </aside>
+  </>
 }

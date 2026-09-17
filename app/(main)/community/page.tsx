@@ -1,3 +1,4 @@
+import { MemberAvatar } from '@/components/community/MemberAvatar'
 import { hasClubProAccess } from '@/lib/club-membership'
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase-admin'
@@ -27,7 +28,7 @@ import {
   hasActiveClubAccess,
 } from '@/lib/community'
 import { createCommunityComment, createCommunityPost, toggleCommunityPostLike } from './actions'
-import { CommunityAgentCard } from './CommunityAgentCard'
+
 
 type Comment = {
   id: string
@@ -39,6 +40,7 @@ type Comment = {
 type Like = { user_id: string }
 
 type Post = {
+  author_id: string | null
   id: string
   author_name: string
   author_role: string | null
@@ -86,7 +88,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
 
   let postsQuery = supabase
     .from('community_posts')
-    .select('id, author_name, author_role, category, title, body, is_pinned, created_at, community_comments(id, author_name, body, created_at), community_post_likes(user_id)')
+    .select('id, author_id, author_name, author_role, category, title, body, is_pinned, created_at, community_comments(id, author_name, body, created_at), community_post_likes(user_id)')
 
   if (search) postsQuery = postsQuery.or(`title.ilike.%${search}%,body.ilike.%${search}%`)
   if (selectedSpace) postsQuery = postsQuery.eq('category', selectedSpace)
@@ -111,6 +113,9 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
   ])
 
   const posts = (rawPosts ?? []) as Post[]
+  const authorIds = Array.from(new Set(posts.map(post => post.author_id).filter((id): id is string => Boolean(id))));
+  const { data: authorProfiles } = authorIds.length ? await supabase.from('community_members').select('user_id,display_name,current_role,organization_name,organization_description,avatar_path').in('user_id', authorIds) : { data: [] };
+  const authorById = new Map((authorProfiles ?? []).map(author => [author.user_id, author]));
   const upcomingEvent = rawEvent as Event | null
   const newMembers = (rawMembers ?? []) as Member[]
   const activeSpace = selectedSpace ? COMMUNITY_CATEGORIES[selectedSpace] : null
@@ -129,19 +134,18 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
           <header className="mb-5 flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">{search ? `Busca: ${search}` : activeSpace?.title ?? 'Início'}</h1>
+                <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">{search ? `Busca: ${search}` : activeSpace?.title ?? 'Posts'}</h1>
                 {selectedSpace === 'anuncio' ? <span className="rounded bg-[#FFF0E9] px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-[#D9470F]">Oficial</span> : null}
               </div>
               <p className="mt-1 text-xs leading-5 text-[#77746E]">
-                {activeSpace?.description ?? 'Acompanhe as conversas e novidades da comunidade.'}
+                {activeSpace?.description ?? 'Publique perguntas e experiências. Escolha um assunto para acompanhar as conversas.'}
               </p>
             </div>
-            <button className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#7D7A75] hover:bg-white" aria-label="Mais opções">
-              <MoreHorizontal className="h-5 w-5" />
-            </button>
+
           </header>
 
           <form id="community-search" action="/community" className="mb-5 flex scroll-mt-32 gap-2 md:hidden"><input name="q" defaultValue={search} aria-label="Buscar publicações" placeholder="Buscar publicações" maxLength={80} className="min-w-0 flex-1 rounded-lg border border-[#CEC8BD] bg-white px-3 py-2 text-sm"/><button className="rounded-lg bg-[#111] px-3 py-2 text-xs font-semibold text-white">Buscar</button></form>
+          <form action="/community" className="mb-5 flex flex-wrap items-end gap-2 lg:hidden"><label className="min-w-0 flex-1 text-sm font-medium">Assunto<select name="space" defaultValue={selectedSpace ?? ''} className="mt-2 min-h-12 w-full rounded-xl border border-[#CEC8BD] bg-white px-3 text-base"><option value="">Todos os posts</option>{Object.entries(COMMUNITY_CATEGORIES).map(([key, category]) => <option key={key} value={key}>{category.label}</option>)}</select></label><button className="min-h-12 rounded-xl bg-[#24231F] px-4 text-sm font-semibold text-white">Filtrar</button></form>
           {!hasCommunityAccess ? (
             <section className="mb-4 overflow-hidden rounded-xl border border-[#FFD0BD] bg-[#FFF6F1] p-4 sm:p-5">
               <div className="flex items-start gap-3">
@@ -173,11 +177,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                         Começar por aqui <ArrowRight className="h-3.5 w-3.5" />
                       </Link>
                       {whatsappUrl ? <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-white hover:text-[#FF9A72]">Entrar no WhatsApp <ArrowRight className="h-3.5 w-3.5" /></a> : null}
-                      {hasProAccess ? (
-                        <Link href="/community/jobs" className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#FF9A72] hover:text-white">
-                          Ver vagas para o meu perfil <ArrowRight className="h-3.5 w-3.5" />
-                        </Link>
-                      ) : null}
+
                     </div>
                   </div>
                 </div>
@@ -185,7 +185,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
             </section>
           ) : null}
 
-          {selectedSpace ? <CommunityAgentCard category={selectedSpace} hasPaidAccess={hasProAccess} /> : null}
+
 
           {hasCommunityAccess ? <details id="new-post" className="group mb-4 overflow-hidden rounded-xl border border-[#E2E2DE] bg-white" open={posts.length === 0}>
             <summary className="flex cursor-pointer list-none items-center gap-3 p-3.5 sm:px-4">
@@ -251,6 +251,8 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
 
           <div className="space-y-3">
             {posts.map(post => {
+              const author = post.author_id ? authorById.get(post.author_id) : null
+              const authorName = author?.display_name || post.author_name
               const category = getCommunityCategory(post.category)
               const comments = [...(post.community_comments ?? [])].sort((a, b) => a.created_at.localeCompare(b.created_at))
               const likes = post.community_post_likes ?? []
@@ -259,14 +261,11 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
               return (
                 <article id={`post-${post.id}`} key={post.id} className="rounded-xl border border-[#E1E1DD] bg-white p-4 transition hover:border-[#D2D1CC] sm:p-5">
                   <div className="flex items-start gap-3">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-black ${getAvatarTone(post.author_name)}`}>
-                      {getInitials(post.author_name)}
-                    </div>
+                    <MemberAvatar userId={post.author_id} path={author?.avatar_path} name={authorName} />
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                        <span className="text-[13px] font-extrabold text-[#292824]">{post.author_name}</span>
-                        {post.author_role ? <span className="text-[10px] text-[#8A8782]">{post.author_role}</span> : null}
-                      </div>
+                      {post.author_id ? <Link href={`/community/members/${post.author_id}`} className="text-base font-semibold text-[#24231F] underline-offset-4 hover:underline">{authorName}</Link> : <span className="text-base font-semibold">{authorName}</span>}
+                      <p className="mt-1 text-sm font-medium text-[#48443E]">{author?.current_role || post.author_role || 'Membro do Club'}{author?.organization_name ? ` · ${author.organization_name}` : ''}</p>
+                      {author?.organization_description ? <p className="mt-2 whitespace-pre-wrap rounded-lg bg-[#F5F1E8] px-3 py-2 text-sm leading-6 text-[#625E59]">{author.organization_description}</p> : null}
                       <p className="mt-0.5 flex items-center gap-1.5 text-[9px] text-[#9A9791]">
                         {formatCommunityDate(post.created_at, true)}
                         <span>·</span>
@@ -274,7 +273,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                       </p>
                     </div>
                     {post.is_pinned ? <Pin className="h-3.5 w-3.5 rotate-45 text-[#FF5C1A]" aria-label="Publicação fixada" /> : null}
-                    <button className="text-[#9A9791] hover:text-[#393833]" aria-label="Mais opções da publicação"><MoreHorizontal className="h-4 w-4" /></button>
+
                   </div>
 
                   <div className="mt-4 pl-0 sm:pl-[52px]">
@@ -293,7 +292,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
                     <span className="flex items-center gap-1.5"><MessageCircle className="h-4 w-4" /> {comments.length || 'Comentar'}</span>
                   </div> : (
                     <div className="mt-5 flex items-center gap-2 border-t border-[#ECECE8] pt-3 text-[10px] font-bold text-[#9A9791] sm:ml-[52px]">
-                      <Lock className="h-3.5 w-3.5" /> Interações disponíveis para assinantes
+                      <Lock className="h-3.5 w-3.5" /> Interações disponíveis para membros do Club
                     </div>
                   )}
 
@@ -329,7 +328,7 @@ export default async function CommunityPage({ searchParams }: { searchParams?: {
         </section>
 
         <aside className="hidden space-y-4 xl:sticky xl:top-[5.75rem] xl:block">
-          <form id="community-search" action="/community" className="mb-5 flex scroll-mt-32 gap-2 md:hidden"><input name="q" defaultValue={search} aria-label="Buscar publicações" placeholder="Buscar publicações" maxLength={80} className="min-w-0 flex-1 rounded-lg border border-[#CEC8BD] bg-white px-3 py-2 text-sm"/><button className="rounded-lg bg-[#111] px-3 py-2 text-xs font-semibold text-white">Buscar</button></form>
+
           {!hasCommunityAccess ? (
             <section className="rounded-xl bg-[#292825] p-5 text-white">
               <Lock className="h-5 w-5 text-[#FF7A45]" />

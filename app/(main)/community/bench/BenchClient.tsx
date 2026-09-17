@@ -4,25 +4,39 @@ import { useState } from 'react'
 import { confirmBenchAttendance, declineBenchAttendance } from '../actions'
 
 type Props = { eventId: string; initial: Record<string, string | null> | null; member: { name: string; role: string; email: string } }
-
+const fields = [
+  {key:'name',label:'Nome completo',type:'text',autocomplete:'name',required:true,max:120},
+  {key:'email',label:'Email',type:'email',autocomplete:'email',required:true,max:240},
+  {key:'role',label:'Cargo / atuação',type:'text',autocomplete:'organization-title',required:true,max:120},
+  {key:'organization',label:'Empresa / organização',type:'text',autocomplete:'organization',required:true,max:120},
+  {key:'phone',label:'Celular para contato',type:'tel',autocomplete:'tel',required:false,max:40},
+] as const
 export default function BenchClient({ eventId, initial, member }: Props) {
   const [response, setResponse] = useState(initial?.response ?? 'pending')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
-  const [form, setForm] = useState({ name: initial?.guest_name || member.name, role: initial?.guest_role || member.role || 'Legal Operations', organization: initial?.organization_name || '', email: initial?.guest_email || member.email, phone: initial?.guest_phone || '', dietary: initial?.dietary_restrictions || '', accessibility: initial?.accessibility_needs || '', notes: initial?.arrival_notes || '' })
-  const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }))
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setBusy(true); setMessage('')
-    const data = new FormData(); data.set('event_id', eventId); Object.entries(form).forEach(([key, value]) => data.set(key, value))
-    const result = await confirmBenchAttendance(data); setBusy(false); setResponse(result.ok ? 'confirmed' : 'pending'); setMessage(result.message)
+  const [failed, setFailed] = useState(false)
+  const [form, setForm] = useState({ name: initial?.guest_name || member.name, role: initial?.guest_role || member.role || '', organization: initial?.organization_name || '', email: initial?.guest_email || member.email, phone: initial?.guest_phone || '', dietary: initial?.dietary_restrictions || '', accessibility: initial?.accessibility_needs || '', notes: initial?.arrival_notes || '' })
+  const update = (key: keyof typeof form, value: string) => setForm(prev => ({ ...prev, [key]: value }))
+  async function save(decline = false) {
+    if (busy) return
+    setBusy(true); setMessage(''); setFailed(false)
+    try {
+      const data = new FormData(); data.set('event_id', eventId)
+      Object.entries(form).forEach(([key, value]) => data.set(key, value))
+      const result = await (decline ? declineBenchAttendance(data) : confirmBenchAttendance(data))
+      if (result.ok) setResponse(decline ? 'declined' : 'confirmed')
+      setFailed(!result.ok); setMessage(result.message)
+    } catch { setFailed(true); setMessage('Não foi possível salvar. Seus dados continuam no formulário; tente novamente.') }
+    finally { setBusy(false) }
   }
-  async function decline() { setBusy(true); const data = new FormData(); data.set('event_id', eventId); const result = await declineBenchAttendance(data); setBusy(false); setResponse('declined'); setMessage(result.message) }
-  const input = (key: string, label: string, required = false) => <label className="block text-xs font-bold text-[#4C4A45]">{label}<input required={required} value={form[key as keyof typeof form]} onChange={e => update(key, e.target.value)} className="mt-1.5 w-full rounded-lg border border-[#DFDFDB] bg-white px-3 py-2.5 text-sm font-normal outline-none focus:border-[#D9470F]" /></label>
-  return <form onSubmit={submit} className="space-y-5">
-    <div className="grid gap-3 sm:grid-cols-2">{input('name', 'Nome completo', true)}{input('email', 'E-mail', true)}{input('role', 'Cargo / atuação', true)}{input('organization', 'Empresa / organização', true)}{input('phone', 'Celular para contato')} </div>
-    <div className="grid gap-3 sm:grid-cols-2">{input('dietary', 'Restrições alimentares')}{input('accessibility', 'Acessibilidade')}</div>
-    <label className="block text-xs font-bold text-[#4C4A45]">Observações para chegada<textarea value={form.notes} onChange={e => update('notes', e.target.value)} rows={3} className="mt-1.5 w-full rounded-lg border border-[#DFDFDB] bg-white px-3 py-2.5 text-sm font-normal outline-none focus:border-[#D9470F]" /></label>
-    {message && <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">{message}</p>}
-    <div className="flex flex-wrap gap-2"><button disabled={busy} className="rounded-lg bg-[#D9470F] px-4 py-2.5 text-xs font-extrabold text-white disabled:opacity-50">{busy ? 'Salvando...' : response === 'confirmed' ? 'Atualizar confirmação' : 'Confirmar presença'}</button>{response === 'confirmed' && <button type="button" disabled={busy} onClick={decline} className="rounded-lg border border-[#DFDFDB] px-4 py-2.5 text-xs font-bold text-[#5E5A54]">Não poderei ir</button>}</div>
+  return <form onSubmit={event => {event.preventDefault(); void save()}} className="space-y-5" aria-busy={busy}>
+    <fieldset disabled={busy} className="space-y-4"><legend className="sr-only">Dados de participação</legend>
+      {fields.map(field => <label key={field.key} className="block text-sm font-medium text-[#4C4A45]">{field.label}{field.required ? ' *' : ''}<input name={field.key} required={field.required} type={field.type} autoComplete={field.autocomplete} maxLength={field.max} value={form[field.key]} onChange={event => update(field.key,event.target.value)} className="mt-2 min-h-12 w-full min-w-0 rounded-xl border border-[#CEC8BD] bg-white px-3 py-3 text-base font-normal focus:border-[#A94E38]" /></label>)}
+      <details><summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">Acessibilidade, alimentação e chegada</summary><div className="mt-2 space-y-4">{([['dietary','Restrições alimentares',500],['accessibility','Necessidades de acessibilidade',500],['notes','Observações para chegada',1000]] as const).map(([key,label,max]) => <label key={key} className="block text-sm font-medium">{label}<textarea name={key} value={form[key]} onChange={event => update(key,event.target.value)} rows={2} maxLength={max} className="mt-2 w-full min-w-0 rounded-xl border border-[#CEC8BD] bg-white px-3 py-3 text-base font-normal" /></label>)}</div></details>
+    </fieldset>
+    <p className="text-xs text-[#625E59]">* Campos obrigatórios</p>
+    {message ? <p role={failed ? 'alert' : 'status'} className={`rounded-xl px-4 py-3 text-sm leading-6 ${failed ? 'bg-red-50 text-red-800' : 'bg-emerald-50 text-emerald-800'}`}>{message}</p> : null}
+    <div className="grid gap-2"><button disabled={busy} className="min-h-12 rounded-xl bg-[#24231F] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50">{busy ? 'Salvando…' : response === 'confirmed' ? 'Atualizar confirmação' : 'Confirmar presença'}</button>{response === 'confirmed' ? <button type="button" disabled={busy} onClick={() => void save(true)} className="min-h-12 rounded-xl border border-[#CEC8BD] px-4 py-3 text-sm font-semibold disabled:opacity-50">Não poderei ir</button> : null}</div>
   </form>
 }

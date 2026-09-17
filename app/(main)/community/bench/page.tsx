@@ -1,20 +1,45 @@
-import { CalendarDays, Clock3, MapPin, Navigation, Users } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowUpRight, CalendarDays, Clock3, GitBranch, MapPin } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { hasActiveClubAccess } from '@/lib/community'
 import BenchClient from './BenchClient'
 
 export const dynamic = 'force-dynamic'
+export const metadata = { title: 'Bench | legalops.club', description: 'Encontros, avaliações de CLM e referências construídas pela comunidade.' }
+const dateFormat = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'long', day: 'numeric', month: 'long' })
+const timeFormat = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' })
 
 export default async function BenchPage() {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const [{ data: member }, { data: event }] = await Promise.all([
-    supabase.from('community_members').select('display_name, current_role, club_access_status, club_access_expires_at').eq('user_id', user?.id ?? '').maybeSingle(),
-    supabase.from('community_events').select('id, title, description, host_name, starts_at, ends_at, location_label, location_url').eq('slug', 'bench-nubank-2026-09-17').maybeSingle(),
+  const [{ data: member }, { data: event, error: eventError }] = await Promise.all([
+    supabase.from('community_members').select('display_name,current_role,club_access_status,club_access_expires_at').eq('user_id', user?.id ?? '').maybeSingle(),
+    supabase.from('community_events').select('id,title,description,host_name,starts_at,ends_at,location_label,location_url').eq('slug', 'bench-nubank-2026-09-17').eq('is_published', true).maybeSingle(),
   ])
-  if (!user || !hasActiveClubAccess(member) || !event) return <div className="mx-auto max-w-3xl px-5 py-16"><h1 className="text-2xl font-black">Bench LegalOps</h1><p className="mt-2 text-sm text-[#77746E]">Este encontro está disponível para membros ativos do Club.</p></div>
-  const { data: rsvp } = await supabase.from('community_event_rsvps').select('*').eq('event_id', event.id).eq('user_id', user.id).maybeSingle()
-  const date = new Date(event.starts_at)
-  const activeMember = member!
-  return <main className="mx-auto w-full max-w-[1000px] px-4 py-6 sm:px-6 lg:px-8 lg:py-9"><div className="grid gap-5 lg:grid-cols-[1.05fr_.95fr]"><section className="rounded-2xl bg-[#292824] p-6 text-[#F8F4EA] sm:p-9"><span className="text-[10px] font-black uppercase tracking-[.18em] text-[#FFB092]">Primeiro Bench · presencial</span><h1 className="mt-4 max-w-xl text-3xl font-black tracking-[-.04em] sm:text-5xl">Bench LegalOps no Nubank</h1><p className="mt-4 max-w-xl text-sm leading-6 text-[#D7D0C3]">{event.description}</p><div className="mt-8 space-y-3 text-xs font-bold"><div className="flex gap-3"><CalendarDays className="h-4 w-4 text-[#FF9B76]" /> Quinta-feira, 17 de setembro de 2026</div><div className="flex gap-3"><Clock3 className="h-4 w-4 text-[#FF9B76]" /> 19h às 21h · horário de Brasília</div><div className="flex gap-3"><MapPin className="h-4 w-4 text-[#FF9B76]" /> Nubank · Pinheiros, São Paulo</div></div><a href={event.location_url ?? '#'} target="_blank" rel="noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-[#F8F4EA] px-4 py-2.5 text-xs font-black text-[#292824]"><Navigation className="h-3.5 w-3.5" /> Abrir endereço no mapa</a></section><section className="rounded-2xl border border-[#E1E1DD] bg-white p-5 sm:p-7"><div className="flex items-start justify-between gap-3"><div><span className="text-[10px] font-black uppercase tracking-[.14em] text-[#D9470F]">Sua participação</span><h2 className="mt-2 text-xl font-black text-[#292824]">Confirme seus dados</h2></div><Users className="h-5 w-5 text-[#D9470F]" /></div><p className="mt-2 text-xs leading-5 text-[#77746E]">Precisamos dessas informações para organizar a recepção e tornar a conversa melhor para todo mundo.</p><div className="mt-6"><BenchClient eventId={event.id} initial={rsvp} member={{ name: activeMember.display_name || user.email?.split('@')[0] || 'Membro LegalOps', role: activeMember.current_role || '', email: user.email || '' }} /></div></section></div></main>
+  if (!user || !hasActiveClubAccess(member)) return <div className="px-5 py-10"><h1 className="text-2xl font-semibold">Bench</h1><p className="mt-3 text-sm">Complete seu perfil no Club para participar dos encontros.</p><Link href="/club/entrar" className="mt-4 inline-flex min-h-12 items-center underline">Completar perfil</Link></div>
+  const { data: rsvp } = event ? await supabase.from('community_event_rsvps').select('response,guest_name,guest_role,organization_name,guest_email,guest_phone,dietary_restrictions,accessibility_needs,arrival_notes').eq('event_id', event.id).eq('user_id', user.id).maybeSingle() : { data: null }
+  const ended = event && new Date(event.ends_at || event.starts_at).getTime() < Date.now()
+  const mapUrl = event?.location_url?.startsWith('https://') ? event.location_url : null
+  return <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 lg:py-9">
+    <header className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-widest text-[#A94E38]">Comunidade / Bench</p><h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Aprender com a prática.</h1><p className="mt-3 text-base leading-7 text-[#625E59]">Compare ferramentas, participe dos encontros e ajude a construir referências para operações jurídicas.</p></header>
+    <nav aria-label="Nesta página do Bench" className="mt-5 flex flex-wrap gap-2"><a href="#bench-ferramentas" className="inline-flex min-h-12 items-center rounded-xl border border-[#CEC8BD] bg-white px-4 text-sm font-semibold">Ferramentas</a><a href="#bench-encontros" className="inline-flex min-h-12 items-center rounded-xl border border-[#CEC8BD] bg-white px-4 text-sm font-semibold">Encontros</a></nav>
+    <div className="mt-7 grid items-start gap-5 xl:grid-cols-2">
+      <section id="bench-ferramentas" className="scroll-mt-24 rounded-2xl border border-[#CEC8BD] bg-white p-5 sm:p-7">
+        <p className="text-xs font-semibold uppercase tracking-wider text-[#A94E38]">Ferramentas / projeto aberto</p><h2 className="mt-3 text-2xl font-semibold tracking-tight">Qual CLM faz sentido para sua empresa?</h2><p className="mt-3 text-sm leading-7 text-[#625E59]">Comece pelo diagnóstico. Avalie 32 critérios, integrações, custo total e o que precisa funcionar no piloto.</p>
+        <a href="https://legalops.dev/bench/" className="mt-5 flex min-h-12 items-center justify-between gap-3 rounded-xl bg-[#24231F] px-4 py-3 text-sm font-semibold text-white">Abrir avaliação de CLM <ArrowUpRight className="h-5 w-5 shrink-0" /></a>
+        <a href="https://legalops.dev/bench/#contribuir" className="mt-2 flex min-h-12 items-center justify-between gap-3 rounded-xl border border-[#CEC8BD] px-4 py-3 text-sm font-semibold">Compartilhar uma experiência <ArrowUpRight className="h-5 w-5 shrink-0" /></a>
+        <div className="mt-5 flex flex-wrap gap-x-4 border-t border-[#E6DED0] pt-3"><a href="https://legalops.dev/bench/apresentacao" className="inline-flex min-h-11 items-center text-sm underline">Apresentação</a><a href="https://github.com/agenciaspace/clm-bench" className="inline-flex min-h-11 items-center gap-2 text-sm underline"><GitBranch className="h-4 w-4" />Código aberto</a></div><p className="mt-2 text-xs leading-5 text-[#817A73]">Avaliação pública no legalops.dev. Contribuições passam por revisão antes de publicar.</p>
+      </section>
+      <section id="bench-encontros" className="scroll-mt-24 rounded-2xl border border-[#CEC8BD] bg-white p-5 sm:p-7">
+        <p className="text-xs font-semibold uppercase tracking-wider text-[#A94E38]">Encontros / troca entre profissionais</p>
+        {event ? <><div className="mt-3 flex flex-wrap items-start justify-between gap-3"><h2 className="text-2xl font-semibold tracking-tight">{event.title}</h2><span className="rounded-full bg-[#F3F0E8] px-3 py-1 text-xs font-semibold">{ended ? 'Realizado' : rsvp?.response === 'confirmed' ? 'Presença confirmada' : 'Presencial'}</span></div>
+          <dl className="mt-5 space-y-4 text-sm leading-6"><div className="flex gap-3"><CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-[#A94E38]" /><div><dt className="sr-only">Data</dt><dd>{dateFormat.format(new Date(event.starts_at))}</dd></div></div><div className="flex gap-3"><Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-[#A94E38]" /><div><dt className="sr-only">Horário</dt><dd>{timeFormat.format(new Date(event.starts_at))}{event.ends_at ? ` às ${timeFormat.format(new Date(event.ends_at))}` : ''} · Brasília</dd></div></div><div className="flex gap-3"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#A94E38]" /><div><dt className="sr-only">Local</dt><dd className="break-words">{event.location_label}</dd></div></div></dl>
+          {mapUrl ? <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex min-h-12 items-center gap-2 text-sm font-semibold underline">Ver endereço no mapa <ArrowUpRight className="h-4 w-4" /></a> : null}
+          <details className="mt-3 border-t border-[#E6DED0] pt-2"><summary className="min-h-12 cursor-pointer py-3 text-sm font-semibold">Sobre o encontro</summary><p className="pb-4 text-sm leading-7 text-[#625E59]">{event.description}</p></details>
+          {!ended ? <details className="mt-2 rounded-xl bg-[#F5F1E8] p-4"><summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">{rsvp?.response === 'confirmed' ? 'Revisar minha participação' : 'Confirmar minha participação'}</summary><p className="mt-2 text-sm leading-6 text-[#625E59]">Seus dados são usados para organizar a recepção.</p><div className="mt-5"><BenchClient eventId={event.id} initial={rsvp} member={{ name: member?.display_name || user.email?.split('@')[0] || 'Membro LegalOps', role: member?.current_role || '', email: user.email || '' }} /></div></details> : null}
+        </> : <><h2 className="mt-3 text-2xl font-semibold">Próximos encontros</h2><p className="mt-3 text-sm leading-7 text-[#625E59]">{eventError ? 'Não conseguimos carregar a programação. Tente novamente.' : 'As próximas datas serão publicadas aqui.'}</p></>}
+        <Link href="/bench" className="mt-5 inline-flex min-h-12 items-center text-sm font-semibold underline">Ver temas e outros encontros →</Link>
+      </section>
+    </div>
+  </div>
 }

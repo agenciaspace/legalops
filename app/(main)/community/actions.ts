@@ -148,6 +148,7 @@ export async function updateCommunityProfile(formData: FormData) {
   const currentRole = String(formData.get('current_role') ?? '').trim()
   const headline = String(formData.get('public_headline') ?? '').trim()
   const organizationName = String(formData.get('organization_name') ?? '').trim()
+  const organizationDescription = String(formData.get('organization_description') ?? '').trim()
   const bio = String(formData.get('public_bio') ?? '').trim()
   const linkedinUrl = String(formData.get('linkedin_url') ?? '').trim()
   const areasOfExpertise = commaSeparatedValues(formData, 'areas_of_expertise', 10)
@@ -171,15 +172,16 @@ export async function updateCommunityProfile(formData: FormData) {
     || currentRole.length < 2 || currentRole.length > 120
     || headline.length < 3 || headline.length > 160
     || organizationName.length < 2 || organizationName.length > 120
+    || organizationDescription.length < 20 || organizationDescription.length > 700
     || bio.length < 20 || bio.length > 1200
     || (careerSummary.length > 0 && careerSummary.length < 20) || careerSummary.length > 3000
     || (baseCvText.length > 0 && baseCvText.length < 50) || baseCvText.length > 30000
     || areasOfExpertise.length === 0
     || !PROFESSIONAL_TYPES.has(professionalType)
     || !REMOTE_PREFERENCES.has(preferredRemote)
-  ) return
+  ) redirect('/community/profile?error=fields')
 
-  if (!normalizeLinkedInProfile(linkedinUrl)) return
+  if (!normalizeLinkedInProfile(linkedinUrl)) redirect('/community/profile?error=fields')
 
   const { supabase, user } = await getAuthenticatedMember()
   const { error } = await supabase
@@ -189,6 +191,7 @@ export async function updateCommunityProfile(formData: FormData) {
       current_role: currentRole,
       public_headline: headline,
       organization_name: organizationName,
+      organization_description: organizationDescription,
       public_bio: bio,
       linkedin_url: normalizeLinkedInProfile(linkedinUrl),
       areas_of_expertise: areasOfExpertise,
@@ -208,7 +211,7 @@ export async function updateCommunityProfile(formData: FormData) {
     })
     .eq('user_id', user.id)
 
-  if (error) return
+  if (error) redirect('/community/profile?error=save')
 
   if (openToOpportunities && jobAlertsEnabled) {
     try {
@@ -218,6 +221,7 @@ export async function updateCommunityProfile(formData: FormData) {
     }
   }
 
+  revalidatePath('/community')
   revalidatePath('/community/profile')
   revalidatePath('/community/members')
   revalidatePath('/community/jobs')

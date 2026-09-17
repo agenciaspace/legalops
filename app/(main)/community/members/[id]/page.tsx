@@ -1,3 +1,4 @@
+import { MemberAvatar } from '@/components/community/MemberAvatar'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, BadgeCheck, BriefcaseBusiness, Building2, Linkedin, ShieldCheck } from 'lucide-react'
@@ -5,6 +6,8 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getAvatarTone, getInitials } from '@/lib/community'
 
 type Member = {
+  avatar_path: string | null
+  organization_description: string | null
   user_id: string
   display_name: string
   current_role: string | null
@@ -23,7 +26,7 @@ export default async function MemberProfilePage({ params }: { params: { id: stri
   const supabase = await createServerSupabaseClient()
   const { data } = await supabase
     .from('community_members')
-    .select('user_id, display_name, current_role, areas_of_expertise, public_headline, public_bio, organization_name, linkedin_url, profile_verification_status, profile_verified_at')
+    .select('avatar_path, organization_description, user_id, display_name, current_role, areas_of_expertise, public_headline, public_bio, organization_name, linkedin_url, profile_verification_status, profile_verified_at')
     .eq('user_id', params.id)
     .maybeSingle()
 
@@ -39,7 +42,7 @@ export default async function MemberProfilePage({ params }: { params: { id: stri
         <div className="h-24 bg-[#292825] sm:h-32" />
         <div className="px-5 pb-6 sm:px-7">
           <div className="-mt-9 flex flex-col gap-4 sm:-mt-10 sm:flex-row sm:items-end sm:justify-between">
-            <div className={`flex h-20 w-20 items-center justify-center rounded-full border-4 border-white text-xl font-black shadow-sm ${getAvatarTone(member.display_name)}`}>{getInitials(member.display_name)}</div>
+            <MemberAvatar userId={member.user_id} path={member.avatar_path} name={member.display_name} size="h-20 w-20 border-4 border-white" />
             {verified ? (
               <span className="inline-flex self-start items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[9px] font-black text-emerald-700 sm:self-auto"><BadgeCheck className="h-4 w-4" /> Perfil validado</span>
             ) : (
@@ -56,6 +59,7 @@ export default async function MemberProfilePage({ params }: { params: { id: stri
             {member.linkedin_url ? <a href={member.linkedin_url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 font-bold text-[#D9470F] hover:underline"><Linkedin className="h-4 w-4" /> LinkedIn</a> : null}
           </div>
 
+          {member.organization_description ? <section className="mt-6 rounded-xl bg-[#F5F1E8] p-4"><h2 className="text-sm font-semibold">Onde trabalha</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-7">{member.organization_description}</p></section> : null}
           <div className="mt-6 border-t border-[#ECECE8] pt-6">
             <h2 className="text-xs font-extrabold text-[#34332F]">Sobre a atuação</h2>
             <p className="mt-2 whitespace-pre-wrap text-xs leading-6 text-[#68655F]">{member.public_bio || 'Este membro ainda está completando sua apresentação profissional.'}</p>

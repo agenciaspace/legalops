@@ -1,0 +1,23 @@
+{
+  "id": "/community",
+  "name": "legalops.club",
+  "short_name": "LegalOps",
+  "description": "Posts da comunidade, Bench e assistência Pro.",
+  "lang": "pt-BR",
+  "start_url": "/community/bench",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F5F1E8",
+  "theme_color": "#F5F1E8",
+  "prefer_related_applications": false,
+  "icons": [
+    {"src":"/club-pwa/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"/club-pwa/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"/club-pwa/icon-maskable.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  ],
+  "shortcuts": [
+    {"name":"Bench","url":"/community/bench"},
+    {"name":"Posts","url":"/community"},
+    {"name":"Pro","url":"/community/pro"}
+  ]
+}

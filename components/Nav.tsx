@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Bell, ChevronDown, MessageCircle, Plus, Search, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import { BrandMark, BrandWordmark } from '@/components/BrandLogo'
+import { BrandWordmark } from '@/components/BrandLogo'
 
 interface NavProps {
   discoverCount: number
@@ -17,6 +17,7 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess, isClubAdmin =
   const pathname = usePathname()
   const router = useRouter()
   const isCommunity = pathname.startsWith('/community')
+  const isPosts = pathname === '/community'
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -48,26 +49,23 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess, isClubAdmin =
       <header className="sticky top-0 z-50 h-16 border-b border-[#CEC8BD] bg-[#F5F1E8]/95 backdrop-blur-xl">
         <div className="flex h-full items-center gap-3 px-4 lg:px-5">
           <Link href="/community" className="flex w-auto shrink-0 items-center gap-2.5 lg:w-[232px]" aria-label="legalops.club — início">
-            <BrandMark className="h-8 w-auto text-[#111111]" />
-            <div className="hidden min-w-0 sm:block">
+
+            <div className="min-w-0">
               <BrandWordmark className="inline-flex items-baseline text-[19px] font-medium leading-none tracking-[-0.065em] text-[#111111]" />
               <p className="mt-1 text-[8px] font-bold uppercase tracking-[0.17em] text-[#918A83]">comunidade</p>
             </div>
-            <ChevronDown className="hidden h-3.5 w-3.5 text-[#918A83] lg:block" />
+
           </Link>
 
           <form action="/community" method="get" className="mx-auto hidden h-9 w-full max-w-md items-center gap-2 rounded-full border border-[#CEC8BD] bg-white/65 px-3 text-xs md:flex"><Search className="h-4 w-4" /><input name="q" aria-label="Buscar na comunidade" placeholder="Buscar na comunidade" maxLength={80} className="min-w-0 flex-1 bg-transparent outline-none"/><button type="submit" className="font-semibold">Buscar</button></form>
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5">
-            <Link href="/community#new-post" className="hidden h-9 items-center gap-1.5 rounded-full bg-[#E88A6A] px-3.5 text-xs font-extrabold text-[#111111] transition hover:bg-[#DE7B5C] sm:flex">
+            {isPosts ? <Link href="/community#new-post" className="hidden h-11 items-center gap-1.5 rounded-full bg-[#E88A6A] px-3.5 text-xs font-extrabold text-[#111111] transition hover:bg-[#DE7B5C] sm:flex">
               <Plus className="h-4 w-4" /> Novo post
-            </Link>
-            <Link href="/community#community-search" className="flex h-9 w-9 items-center justify-center rounded-full text-[#69635E] md:hidden" aria-label="Buscar na comunidade"><Search className="h-[18px] w-[18px]" /></Link>
-            <Link href={hasClubAccess ? '/community/jobs' : '/club#pro'} className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#69635E] transition hover:bg-white/70 hover:text-[#111111]" aria-label={jobAlertCount > 0 ? `${jobAlertCount} alertas de vagas` : 'Alertas de vagas'}>
-              <Bell className="h-[18px] w-[18px]" />
-              {jobAlertCount > 0 ? <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#E88A6A] ring-2 ring-[#F5F1E8]" /> : null}
-            </Link>
-            <details className="relative"><summary className="ml-0.5 flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full bg-[#111111] text-[10px] font-black text-white" aria-label="Abrir menu do perfil">LO</summary><div className="absolute right-0 top-12 w-52 rounded-xl border border-[#CEC8BD] bg-white p-2 text-sm shadow-lg"><Link href="/community/profile" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu perfil</Link><Link href="/club/checkout" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu Pro</Link>{isClubAdmin&&<Link href="/club/admin/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Pagamentos do Pro</Link>}<button onClick={handleSignOut} className="w-full rounded-lg p-3 text-left hover:bg-[#F5F1E8]">Sair</button></div></details>
+            </Link> : null}
+            <Link href="/community#community-search" className="flex h-11 w-11 items-center justify-center rounded-full text-[#69635E] md:hidden" aria-label="Buscar na comunidade"><Search className="h-[18px] w-[18px]" /></Link>
+
+            <details className="relative"><summary className="ml-0.5 flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-[#111111] text-[10px] font-black text-white" aria-label="Abrir menu do perfil">LO</summary><div className="absolute right-0 top-12 w-52 rounded-xl border border-[#CEC8BD] bg-white p-2 text-sm shadow-lg"><Link href="/community/profile" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu perfil</Link><Link href="/community/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu Pro</Link>{isClubAdmin&&<Link href="/club/admin/bench" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Revisar contribuições</Link>}{isClubAdmin&&<Link href="/club/admin/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Pagamentos do Pro</Link>}<button onClick={handleSignOut} className="w-full rounded-lg p-3 text-left hover:bg-[#F5F1E8]">Sair</button></div></details>
           </div>
         </div>
       </header>

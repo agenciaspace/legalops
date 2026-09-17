@@ -121,6 +121,8 @@ The middleware public allowlist currently includes:
 - `/club/checkout`: manual PIX orders and private receipt upload. Offer stays inactive until an explicit price and period are configured.
 - `/club/admin/pro`: allowlisted admins configure the offer and approve bank-verified payments.
 - `/community`, `/community/profile`, `/community/members`, `/community/calendar`: free member features.
+- `/community/bench`: responsive member hub linking the public open-source CLM assessment.
+- `/community/pro`: Pro hub; separate from community posts and Bench.
 - `/community/assistant`, `/community/agents`, `/community/jobs`, `/community/summaries`: Pro features.
 - `/api/club/agent`: private preferences/history and source-backed personal agent; 30 questions per UTC day.
 
@@ -306,3 +308,26 @@ in the GitHub Actions build environment, as well as Wrangler runtime vars.
 Runtime-only values leave browser signup and login unable to initialize.
 `scripts/verify-public-auth-build.mjs` checks compiled client chunks before deploy.
 When changing authentication, submit the browser form; rendering it is not enough.
+
+
+## Club mobile and identity (2026-09-17)
+
+- Posts, Bench and Pro are separate primary navigation destinations. Mobile uses
+  a bottom bar; secondary member pages live in More.
+- The Club PWA manifest is `/club-pwa/manifest.webmanifest`. `/club-sw.js`
+  caches only its generic offline page and icons, never authenticated pages,
+  API responses, RSC payloads, or submissions. Exact public asset paths are
+  allowlisted in middleware. Include `public/**` in deployment triggers.
+- Photos use private `club-avatars` Storage. `/api/club/avatar` accepts converted
+  JPEG uploads or removes the signed-in member's photo; `/api/club/avatar/[id]`
+  serves photos only to active Club members with private/no-store headers.
+- `account_profiles.organization_description` and `avatar_path` synchronize to
+  `community_members`. Posts read current author identity rather than a stale
+  text snapshot. Photo upload strips source metadata through canvas conversion.
+- The personal agent has one conversation, paginated history and a bottom
+  composer. Model context remains the latest eight turns plus saved preferences.
+- Demo community content was removed by the scoped migration
+  `20260917164211_remove_club_demo_content.sql`; retain real events and profiles.
+- Cloudflare remains production. Legacy Vercel project now recognizes Next.js;
+  `vercel.json` disables duplicate Git deployments. Deployment status commits
+  rebase/retry to avoid races between Worker and Pages workflows.

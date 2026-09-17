@@ -1,8 +1,12 @@
+import type { Metadata } from 'next'
+import { ClubPwa } from '@/components/community/ClubPwa'
 import { ClubWelcomeNotice } from '@/components/community/ClubWelcomeNotice'
 import { hasClubProAccess } from '@/lib/club-membership'
 import { CommunityTabs } from '@/components/community/CommunityTabs'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getInitials, hasActiveClubAccess } from '@/lib/community'
+
+export const metadata: Metadata = { title: 'Comunidade | legalops.club', description: 'Posts, Bench e Pro em áreas próprias.', manifest: '/club-pwa/manifest.webmanifest', appleWebApp: { capable: true, title: 'LegalOps Club', statusBarStyle: 'default' }, icons: { apple: '/club-pwa/icon-192.png' } }
 
 export default async function CommunityLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient()
@@ -22,7 +26,7 @@ export default async function CommunityLayout({ children }: { children: React.Re
   const hasPaidAccess = hasActiveClubAccess(member) && hasClubProAccess(member)
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#F3F0E8] text-[#24231F]">
+    <div className="club-shell min-h-[calc(100dvh-4rem)] bg-[#F3F0E8] text-[#24231F]">
       <div className="flex items-start">
         <CommunityTabs
           memberName={memberName}
@@ -31,7 +35,7 @@ export default async function CommunityLayout({ children }: { children: React.Re
           initials={getInitials(memberName)}
           hasPaidAccess={hasPaidAccess}
         />
-        <div className="min-w-0 flex-1 pt-[53px] lg:pt-0"><ClubWelcomeNotice />{children}</div>
+        <div className="club-content min-w-0 flex-1"><ClubPwa /><ClubWelcomeNotice />{children}</div>
       </div>
     </div>
   )

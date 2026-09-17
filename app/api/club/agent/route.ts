@@ -15,16 +15,18 @@ async function session() {
   if(!hasActiveClubAccess(member)||!hasClubProAccess(member)) return {error:NextResponse.json({error:'Este recurso faz parte do Club Pro.'},{status:403})} as const
   return {supabase,user} as const
 }
-export async function GET() {
+export async function GET(request:NextRequest) {
   const access=await session();if(access.error)return access.error
   const {supabase,user}=access
+  const page=Number(request?.nextUrl.searchParams.get('page')||0)
+  if(!Number.isInteger(page)||page<0||page>10000)return NextResponse.json({error:'Página inválida.'},{status:400})
   const [turns,preferences,usage]=await Promise.all([
-    supabase.from('club_agent_turns').select('id,question,answer,sources,status,created_at').eq('user_id',user.id).eq('status','completed').order('created_at',{ascending:false}).limit(30),
+    supabase.from('club_agent_turns').select('id,question,answer,sources,status,created_at').eq('user_id',user.id).eq('status','completed').order('created_at',{ascending:false}).order('id',{ascending:false}).range(page*30,page*30+30),
     supabase.from('club_agent_preferences').select('focus,topics').eq('user_id',user.id).maybeSingle(),
     supabase.from('club_agent_usage').select('used').eq('user_id',user.id).eq('day',new Date().toISOString().slice(0,10)).maybeSingle(),
   ])
   if(turns.error||preferences.error||usage.error)return NextResponse.json({error:'Não conseguimos carregar seu agente.'},{status:503})
-  return NextResponse.json({turns:(turns.data??[]).reverse(),preferences:preferences.data??{focus:'',topics:[]},used:usage.data?.used??0})
+  return NextResponse.json({turns:(turns.data??[]).slice(0,30).reverse(),has_more:(turns.data?.length??0)>30,page,preferences:preferences.data??{focus:'',topics:[]},used:usage.data?.used??0})
 }
 export async function PATCH(request:NextRequest) {
   const access=await session();if(access.error)return access.error
@@ -53,7 +55,7 @@ export async function POST(request:NextRequest) {
   }
   try {
     const results=await Promise.all([
-      supabase.from('account_profiles').select('full_name,current_role,organization_name,public_bio,areas_of_expertise,desired_roles').eq('user_id',user.id).maybeSingle(),
+      supabase.from('account_profiles').select('full_name,current_role,organization_name,organization_description,public_bio,areas_of_expertise,desired_roles').eq('user_id',user.id).maybeSingle(),
       supabase.from('club_agent_preferences').select('focus,topics').eq('user_id',user.id).maybeSingle(),
       supabase.from('club_agent_turns').select('id,question,answer,sources,status,created_at').eq('user_id',user.id).eq('status','completed').order('created_at',{ascending:false}).limit(8),
       supabase.from('community_posts').select('id,title,body,category,created_at,community_comments(body,created_at)').order('created_at',{ascending:false}).limit(50),

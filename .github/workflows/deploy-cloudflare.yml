@@ -5,6 +5,7 @@ on:
     paths:
       - 'app/**'
       - 'components/**'
+      - 'public/**'
       - 'lib/**'
       - 'middleware.ts'
       - 'scripts/verify-public-auth-build.mjs'
@@ -102,7 +103,12 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add .github/cloudflare-deploy-status.txt
           git diff --cached --quiet || git commit -m 'chore: record Cloudflare deploy status [skip ci]'
-          git push
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push; then exit 0; fi
+            sleep 2
+          done
+          exit 1
 
       - name: Fail if Cloudflare deployment failed
         if: steps.build.outcome != 'success' || steps.deploy.outcome != 'success' || steps.deploy_cron.outcome != 'success' || steps.deploy_inbound.outcome != 'success' || steps.smoke.outcome != 'success'
