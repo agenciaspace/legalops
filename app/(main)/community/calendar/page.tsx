@@ -2,6 +2,7 @@ import { CalendarDays, Clock3, MapPin, Plus, Video } from 'lucide-react'
 import BenchSection from './BenchSection'
 import {BenchDisclosure} from './BenchDisclosure'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import Link from 'next/link'
 
 type Event = {
   id: string
@@ -54,6 +55,7 @@ export default async function CalendarPage() {
           <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Eventos</h1>
           <p className="mt-1 text-xs text-[#77746E]">Encontros, Bench e conversas da comunidade. Horários de Brasília.</p>
         </div>
+        <Link href="/community/events/manage" className="inline-flex min-h-11 items-center rounded-lg border border-[#CEC8BD] bg-white px-3 text-xs font-bold">Gerenciar eventos</Link>
 
       </header>
 
