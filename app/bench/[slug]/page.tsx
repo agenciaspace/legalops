@@ -34,7 +34,7 @@ export default async function BenchTopicPage({ params, searchParams }: PageProps
   const admin = createAdminClient()
   const { data: topic } = await admin
     .from('bench_topics')
-    .select('id, slug, title, description, category, region_id, status, interest_count, min_participants, ideal_participants, summary, key_findings')
+    .select('id, slug, title, description, category, region_id, status, interest_count, min_participants, ideal_participants, summary, key_findings, participation_mode, participation_details, extra_registration_fields, pre_questions')
     .eq('slug', params.slug)
     .eq('is_public', true)
     .neq('status', 'archived')
@@ -83,6 +83,14 @@ export default async function BenchTopicPage({ params, searchParams }: PageProps
             </div>
             <h1 className="mt-5 max-w-[760px] text-[42px] font-semibold leading-[1.02] tracking-[-0.06em] sm:text-[60px]" style={roundedFont}>{topic.title}<span className="text-[#E88A6A]">.</span></h1>
             <p className="mt-6 max-w-[760px] text-base leading-8 text-[#625E59]">{topic.description}</p>
+
+            <section className="mt-8 rounded-xl border border-[#CEC8BD] bg-[#FAF7F1] p-5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#C9684F]">como participar</p>
+              <h2 className="mt-2 text-xl font-semibold" style={roundedFont}>{topic.participation_mode === 'presencial' ? 'Encontro presencial' : topic.participation_mode === 'hibrido' ? 'Presencial + remoto' : 'Encontro remoto'}</h2>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#625E59]">{topic.participation_details || (topic.participation_mode === 'presencial' ? 'O endereço e as instruções de chegada serão enviados após a confirmação.' : 'O link de acesso será enviado após a confirmação. Teste câmera e áudio antes do horário.')}</p>
+            </section>
+
+            {topic.pre_questions?.length ? <section className="mt-8"><p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#817A73]">perguntas prévias</p><p className="mt-2 text-sm text-[#625E59]">Envie perguntas antes do encontro para orientar a conversa:</p><ul className="mt-3 space-y-2">{topic.pre_questions.map((question: string) => <li key={question} className="rounded-lg border border-[#CEC8BD] bg-white px-4 py-3 text-sm text-[#514D48]">{question}</li>)}</ul></section> : null}
 
             {session ? (
               <div className="mt-8 grid gap-3 border-y border-[#CEC8BD] py-5 sm:grid-cols-3">
@@ -142,6 +150,7 @@ export default async function BenchTopicPage({ params, searchParams }: PageProps
                     <input name="email" type="email" required maxLength={254} placeholder="Email" className="w-full rounded-lg border border-[#CEC8BD] bg-white px-4 py-3 text-sm outline-none focus:border-[#E88A6A]" />
                     <input name="organization" maxLength={120} placeholder="Empresa / organização" className="w-full rounded-lg border border-[#CEC8BD] bg-white px-4 py-3 text-sm outline-none focus:border-[#E88A6A]" />
                     <input name="current_role" maxLength={120} placeholder="Cargo / função" className="w-full rounded-lg border border-[#CEC8BD] bg-white px-4 py-3 text-sm outline-none focus:border-[#E88A6A]" />
+                    {((topic.extra_registration_fields as {key:string;label:string;required?:boolean}[] | null) ?? []).map(field => <input key={field.key} name={`extra_${field.key}`} required={field.required !== false} maxLength={500} placeholder={`${field.label}${field.required === false ? ' (opcional)' : ''}`} className="w-full rounded-lg border border-[#CEC8BD] bg-white px-4 py-3 text-sm outline-none focus:border-[#E88A6A]" />)}
                     <button className="w-full rounded-lg bg-[#111111] px-5 py-3 text-sm font-bold text-white hover:bg-[#2A2927]">{session ? 'Participar do bench' : 'Tenho interesse'}</button>
                   </form>
                   <p className="mt-4 text-[10px] leading-4 text-[#918A83]">Seu email não é exibido publicamente. Ele é usado para a gestão do bench e para o convite da reunião.</p>

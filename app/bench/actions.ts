@@ -92,6 +92,7 @@ export async function registerBenchInterest(formData: FormData) {
   const email = normalizeEmail(formData.get('email'))
   const organization = clean(formData.get('organization'), 120)
   const currentRole = clean(formData.get('current_role'), 120)
+  const extraAnswers = Object.fromEntries(Array.from(formData.entries()).filter(([key]) => key.startsWith('extra_')).map(([key, value]) => [key.slice(6), clean(value, 500)]))
 
   if (!topicId || fullName.length < 2 || !EMAIL_RE.test(email)) return
 
@@ -139,6 +140,7 @@ export async function registerBenchInterest(formData: FormData) {
     current_role: currentRole || null,
     status,
     calendar_invite_status: status === 'registered' ? 'pending' : 'not_required',
+    extra_answers: extraAnswers,
     updated_at: new Date().toISOString(),
   }
 
@@ -271,6 +273,15 @@ export async function createBenchTopic(formData: FormData) {
   const regionId = clean(formData.get('region_id'), 80)
   const minimum = Math.max(2, Math.min(100, Number(formData.get('min_participants') || 5)))
   const ideal = Math.max(minimum, Math.min(250, Number(formData.get('ideal_participants') || 12)))
+  const participationMode = ['presencial', 'remoto', 'hibrido'].includes(clean(formData.get('participation_mode'), 20)) ? clean(formData.get('participation_mode'), 20) : 'remoto'
+  const participationDetails = clean(formData.get('participation_details'), 2000)
+  const preQuestions = clean(formData.get('pre_questions'), 3000).split('\n').map(value => value.trim()).filter(Boolean).slice(0, 12)
+  let extraFields: { key: string; label: string; required: boolean }[] = []
+  try {
+    const parsed = JSON.parse(clean(formData.get('extra_registration_fields'), 3000) || '[]') as unknown
+    const fields = Array.isArray(parsed) ? parsed as { key?: string; label?: string; required?: boolean }[] : []
+    extraFields = fields.filter(field => field?.key && field?.label).slice(0, 8).map(field => ({ key: String(field.key).slice(0, 40), label: String(field.label).slice(0, 160), required: field.required !== false }))
+  } catch { return }
   if (title.length < 3 || description.length < 10) return
   if (!manager.isAdmin && (!regionId || !manager.managedRegionIds.has(regionId))) return
 
@@ -292,6 +303,10 @@ export async function createBenchTopic(formData: FormData) {
     region_id: regionId || null,
     min_participants: minimum,
     ideal_participants: ideal,
+    participation_mode: participationMode,
+    participation_details: participationDetails,
+    pre_questions: preQuestions,
+    extra_registration_fields: extraFields,
     created_by: manager.user.id,
   })
   revalidatePath('/bench')

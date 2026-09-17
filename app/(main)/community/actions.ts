@@ -69,6 +69,37 @@ export async function createCommunityPost(formData: FormData) {
   }
 }
 
+export async function registerPublicEvent(formData: FormData) {
+  const eventId = String(formData.get('event_id') ?? '').trim()
+  const name = String(formData.get('name') ?? '').trim().slice(0, 120)
+  const email = String(formData.get('email') ?? '').trim().slice(0, 240).toLowerCase()
+  const role = String(formData.get('role') ?? '').trim().slice(0, 120)
+  const organization = String(formData.get('organization') ?? '').trim().slice(0, 120)
+  if (!/^[0-9a-f-]{36}$/i.test(eventId) || name.length < 2 || role.length < 2 || organization.length < 2 || !email.includes('@')) return
+  const admin = createAdminClient()
+  const { data: event } = await admin.from('community_events').select('slug').eq('id', eventId).eq('is_published', true).maybeSingle()
+  if (!event) return
+  await admin.from('community_event_rsvps').insert({ event_id: eventId, user_id: null, response: 'confirmed', guest_name: name, guest_email: email, guest_role: role, organization_name: organization, confirmed_at: new Date().toISOString() })
+  redirect(`/community/events/${event.slug}?registered=1`)
+}
+
+export async function shareEventResource(formData: FormData) {
+  const eventId = String(formData.get('event_id') ?? '').trim()
+  const title = String(formData.get('title') ?? '').trim().slice(0, 160)
+  const description = String(formData.get('description') ?? '').trim().slice(0, 1000)
+  const url = String(formData.get('resource_url') ?? '').trim()
+  const kind = String(formData.get('kind') ?? 'link')
+  if (!eventId || title.length < 2 || !/^https:\/\//.test(url) || !['foto', 'documento', 'link', 'outro'].includes(kind)) return
+  const { supabase, user } = await getAuthenticatedMember()
+  const { data: attendance } = await supabase.from('community_event_rsvps').select('id').eq('event_id', eventId).eq('user_id', user.id).eq('response', 'confirmed').maybeSingle()
+  if (!attendance) return
+  const { data: event } = await supabase.from('community_events').select('slug').eq('id', eventId).eq('is_published', true).maybeSingle()
+  if (!event) return
+  await supabase.from('community_event_resources').insert({ event_id: eventId, uploader_id: user.id, kind, title, description, resource_url: url })
+  revalidatePath(`/community/events/${event.slug}`)
+  redirect(`/community/events/${event.slug}?shared=1`)
+}
+
 export async function confirmBenchAttendance(formData: FormData) {
   const { supabase, user } = await getAuthenticatedMember()
   const eventId = String(formData.get('event_id') ?? '')
