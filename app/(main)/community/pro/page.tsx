@@ -8,7 +8,6 @@ export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Pro | legalops.club' }
 const resources = [
   {href:'/community/assistant',title:'Meu agente',description:`Converse com contexto e histórico privado. Até ${PRO_DAILY_QUESTIONS} perguntas por dia.`,icon:Bot},
-  {href:'/community/agents',title:'Agentes por assunto',description:'Explore questões de contratos, dados e operações com assistência temática.',icon:MessagesSquare},
   {href:'/community/summaries',title:'Resumos da comunidade',description:'Retome os assuntos discutidos a partir das publicações e comentários disponíveis.',icon:Sparkles},
   {href:'/community/jobs',title:'Oportunidades para seu perfil',description:'Acompanhe vagas relacionadas ao seu contexto profissional.',icon:BriefcaseBusiness},
 ]

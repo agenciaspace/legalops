@@ -6,7 +6,7 @@ vi.mock('@/lib/supabase-server',()=>({createServerSupabaseClient:async()=>({
  auth:{getUser:async()=>({data:{user:state.user}})},
  from:(table:string)=>{
   const data=()=>table==='community_members'?{club_access_status:'active',club_pro_status:state.pro?'active':'inactive'}:table==='account_profiles'?{full_name:'Owner',areas_of_expertise:[]}:table==='club_agent_preferences'?{focus:'Meus contratos',topics:[]}:[]
-  const query:any={select:()=>query,eq:(field:string,value:string)=>{state.filters.push([table,field,value]);return query},order:()=>query,not:()=>query,limit:()=>query,maybeSingle:async()=>({data:data(),error:null}),then:(resolve:(value:unknown)=>unknown)=>resolve({data:data(),error:null})}
+  const query:any={select:()=>query,eq:(field:string,value:string)=>{state.filters.push([table,field,value]);return query},gte:()=>query,order:()=>query,not:()=>query,limit:()=>query,maybeSingle:async()=>({data:data(),error:null}),then:(resolve:(value:unknown)=>unknown)=>resolve({data:data(),error:null})}
   return query
  },
 })}))
@@ -38,4 +38,13 @@ it('records failure and refunds the reservation instead of saving an invented an
  expect((await POST(request({question:'Como usar o OpenCLM?'}))).status).toBe(503)
  expect(state.rpc).toHaveBeenCalledWith('finish_club_agent_turn',{turn_id:'turn',answer_text:null,source_links:[],failed:true})
  log.mockRestore()
+})
+it('grounds personalized digests in the owner interactions and published events',async()=>{
+ await POST(request({question:'Resuma minhas interações e recomende Bench',page:'/community/calendar',user_id:'intruder'}))
+ expect(state.filters).toContainEqual(['community_comments','author_id','owner'])
+ expect(state.filters).toContainEqual(['community_post_likes','user_id','owner'])
+ expect(state.filters).toContainEqual(['community_posts','author_id','owner'])
+ expect(state.filters).toContainEqual(['community_events','is_published',true])
+ const prompt=state.generate.mock.calls[0][0];expect(prompt.userPrompt).toContain('/community/calendar');expect(prompt.userPrompt).toContain('Não há rastreamento de páginas lidas')
+ expect(prompt.systemPrompt).toContain('Não afirme que sabe o que foi lido')
 })

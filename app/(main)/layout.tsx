@@ -18,7 +18,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       .eq('user_id', user.id),
     supabase
       .from('community_members')
-      .select('club_access_status, club_access_expires_at, club_pro_status, club_pro_expires_at')
+      .select('user_id,display_name,avatar_path,club_access_status, club_access_expires_at, club_pro_status, club_pro_expires_at')
       .eq('user_id', user.id)
       .maybeSingle(),
   ])
@@ -50,7 +50,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="min-h-screen bg-[#F5F1E8]">
-      <Nav discoverCount={count ?? 0} jobAlertCount={jobAlertCount ?? 0} hasClubAccess={hasClubAccess} isClubAdmin={isLegalOpsAdminEmail(user.email)} />
+      <Nav member={clubAccess} discoverCount={count ?? 0} jobAlertCount={jobAlertCount ?? 0} hasClubAccess={hasClubAccess} isClubAdmin={isLegalOpsAdminEmail(user.email)} />
       <AppMain>{children}</AppMain>
     </div>
   )

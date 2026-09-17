@@ -68,3 +68,14 @@ it('selects catalog tools, keeps their own scores and prevents a fifth option', 
   expect(document.querySelector('[data-vendor="3"][data-score="0"]').value).toBe('3');
   expect(document.querySelector('[data-vendor="2"][data-score="0"]').value).toBe('');
 });
+it('reveals one step and one criteria group while retaining the complete catalog',()=>{
+ document.getElementById('reset').click();
+ const visible=()=>[...document.querySelectorAll('[data-wizard-panel]')].filter(el=>!el.hidden).map(el=>el.dataset.wizardPanel);
+ expect(visible()).toEqual(['0']);expect(document.querySelectorAll('#profile-fields [data-profile]')).toHaveLength(3);
+ document.getElementById('wizard-next').click();expect(visible()).toEqual(['1']);
+ const search=document.getElementById('tool-search');search.value='';search.dispatchEvent(new Event('input',{bubbles:true}));expect(document.getElementById('catalog-count').textContent).toContain('234');
+ document.getElementById('wizard-next').click();expect(visible()).toEqual(['2']);
+ const group=document.getElementById('criterion-group');group.value='1';group.dispatchEvent(new Event('change',{bubbles:true}));
+ expect([...document.querySelectorAll('[data-score-group]')].filter(el=>!el.hidden).every(el=>el.dataset.scoreGroup==='1')).toBe(true);
+ expect(document.body.textContent).not.toContain('G2');expect(document.querySelector('a[href*="g2.com"]')).toBeNull();
+});

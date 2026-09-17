@@ -9,22 +9,61 @@ const scoreOptions = (selected) => `<option value=""${selected === null ? ' sele
 
 $('presets').innerHTML = Object.entries(presets).map(([id, p]) => `<button class="button" type="button" data-preset="${id}">${p.name}</button>`).join('');
 const weightControl = (c, i) => `<div class="weight-row"><div class="weight-heading"><label for="weight-${i}">${c.name}</label><output for="weight-${i}" id="weight-value-${i}"></output></div><p id="weight-help-${i}">${c.question}</p><input id="weight-${i}" type="range" min="0" max="5" step="1" aria-describedby="weight-help-${i}" data-weight="${i}"><div class="range-labels"><span>não é prioridade</span><span>essencial</span></div></div>`;
-$('weights').innerHTML = criteria.slice(0, 4).map(weightControl).join('') + [...new Set(criteria.slice(4).map(c => c.group))].map(group => `<details class="criteria-group"><summary>${group}</summary>${criteria.map((c, i) => i >= 4 && c.group === group ? weightControl(c, i) : '').join('')}</details>`).join('');
-$('profile-fields').innerHTML = profileFields.map(f => `<label>${f.label}${f.type === 'number' ? `<input type="number" min="0" max="10000000" step="1" data-profile="${f.id}" inputmode="numeric">` : `<textarea rows="2" maxlength="700" data-profile="${f.id}" placeholder="${f.placeholder}"></textarea>`}</label>`).join('');
+const groups = [...new Set(criteria.map(c=>c.group))];
+let currentGroup = groups[0];
+$('criterion-group').innerHTML = groups.map((group,i)=>`<option value="${i}">${group}</option>`).join('');
+$('weights').innerHTML = criteria.map((c,i)=>`<div data-criterion-group="${groups.indexOf(c.group)}">${weightControl(c,i)}</div>`).join('');
+const profileControl = f => `<label>${f.label}${f.type === 'number' ? `<input type="number" min="0" max="10000000" step="1" data-profile="${f.id}" inputmode="numeric">` : `<textarea rows="2" maxlength="700" data-profile="${f.id}" placeholder="${f.placeholder}"></textarea>`}</label>`;
+const primaryFields = ['main_problem','existing_tools','required_integrations'];
+$('profile-fields').innerHTML = primaryFields.map(id=>profileControl(profileFields.find(f=>f.id===id))).join('');
+$('profile-extra').innerHTML = profileFields.filter(f=>!primaryFields.includes(f.id)).map(profileControl).join('');
 $('stage-buttons').innerHTML = stages.map((s, i) => `<button type="button" class="button" data-stage="${s.id}">${i + 1}. ${s.name}</button>`).join('');
 const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let renderedIds = null;
-let visibleTools = 24;
+let visibleTools = 6;
+let currentStep = 0;
+function renderGroup() {
+ const index=groups.indexOf(currentGroup);
+ document.querySelectorAll('[data-criterion-group]').forEach(el=>{el.hidden=+el.dataset.criterionGroup!==index});
+ document.querySelectorAll('[data-score-group]').forEach(el=>{el.hidden=+el.dataset.scoreGroup!==index});
+ $('criterion-group').value=String(index);
+ $('criterion-progress').textContent=`Grupo ${index+1} de ${groups.length}`;
+ $('next-group').textContent=index===groups.length-1?'Conferir resultado':'Próximo grupo →';
+}
+$('criterion-group').addEventListener('change',()=>{currentGroup=groups[+$('criterion-group').value];renderGroup()});
+$('next-group').addEventListener('click',()=>{const i=groups.indexOf(currentGroup);if(i<groups.length-1){currentGroup=groups[i+1];renderGroup();$('criterion-group').focus()}else{$('result-details').open=true;$('result-details').scrollIntoView({block:'start'})}});
+function showStep(step, focus=true) {
+ if(step===2&&state.vendorIds.length<2){$('wizard-status').textContent='Escolha pelo menos duas ferramentas para avaliar.';return}
+ currentStep=step;
+ document.querySelectorAll('[data-wizard-panel]').forEach(el=>{el.hidden=+el.dataset.wizardPanel!==step});
+ document.querySelectorAll('[data-wizard-go]').forEach(el=>{el.setAttribute('aria-current',+el.dataset.wizardGo===step?'step':'false')});
+ $('wizard-back').hidden=step===0;$('wizard-next').hidden=step===2;
+ $('wizard-next').textContent=step===0?'Escolher ferramentas →':'Avaliar ferramentas →';
+ $('wizard-status').textContent='';
+ if(focus){const heading=document.querySelector(`[data-wizard-panel="${step}"] h2`);heading?.focus();heading?.scrollIntoView?.({block:'start'})}
+}
+document.querySelectorAll('[data-wizard-go]').forEach(el=>el.addEventListener('click',()=>showStep(+el.dataset.wizardGo)));
+$('wizard-next').addEventListener('click',()=>showStep(Math.min(2,currentStep+1)));
+$('wizard-back').addEventListener('click',()=>showStep(Math.max(0,currentStep-1)));
+function revealHash(){
+ let id;try{id=decodeURIComponent(location.hash.slice(1))}catch{return}if(!id||id.startsWith('cenario='))return;
+ const target=document.getElementById(id);if(!target)return;
+ if(['ferramentas','catalog-title'].includes(id))showStep(1,false);
+ if(['diagnostico','necessidade'].includes(id))showStep(0,false);
+ if(['avaliacao','requisitos'].includes(id))showStep(2,false);
+ for(let parent=target;parent;parent=parent.parentElement)if(parent.tagName==='DETAILS')parent.open=true;
+ target.scrollIntoView?.({block:'start'});
+}
 function renderComparison() {
   const active = selectedVendors(state);
   const head = label => `<tr><th scope="col">${label}</th>${active.map(v => `<th scope="col">${escape(v.name)}</th>`).join('')}</tr>`;
   $('score-head').innerHTML = head('Eixo'); $('gate-head').innerHTML = head('Requisito');
-  $('score-inputs').innerHTML = criteria.map((c, i) => `<tr><th scope="row">${c.name}</th>${active.map((v, vi) => `<td><select aria-label="Nota ${escape(v.name)}: ${c.name}" data-vendor="${vi}" data-score="${i}">${scoreOptions(state.scores[vi][i])}</select></td>`).join('')}</tr>`).join('');
+  $('score-inputs').innerHTML = criteria.map((c, i) => `<tr data-score-group="${groups.indexOf(c.group)}"><th scope="row">${c.name}</th>${active.map((v, vi) => `<td><select aria-label="Nota ${escape(v.name)}: ${c.name}" data-vendor="${vi}" data-score="${i}">${scoreOptions(state.scores[vi][i])}</select></td>`).join('')}</tr>`).join('');
   $('gate-inputs').innerHTML = gates.map((g, i) => `<tr><th scope="row">${g.name}<span class="cell-note">${g.description}</span></th>${active.map((v, vi) => `<td><select aria-label="${escape(v.name)}: ${g.name}" data-vendor="${vi}" data-gate="${i}"><option value="pending">A validar</option><option value="pass">Atende</option><option value="fail">Não atende</option></select></td>`).join('')}</tr>`).join('');
   renderedIds = state.vendorIds.join('|');
+  renderGroup();
 }
-$('hero-tool-count').textContent = catalogMeta.toolCount;
-$('catalog-provenance').textContent = `${catalogMeta.toolCount} opções · ${catalogMeta.categoryListingCount} cadastros da categoria de CLM do G2, com nomes repetidos agrupados, mais Luminance · consulta em 17/09/2026.`;
+$('catalog-provenance').textContent = `${catalogMeta.toolCount} ferramentas no catálogo da comunidade. Escolha de duas a quatro para avaliar.`;
 $('tool-category').innerHTML += Object.entries(catalogCategories).map(([id, label]) => `<option value="${id}">${label}</option>`).join('');
 $('bench-tools').innerHTML = vendors.map(v => `<option value="${escape(v.name)}"></option>`).join('');
 const searchable = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -37,14 +76,13 @@ function renderCatalog() {
   $('catalog-count').textContent = matches.length ? `${Math.min(visibleTools,matches.length)} de ${matches.length} opções encontradas.` : 'Nenhuma ferramenta encontrada. Tente outro nome ou sugira uma no formulário da comunidade.';
   $('tool-cards').innerHTML = matches.slice(0,visibleTools).map(v => {
     const selected = state.vendorIds.includes(v.id);
-    const extraSources = v.g2Listings.length > 1 ? `<details><summary>${v.g2Listings.length} cadastros G2 agrupados</summary>${v.g2Listings.slice(1).map((source,i) => `<a href="${source.url}" target="_blank" rel="noopener noreferrer">Cadastro adicional ${i+1} ↗</a>`).join('')}</details>` : '';
-    return `<article class="tool-card${selected?' selected':''}"><p class="micro">${catalogCategories[v.category]}</p><h4>${escape(v.name)}</h4><p>${escape(v.description)}</p>${v.sourceNote?`<p class="small catalog-source-note">${escape(v.sourceNote)}</p>`:''}<p class="small">${v.initialScores?'4 hipóteses editoriais; demais critérios a validar.':'Capacidades sem nota; avalie no seu piloto.'}</p><div class="tool-actions"><button type="button" class="button" data-toggle-vendor="${v.id}" aria-pressed="${selected}" aria-label="${selected?'Remover':'Comparar'} ${escape(v.name)}">${selected?'Remover':'Comparar'}</button><a href="${v.g2Listings[0].url}" target="_blank" rel="noopener noreferrer">Ver no G2 ↗</a></div>${extraSources}</article>`;
+    return `<article class="tool-card${selected?' selected':''}"><p class="micro">${catalogCategories[v.category]}</p><h4>${escape(v.name)}</h4><p>${escape(v.description)}</p>${v.sourceNote?`<p class="small catalog-source-note">${escape(v.sourceNote)}</p>`:''}<p class="small">${v.initialScores?'4 hipóteses editoriais; demais critérios a validar.':'Capacidades sem nota; avalie no seu piloto.'}</p><div class="tool-actions"><button type="button" class="button" data-toggle-vendor="${v.id}" aria-pressed="${selected}" aria-label="${selected?'Remover':'Comparar'} ${escape(v.name)}">${selected?'Remover':'Comparar'}</button>${v.officialUrl?`<a href="${v.officialUrl}" target="_blank" rel="noopener noreferrer">Site da ferramenta ↗</a>`:'<a href="#contribuir">Contribuir</a>'}</div></article>`;
   }).join('');
   $('catalog-more').hidden = matches.length <= visibleTools;
 }
-$('tool-search').addEventListener('input',()=>{visibleTools=24;renderCatalog()});
-$('tool-category').addEventListener('change',()=>{visibleTools=24;renderCatalog()});
-$('catalog-more').addEventListener('click',()=>{const old=visibleTools;visibleTools+=24;renderCatalog();$('tool-cards').children[old]?.querySelector('button')?.focus()});
+$('tool-search').addEventListener('input',()=>{visibleTools=6;renderCatalog()});
+$('tool-category').addEventListener('change',()=>{visibleTools=6;renderCatalog()});
+$('catalog-more').addEventListener('click',()=>{const old=visibleTools;visibleTools+=6;renderCatalog();$('tool-cards').children[old]?.querySelector('button')?.focus()});
 $('ferramentas').addEventListener('click',event=>{
   const button=event.target.closest('[data-toggle-vendor]');if(!button)return;
   const id=button.dataset.toggleVendor;const selected=state.vendorIds.includes(id);
@@ -136,7 +174,7 @@ $('presets').addEventListener('click', e => {
   state.weights = [...presets[button.dataset.preset].weights];
   clearSharedHash(); render(true);
 });
-$('reset').addEventListener('click', () => { state = initialState(); clearSharedHash(); render(true); renderCatalog(); $('catalog-message').textContent=''; $('action-status').textContent = 'Diagnóstico, etapas, pesos, notas e requisitos restaurados.'; });
+$('reset').addEventListener('click', () => { state = initialState(); clearSharedHash(); render(true); renderCatalog(); $('catalog-message').textContent=''; currentGroup=groups[0];renderGroup();showStep(0);$('action-status').textContent = 'Diagnóstico, etapas, pesos, notas e requisitos restaurados.'; });
 $('download').addEventListener('click', () => {
   const url = URL.createObjectURL(new Blob([report(state)], { type: 'text/markdown;charset=utf-8' }));
   const a = document.createElement('a'); a.href = url; a.download = 'legalops-bench-avaliacao.md'; a.click();
@@ -159,7 +197,8 @@ $('share').addEventListener('click', async () => {
 $('print').addEventListener('click', () => window.print());
 window.addEventListener('hashchange', () => {
   const shared = decodeState(location.hash);
-  if (shared) { state = shared; render(true); renderCatalog(); }
+  if (shared) { state = shared; render(true); renderCatalog(); showStep(2); }
+  revealHash();
 });
 document.querySelectorAll('a[href^="#source-"]').forEach(link => {
   link.addEventListener('click', () => { document.querySelector('.sources').open = true; });
@@ -172,7 +211,10 @@ window.addEventListener('beforeprint', () => {
 window.addEventListener('afterprint', () => closedDetails.forEach(el => { el.open = false; }));
 render(true);
 renderCatalog();
+showStep(decodeState(location.hash)?2:0,false);
 $('calculator-ui').hidden = false;
 if (location.hash.startsWith('#cenario=')) {
   $('action-status').textContent = decodeState(location.hash) ? 'Cenário compartilhado carregado.' : 'Link inválido ou de outra edição. Carregamos a avaliação inicial.';
 }
+
+revealHash();

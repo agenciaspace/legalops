@@ -26,6 +26,6 @@ export function ClubPwa() {
     catch {setMessage('Use o menu do navegador para adicionar o Club à tela inicial.');setShowHelp(true)}
     finally {setInstallEvent(null)}
   }
-  if (installed || pathname === '/community/assistant') return null
+  if (installed || pathname !== '/community/profile') return null
   return <div className="mx-4 mt-4 rounded-xl border border-[#CEC8BD] bg-white px-4 py-2 sm:mx-6 lg:mx-8"><div className="flex flex-wrap items-center justify-between gap-x-3"><p className="text-sm text-[#625E59]">Club na tela inicial</p><button type="button" onClick={() => void install()} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#A94E38]"><Download className="h-4 w-4" />Instalar app</button></div>{showHelp ? <div className="border-t border-[#E6DED0] py-3 text-sm leading-6"><div className="flex items-start justify-between gap-2"><p>No iPhone, abra Compartilhar e escolha “Adicionar à Tela de Início”. No Android ou computador, procure “Instalar app” no menu do navegador.</p><button type="button" onClick={() => setShowHelp(false)} className="flex min-h-11 min-w-11 items-center justify-center" aria-label="Fechar instruções"><X className="h-4 w-4" /></button></div><p className="mt-2 text-xs text-[#817A73]">A disponibilidade depende do navegador. Posts, confirmações e Pro precisam de conexão.</p>{message ? <p role="status">{message}</p> : null}</div> : null}</div>
 }

@@ -4,7 +4,7 @@
   "short_name": "LegalOps",
   "description": "Posts, eventos com Bench e assistência Pro.",
   "lang": "pt-BR",
-  "start_url": "/community/calendar",
+  "start_url": "/community",
   "scope": "/",
   "display": "standalone",
   "background_color": "#F5F1E8",
@@ -17,7 +17,7 @@
   ],
   "shortcuts": [
     {"name":"Eventos","url":"/community/calendar"},
-    {"name":"Posts","url":"/community"},
-    {"name":"Pro","url":"/community/pro"}
+    {"name":"Comunidade","url":"/community"},
+    {"name":"Meu agente","url":"/community/assistant"}
   ]
 }

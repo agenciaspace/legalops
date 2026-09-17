@@ -29,15 +29,15 @@ describe('Club admission and Pro routing', () => {
   })
   it('blocks free users from Pro pages and AI APIs', async () => {
     state.user = { id: 'free' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive' }
-    expect((await request('/community/agents')).headers.get('location')).toBe('https://legalops.club/club#pro')
+    expect((await request('/community/jobs')).headers.get('location')).toBe('https://legalops.club/club#pro')
     expect((await request('/api/ai/cover-letter')).status).toBe(403)
     expect((await request('/api/pipeline/job/cv')).status).toBe(403)
   })
   it('allows Pro but keeps community access after Pro expires', async () => {
     state.user = { id: 'pro' }; state.member = { club_access_status: 'active', club_pro_status: 'active' }
-    expect((await request('/community/agents')).status).toBe(200)
+    expect((await request('/community/jobs')).status).toBe(200)
     state.member.club_pro_expires_at = '2000-01-01'
-    expect((await request('/community/agents')).status).toBe(307)
+    expect((await request('/community/jobs')).status).toBe(307)
     expect((await request('/community')).status).toBe(200)
   })
 })
@@ -54,5 +54,5 @@ it('serves public PWA assets without exposing community data', async () => {
   expect((await request('/community/bench')).headers.get('location')).toContain('/login')
   state.user={id:'free'};state.member={club_access_status:'active',club_pro_status:'inactive'}
   expect((await request('/community/pro')).status).toBe(200)
-  expect((await request('/community/assistant')).status).toBe(307)
+  expect((await request('/community/assistant')).status).toBe(200)
 })

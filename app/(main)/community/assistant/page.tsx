@@ -1,3 +1,2 @@
-import { PersonalAgent } from './PersonalAgent'
-export const metadata={title:'Meu agente | legalops.club'}
-export default function PersonalAgentPage() { return <PersonalAgent /> }
+import {redirect} from 'next/navigation'
+export default function AgentPage(){redirect('/community?agente=1')}

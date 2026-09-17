@@ -6,9 +6,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { COMMUNITY_CATEGORIES, hasActiveClubAccess } from '@/lib/community'
 import { generateClubJobAlerts } from '@/lib/club-job-matching'
-import { generateOpenRouterText } from '@/lib/openrouter'
 import { hasClubProAccess, normalizeLinkedInProfile } from '@/lib/club-membership'
-import { getCommunityAgent } from '@/lib/community-agents'
 
 const PROFESSIONAL_TYPES = new Set(['law_firm', 'legal_dept', 'public_sector', 'freelance', 'other'])
 const REMOTE_PREFERENCES = new Set(['remote', 'hybrid', 'onsite', 'any'])
@@ -240,30 +238,5 @@ export async function markClubJobAlertsRead() {
   if (!error) {
     revalidatePath('/community/jobs')
     revalidatePath('/community')
-  }
-}
-
-export async function askCommunityAgent(formData: FormData): Promise<{ ok: true; answer: string } | { ok: false; error: string }> {
-  const category = String(formData.get('category') ?? '')
-  const question = String(formData.get('question') ?? '').trim()
-
-  if (!COMMUNITY_CATEGORIES[category] || question.length < 3 || question.length > 2000) {
-    return { ok: false, error: 'Escreva uma pergunta de 3 a 2.000 caracteres.' }
-  }
-
-  await getAuthenticatedMember(true)
-  const agent = getCommunityAgent(category)
-
-  try {
-    const answer = await generateOpenRouterText({
-      systemPrompt: agent.systemPrompt,
-      userPrompt: `Espaço da comunidade: ${COMMUNITY_CATEGORIES[category].title}\nAgente: ${agent.name}, ${agent.role}\n\nPergunta do membro:\n${question}\n\nResponda de forma prática em até 5 parágrafos curtos. Quando útil, organize em diagnóstico, opções e próximo passo.`,
-      maxTokens: 900,
-      temperature: 0.2,
-    })
-    return { ok: true, answer }
-  } catch (error) {
-    console.error('[community-agent] Could not answer question:', error)
-    return { ok: false, error: 'O agente está indisponível agora. Tente novamente em alguns minutos.' }
   }
 }

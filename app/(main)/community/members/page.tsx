@@ -1,9 +1,12 @@
 import Link from 'next/link'
+import {isDirectoryMember} from '@/lib/community-directory'
 import { BadgeCheck, BriefcaseBusiness, Building2, Search, SlidersHorizontal, UserPlus, Users } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getAvatarTone, getInitials } from '@/lib/community'
 
 type Member = {
+  club_access_status: string
+  club_access_expires_at: string | null
   user_id: string
   display_name: string
   current_role: string | null
@@ -21,12 +24,12 @@ export default async function MembersPage({ searchParams }: { searchParams?: { q
   const search = searchParams?.q?.trim() ?? ''
   let membersQuery = supabase
     .from('community_members')
-    .select('user_id, display_name, current_role, areas_of_expertise, public_headline, public_bio, organization_name, profile_verification_status')
+    .select('club_access_status,club_access_expires_at,user_id, display_name, current_role, areas_of_expertise, public_headline, public_bio, organization_name, profile_verification_status')
 
   if (search) membersQuery = membersQuery.ilike('display_name', `%${search}%`)
 
   const { data: rawMembers } = await membersQuery.order('created_at', { ascending: true })
-  const members = (rawMembers ?? []) as Member[]
+  const members = ((rawMembers ?? []) as Member[]).filter(isDirectoryMember)
 
   return (
     <div className="mx-auto w-full max-w-[1100px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
@@ -35,9 +38,6 @@ export default async function MembersPage({ searchParams }: { searchParams?: { q
           <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Membros</h1>
           <p className="mt-1 text-xs text-[#77746E]">Encontre pessoas por experiência, função ou especialidade.</p>
         </div>
-        <button className="inline-flex h-9 items-center justify-center gap-2 self-start rounded-lg bg-[#FF5C1A] px-3.5 text-[11px] font-extrabold text-white hover:bg-[#E84D10]">
-          <UserPlus className="h-4 w-4" /> Convidar pessoas
-        </button>
       </header>
 
       <div className="mt-5 flex flex-col gap-2 sm:flex-row">
@@ -45,14 +45,11 @@ export default async function MembersPage({ searchParams }: { searchParams?: { q
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999690]" />
           <input name="q" defaultValue={search} placeholder="Buscar membros" className="h-10 w-full rounded-lg border border-[#DFDFDB] bg-white pl-9 pr-3 text-xs outline-none transition focus:border-[#FFB99E] focus:ring-2 focus:ring-[#FFF0E9]" />
         </form>
-        <button className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#DFDFDB] bg-white px-3 text-[10px] font-bold text-[#66635E] hover:bg-[#FAFAF8]">
-          <SlidersHorizontal className="h-3.5 w-3.5" /> Filtros
-        </button>
       </div>
 
       <div className="mt-4 flex items-center justify-between border-b border-[#E3E3DF] pb-3">
         <p className="text-[10px] font-bold text-[#8B8882]">{members.length} {members.length === 1 ? 'membro encontrado' : 'membros encontrados'}</p>
-        <button className="text-[10px] font-bold text-[#8B8882]">Mais recentes</button>
+
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

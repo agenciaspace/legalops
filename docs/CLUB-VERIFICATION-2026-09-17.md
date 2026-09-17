@@ -72,3 +72,13 @@ unassessed criteria stay empty rather than implying evidence.
 - Verified locally at 390 px and 320 px: no page overflow, adding Icertis and Docusign, rejecting a fifth tool, and sharing four selected IDs without private fields. Standalone model/catalog suite: 13 passing tests.
 
 Production verification for source `2a4dd4f`: Worker run `35253846090` and Pages run `35253846289` both succeeded. Authenticated browser confirmed Events → Bench, the legacy redirect, and responsive layout at 390/320 px. Chromium returned zero manifest and installability errors; PWA start URL is Events. Public catalog selection of four tools works. Final LegalOps suite: 272 tests in 43 files passed; standalone catalog/model: 13 passed. Temporary verification account, sessions and profile were deleted after checking, with zero matching rows remaining.
+
+## Simplified experience and single agent
+
+Feed limited initially to three recent publications; one publish action, collapsed filters, profile-only install help. Navigation is Community/Events, with one persistent agent bubble. Legacy subject agents and their server action were removed. The agent reads the authenticated user's posts, comments and likes, plus published events and sources, and explicitly does not claim read tracking. Pro API enforcement remains in place.
+
+Seven imported generic member records are excluded from directory display without deleting their underlying real accounts. Six untouched, authorless Bench seed topics with no sessions/registrations were deleted by `20260917181904_remove_unstarted_seed_benches`; real Nubank event remains.
+
+Bench keeps 234 catalog entries with no G2 UI/report references, three steps and one criteria group at a time. Method explanation uses everyday language. Open Playbook launched as a separate MIT repository with a three-field editor, local drafts, exports and explicit GitHub proposals; approved library intentionally empty.
+
+Local build passed. 274 app tests passed before final copy/project links; standalone Bench 13 tests and Playbook 2 tests passed. Production checks recorded after deployment below.

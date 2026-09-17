@@ -1,5 +1,6 @@
 import { MemberAvatar } from '@/components/community/MemberAvatar'
 import Link from 'next/link'
+import {isDirectoryMember} from '@/lib/community-directory'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, BadgeCheck, BriefcaseBusiness, Building2, Linkedin, ShieldCheck } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
@@ -26,11 +27,11 @@ export default async function MemberProfilePage({ params }: { params: { id: stri
   const supabase = await createServerSupabaseClient()
   const { data } = await supabase
     .from('community_members')
-    .select('avatar_path, organization_description, user_id, display_name, current_role, areas_of_expertise, public_headline, public_bio, organization_name, linkedin_url, profile_verification_status, profile_verified_at')
+    .select('club_access_status,club_access_expires_at,avatar_path, organization_description, user_id, display_name, current_role, areas_of_expertise, public_headline, public_bio, organization_name, linkedin_url, profile_verification_status, profile_verified_at')
     .eq('user_id', params.id)
     .maybeSingle()
 
-  if (!data) notFound()
+  if (!data || !isDirectoryMember(data)) notFound()
   const member = data as Member
   const verified = member.profile_verification_status === 'verified'
 

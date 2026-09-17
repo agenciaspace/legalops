@@ -1,0 +1,3 @@
+'use client'
+import {useEffect,useRef} from 'react'
+export function BenchDisclosure({children}:{children:React.ReactNode}){const ref=useRef<HTMLDetailsElement>(null);useEffect(()=>{const reveal=()=>{if(location.hash.startsWith('#bench')&&ref.current){ref.current.open=true;document.getElementById(location.hash.slice(1))?.scrollIntoView({block:'start'})}};reveal();window.addEventListener('hashchange',reveal);return()=>window.removeEventListener('hashchange',reveal)},[]);return <details ref={ref} id="bench" className="mt-6 scroll-mt-24 rounded-2xl border border-[#CEC8BD] bg-white p-5"><summary className="min-h-12 cursor-pointer text-base font-semibold">Bench · comparar ferramentas e trocar experiências</summary>{children}</details>}

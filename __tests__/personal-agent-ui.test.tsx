@@ -11,7 +11,7 @@ it('keeps a single conversation and appends question and answer in sequence',asy
  await screen.findByText('Próximo passo')
  expect(screen.getByText('Resposta anterior')).toBeInTheDocument()
  expect(screen.getAllByRole('article',{name:'Sua mensagem'})).toHaveLength(2)
- expect(fetch.mock.calls[1][1].body).toBe(JSON.stringify({question:'E como aplicar?'}))
+ expect(fetch.mock.calls[1][1].body).toBe(JSON.stringify({question:'E como aplicar?',page:'/'}))
  expect(screen.getByText(/2\/30 perguntas/)).toBeInTheDocument()
 })
 it('preserves the draft on a failed send and prevents duplicate submissions while waiting',async()=>{

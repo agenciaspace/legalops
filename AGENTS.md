@@ -312,8 +312,7 @@ When changing authentication, submit the browser form; rendering it is not enoug
 
 ## Club mobile and identity (2026-09-17)
 
-- Posts, Events and Pro are separate primary navigation destinations. Bench is a section within Events. Mobile uses
-  a bottom bar; secondary member pages live in More.
+- Primary navigation is Community and Events. One personal agent opens on demand in a persistent bubble; legacy agent routes redirect to it. Bench is collapsed within Events. Profile controls own secondary destinations.
 - The Club PWA manifest is `/club-pwa/manifest.webmanifest`. `/club-sw.js`
   caches only its generic offline page and icons, never authenticated pages,
   API responses, RSC payloads, or submissions. Exact public asset paths are
@@ -331,3 +330,11 @@ When changing authentication, submit the browser form; rendering it is not enoug
 - Cloudflare remains production. Legacy Vercel project now recognizes Next.js;
   `vercel.json` disables duplicate Git deployments. Deployment status commits
   rebase/retry to avoid races between Worker and Pages workflows.
+
+## Progressive community experience (2026-09-17)
+
+- Feed starts with three recent posts and one publish action. Filters are collapsed; no welcome panels, directory counts or install banner on entry. Install control lives in Profile.
+- Do not add subject-specific agents. The single conversation uses owner-only post/comment/like history, published events, profile, and authorized sources; no read tracking is claimed. API remains Pro-gated.
+- Imported generic member rows are access records, not directory profiles. `isDirectoryMember` controls visibility without deleting real accounts.
+- Bench frontend source is `agenciaspace/clm-bench`; community-owned catalog, three steps, one criteria group at a time. Keep external discovery attribution out of the product UI; preserve research history separately.
+- Open Playbook frontend source is `agenciaspace/open-playbook`, published at `/playbook/`; browser drafts and explicit GitHub proposals, no approved clauses until reviewed.

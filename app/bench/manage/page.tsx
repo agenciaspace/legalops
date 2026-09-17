@@ -77,12 +77,14 @@ export default async function BenchManagePage({ searchParams }: { searchParams?:
             <div className="border border-[#CEC8BD] bg-[#FAF7F1] p-5">
               <div className="flex items-center gap-2"><Settings2 className="h-4 w-4 text-[#C9684F]" /><h2 className="text-sm font-bold">Criar bench</h2></div>
               <form action={createBenchTopic} className="mt-5 space-y-3">
-                <input name="title" required minLength={3} maxLength={180} placeholder="Tema" className="w-full rounded-lg border border-[#CEC8BD] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#E88A6A]" />
-                <textarea name="description" required minLength={10} maxLength={3000} rows={4} placeholder="O que será comparado?" className="w-full rounded-lg border border-[#CEC8BD] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#E88A6A]" />
-                <input name="category" maxLength={80} placeholder="Categoria (ex.: contratos-clm)" className="w-full rounded-lg border border-[#CEC8BD] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#E88A6A]" />
+                <input name="title" required minLength={3} maxLength={180} aria-label="Tema do Bench" placeholder="Qual tema vamos comparar?" className="w-full rounded-lg border border-[#CEC8BD] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#E88A6A]" />
+                <textarea name="description" required minLength={10} maxLength={3000} rows={4} aria-label="Objetivo do Bench" placeholder="O que você quer aprender com outros times?" className="w-full rounded-lg border border-[#CEC8BD] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#E88A6A]" />
                 <select name="region_id" required={!manager.isAdmin} className="w-full rounded-lg border border-[#CEC8BD] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#E88A6A]"><option value="">{manager.isAdmin ? 'Brasil / sem região' : 'Escolha sua região'}</option>{(regions ?? []).map(region => <option key={region.id} value={region.id}>{region.name}</option>)}</select>
+                <details><summary className="min-h-12 cursor-pointer py-3 text-sm">Ajustes opcionais</summary>
+                <input name="category" maxLength={80} placeholder="Categoria (ex.: contratos-clm)" className="w-full rounded-lg border border-[#CEC8BD] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#E88A6A]" />
                 <div className="grid grid-cols-2 gap-3"><label className="text-[10px] font-bold text-[#716B65]">Mínimo<input name="min_participants" type="number" min={2} max={100} defaultValue={5} className="mt-1 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 py-2.5 text-sm" /></label><label className="text-[10px] font-bold text-[#716B65]">Ideal<input name="ideal_participants" type="number" min={2} max={250} defaultValue={12} className="mt-1 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 py-2.5 text-sm" /></label></div>
-                <button className="w-full rounded-lg bg-[#111111] px-4 py-3 text-sm font-bold text-white">Criar bench</button>
+                </details>
+                <button className="w-full rounded-lg bg-[#111111] px-4 py-3 text-sm font-bold text-white">Criar Bench</button>
               </form>
             </div>
           </div>

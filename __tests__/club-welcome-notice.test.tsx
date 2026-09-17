@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import { ClubWelcomeNotice } from '@/components/community/ClubWelcomeNotice'
+vi.mock('next/navigation',()=>({usePathname:()=>'/community/profile'}))
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 it('requests pending welcome messages when a member enters the community', async () => {
   const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ clubSent: true }) })

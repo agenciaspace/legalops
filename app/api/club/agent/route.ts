@@ -60,19 +60,27 @@ export async function POST(request:NextRequest) {
       supabase.from('club_agent_turns').select('id,question,answer,sources,status,created_at').eq('user_id',user.id).eq('status','completed').order('created_at',{ascending:false}).limit(8),
       supabase.from('community_posts').select('id,title,body,category,created_at,community_comments(body,created_at)').order('created_at',{ascending:false}).limit(50),
       supabase.from('community_discussion_summaries').select('title,summary,period_start,period_end').order('period_end',{ascending:false}).limit(4),
+      supabase.from('community_events').select('id,title,description,starts_at,ends_at,location_label').eq('is_published',true).gte('starts_at',new Date(Date.now()-30*86400000).toISOString()).order('starts_at',{ascending:false}).limit(12),
+      supabase.from('community_posts').select('id,title,created_at').eq('author_id',user.id).order('created_at',{ascending:false}).limit(10),
+      supabase.from('community_comments').select('post_id,body,created_at').eq('author_id',user.id).order('created_at',{ascending:false}).limit(10),
+      supabase.from('community_post_likes').select('post_id,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(10),
       supabase.from('jobs').select('id,title,company,raw_description,url,url_status,url_checked_at,company_logo_url').eq('url_status','live').eq('enrichment_status','done').not('url_checked_at','is',null).limit(50),
     ])
     if(results.some(result=>result.error))throw new Error('Could not read authorized agent context')
-    const [profile,preferences,history,posts,summaries,jobs]=results
+    const [profile,preferences,history,posts,summaries,events,ownPosts,ownComments,ownLikes,jobs]=results
     const prefs=preferences.data??{focus:'',topics:[]}
+    const activity={posts:ownPosts.data??[],comments:(ownComments.data??[]).map(c=>({...c,body:c.body.slice(0,500)})),likes:ownLikes.data??[],scope:'Últimos 10 registros de cada tipo do próprio usuário. Não há rastreamento de páginas lidas ou de última visita.'}
     const sources:AgentSource[]=[
-      ...(posts.data??[]).map(post=>({kind:'club' as const,title:post.title,url:`https://legalops.club/community?space=${encodeURIComponent(post.category)}#post-${post.id}`,content:`Publicado em ${post.created_at}. ${post.body.slice(0,650)} Comentários: ${(post.community_comments??[]).slice(-2).map(comment=>comment.body.slice(0,200)).join(" / ")}`})),
+      ...(events.data??[]).map(event=>({kind:'club' as const,title:`Encontro: ${event.title}`,url:'https://legalops.club/community/calendar#bench',content:`Bench e eventos da comunidade. Início: ${event.starts_at}. Fim: ${event.ends_at??'não informado'}. Local: ${event.location_label}. ${event.description?.slice(0,1200)??''}`})),
+      {kind:'dev',title:'Bench de CLM da comunidade',url:'https://legalops.dev/bench/',content:'Catálogo próprio e aberto de ferramentas de gestão contratual, com avaliação em três passos: necessidade, ferramentas e avaliação. Cada empresa escolhe seus pesos e valida capacidades no piloto. Não indica compatibilidade automaticamente nem comprova integrações sem evidência.'},
+      ...(posts.data??[]).map(post=>({kind:'club' as const,title:post.title,url:`https://legalops.club/community?post=${post.id}#post-${post.id}`,content:`Publicado em ${post.created_at}. ${post.body.slice(0,650)} Comentários: ${(post.community_comments??[]).slice(-2).map(comment=>comment.body.slice(0,200)).join(" / ")}`})),
       ...(summaries.data??[]).map(summary=>({kind:'club' as const,title:summary.title,url:'https://legalops.club/community/summaries',content:`Período: ${summary.period_start} a ${summary.period_end}. ${summary.summary}`})),
       ...(jobs.data??[]).filter(job=>isPublishableJobRecord({url:job.url,urlStatus:job.url_status,companyLogoUrl:job.company_logo_url})).map(job=>({kind:'work' as const,title:`${job.title} — ${job.company}`,url:job.url,content:(job.raw_description??'').slice(0,1600)})),
+      {kind:'dev',title:'Playbook contratual aberto',url:'https://legalops.dev/playbook/',content:'Projeto comunitário open source com editor de posições, exceções e aprovações. Rascunhos ficam no navegador, podem ser exportados e propostos no GitHub. A biblioteca ainda não tem posições aprovadas. Não é uma política jurídica pronta.'},
       OPENCLM_AGENT_SOURCE,
     ]
-    const selected=rankAgentSources(sources,question,[...(profile.data?.areas_of_expertise??[]),...prefs.topics.map((topic:string)=>COMMUNITY_CATEGORIES[topic]?.label??topic)])
-    const prompt=personalAgentPrompt({profile:profile.data,focus:prefs.focus,topics:prefs.topics,history:[...(history.data??[])].reverse() as AgentTurn[],sources:selected,question})
+    const selected=rankAgentSources(sources,question,[...(profile.data?.areas_of_expertise??[]),profile.data?.current_role??'',profile.data?.organization_description??'',prefs.focus,...prefs.topics.map((topic:string)=>COMMUNITY_CATEGORIES[topic]?.label??topic)])
+    const prompt=personalAgentPrompt({profile:profile.data,focus:prefs.focus,topics:prefs.topics,history:[...(history.data??[])].reverse() as AgentTurn[],sources:selected,question,activity,currentPage:typeof body.page==='string'&&/^\/community(?:\/[^?#]*)?$/.test(body.page)?body.page.slice(0,150):'/community'})
     const answer=await generateOpenRouterText({...prompt,maxTokens:1400,temperature:0.2,timeoutMs:35000})
     if(!answer.trim())throw new Error('Empty agent response')
     const sourceLinks=selected.map(({title,url,kind})=>({title,url,kind}))

@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/agenciaspace/open-playbook",
+  "revision": "375a79c5dbc16d3bd6060e3cc1182b09697dfe2b",
+  "paths": [
+    "cloudflare-landing/playbook"
+  ]
+}

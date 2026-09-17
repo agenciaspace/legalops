@@ -4,16 +4,18 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Bell, ChevronDown, MessageCircle, Plus, Search, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
+import { MemberAvatar } from '@/components/community/MemberAvatar'
 import { BrandWordmark } from '@/components/BrandLogo'
 
 interface NavProps {
   discoverCount: number
   jobAlertCount: number
   hasClubAccess: boolean
+  member?: {user_id:string;display_name:string;avatar_path?:string|null}|null
   isClubAdmin?: boolean
 }
 
-export function Nav({ discoverCount, jobAlertCount, hasClubAccess, isClubAdmin = false }: NavProps) {
+export function Nav({ discoverCount, jobAlertCount, hasClubAccess, isClubAdmin = false, member }: NavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const isCommunity = pathname.startsWith('/community')
@@ -57,15 +59,8 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess, isClubAdmin =
 
           </Link>
 
-          <form action="/community" method="get" className="mx-auto hidden h-9 w-full max-w-md items-center gap-2 rounded-full border border-[#CEC8BD] bg-white/65 px-3 text-xs md:flex"><Search className="h-4 w-4" /><input name="q" aria-label="Buscar na comunidade" placeholder="Buscar na comunidade" maxLength={80} className="min-w-0 flex-1 bg-transparent outline-none"/><button type="submit" className="font-semibold">Buscar</button></form>
-
           <div className="ml-auto flex shrink-0 items-center gap-1.5">
-            {isPosts ? <Link href="/community#new-post" className="hidden h-11 items-center gap-1.5 rounded-full bg-[#E88A6A] px-3.5 text-xs font-extrabold text-[#111111] transition hover:bg-[#DE7B5C] sm:flex">
-              <Plus className="h-4 w-4" /> Novo post
-            </Link> : null}
-            <Link href="/community#community-search" className="flex h-11 w-11 items-center justify-center rounded-full text-[#69635E] md:hidden" aria-label="Buscar na comunidade"><Search className="h-[18px] w-[18px]" /></Link>
-
-            <details className="relative"><summary className="ml-0.5 flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-[#111111] text-[10px] font-black text-white" aria-label="Abrir menu do perfil">LO</summary><div className="absolute right-0 top-12 w-52 rounded-xl border border-[#CEC8BD] bg-white p-2 text-sm shadow-lg"><Link href="/community/profile" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu perfil</Link><Link href="/community/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu Pro</Link>{isClubAdmin&&<Link href="/club/admin/bench" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Revisar contribuições</Link>}{isClubAdmin&&<Link href="/club/admin/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Pagamentos do Pro</Link>}<button onClick={handleSignOut} className="w-full rounded-lg p-3 text-left hover:bg-[#F5F1E8]">Sair</button></div></details>
+            <details className="relative"><summary className="ml-0.5 flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-[#111111] text-[10px] font-black text-white" aria-label="Abrir menu do perfil"><MemberAvatar userId={member?.user_id} name={member?.display_name || 'Meu perfil'} path={member?.avatar_path} size="h-11 w-11" /></summary><div className="absolute right-0 top-12 w-52 rounded-xl border border-[#CEC8BD] bg-white p-2 text-sm shadow-lg"><Link href="/community/profile" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu perfil</Link><Link href="/community/members" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Membros</Link><Link href="/community/office" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Escritório</Link><Link href="/community/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu Pro</Link>{isClubAdmin&&<Link href="/club/admin/bench" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Revisar contribuições</Link>}{isClubAdmin&&<Link href="/club/admin/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Pagamentos do Pro</Link>}<button onClick={handleSignOut} className="w-full rounded-lg p-3 text-left hover:bg-[#F5F1E8]">Sair</button></div></details>
           </div>
         </div>
       </header>

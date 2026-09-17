@@ -1,5 +1,6 @@
 import { CalendarDays, Clock3, MapPin, Plus, Video } from 'lucide-react'
 import BenchSection from './BenchSection'
+import {BenchDisclosure} from './BenchDisclosure'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 type Event = {
@@ -42,9 +43,9 @@ export default async function CalendarPage() {
     .select('id, slug, title, description, host_name, starts_at, ends_at, location_label, location_url, event_type')
     .eq('is_published', true)
     .gte('starts_at', new Date().toISOString())
-    .order('starts_at', { ascending: true })
+    .order('starts_at', { ascending: true }).limit(1)
 
-  const events = ((rawEvents ?? []) as Event[]).filter(event => event.slug !== 'bench-nubank-2026-09-17')
+  const events = (rawEvents ?? []) as Event[]
 
   return (
     <div className="mx-auto w-full max-w-[1000px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
@@ -56,12 +57,10 @@ export default async function CalendarPage() {
 
       </header>
 
-      <nav aria-label="Seções de eventos" className="mt-5 flex flex-wrap gap-2"><a href="#bench" className="inline-flex min-h-12 items-center rounded-xl border border-[#CEC8BD] bg-white px-4 text-sm font-semibold">Bench</a><a href="#outros-eventos" className="inline-flex min-h-12 items-center rounded-xl border border-[#CEC8BD] bg-white px-4 text-sm font-semibold">Outros encontros</a></nav>
-      <BenchSection />
       <section id="outros-eventos" className="scroll-mt-24 mt-8 overflow-hidden rounded-xl border border-[#E1E1DD] bg-white">
         <div className="flex items-center justify-between border-b border-[#ECECE8] px-4 py-3.5 sm:px-5">
-          <h2 className="text-xs font-extrabold text-[#34332F]">Outros encontros</h2>
-          <span className="rounded-md bg-[#F1F1EE] px-2 py-1 text-[8px] font-black text-[#77746E]">{events.length} AGENDADOS</span>
+          <h2 className="text-xs font-extrabold text-[#34332F]">Próximo encontro</h2>
+
         </div>
 
         <div className="divide-y divide-[#ECECE8]">
@@ -105,6 +104,7 @@ export default async function CalendarPage() {
           ) : null}
         </div>
       </section>
+      <BenchDisclosure><BenchSection /></BenchDisclosure>
     </div>
   )
 }
