@@ -96,7 +96,7 @@ export default async function BenchTopicPage({ params, searchParams }: PageProps
               <div className="mt-8 grid gap-3 border-y border-[#CEC8BD] py-5 sm:grid-cols-3">
                 <div className="flex items-center gap-2 text-sm font-semibold"><CalendarDays className="h-4 w-4 text-[#C9684F]" /> {formatDate(session.starts_at)}</div>
                 <div className="flex items-center gap-2 text-sm font-semibold"><Clock3 className="h-4 w-4 text-[#C9684F]" /> {Math.round((new Date(session.ends_at).getTime() - new Date(session.starts_at).getTime()) / 60000)} min</div>
-                <div className="flex items-center gap-2 text-sm font-semibold"><MapPin className="h-4 w-4 text-[#C9684F]" /> Online · Google Meet</div>
+                <div className="flex items-center gap-2 text-sm font-semibold"><MapPin className="h-4 w-4 text-[#C9684F]" /> {topic.participation_mode === 'presencial' ? 'Presencial' : topic.participation_mode === 'hibrido' ? 'Híbrido' : 'Remoto · Google Meet'}</div>
               </div>
             ) : (
               <div className="mt-8 border-y border-[#CEC8BD] py-5">
