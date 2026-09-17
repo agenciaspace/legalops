@@ -27,8 +27,10 @@ export async function middleware(request: NextRequest) {
 
   let supabaseResponse = NextResponse.next({ request })
   const publicPaths = new Set(['/', '/club', '/club/about', '/club/checkout', '/cadastro', '/login', '/set-password', '/auth/confirm'])
+  const isPublicEventPage = pathname.startsWith('/community/events/') && pathname.split('/').length === 4
   const isPublicPage = publicPaths.has(pathname)
     || pathname === '/bench/nubank-2026-09-17'
+    || isPublicEventPage
   const publicWebhookPaths = new Set([
     '/api/webhooks/brevo/inbound',
     '/api/webhooks/cloudflare/inbound',
@@ -84,7 +86,7 @@ export async function middleware(request: NextRequest) {
   const requiresClub = pathname === '/onboard'
     || ['/dashboard', '/discover', '/pipeline', '/jobs', '/settings', '/professionals'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
     || ['/api/club', '/api/profile', '/api/pipeline', '/api/jobs', '/api/ai'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
-    || pathname === '/community' || pathname.startsWith('/community/')
+    || pathname === '/community' || pathname.startsWith('/community/') && !isPublicEventPage
 
   let clubAccess: { club_access_status: string | null; club_access_expires_at: string | null; club_pro_status: string | null; club_pro_expires_at: string | null } | null = null
   if (requiresClub) {
