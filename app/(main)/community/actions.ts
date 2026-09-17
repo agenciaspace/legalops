@@ -69,6 +69,19 @@ export async function createCommunityPost(formData: FormData) {
   }
 }
 
+export async function createCommunitySubtopic(formData: FormData) {
+  const category = String(formData.get('category') ?? '').trim()
+  const title = String(formData.get('title') ?? '').trim().slice(0, 160)
+  const description = String(formData.get('description') ?? '').trim().slice(0, 1000)
+  if (!COMMUNITY_CATEGORIES[category] || title.length < 3) return
+  const { supabase, user } = await getAuthenticatedMember()
+  const { error } = await supabase.from('community_forum_topics').insert({ category, title, description, created_by: user.id })
+  if (!error) {
+    revalidatePath('/community')
+    redirect(`/community?space=${encodeURIComponent(category)}&subtopic=created`)
+  }
+}
+
 export async function registerPublicEvent(formData: FormData) {
   const eventId = String(formData.get('event_id') ?? '').trim()
   const name = String(formData.get('name') ?? '').trim().slice(0, 120)

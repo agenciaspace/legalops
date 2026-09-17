@@ -3,7 +3,7 @@ import { CalendarDays, Heart, Lock, MessageCircle, Pin, Send } from 'lucide-reac
 import { MemberAvatar } from '@/components/community/MemberAvatar'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { COMMUNITY_CATEGORIES, formatCommunityDate, getCommunityCategory, hasActiveClubAccess } from '@/lib/community'
-import { createCommunityComment, createCommunityPost, toggleCommunityPostLike } from './actions'
+import { createCommunityComment, createCommunityPost, createCommunitySubtopic, toggleCommunityPostLike } from './actions'
 
 type Post = {id:string;author_id:string|null;author_name:string;author_role:string|null;category:string;title:string;body:string;is_pinned:boolean;created_at:string;community_comments:{id:string;author_name:string;body:string;created_at:string}[];community_post_likes:{user_id:string}[]}
 export const dynamic = 'force-dynamic'
@@ -26,6 +26,7 @@ export default async function CommunityPage({searchParams}:{searchParams?:{space
  const {data:authors}=authorIds.length ? await supabase.from('community_members').select('user_id,display_name,current_role,organization_name,organization_description,avatar_path').in('user_id',authorIds) : {data:[]}
  const authorById=new Map((authors??[]).map(a=>[a.user_id,a]))
  const {data:feedEvents}=await supabase.from('community_events').select('id,slug,title,description,host_name,starts_at,location_label,event_type').eq('is_published',true).order('starts_at',{ascending:false}).limit(10)
+ const {data:subtopics}=selectedSpace ? await supabase.from('community_forum_topics').select('id,title,description,created_at').eq('category',selectedSpace).eq('status','active').order('created_at',{ascending:false}).limit(20) : {data:[]}
  const next=new URLSearchParams({count:String(take+3)});if(search)next.set('q',search);if(selectedSpace)next.set('space',selectedSpace)
  return <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
   <header className="mb-5"><h1 className="text-2xl font-semibold tracking-tight">Comunidade</h1></header>
@@ -46,6 +47,8 @@ export default async function CommunityPage({searchParams}:{searchParams?:{space
     <button className="min-h-12 rounded-lg bg-[#24231F] px-4 font-semibold text-white">Buscar</button>{search||selectedSpace?<Link href="/community" className="inline-flex min-h-12 items-center">Limpar filtros</Link>:null}
    </form>
   </details>
+  {selectedSpace && hasCommunityAccess ? <details className="mb-5 rounded-xl border border-[#CEC8BD] bg-white p-4"><summary className="cursor-pointer text-sm font-semibold">Criar subtema em {COMMUNITY_CATEGORIES[selectedSpace].label}</summary><form action={createCommunitySubtopic} className="mt-4 space-y-3"><input type="hidden" name="category" value={selectedSpace} /><input name="title" required minLength={3} maxLength={160} placeholder="Nome do subtema" className="min-h-11 w-full rounded-lg border px-3 text-sm" /><textarea name="description" maxLength={1000} rows={2} placeholder="O que vamos discutir?" className="w-full rounded-lg border p-3 text-sm" /><button className="min-h-11 rounded-lg bg-[#24231F] px-4 text-sm font-semibold text-white">Criar subtema</button></form></details> : null}
+  {selectedSpace && subtopics?.length ? <section className="mb-5 rounded-xl border border-[#E1E1DD] bg-white p-4"><h2 className="text-sm font-bold">Subtemas do fórum</h2><div className="mt-3 grid gap-2 sm:grid-cols-2">{subtopics.map(topic => <div key={topic.id} className="rounded-lg bg-[#F7F7F5] p-3"><p className="text-sm font-semibold">{topic.title}</p>{topic.description ? <p className="mt-1 text-xs text-[#716B65]">{topic.description}</p> : null}</div>)}</div></section> : null}
   {posts.length===0 && !(feedEvents?.length) ? <p className="py-8 text-sm leading-6 text-[#625E59]">{search||selectedSpace?'Nenhuma publicação encontrada.':'Ainda não há publicações. Compartilhe uma pergunta ou experiência para começar.'}</p> : null}
   <div className="space-y-4">
    {(feedEvents ?? []).map(event => <article key={`event-${event.id}`} className="rounded-xl border border-[#FFD8C8] bg-[#FFF8F4] p-4 sm:p-5">

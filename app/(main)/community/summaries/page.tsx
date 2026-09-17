@@ -31,8 +31,8 @@ export default async function DiscussionSummariesPage() {
     <div className="mx-auto w-full max-w-[920px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
       <header>
         <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.14em] text-[#D9470F]"><Sparkles className="h-3.5 w-3.5" /> Curadoria assistida por IA</div>
-        <h1 className="mt-2 text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Resumos das discussões</h1>
-        <p className="mt-1 max-w-2xl text-xs leading-5 text-[#77746E]">A cada semana, a IA organiza argumentos, aprendizados e perguntas que surgiram nas comunidades — sem substituir a conversa original.</p>
+        <h1 className="mt-2 text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Resumos do WhatsApp</h1>
+        <p className="mt-1 max-w-2xl text-xs leading-5 text-[#77746E]">Aqui entram os resumos das conversas gerais do WhatsApp. No app, os fóruns ficam organizados por assunto; no WhatsApp falamos de tudo para manter a conversa aberta.</p>
       </header>
 
       <section className="mt-5 rounded-xl border border-[#FFD6C7] bg-[#FFF6F1] p-4">

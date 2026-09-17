@@ -43,7 +43,7 @@ export default async function CalendarPage() {
     .select('id, slug, title, description, host_name, starts_at, ends_at, location_label, location_url, event_type')
     .eq('is_published', true)
     .gte('starts_at', new Date().toISOString())
-    .order('starts_at', { ascending: true }).limit(1)
+    .order('starts_at', { ascending: true }).limit(50)
 
   const events = (rawEvents ?? []) as Event[]
 
