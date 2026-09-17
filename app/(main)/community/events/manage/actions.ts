@@ -30,6 +30,7 @@ export async function updateEventConfiguration(formData: FormData) {
   const locationUrl = value(formData, 'location_url', 1000)
   const mode = ['presencial', 'remoto', 'hibrido'].includes(value(formData, 'participation_mode', 20)) ? value(formData, 'participation_mode', 20) : 'remoto'
   const details = value(formData, 'participation_details', 3000)
+  if (title.length < 3 || description.length < 10 || hostName.length < 2 || location.length < 2 || (locationUrl && !/^https:\/\//i.test(locationUrl))) redirect(`/community/events/manage?event=${eventId}&error=fields`)
   const questions = value(formData, 'pre_questions', 5000).split('\n').map(q => q.trim()).filter(Boolean).slice(0, 20)
   let fields: { key: string; label: string; required: boolean }[] = []
   try {
