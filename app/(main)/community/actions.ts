@@ -100,9 +100,9 @@ export async function shareEventResource(formData: FormData) {
   const eventId = String(formData.get('event_id') ?? '').trim()
   const title = String(formData.get('title') ?? '').trim().slice(0, 160)
   const description = String(formData.get('description') ?? '').trim().slice(0, 1000)
-  const url = String(formData.get('resource_url') ?? '').trim()
+  const file = formData.get('file')
   const kind = String(formData.get('kind') ?? 'link')
-  if (!eventId || title.length < 2 || !/^https:\/\//.test(url) || !['foto', 'documento', 'link', 'outro'].includes(kind)) return
+  if (!eventId || title.length < 2 || !(file instanceof File) || file.size < 1 || file.size > 10 * 1024 * 1024 || !['foto', 'documento', 'outro'].includes(kind)) return
   const { supabase, user } = await getAuthenticatedMember()
   const [{ data: attendance }, { data: eventAdmin }] = await Promise.all([
     supabase.from('community_event_rsvps').select('id').eq('event_id', eventId).eq('user_id', user.id).eq('response', 'confirmed').maybeSingle(),
@@ -111,7 +111,13 @@ export async function shareEventResource(formData: FormData) {
   if (!attendance && !eventAdmin) return
   const { data: event } = await supabase.from('community_events').select('slug').eq('id', eventId).eq('is_published', true).maybeSingle()
   if (!event) return
-  await supabase.from('community_event_resources').insert({ event_id: eventId, uploader_id: user.id, kind, title, description, resource_url: url })
+  const extension = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8) : 'bin'
+  const storagePath = `${eventId}/${user.id}/${crypto.randomUUID()}.${extension || 'bin'}`
+  const admin = createAdminClient()
+  const { error: uploadError } = await admin.storage.from('community-event-files').upload(storagePath, new Uint8Array(await file.arrayBuffer()), { contentType: file.type, upsert: false })
+  if (uploadError) return
+  const { error } = await admin.from('community_event_resources').insert({ event_id: eventId, uploader_id: user.id, kind, title, description, storage_path: storagePath, resource_url: null })
+  if (error) { await admin.storage.from('community-event-files').remove([storagePath]); return }
   revalidatePath(`/community/events/${event.slug}`)
   redirect(`/community/events/${event.slug}?shared=1`)
 }
