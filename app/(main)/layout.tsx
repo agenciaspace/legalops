@@ -9,7 +9,9 @@ import { hasActiveClubAccess } from '@/lib/community'
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  // Middleware protects the private routes. Public event pages also live in
+  // this route group, so let those pages render without the authenticated nav.
+  if (!user) return <div className="min-h-screen bg-[#F5F1E8]">{children}</div>
 
   const [{ data: pipeline }, { data: clubAccess }] = await Promise.all([
     supabase
