@@ -19,6 +19,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.rewrite(clubUrl)
   }
 
+  // Public Bench has its own input limits and publishes only reviewed content.
+  // Keep this exact path independent of Club authentication and paid access.
+  if (pathname === '/api/bench/contributions') return NextResponse.next({ request })
+
   let supabaseResponse = NextResponse.next({ request })
   const publicPaths = new Set(['/', '/club', '/club/about', '/club/checkout', '/cadastro', '/login', '/set-password', '/auth/confirm'])
   const isPublicPage = publicPaths.has(pathname)

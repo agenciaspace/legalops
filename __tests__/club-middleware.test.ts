@@ -41,3 +41,9 @@ describe('Club admission and Pro routing', () => {
     expect((await request('/community')).status).toBe(200)
   })
 })
+
+it('exposes only the exact Bench intake path and keeps moderation authenticated', async () => {
+  expect((await request('/api/bench/contributions')).status).toBe(200)
+  expect((await request('/api/bench/contributions/admin')).status).toBe(401)
+  expect((await request('/club/admin/bench')).headers.get('location')).toContain('/login?next=')
+})

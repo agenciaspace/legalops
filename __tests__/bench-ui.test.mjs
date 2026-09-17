@@ -24,6 +24,7 @@ describe('Bench calculator browser controls', () => {
     expect(document.getElementById('ranking').textContent).toContain('Veto: Segurança');
   });
   it('updates custom scores and handles all-zero priorities', () => {
+    document.querySelector('[data-preset="balanced"]').click();
     const el = document.querySelector('[data-vendor="0"][data-score="0"]');
     el.value = '0'; el.dispatchEvent(new Event('change', { bubbles: true }));
     expect(document.getElementById('result-title').textContent).toContain('Luminance');
@@ -39,4 +40,16 @@ describe('Bench calculator browser controls', () => {
     el.click();
     expect(document.querySelector('.sources').open).toBe(true);
   });
+});
+
+it('keeps checklist focus and saves the private diagnosis locally', () => {
+  document.getElementById('reset').click();
+  const task = document.querySelector('[data-task]');
+  task.focus(); task.click();
+  expect(document.activeElement).toBe(task);
+  expect(document.getElementById('stage-progress').textContent).toContain('1 de 18');
+  const input = document.querySelector('[data-profile="existing_tools"]');
+  input.value = 'CRM\nERP\nCRM'; input.dispatchEvent(new Event('input', { bubbles: true }));
+  expect(document.getElementById('stack-count').textContent).toContain('2 ferramentas');
+  expect(JSON.parse(localStorage.getItem('legalops-clm-bench-v2')).profile.existing_tools).toBe('CRM\nERP\nCRM');
 });
