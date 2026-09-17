@@ -1,0 +1,39 @@
+{
+  "case": "cover_letter",
+  "requested_model": "google/gemini-3.1-flash-lite",
+  "model": "google/gemini-3.1-flash-lite",
+  "provider": "Google",
+  "id": "gen-1789609725-N9uwQuWs0mTzjbAq0io9",
+  "status": 200,
+  "latency_ms": 1868,
+  "usage": {
+    "prompt_tokens": 601,
+    "completion_tokens": 185,
+    "total_tokens": 786,
+    "cost": 0.0004234725,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00042775,
+      "upstream_inference_prompt_cost": 0.00015025,
+      "upstream_inference_completions_cost": 0.0002775
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\n\"job_id\": \"j1\",\n\"letter\": \"Olá, gostaria de me candidatar à vaga de Analista de Legal Ops. Com 3 anos de experiência na área, possuo sólida vivência com gestão de contratos e implementação de CLM. Minhas competências técnicas incluem o uso avançado de Excel e Power BI para análise de dados e otimização de processos jurídicos. Tenho inglês em nível intermediário e busco atuar em um modelo remoto no Brasil, contribuindo para a eficiência operacional do departamento jurídico. Acredito que meu perfil técnico e foco em melhoria de fluxos estão alinhados aos requisitos da posição. Estou à disposição para uma entrevista e para detalhar como posso agregar valor ao time.\",\n\"claimed_skills\": [\"Excel\", \"Power BI\"],\n\"claimed_experience_years\": 3,\n\"sent\": false\n}",
+  "error": null,
+  "client_latency_ms": 1940,
+  "repeat": 2,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:48:47Z"
+}

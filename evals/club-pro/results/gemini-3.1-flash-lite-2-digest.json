@@ -1,0 +1,39 @@
+{
+  "case": "digest",
+  "requested_model": "google/gemini-3.1-flash-lite",
+  "model": "google/gemini-3.1-flash-lite",
+  "provider": "Google",
+  "id": "gen-1789609721-0O2kELm2ymWlZI981yEL",
+  "status": 200,
+  "latency_ms": 2598,
+  "usage": {
+    "prompt_tokens": 466,
+    "completion_tokens": 246,
+    "total_tokens": 712,
+    "cost": 0.000480645,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0004855,
+      "upstream_inference_prompt_cost": 0.0001165,
+      "upstream_inference_completions_cost": 0.000369
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\n  \"mandatory_deadline\": \"2026-09-18 16:00 BRT\",\n  \"clm_date\": \"2026-09-22 19:00 BRT\",\n  \"registration_deadline\": \"2026-09-21 17:00 BRT\",\n  \"clm_url\": \"https://example.org/clm-v2\",\n  \"summary\": \"Olá, Pessoa fictícia A. Como Analista de Legal Ops em Recife, seu perfil focado em Contratos e CLM está alinhado ao evento sobre CLM v2. Note que o status de spend foi cancelado e o de procurement está em fase de proposta. Lembre-se de cumprir o prazo obrigatório de 18/09, mesmo fora de suas competências atuais em Python ou DocuSign.\",\n  \"actions_performed\": [\n    \"Verificação de prazos obrigatórios\",\n    \"Alinhamento de interesses em CLM\",\n    \"Monitoramento de status de procurement\"\n  ]\n}",
+  "error": null,
+  "client_latency_ms": 2895,
+  "repeat": 2,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:48:43Z"
+}

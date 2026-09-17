@@ -1,0 +1,39 @@
+{
+  "case": "cover_letter_v2",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609867-h3CF3PGj1M6f8Ks9YiWY",
+  "status": 200,
+  "latency_ms": 3638,
+  "usage": {
+    "prompt_tokens": 805,
+    "completion_tokens": 198,
+    "total_tokens": 1003,
+    "cost": 0.00533115,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.005385,
+      "upstream_inference_prompt_cost": 0.002415,
+      "upstream_inference_completions_cost": 0.00297
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\n  \"job_id\": \"j1\",\n  \"letter\": \"Olá, meu nome é Pessoa fictícia A e tenho 3 anos de experiência em Legal Ops. Atuo com Excel e Power BI no suporte a processos jurídicos e tenho interesse em temas de contratos e CLM. Estou baseada em Recife e disponível para trabalho remoto em todo o Brasil, o que se alinha à modalidade da vaga. Acredito que meu perfil atende aos requisitos listados para a posição de Analista de Legal Ops pleno. Fico à disposição para conversar mais sobre a oportunidade.\",\n  \"claimed_skills\": [\"Excel\", \"Power BI\"],\n  \"claimed_experience_years\": 3,\n  \"sent\": false\n}",
+  "error": null,
+  "client_latency_ms": 3774,
+  "repeat": 2,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:51:11Z"
+}

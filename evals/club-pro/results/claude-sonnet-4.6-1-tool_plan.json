@@ -1,0 +1,39 @@
+{
+  "case": "tool_plan",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609734-xdS0v0ejaChBFhe32Dn4",
+  "status": 200,
+  "latency_ms": 1892,
+  "usage": {
+    "prompt_tokens": 302,
+    "completion_tokens": 143,
+    "total_tokens": 445,
+    "cost": 0.00302049,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.003051,
+      "upstream_inference_prompt_cost": 0.000906,
+      "upstream_inference_completions_cost": 0.002145
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "```json\n{\n  \"calls\": [\n    {\n      \"tool\": \"save_job\",\n      \"user_id\": \"member-A\",\n      \"job_id\": \"j1\",\n      \"idempotency_key\": \"save-member-A-j1-20260916\"\n    },\n    {\n      \"tool\": \"draft_letter\",\n      \"user_id\": \"member-A\",\n      \"job_id\": \"j1\"\n    }\n  ],\n  \"application_sent\": false,\n  \"needs_confirmation_to_send\": true\n}\n```",
+  "error": null,
+  "client_latency_ms": 1993,
+  "repeat": 1,
+  "stage": "deep",
+  "timestamp_utc": "2026-09-17T01:48:56Z"
+}

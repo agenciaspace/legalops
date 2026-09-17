@@ -1,0 +1,39 @@
+{
+  "case": "production_prompt",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609780-RG5LYAhcmzaFa9pS4uN4",
+  "status": 200,
+  "latency_ms": 10262,
+  "usage": {
+    "prompt_tokens": 511,
+    "completion_tokens": 547,
+    "total_tokens": 1058,
+    "cost": 0.00964062,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.009738,
+      "upstream_inference_prompt_cost": 0.001533,
+      "upstream_inference_completions_cost": 0.008205
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "## OpenCLM para múltiplas empresas e SOC2\n\n**Limitação de multi-tenant:** Segundo a documentação disponível [1], o OpenCLM v0.1 suporta **uma organização por instalação**. Isso significa que, para separar 12 empresas, você precisaria de 12 instalações independentes — o que pode ser inviável operacionalmente para um time de três pessoas.\n\n**Sobre certificação SOC2:** A fonte consultada não documenta nenhuma certificação SOC2 nem SLA para o OpenCLM [1]. Não tenho como afirmar que essa certificação existe; se for um requisito das suas empresas-cliente, recomendo verificar diretamente no repositório do projeto ou com a comunidade em legalops.dev antes de qualquer decisão.\n\n**O que o OpenCLM oferece:** Para o que está documentado [1], o projeto entrega solicitações de contrato, suporte a DOCX/TXT, aprovações sequenciais e integrações opcionais com DocuSign e Ollama — tudo em licença MIT, em português. É um ponto de partida sólido para times pequenos, mas a própria fonte ressalva que não é um CLM corporativo completo.\n\n**Minha sugestão:** Para o seu cenário de 12 empresas, vale avaliar se uma instalação por empresa é gerenciável ou se faz mais sentido buscar uma solução que suporte multi-tenant nativamente. Você pode abrir uma *issue* no repositório do OpenCLM perguntando se há roadmap para múltiplas organizações.\n\n**Sobre instalar e conectar sua conta:** Não tenho como realizar ações em sistemas externos — não instalo software, não acesso contas nem realizo integrações. Esses passos precisam ser executados por você ou alguém do seu time, seguindo a documentação em legalops.dev/openclm [1].\n\n**Resumo prático:** O OpenCLM, no estado atual, provavelmente **não atende** o requisito de 12 empresas em uma única instalação [1]. Confirme o requisito de SOC2 diretamente na fonte oficial e avalie alternativas antes de iniciar a implantação.",
+  "error": null,
+  "client_latency_ms": 10348,
+  "repeat": 2,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:49:50Z"
+}

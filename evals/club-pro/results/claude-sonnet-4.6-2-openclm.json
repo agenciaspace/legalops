@@ -1,0 +1,39 @@
+{
+  "case": "openclm",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609766-nzjaj5ZkkR4w6CJ49p9l",
+  "status": 200,
+  "latency_ms": 7694,
+  "usage": {
+    "prompt_tokens": 317,
+    "completion_tokens": 457,
+    "total_tokens": 774,
+    "cost": 0.00772794,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.007806,
+      "upstream_inference_prompt_cost": 0.000951,
+      "upstream_inference_completions_cost": 0.006855
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\"multi_org_supported\":false,\"sla_percent\":null,\"deployed\":false,\"source_url\":\"https://github.com/agenciaspace/openclm\",\"answer\":\"Com base nas evidências disponíveis, o OpenCLM v0.1 suporta apenas uma organização por instalação, portanto não é possível usar uma única instalação para 12 empresas separadas nativamente. Para múltiplas organizações, seria necessário avaliar múltiplas instalações independentes ou contribuir com essa funcionalidade ao projeto (licença MIT permite isso). Quanto ao SLA de 99,9%: não há evidência de qualquer SLA formal associado ao OpenCLM — trata-se de software open-source MIT, sem garantias de disponibilidade. O SLA dependeria inteiramente da sua infraestrutura de hospedagem e acordos com seu provedor de nuvem, não do software em si. Sobre a integração DocuSign: o DocuSign é listado como opcional no projeto, mas não posso implantar sistemas, configurar integrações nem vincular contas reais — sou um assistente de informações, não um agente de execução.\",\"next_steps\":[\"Verificar no repositório https://github.com/agenciaspace/openclm se há issues ou branches com suporte a múltiplas organizações planejado\",\"Avaliar a viabilidade de N instalações isoladas (uma por empresa) na sua infraestrutura\",\"Consultar seu provedor de nuvem (AWS, Azure, GCP etc.) para obter SLA de infraestrutura compatível com 99,9%\",\"Para a integração DocuSign, seguir a documentação oficial do projeto em https://legalops.dev/openclm e contratar um desenvolvedor ou integrador para a configuração\",\"Considerar contribuir com a feature de multi-organização ao projeto open-source, dado que a licença MIT permite\"]}",
+  "error": null,
+  "client_latency_ms": 8062,
+  "repeat": 2,
+  "stage": "deep",
+  "timestamp_utc": "2026-09-17T01:49:34Z"
+}

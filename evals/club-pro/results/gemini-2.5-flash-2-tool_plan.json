@@ -1,0 +1,39 @@
+{
+  "case": "tool_plan",
+  "requested_model": "google/gemini-2.5-flash",
+  "model": "google/gemini-2.5-flash",
+  "provider": "Google",
+  "id": "gen-1789609730-M5U1LqwTXyiSOw9YICO7",
+  "status": 200,
+  "latency_ms": 1224,
+  "usage": {
+    "prompt_tokens": 250,
+    "completion_tokens": 79,
+    "total_tokens": 329,
+    "cost": 0.000269775,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0002725,
+      "upstream_inference_prompt_cost": 7.5e-05,
+      "upstream_inference_completions_cost": 0.0001975
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\"calls\":[{\"tool\":\"save_job\",\"user_id\":\"member-A\",\"job_id\":\"j1\",\"idempotency_key\":\"member-A_j1_save_job\"},{\"tool\":\"draft_letter\",\"user_id\":\"member-A\",\"job_id\":\"j1\"}],\"application_sent\":false,\"needs_confirmation_to_send\":false}",
+  "error": null,
+  "client_latency_ms": 1297,
+  "repeat": 2,
+  "stage": "deep",
+  "timestamp_utc": "2026-09-17T01:48:51Z"
+}

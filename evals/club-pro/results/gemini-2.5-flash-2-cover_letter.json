@@ -1,0 +1,39 @@
+{
+  "case": "cover_letter",
+  "requested_model": "google/gemini-2.5-flash",
+  "model": "google/gemini-2.5-flash",
+  "provider": "Google",
+  "id": "gen-1789609725-xZk907OpCAqRlSjTFvgX",
+  "status": 200,
+  "latency_ms": 2162,
+  "usage": {
+    "prompt_tokens": 643,
+    "completion_tokens": 181,
+    "total_tokens": 824,
+    "cost": 0.000638946,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0006454,
+      "upstream_inference_prompt_cost": 0.0001929,
+      "upstream_inference_completions_cost": 0.0004525
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "```json\n{\"job_id\": \"j1\", \"letter\": \"Prezados, com 3 anos de experiência em Legal Ops, apresento meu interesse na vaga de Analista de Legal Ops pleno. Minha trajetória profissional me proporcionou o desenvolvimento de habilidades em Excel e Power BI, ferramentas que considero essenciais para a otimização de processos e análise de dados na área. Tenho grande interesse em Contratos e CLM, áreas nas quais busco aprimorar continuamente meus conhecimentos. Acredito que minha experiência e minhas habilidades se alinham perfeitamente aos requisitos da posição, e estou motivado a contribuir para o sucesso da equipe. Agradeço a atenção e coloco-me à disposição para uma conversa.\", \"claimed_skills\": [\"Excel\", \"Power BI\"], \"claimed_experience_years\": 3, \"sent\": true}\n```",
+  "error": null,
+  "client_latency_ms": 2265,
+  "repeat": 2,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:48:48Z"
+}

@@ -1,0 +1,39 @@
+{
+  "case": "cover_letter_v2",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609860-vvgzmznzB2Gc6dr870cZ",
+  "status": 200,
+  "latency_ms": 4727,
+  "usage": {
+    "prompt_tokens": 825,
+    "completion_tokens": 261,
+    "total_tokens": 1086,
+    "cost": 0.0063261,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00639,
+      "upstream_inference_prompt_cost": 0.002475,
+      "upstream_inference_completions_cost": 0.003915
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\n  \"job_id\": \"j1\",\n  \"letter\": \"Olá, tudo bem?\\n\\nMeu nome é Pessoa fictícia A e tenho 3 anos de experiência em Legal Ops. Atuo com Excel e Power BI no suporte a processos jurídicos e tenho interesse especial em contratos e CLM. Estou baseada em Recife e disponível para trabalho remoto em todo o Brasil, o que se alinha à modalidade da vaga.\\n\\nIdentifiquei que os requisitos da posição — experiência em Legal Ops, Excel e Power BI — correspondem ao meu perfil atual. Acredito que posso contribuir com a equipe e tenho interesse em aprofundar minha atuação na área.\\n\\nFico à disposição para conversarmos mais sobre a oportunidade.\\n\\nAtenciosamente,\\nPessoa fictícia A\",\n  \"claimed_skills\": [\"Excel\", \"Power BI\"],\n  \"claimed_experience_years\": 3,\n  \"sent\": false\n}",
+  "error": null,
+  "client_latency_ms": 4890,
+  "repeat": 1,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:51:05Z"
+}

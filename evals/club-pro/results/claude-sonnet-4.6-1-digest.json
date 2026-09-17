@@ -1,0 +1,39 @@
+{
+  "case": "digest",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609710-DhmdUkV8b8yZceAEXuYH",
+  "status": 200,
+  "latency_ms": 8170,
+  "usage": {
+    "prompt_tokens": 649,
+    "completion_tokens": 570,
+    "total_tokens": 1219,
+    "cost": 0.01039203,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.010497,
+      "upstream_inference_prompt_cost": 0.001947,
+      "upstream_inference_completions_cost": 0.00855
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\n  \"mandatory_deadline\": \"2026-09-18 16:00 BRT\",\n  \"clm_date\": \"2026-09-22 19:00 BRT\",\n  \"registration_deadline\": \"2026-09-21 17:00 BRT\",\n  \"clm_url\": \"https://example.org/clm-v2\",\n  \"summary\": \"Olá, Pessoa fictícia A! Confira os destaques desta semana para você, Analista de Legal Ops com foco em Contratos e CLM.\\n\\n⚠️ PRAZO OBRIGATÓRIO — Ação necessária até 18/09 às 16h BRT: atualização de consentimento no diretório. Este prazo é obrigatório para todos os membros, independentemente de área de interesse. Não perca.\\n\\n📅 Encontro de CLM — 22/09 às 19h BRT: tema diretamente alinhado ao seu perfil! Inscrições abertas até 21/09 às 17h. Acesse o material em https://example.org/clm-v2. Atenção: a URL foi corrigida recentemente (fonte m06), use somente este link.\\n\\n🛒 Encontro de Compras Jurídicas: há uma sugestão de encontro sobre o tema, mas sem data confirmada nem aprovação formal (informação de Bia, fonte m04). Nenhuma ação necessária por ora — acompanhe atualizações futuras.\\n\\n📊 Webinar de Spend Analysis: cancelado sem nova data prevista (fonte m05). Nenhuma ação necessária.\\n\\n🔍 Nota técnica — OpenCLM multi-org: o suporte a múltiplas organizações no OpenCLM não foi verificado pelo autor da informação (fonte m07). Trate como sugestão, não como fato confirmado.\\n\\nℹ️ Enquete de BI (opcional): há uma enquete em andamento até 23/09 às 10h BRT. Dado o seu perfil com Power BI, pode ser de interesse, mas não está mapeada nos campos oficiais do boletim — verifique comunicados complementares do clube.\",\n  \"actions_performed\": []\n}",
+  "error": null,
+  "client_latency_ms": 8299,
+  "repeat": 1,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:48:38Z"
+}

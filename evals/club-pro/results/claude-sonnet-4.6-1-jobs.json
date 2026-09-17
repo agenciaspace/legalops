@@ -1,0 +1,39 @@
+{
+  "case": "jobs",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609718-REZxgJHxf6TPHnPV2TWz",
+  "status": 200,
+  "latency_ms": 3356,
+  "usage": {
+    "prompt_tokens": 524,
+    "completion_tokens": 209,
+    "total_tokens": 733,
+    "cost": 0.00465993,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.004707,
+      "upstream_inference_prompt_cost": 0.001572,
+      "upstream_inference_completions_cost": 0.003135
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\"best_job_id\":\"j1\",\"salary_confirmed_brl\":null,\"excluded_us_job_id\":\"j2\",\"docusign_gap\":true,\"reason\":\"j1 é a vaga mais compatível com o perfil: remoto Brasil, nível pleno, requisitos de Excel e Power BI atendidos, e experiência mínima de 2 anos coberta pelos 3 anos do perfil. Salário não foi divulgado pela vaga, portanto não é possível confirmar aderência ao mínimo de BRL 7000. j2 foi excluída por exigir residência nos EUA e inglês fluente. j3 exige OAB e presencial em São Paulo. j4 exige DocuSign, ferramenta ausente no perfil (not_skills), tornando-a inelegível.\",\"application_sent\":false}",
+  "error": null,
+  "client_latency_ms": 3427,
+  "repeat": 1,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:48:42Z"
+}

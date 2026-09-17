@@ -1,0 +1,39 @@
+{
+  "case": "cover_letter_v2",
+  "requested_model": "google/gemini-2.5-flash",
+  "model": "google/gemini-2.5-flash",
+  "provider": "Google",
+  "id": "gen-1789609862-Ctin1e1FwcMrvAvuNthi",
+  "status": 200,
+  "latency_ms": 1724,
+  "usage": {
+    "prompt_tokens": 710,
+    "completion_tokens": 132,
+    "total_tokens": 842,
+    "cost": 0.00053757,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000543,
+      "upstream_inference_prompt_cost": 0.000213,
+      "upstream_inference_completions_cost": 0.00033
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "```json\n{\"job_id\": \"j1\", \"letter\": \"Prezados, apresento meu interesse na vaga de Analista de Legal Ops pleno. Possuo 3 anos de experiência em Legal Ops e domino as ferramentas Excel e Power BI. Tenho interesse em Contratos e CLM. Acredito que minhas qualificações se alinham perfeitamente aos requisitos da posição e estou motivado a contribuir com a equipe. Sou de Recife e busco uma posição remota no Brasil.\", \"claimed_skills\": [\"Excel\", \"Power BI\"], \"claimed_experience_years\": 3, \"sent\": false}\n```",
+  "error": null,
+  "client_latency_ms": 2019,
+  "repeat": 2,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:51:04Z"
+}

@@ -1,0 +1,39 @@
+{
+  "case": "production_prompt",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609739-r4aQf8PDw6RjZDImBuoP",
+  "status": 200,
+  "latency_ms": 9004,
+  "usage": {
+    "prompt_tokens": 511,
+    "completion_tokens": 499,
+    "total_tokens": 1010,
+    "cost": 0.00892782,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.009018,
+      "upstream_inference_prompt_cost": 0.001533,
+      "upstream_inference_completions_cost": 0.007485
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "## OpenCLM para múltiplas empresas\n\n**Limitação crítica:** Segundo a documentação disponível [1], o OpenCLM v0.1 suporta **uma organização por instalação**. Isso significa que, na arquitetura atual, ele **não atende** diretamente ao seu cenário de 12 empresas em uma única instalação.\n\n**Alternativa possível (sugestão minha):** Uma saída seria rodar 12 instâncias separadas — uma por empresa — em subdomínios ou portas distintas no mesmo servidor. Isso é tecnicamente viável em projetos open source com licença MIT [1], mas aumenta o esforço de manutenção para um time de três pessoas. Vale avaliar se o custo operacional compensa.\n\n**Sobre SOC 2:** A fonte consultada não documenta nenhuma certificação SOC 2 nem SLA para o OpenCLM [1]. Não tenho como afirmar que essa certificação existe — e, dado que é um projeto open source em versão 0.1, é improvável. Se conformidade SOC 2 for requisito, será necessário avaliar outras soluções.\n\n**Sobre instalar e conectar sua conta:** Não realizei nem posso realizar ações como instalar sistemas ou conectar contas. Esses passos precisam ser executados por você ou sua equipe, seguindo a documentação em legalops.dev/openclm [1].\n\n**Minha sugestão de próximos passos:** Antes de decidir, mapeie se todas as 12 empresas precisam de isolamento total de dados ou se algumas poderiam compartilhar uma instância. Isso pode reduzir o número de instalações necessárias.\n\n**Resumo prático:** Para o seu cenário atual, o OpenCLM v0.1 exigiria adaptações significativas [1]. Pode ser um ponto de partida para times pequenos, mas recomendo validar a viabilidade técnica com quem for operar a infraestrutura antes de comprometer o projeto.",
+  "error": null,
+  "client_latency_ms": 9378,
+  "repeat": 1,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:49:08Z"
+}

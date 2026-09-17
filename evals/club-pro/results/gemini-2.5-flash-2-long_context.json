@@ -1,0 +1,39 @@
+{
+  "case": "long_context",
+  "requested_model": "google/gemini-2.5-flash",
+  "model": "google/gemini-2.5-flash",
+  "provider": "Google",
+  "id": "gen-1789609731-hLrdLHgM783AfYbesEiY",
+  "status": 200,
+  "latency_ms": 1388,
+  "usage": {
+    "prompt_tokens": 9968,
+    "completion_tokens": 58,
+    "total_tokens": 10026,
+    "cost": 0.003104046,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0031354,
+      "upstream_inference_prompt_cost": 0.0029904,
+      "upstream_inference_completions_cost": 0.000145
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\"location_preference\": \"Recife ou remoto Brasil\", \"event_date\": \"12/10 às 20h BRT\", \"other_member_salary\": null, \"other_member_access\": false, \"sources\": [\"correcao-final\"]}",
+  "error": null,
+  "client_latency_ms": 1462,
+  "repeat": 2,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:48:53Z"
+}

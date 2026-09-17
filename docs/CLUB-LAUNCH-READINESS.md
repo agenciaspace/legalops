@@ -91,3 +91,17 @@ sem confirmação.
 - Conta, sessões, pedido e uso temporários removidos; bucket de recibos vazio.
 - Oferta permanece inativa, sem preço e período. Não anunciar vendas abertas
   até Leon defini-los e a oferta ser ativada.
+
+## Avaliação antes da definição de preço — 16/09/2026
+
+Leon pediu avaliar os modelos e o workflow antes de definir preço.
+[Relatório completo](../evals/club-pro/README.md): 60 chamadas reais em dados
+fictícios, três modelos, custos/latência/qualidade registrados. Modelos Google
+erraram regras de aprovação; Sonnet acertou esse conjunto, mas também apresentou
+falhas de formato e inferências não sustentadas em outras tarefas.
+
+Custo medido da avaliação: US$0,217540, mais piloto US$0,000455. Cenários mensais
+simulados só de IA: R$4,75 / R$14,46 / R$44,36 (premissas no relatório).
+Nenhum preço foi aprovado. Antes do workflow completo: controles determinísticos,
+registros de eventos sem perda de ação/prazo, medição por etapa e conectores reais.
+Nenhum código de produção ou dado de membro foi alterado pela avaliação.

@@ -1,0 +1,35 @@
+{
+  "case": "intake",
+  "requested_model": "google/gemini-3.1-flash-lite",
+  "model": "google/gemini-3.1-flash-lite",
+  "provider": "Google",
+  "id": "gen-1789609666-A2E6YkLDSz8xoM6YU9vz",
+  "status": 200,
+  "latency_ms": 2042,
+  "usage": {
+    "prompt_tokens": 622,
+    "completion_tokens": 203,
+    "total_tokens": 825,
+    "cost": 0.0004554,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00046,
+      "upstream_inference_prompt_cost": 0.0001555,
+      "upstream_inference_completions_cost": 0.0003045
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\n  \"clm_date\": \"2026-09-22 19:00 BRT\",\n  \"registration_deadline\": \"2026-09-21 17:00 BRT\",\n  \"mandatory_deadline\": \"2026-09-18 16:00 BRT\",\n  \"spend_status\": \"canceled\",\n  \"procurement_status\": \"proposal\",\n  \"clm_url\": \"https://example.org/clm-v2\",\n  \"multi_org_verified\": false,\n  \"sources\": [\n    \"m01\",\n    \"m02\",\n    \"m03\",\n    \"m04\",\n    \"m05\",\n    \"m06\",\n    \"m07\",\n    \"m09\"\n  ]\n}",
+  "error": null
+}

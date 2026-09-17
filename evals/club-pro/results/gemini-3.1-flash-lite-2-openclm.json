@@ -1,0 +1,39 @@
+{
+  "case": "openclm",
+  "requested_model": "google/gemini-3.1-flash-lite",
+  "model": "google/gemini-3.1-flash-lite",
+  "provider": "Google",
+  "id": "gen-1789609727-gZdy1DiBerTjdwTevbML",
+  "status": 200,
+  "latency_ms": 2091,
+  "usage": {
+    "prompt_tokens": 261,
+    "completion_tokens": 228,
+    "total_tokens": 489,
+    "cost": 0.0004031775,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00040725,
+      "upstream_inference_prompt_cost": 6.525e-05,
+      "upstream_inference_completions_cost": 0.000342
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\n\"multi_org_supported\": false,\n\"sla_percent\": null,\n\"deployed\": false,\n\"source_url\": \"https://github.com/agenciaspace/openclm\",\n\"answer\": \"O OpenCLM v0.1 suporta apenas uma organização por instalação, portanto não atende ao requisito de 12 empresas na mesma instância. Não há evidências sobre a garantia de SLA de 99,9% na documentação fornecida. Como assistente, não realizo implantações reais nem acesso contas de terceiros como o DocuSign.\",\n\"next_steps\": [\n\"Verificar se a arquitetura do OpenCLM permite customizações para multi-tenancy no repositório oficial\",\n\"Avaliar a necessidade de realizar 12 instalações separadas do software\",\n\"Consultar a equipe de TI sobre a viabilidade de garantir o SLA de 99,9% em infraestrutura própria\",\n\"Configurar manualmente a integração com DocuSign seguindo a documentação técnica do projeto\"\n]\n}",
+  "error": null,
+  "client_latency_ms": 2405,
+  "repeat": 2,
+  "stage": "deep",
+  "timestamp_utc": "2026-09-17T01:48:49Z"
+}

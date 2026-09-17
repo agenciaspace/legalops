@@ -1,0 +1,39 @@
+{
+  "case": "jobs",
+  "requested_model": "google/gemini-2.5-flash",
+  "model": "google/gemini-2.5-flash",
+  "provider": "Google",
+  "id": "gen-1789609707-LKrwlLT7xx6a8STOocqd",
+  "status": 200,
+  "latency_ms": 1740,
+  "usage": {
+    "prompt_tokens": 466,
+    "completion_tokens": 169,
+    "total_tokens": 635,
+    "cost": 0.000556677,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0005623,
+      "upstream_inference_prompt_cost": 0.0001398,
+      "upstream_inference_completions_cost": 0.0004225
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\"best_job_id\": \"j1\", \"salary_confirmed_brl\": null, \"excluded_us_job_id\": \"j2\", \"docusign_gap\": true, \"reason\": \"A vaga 'Analista de Legal Ops pleno' (j1) é a mais adequada, pois o perfil atende aos requisitos de experiência (3 anos vs 2 anos solicitados) e possui as habilidades de Excel e Power BI. A vaga 'Legal Ops manager' (j2) foi excluída por exigir residência nos EUA. A vaga 'Advogado contencioso' (j3) não se alinha ao perfil de Legal Ops. A vaga 'Analista de contratos' (j4) exige DocuSign, que o perfil não possui.\", \"application_sent\": false}",
+  "error": null,
+  "client_latency_ms": 1843,
+  "repeat": 1,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:48:29Z"
+}

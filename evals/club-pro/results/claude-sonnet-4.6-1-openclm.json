@@ -1,0 +1,39 @@
+{
+  "case": "openclm",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609727-Ru9PbZPxbAVCBLHGFXij",
+  "status": 200,
+  "latency_ms": 7051,
+  "usage": {
+    "prompt_tokens": 317,
+    "completion_tokens": 405,
+    "total_tokens": 722,
+    "cost": 0.00695574,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.007026,
+      "upstream_inference_prompt_cost": 0.000951,
+      "upstream_inference_completions_cost": 0.006075
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\"multi_org_supported\":false,\"sla_percent\":null,\"deployed\":false,\"source_url\":\"https://github.com/agenciaspace/openclm\",\"answer\":\"Com base nas evidências disponíveis, o OpenCLM v0.1 suporta apenas uma organização por instalação, portanto não é possível usar uma única instalação para 12 empresas separadas — seria necessário avaliar múltiplas instalações independentes ou aguardar suporte a multiorganização em versões futuras. Quanto ao SLA de 99,9%: não há evidência de qualquer SLA formal no projeto; por ser software MIT de instalação própria, a disponibilidade depende inteiramente da infraestrutura que você provisionar. A integração com DocuSign é listada como opcional no projeto, mas não há evidência de que eu possa configurá-la ou ativá-la em seu nome — nenhuma execução real é realizada por este assistente.\",\"next_steps\":[\"Verificar o repositório https://github.com/agenciaspace/openclm para confirmar o roadmap de suporte a múltiplas organizações\",\"Avaliar a viabilidade de 12 instalações separadas, uma por empresa, como alternativa imediata\",\"Definir sua própria infraestrutura (uptime, redundância, backups) para atingir o nível de disponibilidade desejado, já que não existe SLA fornecido pelo projeto\",\"Consultar a documentação de integração DocuSign no repositório e configurar as credenciais manualmente em cada instalação\",\"Acompanhar a página https://legalops.dev/openclm para atualizações de funcionalidades\"]}",
+  "error": null,
+  "client_latency_ms": 7245,
+  "repeat": 1,
+  "stage": "deep",
+  "timestamp_utc": "2026-09-17T01:48:54Z"
+}

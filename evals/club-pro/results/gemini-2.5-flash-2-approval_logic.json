@@ -1,0 +1,39 @@
+{
+  "case": "approval_logic",
+  "requested_model": "google/gemini-2.5-flash",
+  "model": "google/gemini-2.5-flash",
+  "provider": "Google",
+  "id": "gen-1789609861-iFSqzDpwTIReykyabNlU",
+  "status": 200,
+  "latency_ms": 1350,
+  "usage": {
+    "prompt_tokens": 491,
+    "completion_tokens": 182,
+    "total_tokens": 673,
+    "cost": 0.000596277,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0006023,
+      "upstream_inference_prompt_cost": 0.0001473,
+      "upstream_inference_completions_cost": 0.000455
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "```json\n{\n  \"a\": {\n    \"status\": \"ready\",\n    \"missing\": []\n  },\n  \"b\": {\n    \"status\": \"ready\",\n    \"missing\": []\n  },\n  \"c\": {\n    \"status\": \"blocked_dpa\",\n    \"missing\": []\n  },\n  \"d\": {\n    \"status\": \"blocked_fx\",\n    \"missing\": []\n  },\n  \"e\": {\n    \"status\": \"ready\",\n    \"missing\": []\n  },\n  \"f\": {\n    \"status\": \"ready\",\n    \"missing\": []\n  },\n  \"g\": {\n    \"status\": \"no_action\",\n    \"missing\": []\n  },\n  \"signed\": false\n}\n```",
+  "error": null,
+  "client_latency_ms": 1473,
+  "repeat": 2,
+  "stage": "deep",
+  "timestamp_utc": "2026-09-17T01:51:02Z"
+}

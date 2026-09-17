@@ -1,0 +1,39 @@
+{
+  "case": "intake",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609748-WyyZBlfMlVGOJTj3PK9G",
+  "status": 200,
+  "latency_ms": 1728,
+  "usage": {
+    "prompt_tokens": 708,
+    "completion_tokens": 118,
+    "total_tokens": 826,
+    "cost": 0.00385506,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.003894,
+      "upstream_inference_prompt_cost": 0.002124,
+      "upstream_inference_completions_cost": 0.00177
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\"clm_date\":\"2026-09-22 19:00 BRT\",\"registration_deadline\":\"2026-09-21 17:00 BRT\",\"mandatory_deadline\":\"2026-09-18 16:00 BRT\",\"spend_status\":\"canceled\",\"procurement_status\":\"proposal\",\"clm_url\":\"https://example.org/clm-v2\",\"multi_org_verified\":false,\"sources\":[\"m02\",\"m03\",\"m05\",\"m06\",\"m07\",\"m04\"]}",
+  "error": null,
+  "client_latency_ms": 2055,
+  "repeat": 2,
+  "stage": "shared",
+  "timestamp_utc": "2026-09-17T01:49:10Z"
+}

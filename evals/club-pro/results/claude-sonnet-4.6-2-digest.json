@@ -1,0 +1,39 @@
+{
+  "case": "digest",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609750-phKH7LsFUeVJfPhJYn2h",
+  "status": 200,
+  "latency_ms": 8043,
+  "usage": {
+    "prompt_tokens": 424,
+    "completion_tokens": 527,
+    "total_tokens": 951,
+    "cost": 0.00908523,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.009177,
+      "upstream_inference_prompt_cost": 0.001272,
+      "upstream_inference_completions_cost": 0.007905
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "```json\n{\n  \"mandatory_deadline\": \"2026-09-18 16:00 BRT\",\n  \"clm_date\": \"2026-09-22 19:00 BRT\",\n  \"registration_deadline\": \"2026-09-21 17:00 BRT\",\n  \"clm_url\": \"https://example.org/clm-v2\",\n  \"summary\": \"Olá, Pessoa fictícia A! Aqui está seu boletim personalizado para esta semana.\\n\\n⚠️ AVISO OBRIGATÓRIO — prazo em 2 dias: Você tem uma ação obrigatória com prazo em 2026-09-18 até 16h00 BRT. Verifique e cumpra esse prazo independentemente de outros itens.\\n\\n📋 CLM (seu foco principal): O próximo encontro do grupo de CLM acontece em 2026-09-22 às 19h00 BRT. Como Analista de Legal Ops com interesse em Contratos e CLM, esse evento é diretamente relevante para você. Inscrições encerram em 2026-09-21 às 17h00 BRT — acesse pelo link disponível no campo clm_url. Sugestão (não confirmado): dado seu perfil com Excel e Power BI, pode ser uma boa oportunidade para explorar integrações de CLM com ferramentas de dados que você já domina.\\n\\n📌 Procurement: Há uma iniciativa de procurement em fase de proposta. Nenhuma ação imediata identificada para o seu perfil neste momento, mas vale acompanhar a evolução.\\n\\n❌ Spend Management: A iniciativa de spend management foi cancelada. Nenhuma ação necessária.\\n\\nℹ️ Nota: as informações acima foram extraídas de fontes internas do clube (m02, m03, m04, m05, m06, m07). A verificação multi-organização ainda não foi concluída — trate dados sensíveis com cautela até confirmação.\",\n  \"actions_performed\": []\n}\n```",
+  "error": null,
+  "client_latency_ms": 8127,
+  "repeat": 2,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:49:18Z"
+}

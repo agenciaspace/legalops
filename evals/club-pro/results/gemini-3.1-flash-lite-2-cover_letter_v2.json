@@ -1,0 +1,39 @@
+{
+  "case": "cover_letter_v2",
+  "requested_model": "google/gemini-3.1-flash-lite",
+  "model": "google/gemini-3.1-flash-lite",
+  "provider": "Google",
+  "id": "gen-1789609863-mWpeIqCfmhOolVd8kBGX",
+  "status": 200,
+  "latency_ms": 1640,
+  "usage": {
+    "prompt_tokens": 668,
+    "completion_tokens": 183,
+    "total_tokens": 851,
+    "cost": 0.000437085,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0004415,
+      "upstream_inference_prompt_cost": 0.000167,
+      "upstream_inference_completions_cost": 0.0002745
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\n\"job_id\": \"j1\",\n\"letter\": \"Olá, meu nome é Pessoa fictícia A e gostaria de me candidatar à vaga de Analista de Legal Ops. Com 3 anos de experiência na área, possuo domínio em Excel e Power BI, ferramentas que utilizo para suporte operacional. Tenho forte interesse em processos de contratos e CLM, buscando aplicar meus conhecimentos técnicos para contribuir com a eficiência do departamento jurídico. Resido em Recife e tenho disponibilidade para atuação remota em todo o Brasil. Meu nível de inglês é intermediário. Acredito que meu perfil técnico e minha trajetória profissional estão alinhados aos requisitos desta oportunidade. Agradeço a atenção e coloco-me à disposição para uma entrevista.\",\n\"claimed_skills\": [\"Excel\", \"Power BI\"],\n\"claimed_experience_years\": 3,\n\"sent\": false\n}",
+  "error": null,
+  "client_latency_ms": 1784,
+  "repeat": 2,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:51:05Z"
+}

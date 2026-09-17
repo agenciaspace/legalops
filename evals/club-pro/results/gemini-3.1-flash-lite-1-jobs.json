@@ -1,0 +1,39 @@
+{
+  "case": "jobs",
+  "requested_model": "google/gemini-3.1-flash-lite",
+  "model": "google/gemini-3.1-flash-lite",
+  "provider": "Google",
+  "id": "gen-1789609707-JmnmJ7h6nrwlASbq2fsz",
+  "status": 200,
+  "latency_ms": 1532,
+  "usage": {
+    "prompt_tokens": 466,
+    "completion_tokens": 127,
+    "total_tokens": 593,
+    "cost": 0.00030393,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000307,
+      "upstream_inference_prompt_cost": 0.0001165,
+      "upstream_inference_completions_cost": 0.0001905
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\n\"best_job_id\": \"j1\",\n\"salary_confirmed_brl\": null,\n\"excluded_us_job_id\": \"j2\",\n\"docusign_gap\": true,\n\"reason\": \"A vaga j1 é a única que atende aos requisitos de experiência, localização e habilidades técnicas (Excel e Power BI) do perfil, sem exigir competências listadas como não possuídas (DocuSign ou liderança). A vaga j4 foi descartada devido à exigência obrigatória de DocuSign.\",\n\"application_sent\": false\n}",
+  "error": null,
+  "client_latency_ms": 1611,
+  "repeat": 1,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:48:29Z"
+}

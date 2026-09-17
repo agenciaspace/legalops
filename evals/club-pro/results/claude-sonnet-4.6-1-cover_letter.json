@@ -1,0 +1,39 @@
+{
+  "case": "cover_letter",
+  "requested_model": "anthropic/claude-sonnet-4.6",
+  "model": "anthropic/claude-sonnet-4.6",
+  "provider": "Amazon Bedrock",
+  "id": "gen-1789609722-Ahf97zRKmlVps7HRCgnN",
+  "status": 200,
+  "latency_ms": 5256,
+  "usage": {
+    "prompt_tokens": 746,
+    "completion_tokens": 289,
+    "total_tokens": 1035,
+    "cost": 0.00650727,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.006573,
+      "upstream_inference_prompt_cost": 0.002238,
+      "upstream_inference_completions_cost": 0.004335
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "{\"job_id\":\"j1\",\"letter\":\"Olá, tudo bem?\\n\\nMeu nome é Pessoa fictícia A e tenho 3 anos de experiência em Legal Ops, atuando com foco em contratos e gestão de processos jurídicos. Ao longo da minha trajetória, desenvolvi habilidades sólidas em Excel e Power BI, ferramentas que utilizo no dia a dia para análise e visualização de dados aplicados à área jurídica.\\n\\nEstou baseada em Recife e disponível para trabalho 100% remoto em todo o Brasil, o que se alinha perfeitamente ao modelo da vaga. Tenho inglês em nível intermediário e interesse contínuo em aprofundar meu conhecimento em CLM e gestão de contratos.\\n\\nAcredito que meu perfil atende aos requisitos da posição de Analista de Legal Ops Pleno e estou à disposição para conversar mais sobre como posso contribuir com o time.\\n\\nAguardo retorno. Obrigada pela atenção!\",\"claimed_skills\":[\"Excel\",\"Power BI\"],\"claimed_experience_years\":3,\"sent\":false}",
+  "error": null,
+  "client_latency_ms": 5371,
+  "repeat": 1,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:48:47Z"
+}

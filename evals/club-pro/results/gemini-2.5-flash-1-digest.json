@@ -1,0 +1,39 @@
+{
+  "case": "digest",
+  "requested_model": "google/gemini-2.5-flash",
+  "model": "google/gemini-2.5-flash",
+  "provider": "Google",
+  "id": "gen-1789609705-He5hRMMIKcnHkFV6R0in",
+  "status": 200,
+  "latency_ms": 2257,
+  "usage": {
+    "prompt_tokens": 403,
+    "completion_tokens": 259,
+    "total_tokens": 662,
+    "cost": 0.000760716,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0007684,
+      "upstream_inference_prompt_cost": 0.0001209,
+      "upstream_inference_completions_cost": 0.0006475
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "answer": "```json\n{\"mandatory_deadline\":\"2026-09-18 16:00 BRT\",\"clm_date\":\"2026-09-22 19:00 BRT\",\"registration_deadline\":\"2026-09-21 17:00 BRT\",\"clm_url\":\"https://example.org/clm-v2\",\"summary\":\"Olá Pessoa fictícia A,\\n\\nComo Analista de Legal Ops, sabemos do seu interesse em Contratos e CLM. Por isso, gostaríamos de destacar o evento sobre CLM que ocorrerá em 22/09/2026 às 19:00 BRT. O prazo final para inscrição é 21/09/2026 às 17:00 BRT. Você pode se inscrever através do link: https://example.org/clm-v2.\\n\\nLembre-se também do prazo obrigatório de 18/09/2026 às 16:00 BRT.\\n\\nAtenciosamente,\\nLegalOps.Club\",\"actions_performed\":[]}\n```",
+  "error": null,
+  "client_latency_ms": 2389,
+  "repeat": 1,
+  "stage": "personal",
+  "timestamp_utc": "2026-09-17T01:48:27Z"
+}

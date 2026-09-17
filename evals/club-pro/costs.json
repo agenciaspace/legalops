@@ -1,0 +1,123 @@
+{
+  "metrics": [
+    {
+      "model": "anthropic/claude-sonnet-4.6",
+      "attempts": 20,
+      "successful": 20,
+      "measured_cost_usd": 0.190971,
+      "unknown_cost_attempts": 0,
+      "latency_p50_ms": 4097.5,
+      "latency_p95_ms": 9004,
+      "input_tokens": 36485,
+      "output_tokens": 5563,
+      "cached_input_tokens": 0,
+      "reasoning_tokens": 0,
+      "semantic_fields_pass": 20
+    },
+    {
+      "model": "google/gemini-2.5-flash",
+      "attempts": 20,
+      "successful": 20,
+      "measured_cost_usd": 0.016044435,
+      "unknown_cost_attempts": 0,
+      "latency_p50_ms": 1732.0,
+      "latency_p95_ms": 2257,
+      "input_tokens": 28430,
+      "output_tokens": 3071,
+      "cached_input_tokens": 0,
+      "reasoning_tokens": 0,
+      "semantic_fields_pass": 14
+    },
+    {
+      "model": "google/gemini-3.1-flash-lite",
+      "attempts": 20,
+      "successful": 20,
+      "measured_cost_usd": 0.0105242445,
+      "unknown_cost_attempts": 0,
+      "latency_p50_ms": 1716.0,
+      "latency_p95_ms": 2598,
+      "input_tokens": 28388,
+      "output_tokens": 3580,
+      "cached_input_tokens": 8162,
+      "reasoning_tokens": 0,
+      "semantic_fields_pass": 14
+    }
+  ],
+  "benchmark_usd": 0.2175396795,
+  "pilot_usd": 0.0004554,
+  "assumptions": {
+    "usd_brl_planning_only": 6,
+    "provider_purchase_fee_multiplier": 1.055,
+    "monthly_patterns_measured": false,
+    "cache_savings_assumed": false,
+    "unit_tasks": {
+      "standard": {
+        "model": "google/gemini-2.5-flash",
+        "input": 12000,
+        "output": 1400,
+        "in_usd_m": 0.3,
+        "out_usd_m": 2.5,
+        "brl": 0.044943
+      },
+      "deep": {
+        "model": "anthropic/claude-sonnet-4.6",
+        "input": 12000,
+        "output": 2000,
+        "in_usd_m": 3,
+        "out_usd_m": 15,
+        "brl": 0.41778
+      },
+      "digest": {
+        "model": "google/gemini-3.1-flash-lite",
+        "input": 3000,
+        "output": 600,
+        "in_usd_m": 0.25,
+        "out_usd_m": 1.5,
+        "brl": 0.010444499999999999
+      },
+      "letter": {
+        "model": "google/gemini-2.5-flash",
+        "input": 3000,
+        "output": 800,
+        "in_usd_m": 0.3,
+        "out_usd_m": 2.5,
+        "brl": 0.018357
+      }
+    }
+  },
+  "scenarios": [
+    {
+      "name": "Leve",
+      "counts": {
+        "standard": 60,
+        "deep": 4,
+        "digest": 30,
+        "letter": 4
+      },
+      "estimated_llm_brl": 4.75,
+      "reserve_2x_brl": 9.51
+    },
+    {
+      "name": "Frequente",
+      "counts": {
+        "standard": 200,
+        "deep": 12,
+        "digest": 30,
+        "letter": 8
+      },
+      "estimated_llm_brl": 14.46,
+      "reserve_2x_brl": 28.92
+    },
+    {
+      "name": "Intenso",
+      "counts": {
+        "standard": 600,
+        "deep": 40,
+        "digest": 30,
+        "letter": 20
+      },
+      "estimated_llm_brl": 44.36,
+      "reserve_2x_brl": 88.71
+    }
+  ]
+}
