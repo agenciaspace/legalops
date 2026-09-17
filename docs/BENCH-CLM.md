@@ -23,6 +23,6 @@ All calculations run in the browser. No backend calls or registration. Shared st
 
 Run `npx vitest run __tests__/bench-calculator.test.mjs __tests__/bench-ui.test.mjs` for scoring, presets, vetoes, zero weights, close results, validation, source disclosure and UI change events. The full application suite and production build were also run during delivery.
 
-Browser verification covers desktop/mobile, preset changes, mandatory vetoes, shared-state reload and keyboard slide navigation. The PDF has eight pages. Generate it from the deck with print backgrounds and inspect the eight pages after presentation changes. Pages serves `apresentacao.html` at the extensionless URL.
+Browser verification covers desktop/mobile, preset changes, mandatory vetoes, shared-state reload and keyboard slide navigation. The presentation and PDF have two slides: one brief description per tool. The fullscreen button uses the browser Fullscreen API, with an expanded viewport fallback and Escape to exit. Generate the PDF from the deck with print backgrounds and inspect both pages after presentation changes. Pages serves `apresentacao.html` at the extensionless URL.
 
 Deploy via the existing `Deploy legalops.dev Pages` GitHub workflow. Verify the Bench HTML, JS MIME types, PDF and interactive calculator on the public domain after deploy.
