@@ -104,8 +104,11 @@ export async function shareEventResource(formData: FormData) {
   const kind = String(formData.get('kind') ?? 'link')
   if (!eventId || title.length < 2 || !/^https:\/\//.test(url) || !['foto', 'documento', 'link', 'outro'].includes(kind)) return
   const { supabase, user } = await getAuthenticatedMember()
-  const { data: attendance } = await supabase.from('community_event_rsvps').select('id').eq('event_id', eventId).eq('user_id', user.id).eq('response', 'confirmed').maybeSingle()
-  if (!attendance) return
+  const [{ data: attendance }, { data: eventAdmin }] = await Promise.all([
+    supabase.from('community_event_rsvps').select('id').eq('event_id', eventId).eq('user_id', user.id).eq('response', 'confirmed').maybeSingle(),
+    supabase.from('community_event_admins').select('event_id').eq('event_id', eventId).eq('user_id', user.id).maybeSingle(),
+  ])
+  if (!attendance && !eventAdmin) return
   const { data: event } = await supabase.from('community_events').select('slug').eq('id', eventId).eq('is_published', true).maybeSingle()
   if (!event) return
   await supabase.from('community_event_resources').insert({ event_id: eventId, uploader_id: user.id, kind, title, description, resource_url: url })
