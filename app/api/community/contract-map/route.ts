@@ -17,7 +17,7 @@ export async function GET() {
   if (accessResult.response) return accessResult.response
   const { db, user } = accessResult
   const results = await Promise.all([
-    db!.from('contract_map_sections').select('id,title,position,content,version,updated_at').order('position'),
+    db!.from('contract_map_sections').select('id,title,position,content,version,updated_at,journey').order('position'),
     db!.from('contract_map_contributions').select('*').order('created_at', { ascending: false }).limit(500),
     db!.from('contract_map_revisions').select('section_id,version,content,editor_id,note,created_at').order('created_at', { ascending: false }).limit(100),
     db!.from('contract_map_leads').select('user_id').eq('user_id', user!.id),

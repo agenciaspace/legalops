@@ -3,7 +3,7 @@ const mocks = vi.hoisted(() => ({ user: { id: 'member' } as { id: string } | nul
 vi.mock('@/lib/supabase-server', () => ({ createServerSupabaseClient: async () => ({ auth: { getUser: async () => ({ data: { user: mocks.user } }) }, from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: mocks.member }) }) }) }), rpc: mocks.rpc }) }))
 import { POST } from '@/app/api/community/contract-map/route'
 const content = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Example' }] }] }
-const proposal = { action: 'suggest', section: 'solicitacao', version: 1, content, note: 'Explain contribution', license: true }
+const proposal = { action: 'suggest', section: 'contexto', version: 1, content, note: 'Explain contribution', license: true }
 const post = (body: unknown) => POST(new Request('https://legalops.club/api/community/contract-map', { method: 'POST', headers: { 'Content-Type': 'application/json', origin: 'https://legalops.club' }, body: JSON.stringify(body) }))
 beforeEach(() => { mocks.user = { id: 'member' }; mocks.member = { club_access_status: 'complimentary', club_access_expires_at: null }; mocks.rpc.mockReset().mockResolvedValue({ data: 'ok', error: null }) })
 describe('Contract map permission boundary', () => {

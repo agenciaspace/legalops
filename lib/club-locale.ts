@@ -74,6 +74,8 @@ const english: Record<string, string> = {
   'Gestão de contratos em código aberto: solicitações, documentos, aprovações e integrações.': 'Open source contract management: requests, documents, approvals and integrations.',
   'Conhecer o OpenCLM': 'Explore OpenCLM', 'Playbook aberto': 'Open playbook', 'Abrir o playbook': 'Open the playbook',
   'Construa posições de negociação, limites e regras de aprovação com a comunidade.': 'Build negotiation positions, boundaries and approval rules with the community.',
+  'Menu lateral': 'Sidebar', 'Expandir menu lateral': 'Expand sidebar', 'Recolher menu lateral': 'Collapse sidebar',
+  'Migração de CLM': 'CLM Migration', 'Explorar a jornada': 'Explore the journey', 'Do diagnóstico à adoção: processos, maturidade, requisitos, fornecedores, dados e implantação.': 'From assessment to adoption: processes, maturity, requirements, vendors, data and implementation.',
   'Mapa de Gestão de Contratos': 'Contract Management Map', 'Explorar o mapa': 'Explore the map',
   'Percorra o ciclo do contrato e defina atividades, responsáveis e entregas de cada etapa.': 'Walk through the contract lifecycle and define activities, owners and deliverables for each stage.',
   'Avaliação de CLMs': 'CLM evaluation', 'Comparar CLMs': 'Compare CLMs',

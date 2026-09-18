@@ -23,7 +23,7 @@
       const response = await fetch('https://legalops.club/api/contract-map', { signal: AbortSignal.timeout(12000), cache: 'no-store' });
       if (!response.ok) throw new Error('unavailable');
       const data = await response.json();
-      if (!Array.isArray(data.sections) || data.sections.length !== 8) throw new Error('incomplete');
+      if (!Array.isArray(data.sections) || data.sections.length !== document.querySelectorAll('[data-stage]').length) throw new Error('incomplete');
       // Prepare all nodes before changing the page so a malformed response keeps the fallback intact.
       const replacements = data.sections.map(section => {
         const container = document.getElementById(section.id);
@@ -35,16 +35,48 @@
       });
       for (const { container, content, version, link } of replacements) {
         container.querySelector('.detail').replaceChildren(version, content, link);
-        container.querySelector('summary small').textContent = 'Texto aprovado pela comunidade';
       }
       status.textContent = 'Versão aprovada atualizada. Abra uma etapa para explorar ou contribuir.';
       if (downloadUrl) URL.revokeObjectURL(downloadUrl);
       downloadUrl = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
       const download = document.getElementById('download-map'); download.href = downloadUrl; download.textContent = 'Baixar versão aprovada';
     } catch {
-      status.textContent = 'Não foi possível consultar atualizações. A estrutura inicial continua disponível; tente atualizar a página.';
+      status.textContent = 'Não foi possível consultar atualizações. A versão exibida pode estar desatualizada; tente atualizar a página.';
     }
   }
+  const panels = Array.from(document.querySelectorAll('.journey-phase'));
+  const tabs = Array.from(document.querySelectorAll('[data-phase]'));
+  const position = document.getElementById('journey-position');
+  const previous = document.getElementById('phase-prev');
+  const next = document.getElementById('phase-next');
+  const all = document.getElementById('show-all');
+  let active = 0;
+  function showPhase(index, updateHash = true) {
+    active = Math.max(0, Math.min(index, panels.length - 1));
+    panels.forEach((panel, i) => { panel.hidden = i !== active; });
+    tabs.forEach((tab, i) => { if (i === active) tab.setAttribute('aria-current','step'); else tab.removeAttribute('aria-current'); });
+    previous.disabled = active === 0; next.disabled = active === panels.length - 1;
+    position.textContent = `Fase ${active+1} de ${panels.length} · etapas ${active*3+1} a ${active*3+3}`;
+    all.textContent = 'Ver todas as etapas';
+    if (updateHash) history.replaceState(null, '', `#${panels[active].id}`);
+  }
+  function followHash() {
+    const target = document.getElementById(location.hash.slice(1));
+    const panel = target?.closest('.journey-phase');
+    if (panel) { showPhase(panels.indexOf(panel), false); if (target.matches('[data-stage]')) target.open = true; }
+    else showPhase(0, false);
+  }
+  tabs.forEach((tab, index) => tab.addEventListener('click', event => { event.preventDefault(); showPhase(index); }));
+  previous.addEventListener('click', () => showPhase(active-1));
+  next.addEventListener('click', () => showPhase(active+1));
+  all.hidden = false; document.querySelector('.phase-paging').hidden = false;
+  all.addEventListener('click', () => {
+    if (all.textContent === 'Ver uma fase por vez') return showPhase(active);
+    panels.forEach(panel => { panel.hidden = false; }); tabs.forEach(tab => tab.removeAttribute('aria-current'));
+    position.textContent = '12 etapas · 4 fases'; all.textContent = 'Ver uma fase por vez';
+  });
+  window.addEventListener('hashchange', followHash);
+  followHash();
   refresh();
   window.addEventListener('focus', refresh);
 })();

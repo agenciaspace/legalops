@@ -1,0 +1,122 @@
+{
+  "phases": [
+    {
+      "id": "entender",
+      "title": "Entender o jurídico",
+      "description": "Defina o problema e conheça o ponto de partida."
+    },
+    {
+      "id": "preparar",
+      "title": "Preparar a decisão",
+      "description": "Transforme necessidades em requisitos, dados e orçamento."
+    },
+    {
+      "id": "escolher",
+      "title": "Escolher a solução",
+      "description": "Compare evidências, teste e negocie as condições."
+    },
+    {
+      "id": "implantar",
+      "title": "Fazer a mudança funcionar",
+      "description": "Migre com controle, envolva as pessoas e acompanhe resultados."
+    }
+  ],
+  "stages": [
+    {
+      "id": "contexto",
+      "title": "Definir o problema e o objetivo",
+      "phase": "entender",
+      "purpose": "Combine por que mudar, para quem e qual resultado importa.",
+      "deliverable": "Uma página com problema, público, objetivo, escopo, responsáveis e alternativas.",
+      "gate": "Há acordo sobre o problema e alguém com autoridade para priorizar e decidir."
+    },
+    {
+      "id": "processos",
+      "title": "Entender os processos internos",
+      "phase": "entender",
+      "purpose": "Desenhe o trabalho real antes de automatizá-lo.",
+      "deliverable": "Desenho do processo atual e do processo desejado, com gargalos, donos e prioridades.",
+      "gate": "As áreas validaram o fluxo desejado e as exceções essenciais."
+    },
+    {
+      "id": "maturidade",
+      "title": "Avaliar maturidade e capacidade",
+      "phase": "entender",
+      "purpose": "Entenda o que o time consegue operar e o que precisa preparar.",
+      "deliverable": "Diagnóstico de processos, pessoas, tecnologia e dados, com lacunas, ações e donos.",
+      "gate": "As lacunas críticas têm um plano e o time dispõe de capacidade para executar o projeto."
+    },
+    {
+      "id": "requisitos",
+      "title": "Definir requisitos e integrações",
+      "phase": "preparar",
+      "purpose": "Especifique o que a solução precisa fazer e como comprovar.",
+      "deliverable": "Matriz de requisitos priorizados com evidência esperada e teste de aceite.",
+      "gate": "Os requisitos eliminatórios são justificáveis e podem ser testados."
+    },
+    {
+      "id": "dados-legado",
+      "title": "Preparar dados e o legado",
+      "phase": "preparar",
+      "purpose": "Saiba o que existe, o que migrar e como conferir a transferência.",
+      "deliverable": "Inventário, regras de limpeza e mapeamento, escopo de migração e critérios de reconciliação.",
+      "gate": "Uma amostra foi extraída e os dados necessários podem ser migrados e conferidos."
+    },
+    {
+      "id": "viabilidade",
+      "title": "Construir orçamento e viabilidade",
+      "phase": "preparar",
+      "purpose": "Compare o custo completo e os benefícios com hipóteses explícitas.",
+      "deliverable": "Caso de negócio com custo total, alternativas, cenários, hipóteses e fonte de recursos.",
+      "gate": "O orçamento inclui a mudança e a operação, e o patrocinador aprovou o escopo."
+    },
+    {
+      "id": "fornecedores",
+      "title": "Avaliar fornecedores com evidências",
+      "phase": "escolher",
+      "purpose": "Compare as opções usando as necessidades do seu jurídico.",
+      "deliverable": "Lista curta de opções com evidências, lacunas, custos comparáveis e roteiro do piloto.",
+      "gate": "As opções selecionadas atendem aos requisitos essenciais ou têm lacunas explicitamente aceitas para testar."
+    },
+    {
+      "id": "piloto",
+      "title": "Testar e decidir",
+      "phase": "escolher",
+      "purpose": "Valide o trabalho real antes de assumir a implantação completa.",
+      "deliverable": "Relatório do piloto e decisão fundamentada, com pendências e condições de aceite.",
+      "gate": "Os testes essenciais passaram e as pendências têm tratamento aprovado pelos responsáveis."
+    },
+    {
+      "id": "contratacao",
+      "title": "Negociar contrato e plano de execução",
+      "phase": "escolher",
+      "purpose": "Transforme promessas e condições de decisão em compromissos claros.",
+      "deliverable": "Instrumentos aprovados e plano de execução com responsabilidades, marcos e condições de saída.",
+      "gate": "Não há requisito essencial dependente de promessa sem compromisso verificável."
+    },
+    {
+      "id": "migracao",
+      "title": "Implantar e migrar com controle",
+      "phase": "implantar",
+      "purpose": "Coloque a solução em operação com dados conferidos e continuidade.",
+      "deliverable": "Solução em produção, dados reconciliados, aceite registrado e plano de estabilização.",
+      "gate": "Fluxos críticos funcionam, dados foram conferidos e há suporte e retorno previstos."
+    },
+    {
+      "id": "adocao",
+      "title": "Preparar pessoas e sustentar o uso",
+      "phase": "implantar",
+      "purpose": "Faça o novo processo funcionar para quem solicita, decide e opera.",
+      "deliverable": "Plano de comunicação, treinamento e suporte, com responsáveis e sinais de adoção.",
+      "gate": "Cada público sabe como executar suas tarefas e obter ajuda, e a administração tem dono."
+    },
+    {
+      "id": "evolucao",
+      "title": "Medir, melhorar e preparar o próximo ciclo",
+      "phase": "implantar",
+      "purpose": "Confira se o investimento resolveu o problema e mantenha a operação saudável.",
+      "deliverable": "Painel de resultados, rotina de governança e plano priorizado de melhoria e renovação.",
+      "gate": "Existe responsável pela operação, revisão periódica dos resultados e preparação para decisões futuras."
+    }
+  ]
+}

@@ -1,10 +1,14 @@
+import migration from './clm-migration.json'
 export type MapNode = { type: string; text?: string; content?: MapNode[]; attrs?: { level?: number; start?: number }; marks?: { type: string }[] }
-export type MapSection = { id: string; title: string; position: number; content: MapNode; version: number; updated_at: string }
+export type MapSection = { id: string; title: string; position: number; content: MapNode; version: number; updated_at: string; journey?: string }
 export type MapContribution = { id: string; section_id: string; author_id: string; body: string; kind: 'comment' | 'suggestion'; proposed_content: MapNode | null; base_version: number; status: 'open' | 'accepted' | 'rejected' | 'resolved'; created_at: string; review_note: string | null; reviewer_id: string | null }
 export type MapRevision = { section_id: string; version: number; content: MapNode; editor_id: string | null; note: string; created_at: string }
 export type MapWorkspace = { sections: MapSection[]; contributions: MapContribution[]; revisions: MapRevision[]; authors: { user_id: string; display_name: string }[]; isLead: boolean; userId: string }
 export const MAP_PATH = '/community/tools/mapa-contratos'
-export const MAP_SECTION_IDS = ['solicitacao','triagem','elaboracao','negociacao','aprovacao','assinatura','execucao','renovacao'] as const
+export const LEGACY_MAP_SECTION_IDS = ['solicitacao','triagem','elaboracao','negociacao','aprovacao','assinatura','execucao','renovacao'] as const
+export const MAP_SECTION_IDS: readonly string[] = [...LEGACY_MAP_SECTION_IDS, ...migration.stages.map(stage => stage.id)]
+export const MIGRATION_PHASES = migration.phases
+export const MIGRATION_STAGES = migration.stages
 const children: Record<string, string[]> = {
   doc: ['paragraph','heading','bulletList','orderedList','blockquote'],
   paragraph: ['text','hardBreak'], heading: ['text','hardBreak'],

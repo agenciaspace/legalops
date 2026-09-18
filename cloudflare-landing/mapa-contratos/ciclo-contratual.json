@@ -1,0 +1,104 @@
+{
+  "title": "Mapa de Gestão de Contratos",
+  "version": "0.1.0",
+  "license": "MIT",
+  "status": "Estrutura inicial para revisão e adaptação pela comunidade",
+  "stages": [
+    {
+      "id": "solicitacao",
+      "title": "Solicitar e priorizar",
+      "purpose": "Entender a demanda antes de começar.",
+      "suggested_owners": "Área solicitante + Legal Ops",
+      "questions": [
+        "Qual é o objeto, o valor, o prazo e a contraparte?",
+        "Quem responde pelo negócio e qual é a prioridade?"
+      ],
+      "deliverable": "Demanda registrada com informações mínimas e responsável.",
+      "indicators": "Tempo até a triagem; demandas devolvidas por falta de informação."
+    },
+    {
+      "id": "triagem",
+      "title": "Definir o caminho",
+      "purpose": "Escolher o fluxo e o nível de revisão.",
+      "suggested_owners": "Legal Ops + jurídico",
+      "questions": [
+        "Podemos usar um modelo aprovado?",
+        "Quais áreas precisam participar, considerando o risco e o contexto?"
+      ],
+      "deliverable": "Tipo de contrato, revisores e fluxo definidos.",
+      "indicators": "Tempo de triagem; uso de modelos aprovados."
+    },
+    {
+      "id": "elaboracao",
+      "title": "Preparar o contrato",
+      "purpose": "Criar a primeira versão com dados conferidos.",
+      "suggested_owners": "Jurídico ou solicitante autorizado",
+      "questions": [
+        "Qual versão do modelo e do playbook se aplica?",
+        "Os dados da contratação e os anexos estão completos?"
+      ],
+      "deliverable": "Minuta identificada, com versão e anexos.",
+      "indicators": "Tempo de elaboração; retrabalho na primeira versão."
+    },
+    {
+      "id": "negociacao",
+      "title": "Negociar e revisar",
+      "purpose": "Registrar propostas, concessões e pontos em aberto.",
+      "suggested_owners": "Jurídico + responsável pelo negócio",
+      "questions": [
+        "O que está dentro das posições aceitas no playbook?",
+        "Quais desvios precisam de decisão e quem decide?"
+      ],
+      "deliverable": "Versão negociada e registro das exceções.",
+      "indicators": "Rodadas de negociação; tempo aguardando cada parte."
+    },
+    {
+      "id": "aprovacao",
+      "title": "Aprovar as exceções",
+      "purpose": "Obter as decisões necessárias antes de assinar.",
+      "suggested_owners": "Aprovadores definidos pela empresa",
+      "questions": [
+        "As alçadas foram atendidas?",
+        "A aprovação corresponde à versão final e às condições negociadas?"
+      ],
+      "deliverable": "Aprovações registradas e versão final identificada.",
+      "indicators": "Tempo de aprovação; devoluções e exceções recorrentes."
+    },
+    {
+      "id": "assinatura",
+      "title": "Coletar assinaturas",
+      "purpose": "Concluir a formalização e conferir o resultado.",
+      "suggested_owners": "Responsável pelo contrato + signatários",
+      "questions": [
+        "Os signatários e a versão estão corretos?",
+        "Todas as assinaturas e evidências foram reunidas?"
+      ],
+      "deliverable": "Instrumento assinado e evidências vinculadas.",
+      "indicators": "Tempo de assinatura; envelopes cancelados ou corrigidos."
+    },
+    {
+      "id": "execucao",
+      "title": "Guardar e acompanhar",
+      "purpose": "Transformar o contrato em compromissos acompanháveis.",
+      "suggested_owners": "Gestor do contrato + áreas responsáveis",
+      "questions": [
+        "Onde ficam o original e os dados principais?",
+        "Quem acompanha entregas, pagamentos, obrigações e prazos?"
+      ],
+      "deliverable": "Repositório organizado, responsáveis e alertas definidos.",
+      "indicators": "Obrigações acompanhadas; prazos sem responsável."
+    },
+    {
+      "id": "renovacao",
+      "title": "Renovar ou encerrar",
+      "purpose": "Decidir o próximo ciclo com antecedência.",
+      "suggested_owners": "Gestor do contrato + jurídico + negócio",
+      "questions": [
+        "Qual é o prazo para decidir e comunicar a decisão?",
+        "Vamos renovar, renegociar ou encerrar? O que aprendemos?"
+      ],
+      "deliverable": "Decisão registrada, providências concluídas e melhorias propostas.",
+      "indicators": "Renovações decididas no prazo; ações de encerramento pendentes."
+    }
+  ]
+}

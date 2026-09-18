@@ -2,13 +2,14 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import { MIGRATION_PHASES, MIGRATION_STAGES, LEGACY_MAP_SECTION_IDS } from '@/lib/contract-map'
 import type { MapWorkspace as Workspace, MapNode, MapContribution } from '@/lib/contract-map'
 import { MapContent } from './MapContent'
 const MapEditor = dynamic(() => import('./MapEditor').then(module => module.MapEditor), { ssr: false, loading: () => <p>Carregando editor…</p> })
 const button = 'min-h-11 rounded-xl border border-[#CEC8BD] px-4 py-2 text-sm font-semibold disabled:opacity-50'
 export function MapWorkspace() {
   const [data, setData] = useState<Workspace | null>(null)
-  const [selected, setSelected] = useState('solicitacao')
+  const [selected, setSelected] = useState('contexto')
   const [tab, setTab] = useState<'document' | 'discussion' | 'history'>('document')
   const [mode, setMode] = useState<'suggest' | 'publish' | null>(null)
   const [draft, setDraft] = useState<MapNode | null>(null)
@@ -27,7 +28,7 @@ export function MapWorkspace() {
     setData(result)
   }
   useEffect(() => {
-    setSelected(new URLSearchParams(window.location.search).get('section') || 'solicitacao')
+    setSelected(new URLSearchParams(window.location.search).get('section') || 'contexto')
     load().catch(error => setError(error.message))
   }, [])
   useEffect(() => {
@@ -47,19 +48,29 @@ export function MapWorkspace() {
     } catch (error) { setError(error instanceof Error ? error.message : 'Não foi possível conectar. Seu texto continua aqui.') }
     finally { setBusy(false) }
   }
-  const section = data?.sections.find(section => section.id === selected) ?? data?.sections[0]
+  const archived = (LEGACY_MAP_SECTION_IDS as readonly string[]).includes(selected)
+  const sections = data?.sections.filter(item => archived ? (LEGACY_MAP_SECTION_IDS as readonly string[]).includes(item.id) : MIGRATION_STAGES.some(stage => stage.id === item.id)) ?? []
+  const section = sections.find(section => section.id === selected) ?? sections[0]
+  const stageIndex = sections.findIndex(item => item.id === section?.id)
+  const phase = MIGRATION_STAGES.find(item => item.id === section?.id)?.phase
+  function navigate(id: string) { setSelected(id); setNote(''); setReviewing(null); setError(''); setMessage(''); window.history.replaceState(null, '', `?section=${id}`) }
   const author = (id: string | null) => data?.authors.find(author => author.user_id === id)?.display_name ?? 'Comunidade'
   const contributions = data?.contributions.filter(item => item.section_id === section?.id) ?? []
   const statuses = { open: 'Em discussão', accepted: 'Publicada', rejected: 'Não incorporada', resolved: 'Resolvido' }
   function start(action: 'suggest' | 'publish') { if (!section) return; setDraft(section.content); setBase(section.version); setMode(action); setNote(''); setLicense(false); setError(''); setMessage('') }
   return <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
     <Link href="/community/tools" className="text-sm text-[#625E59] underline">← Ferramentas</Link>
-    <div className="mt-4 flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-2xl font-semibold">Mapa aberto de contratos</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-[#625E59]">Uma construção da comunidade. Comente ou proponha um texto; membros-lead revisam e publicam as melhorias.</p></div><a className="text-sm underline" href="https://legalops.dev/mapa-contratos/" target="_blank" rel="noreferrer">Ver mapa público ↗</a></div>
+    <div className="mt-4 flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-2xl font-semibold">{archived ? 'Ciclo contratual · arquivo' : 'Migração de CLM'}</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-[#625E59]">Um caminho para entender seu jurídico, escolher uma solução e fazer a mudança funcionar. Membros propõem melhorias; membros-lead revisam e publicam.</p></div><a className="text-sm underline" href="https://legalops.dev/mapa-contratos/" target="_blank" rel="noreferrer">Ver jornada pública ↗</a></div>
     <p className="mt-3 text-xs text-[#625E59]">{data?.isLead ? 'Você é membro-lead: pode revisar sugestões e publicar alterações.' : 'Comentários e propostas ficam entre membros. O texto aprovado fica público sob licença MIT.'}</p>
     {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800">{error}</p>}
     {message && <p role="status" className="mt-4 rounded-xl bg-green-50 p-3 text-sm text-green-800">{message}</p>}
     {!section ? <div className="mt-6"><p>{error ? 'O mapa não carregou.' : 'Carregando mapa…'}</p><button className={button} onClick={() => load().catch(e => setError(e.message))}>Tentar novamente</button></div> : <>
-      <div className="mt-6 flex flex-wrap items-end gap-3"><label className="min-w-0 flex-1 text-sm font-semibold">Etapa do contrato<select disabled={!!mode || busy} value={section.id} onChange={e => { setSelected(e.target.value); setNote(''); setReviewing(null); setError(''); setMessage(''); window.history.replaceState(null, '', `?section=${e.target.value}`) }} className="mt-2 block min-h-12 w-full rounded-xl border border-[#CEC8BD] bg-white px-3">{data!.sections.map(item => <option key={item.id} value={item.id}>{item.position}. {item.title}</option>)}</select></label><button className={button} disabled={busy} onClick={() => load().then(() => setMessage('Mapa atualizado. Rascunhos em edição foram preservados.')).catch(e => setError(e.message))}>Atualizar</button></div>
+      {archived ? <p className="mt-5 text-sm">Esta é a estrutura anterior do ciclo contratual, com seu histórico preservado. <button className="font-semibold underline" onClick={() => navigate('contexto')}>Abrir Migração de CLM →</button></p> : <>
+        <p className="mt-4 text-sm leading-6 text-[#625E59]">Para o primeiro CLM ou a troca do atual. Comece pelo diagnóstico; aprofunde o que se aplica ao porte, à operação e aos riscos da empresa.</p>
+        <nav aria-label="Fases da migração" className="mt-5 grid grid-cols-2 gap-2 lg:grid-cols-4">{MIGRATION_PHASES.map((item,index) => <button key={item.id} disabled={!!mode || busy} aria-current={phase === item.id ? 'step' : undefined} onClick={() => navigate(MIGRATION_STAGES.find(stage => stage.phase === item.id)!.id)} className={`min-h-16 rounded-xl border p-3 text-left text-sm disabled:opacity-50 ${phase === item.id ? 'border-[#A94E38] bg-[#F6E9E2]' : 'border-[#CEC8BD] bg-white'}`}><span className="mb-1 block text-xs text-[#A94E38]">Fase {index+1}</span><strong>{item.title}</strong></button>)}</nav>
+      </>}
+      <div className="mt-6 flex flex-wrap items-end gap-3"><label className="min-w-0 flex-1 text-sm font-semibold">Etapa da jornada<select disabled={!!mode || busy} value={section.id} onChange={e => navigate(e.target.value)} className="mt-2 block min-h-12 w-full rounded-xl border border-[#CEC8BD] bg-white px-3">{sections.map((item,index) => <option key={item.id} value={item.id}>{index+1}. {item.title}</option>)}</select></label><button className={button} disabled={busy} onClick={() => load().then(() => setMessage('Mapa atualizado. Rascunhos em edição foram preservados.')).catch(e => setError(e.message))}>Atualizar</button></div>
+      <div className="mt-3 flex items-center justify-between gap-2"><button className={button} disabled={!!mode || busy || stageIndex <= 0} onClick={() => navigate(sections[stageIndex-1].id)}>← Anterior</button><span className="text-center text-xs text-[#625E59]">Lendo etapa {stageIndex+1} de {sections.length}</span><button className={button} disabled={!!mode || busy || stageIndex >= sections.length-1} onClick={() => navigate(sections[stageIndex+1].id)}>Próxima →</button></div>
       <nav aria-label="Conteúdo da etapa" className="mt-5 grid grid-cols-3 gap-1 border-b border-[#CEC8BD]">{([['document','Texto aprovado'],['discussion',`Conversas (${contributions.filter(c => c.status === 'open').length})`],['history','Histórico']] as const).map(([id,title]) => <button key={id} disabled={!!mode} aria-current={tab === id ? 'page' : undefined} onClick={() => setTab(id)} className={`min-h-12 border-b-2 px-2 text-xs font-semibold sm:text-sm ${tab === id ? 'border-[#A94E38] text-[#A94E38]' : 'border-transparent text-[#625E59]'}`}>{title}</button>)}</nav>
       {tab === 'document' && <section className="mt-5"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><h2 className="font-semibold">{section.title} <span className="text-xs font-normal text-[#625E59]">· versão {section.version}</span></h2>{!mode && <div className="flex flex-wrap gap-2"><button className={button} onClick={() => start('suggest')}>Sugerir alteração</button>{data!.isLead && <button className={`${button} bg-[#24231F] text-white`} onClick={() => start('publish')}>Editar e publicar</button>}</div>}</div>
         {!mode ? <div className="rounded-2xl border border-[#CEC8BD] bg-white p-5 sm:p-7"><MapContent content={section.content} /></div> : <form onSubmit={e => { e.preventDefault(); send({ action: mode, section: section.id, version: base, content: draft, note, license }, mode === 'publish' ? 'Nova versão publicada no mapa público.' : 'Proposta enviada para revisão pelos membros-lead.') }} className="space-y-4">
@@ -80,5 +91,6 @@ export function MapWorkspace() {
       </section>}
       {tab === 'history' && <section className="mt-5 space-y-3">{data!.revisions.filter(item => item.section_id === section.id).map(item => <details key={item.version} className="rounded-xl border border-[#CEC8BD] bg-white p-4"><summary className="cursor-pointer text-sm"><strong>Versão {item.version}</strong> · {author(item.editor_id)} · {new Date(item.created_at).toLocaleDateString('pt-BR')}<span className="mt-1 block text-[#625E59]">{item.note}</span></summary><div className="mt-4"><MapContent content={item.content} /></div></details>)}<p className="text-xs text-[#625E59]">Últimas 100 revisões do mapa. As anteriores permanecem preservadas.</p></section>}
     </>}
+    {!archived && !mode && <details className="mt-8 border-t border-[#CEC8BD] pt-4 text-xs text-[#625E59]"><summary className="cursor-pointer">Sobre esta construção aberta</summary><p className="mt-3 leading-6">Roteiro adaptável, sem nota universal de maturidade. Registre o que não se aplica e proponha variáveis específicas do seu contexto. A jornada evolui com a comunidade.</p><button className="mt-3 min-h-11 underline" onClick={() => navigate('solicitacao')}>Consultar o ciclo contratual anterior e seu histórico</button></details>}
   </main>
 }

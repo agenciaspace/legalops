@@ -5,7 +5,7 @@ const headers = { 'Access-Control-Allow-Origin': 'https://legalops.dev', 'Access
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers }) }
 export async function GET() {
   const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } })
-  const { data, error } = await db.from('contract_map_sections').select('id,title,position,content,version,updated_at').order('position')
+  const { data, error } = await db.from('contract_map_sections').select('id,title,position,content,version,updated_at,journey').eq('journey', 'clm-migration').order('position')
   if (error) return NextResponse.json({ error: 'Mapa indisponível. Tente novamente.' }, { status: 503, headers: { ...headers, 'Cache-Control': 'no-store' } })
-  return NextResponse.json({ sections: data, license: 'MIT' }, { headers })
+  return NextResponse.json({ title: 'Migração de CLM', journey: 'clm-migration', sections: data, license: 'MIT' }, { headers })
 }
