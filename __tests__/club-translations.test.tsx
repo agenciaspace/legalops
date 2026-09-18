@@ -65,3 +65,12 @@ it('supports browser language priorities, Spanish labels and the Spanish agent',
   expect(browserClubLocale('fr-FR;q=1,es-MX;q=0.9,en;q=0.8')).toBe('es')
   expect(clubTranslator('es')('Ver original')).toBe('Ver original')
 })
+
+it('translates all targets when the source contains multiple languages', async () => {
+  const original = {body:'Vamos revisar el contrato tomorrow.'}
+  vi.stubGlobal('fetch',vi.fn(async()=>Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify({detected_locale:'mul',translations:{'pt-BR':{body:'Vamos revisar o contrato amanhã.'},en:{body:'Let us review the contract tomorrow.'},es:{body:'Revisemos el contrato mañana.'}}})}}]})))
+  const result=await translateClubPayload(original,null,'test-key')
+  expect(result.detected_locale).toBe('mul')
+  expect(result.translations.es.body).toBe('Revisemos el contrato mañana.')
+  expect(result.translations['pt-BR'].body).not.toBe(original.body)
+})
