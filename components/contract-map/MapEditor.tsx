@@ -21,6 +21,7 @@ export function MapEditor(props:Props) {
  const [people,setPeople]=useState<string[]>([])
  useEffect(()=>{
   let synced=false
+  setReady(false);setPeople([]);setStatus('Conectando ao rascunho compartilhado…')
   const doc=new Y.Doc();const client=createClient()
   const connection=new HocuspocusProvider({url:props.collaborationUrl??'wss://legalops.dev/collaboration',name:`clm:${props.sectionId}:v${props.version}`,document:doc,token:async()=>{const {data}=await client.auth.getSession();return data.session?.access_token??''},
    onStatus:({status})=>{if(status==='disconnected'){synced=false;setStatus('Sem conexão. O texto continua aqui; aguardando reconexão.');setReady(false);props.onReady(false)}else if(status==='connecting')setStatus('Conectando ao rascunho compartilhado…')},
@@ -34,7 +35,7 @@ export function MapEditor(props:Props) {
   setProvider(connection)
   return()=>{connection.destroy();doc.destroy();props.onReady(false)}
  },[props.sectionId,props.version])
- return <div><div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[#625E59]"><p role="status">{status}</p>{people.length>0&&<p aria-label="Pessoas no rascunho">{people.join(' · ')}</p>}</div><p className="mb-3 text-xs leading-5 text-[#625E59]">Membros editam juntos este rascunho. Ele só altera o documento público depois da revisão de um lead.</p>{provider&&<EditorSurface {...props} provider={provider} ready={ready}/>}</div>
+ return <div><div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[#625E59]"><p role="status">{status}</p>{people.length>0&&<p aria-label="Pessoas no rascunho">{people.join(' · ')}</p>}</div><p className="mb-3 text-xs leading-5 text-[#625E59]">Membros editam juntos este rascunho. Ele só altera o documento público depois da revisão de um lead.</p>{provider&&<EditorSurface key={provider.configuration.name} {...props} provider={provider} ready={ready}/>}</div>
 }
 function EditorSurface({provider,ready,...props}:Props&{provider:HocuspocusProvider;ready:boolean}) {
  const [quote,setQuote]=useState('')

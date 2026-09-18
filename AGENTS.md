@@ -338,3 +338,18 @@ When changing authentication, submit the browser form; rendering it is not enoug
 - Imported generic member rows are access records, not directory profiles. `isDirectoryMember` controls visibility without deleting real accounts.
 - Bench frontend source is `agenciaspace/clm-bench`; community-owned catalog, three steps, one criteria group at a time. Keep external discovery attribution out of the product UI; preserve research history separately.
 - Open Playbook frontend source is `agenciaspace/open-playbook`, published at `/playbook/`; browser drafts and explicit GitHub proposals, no approved clauses until reviewed.
+
+## Collaborative document responsive checks (2026-09-18)
+
+- Preserve responsive behavior when changing editors, dialogs, tables, comments,
+  mentions, notifications or community navigation. Check 320/390 px mobile,
+  768 px tablet and desktop. Wide tables scroll inside their container; the
+  page must not scroll horizontally.
+- The desktop community sidebar stays below the sticky header during page
+  scrolling. Its collapse/expand button remains visible even when its own menu
+  scrolls, and the preference survives reload. Mobile uses its bottom navigation.
+- Shared Tiptap drafts must remain private to members until a lead publishes.
+  Check two editor sessions, stale-version transitions and mobile comment dialogs.
+  Recreate the editor when its collaboration room changes.
+- Run `npm run test:collaboration` after changing the self-hosted server. Keep
+  the MIT reference implementation in `clm-bench/integrations/legalops` in sync.
