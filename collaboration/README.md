@@ -11,12 +11,12 @@ npm ci
 SUPABASE_URL=https://YOUR_PROJECT.supabase.co \
 SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_KEY \
 COLLAB_DATA_DIR=/var/lib/legalops-collaboration \
-PORT=8788 node collaboration/server.mjs
+PORT=8796 node collaboration/server.mjs
 ```
 
 The process listens on localhost. Place a WebSocket-capable HTTPS proxy in front.
 Here, `wss://legalops.dev/collaboration` passes through Pages and the existing
-OpenCLM tunnel to port 8788. Other OpenCLM paths remain on port 8787.
+OpenCLM tunnel to port 8796. Other OpenCLM paths remain on port 8787.
 `legalops-collaboration.service` is independent of WhatsApp.
 
 Only the Supabase public key is configured. Every socket sends its user token
