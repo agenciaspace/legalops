@@ -300,7 +300,7 @@ members.
 
 ## Deployment policy
 
-- App changes deploy through `npm run deploy:cloudflare` using `wrangler.jsonc`.
+- App changes deploy through `npm run deploy:cloudflare`: OpenNext uploads a version, then the script deploys exactly that returned version at 100% traffic. Existing routes/custom domains remain configured; intentional route changes use `wrangler triggers deploy` with appropriate zone permissions. This avoids treating an unrelated route-permission failure as an application-deploy failure.
 - Cron changes deploy through `npx wrangler deploy --config cloudflare/legalops-cron.wrangler.jsonc`.
 - Inbound email changes deploy through
   `npx wrangler deploy --config cloudflare/email-inbound.wrangler.jsonc`.

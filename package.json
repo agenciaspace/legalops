@@ -10,7 +10,7 @@
     "test:watch": "vitest",
     "build:cloudflare": "opennextjs-cloudflare build",
     "preview:cloudflare": "opennextjs-cloudflare preview",
-    "deploy:cloudflare": "opennextjs-cloudflare deploy",
+    "deploy:cloudflare": "node scripts/deploy-cloudflare-version.mjs",
     "test:collaboration": "node --test collaboration/server.integration.mjs",
     "test:bend": "python3 scripts/check-bend.py"
   },

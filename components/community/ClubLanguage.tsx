@@ -21,7 +21,7 @@ export function ClubLanguageSelect({ compact = false }: { compact?: boolean }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
-  return <div><label className={`relative inline-flex min-h-11 items-center justify-center gap-1 rounded-lg border border-[#CEC8BD] bg-white px-2 text-xs font-semibold ${compact ? "w-16" : ""}`}>
+  return <div><label className={`relative inline-flex min-h-11 items-center justify-center gap-1 rounded-lg border border-[#CEC8BD] bg-white px-2 text-xs font-semibold focus-within:ring-2 focus-within:ring-[#E88A6A] ${compact ? "w-16" : ""}`}>
     <Languages aria-hidden="true" className="h-4 w-4" /><span className="sr-only">Idioma / Language / Idioma</span>
     {compact && <span aria-hidden="true">{locale.split("-")[0].toUpperCase()}</span>}
     <select aria-label="Idioma / Language / Idioma" disabled={busy} value={locale} onChange={async event => {

@@ -11,6 +11,7 @@ on:
       - 'LAWS.bend'
       - 'PROOF.bend'
       - 'scripts/check-bend.py'
+      - 'scripts/deploy-cloudflare-version.mjs'
       - 'middleware.ts'
       - 'scripts/verify-public-auth-build.mjs'
       - 'package.json'
@@ -47,6 +48,9 @@ jobs:
 
       - name: Prove Bend policies and verify generated runtime decisions
         run: npm run test:bend
+
+      - name: Test application
+        run: npm test
 
       - name: Build OpenNext worker
         id: build
