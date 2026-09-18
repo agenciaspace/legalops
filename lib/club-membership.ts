@@ -57,6 +57,6 @@ export function hasClubProAccess(access?: ClubProAccess | null, now = new Date()
 }
 
 export function isClubProPath(path: string): boolean {
-  return ['/api/club/agent', '/community/summaries', '/community/jobs', '/api/ai', '/api/profile/linkedin-insights'].some(prefix => path === prefix || path.startsWith(`${prefix}/`))
+  return ['/api/club/agent', '/community/jobs', '/api/ai', '/api/profile/linkedin-insights'].some(prefix => path === prefix || path.startsWith(`${prefix}/`))
     || /^\/api\/pipeline\/[^/]+\/(?:cv|leader)(?:\/|$)/.test(path)
 }

@@ -1,0 +1,8 @@
+[Unit]
+Description=Check the daily 18h BRT community summary and retry unfinished periods
+[Timer]
+OnCalendar=*-*-* *:0/5:00
+Persistent=true
+AccuracySec=5s
+[Install]
+WantedBy=timers.target

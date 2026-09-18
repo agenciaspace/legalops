@@ -28,6 +28,7 @@ describe('Club admission and Pro separation', () => {
   })
   it('separates community conversations and directory from AI and personalized integrations', () => {
     for (const path of ['/community', '/community/members', '/community/profile', '/community/calendar', '/api/pipeline']) expect(isClubProPath(path)).toBe(false)
-    for (const path of ['/api/club/agent', '/community/summaries', '/community/jobs', '/api/ai/cover-letter', '/api/profile/linkedin-insights', '/api/pipeline/id/cv', '/api/pipeline/id/leader']) expect(isClubProPath(path)).toBe(true)
+    expect(isClubProPath('/community/summaries')).toBe(false)
+    for (const path of ['/api/club/agent', '/community/jobs', '/api/ai/cover-letter', '/api/profile/linkedin-insights', '/api/pipeline/id/cv', '/api/pipeline/id/leader']) expect(isClubProPath(path)).toBe(true)
   })
 })

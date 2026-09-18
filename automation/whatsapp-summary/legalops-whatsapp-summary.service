@@ -1,0 +1,12 @@
+[Unit]
+Description=LegalOps community daily WhatsApp summary
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/legalops-whatsapp-summary/runner.py
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+TimeoutStartSec=240
