@@ -12,10 +12,14 @@
       }
       return text;
     }
-    const tag = { doc: 'div', paragraph: 'p', bulletList: 'ul', orderedList: 'ol', listItem: 'li', blockquote: 'blockquote', hardBreak: 'br' }[node.type] || (node.type === 'heading' ? node.attrs?.level === 3 ? 'h3' : 'h2' : 'div');
+    const tag = { doc: 'div', paragraph: 'p', bulletList: 'ul', orderedList: 'ol', listItem: 'li', blockquote: 'blockquote', hardBreak: 'br', taskList:'ul', taskItem:'li', table:'table', tableRow:'tr', tableCell:'td', tableHeader:'th' }[node.type] || (node.type === 'heading' ? node.attrs?.level === 3 ? 'h3' : 'h2' : 'div');
     const element = document.createElement(tag);
     if (tag === 'ol' && Number.isInteger(node.attrs?.start)) element.start = node.attrs.start;
+    if(node.type==='taskList')element.className='map-task-list';
+    if(node.type==='taskItem'){const check=document.createElement('span');check.textContent=node.attrs?.checked?'☑ ':'☐ ';check.setAttribute('aria-label',node.attrs?.checked?'Concluído':'Pendente');element.append(check);}
+    if(['tableCell','tableHeader'].includes(node.type)){element.colSpan=Math.max(1,Math.min(50,node.attrs?.colspan||1));element.rowSpan=Math.max(1,Math.min(50,node.attrs?.rowspan||1));}
     for (const child of node.content || []) element.append(render(child));
+    if(node.type==='table'){const wrapper=document.createElement('div');wrapper.className='map-table-wrap';wrapper.append(element);return wrapper;}
     return element;
   }
   async function refresh() {

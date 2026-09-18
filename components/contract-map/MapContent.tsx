@@ -15,6 +15,12 @@ export function MapContent({ content }: { content: MapNode }) {
       case 'heading': return item.attrs?.level === 3 ? <h3 key={key}>{inner}</h3> : <h2 key={key}>{inner}</h2>
       case 'bulletList': return <ul key={key}>{inner}</ul>
       case 'orderedList': return <ol key={key} start={item.attrs?.start}>{inner}</ol>
+      case 'taskList': return <ul key={key} className="map-task-list">{inner}</ul>
+      case 'taskItem': return <li key={key} className="map-task-item"><span aria-label={item.attrs?.checked ? 'Concluído' : 'Pendente'}>{item.attrs?.checked ? '☑' : '☐'}</span><div>{inner}</div></li>
+      case 'table': return <div key={key} className="map-table-wrap"><table><tbody>{inner}</tbody></table></div>
+      case 'tableRow': return <tr key={key}>{inner}</tr>
+      case 'tableCell': return <td key={key} colSpan={item.attrs?.colspan} rowSpan={item.attrs?.rowspan}>{inner}</td>
+      case 'tableHeader': return <th key={key} colSpan={item.attrs?.colspan} rowSpan={item.attrs?.rowspan}>{inner}</th>
       case 'listItem': return <li key={key}>{inner}</li>
       case 'blockquote': return <blockquote key={key}>{inner}</blockquote>
       case 'hardBreak': return <br key={key} />

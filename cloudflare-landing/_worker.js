@@ -5,13 +5,21 @@ const PUBLIC = 'https://legalops.dev';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === '/collaboration') {
+      if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') return new Response('WebSocket required', {status:426});
+      const headers = new Headers(request.headers);
+      headers.delete('cookie'); headers.delete('authorization'); headers.delete('host');
+      try { return await fetch(new Request(`${ORIGIN}/collaboration`, {method:'GET',headers,redirect:'manual'})); }
+      catch { return new Response('Collaboration unavailable', {status:503}); }
+    }
     if (url.pathname === PREFIX || url.pathname === '/openclm.html') {
       return Response.redirect(`${PUBLIC}${PREFIX}/${url.search}`, 308);
     }
     if (!url.pathname.startsWith(`${PREFIX}/`)) return env.ASSETS.fetch(request);
     if (url.origin !== PUBLIC) return Response.redirect(`${PUBLIC}${url.pathname}${url.search}`, 308);
     const upstream = new URL(ORIGIN);
-    upstream.pathname = url.pathname.slice(PREFIX.length);
+    // FastAPI root_path routes mounted static files using the prefixed ASGI path.
+    upstream.pathname = url.pathname;
     upstream.search = url.search;
     const headers = new Headers(request.headers);
     headers.delete('host');
