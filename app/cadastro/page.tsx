@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { BrandWordmark } from '@/components/BrandLogo'
-import { contactReturnPath } from '@/lib/contact-card'
+import { clubReturnPath } from '@/lib/club-return-path'
 
 export default function ClubSignupPage() {
   const router = useRouter()
@@ -12,7 +12,7 @@ export default function ClubSignupPage() {
   useEffect(() => {
     const next = new URLSearchParams(window.location.search).get('next')
     if (next === '/club/checkout') setReturnPath('/club/entrar?next=/club/checkout')
-    else if (contactReturnPath(next)) setReturnPath(`/club/entrar?next=${encodeURIComponent(next!)}`)
+    else if (clubReturnPath(next)) setReturnPath(`/club/entrar?next=${encodeURIComponent(next!)}`)
   }, [])
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)

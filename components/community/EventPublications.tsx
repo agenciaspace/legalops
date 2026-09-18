@@ -1,4 +1,5 @@
 import { MemberAvatar } from './MemberAvatar'
+import { EventPhotoGallery } from './EventPhotoGallery'
 import { groupEventPublications, type EventResource } from '@/lib/event-publications'
 
 type Author = { user_id: string; display_name: string; avatar_path: string | null; current_role: string | null; organization_name: string | null }
@@ -19,13 +20,10 @@ export function EventPublications({ resources, authors }: { resources: EventReso
         <div className="min-w-0"><p className="text-sm font-bold text-[#24231F]">{name}</p>{author && <p className="text-xs text-[#69635E]">{[author.current_role, author.organization_name].filter(Boolean).join(' · ')}</p>}<time dateTime={first.created_at} className="text-xs text-[#817A73]">{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(first.created_at))}</time></div>
       </header>
       {caption && <p className="whitespace-pre-wrap break-words px-4 pb-4 text-sm leading-6 text-[#24231F] sm:px-5">{caption}</p>}
-      {first.kind === 'foto' ? <div className={`grid gap-1 bg-[#FAF7F1] ${files.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>{files.map((file, index) => {
+      {first.kind === 'foto' ? <EventPhotoGallery author={name} photos={files.flatMap(file => {
         const source = file.storage_path ? `/api/community/events/resources/${file.id}` : file.resource_url
-        if (!source) return null
-        return <a key={file.id} href={source} target="_blank" rel="noreferrer" aria-label={`Ampliar foto ${index + 1} de ${files.length}`} className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#C9684F]">
-          <img src={source} alt={`Foto ${index + 1} do encontro, compartilhada por ${name}`} loading="lazy" className={`w-full ${files.length === 1 ? 'max-h-[36rem] object-contain' : 'aspect-square object-cover'}`} />
-        </a>
-      })}</div> : <ul className="space-y-2 px-4 pb-4 sm:px-5">{files.map(file => <li key={file.id}><a href={file.storage_path ? `/api/community/events/resources/${file.id}?download=1` : file.resource_url ?? '#'} target="_blank" rel="noreferrer" className="flex min-h-11 items-center justify-between gap-3 rounded-lg border border-[#E6DED0] px-3 py-2 text-sm font-semibold hover:bg-[#FAF7F1]"><span className="min-w-0 break-all">{file.title.split(' · ').pop()}</span><span className="shrink-0 text-xs text-[#C9684F]">Abrir ↗</span></a></li>)}</ul>}
+        return source ? [{ id: file.id, source }] : []
+      })} /> : <ul className="space-y-2 px-4 pb-4 sm:px-5">{files.map(file => <li key={file.id}><a href={file.storage_path ? `/api/community/events/resources/${file.id}?download=1` : file.resource_url ?? '#'} target="_blank" rel="noreferrer" className="flex min-h-11 items-center justify-between gap-3 rounded-lg border border-[#E6DED0] px-3 py-2 text-sm font-semibold hover:bg-[#FAF7F1]"><span className="min-w-0 break-all">{file.title.split(' · ').pop()}</span><span className="shrink-0 text-xs text-[#C9684F]">Abrir ↗</span></a></li>)}</ul>}
     </article>
   })}</div>
 }

@@ -1,5 +1,5 @@
 import {afterEach,beforeEach,expect,it,vi} from 'vitest'
-import {cleanup,fireEvent,render,screen,waitFor} from '@testing-library/react'
+import {cleanup,fireEvent,render,screen,waitFor,within} from '@testing-library/react'
 const state=vi.hoisted(()=>({path:'/community/calendar',search:new URLSearchParams(),confirm:vi.fn(),decline:vi.fn()}))
 vi.mock('next/navigation',()=>({usePathname:()=>state.path,useSearchParams:()=>state.search}))
 vi.mock('@/app/(main)/community/actions',()=>({confirmBenchAttendance:state.confirm,declineBenchAttendance:state.decline}))
@@ -8,10 +8,13 @@ import BenchClient from '@/app/(main)/community/bench/BenchClient'
 import {ClubPwa} from '@/components/community/ClubPwa'
 afterEach(cleanup)
 beforeEach(()=>{vi.clearAllMocks();state.path='/community/calendar';state.search=new URLSearchParams()})
-it('keeps only Community and Events in the primary navigation',()=>{
+it('keeps Community, Events and Tools in the primary navigation',()=>{
  render(<CommunityTabs />)
- expect(screen.getByRole('link',{name:'Comunidade'})).toHaveAttribute('href','/community')
- expect(screen.getByRole('link',{name:'Eventos'})).toHaveAttribute('aria-current','page')
+ const nav=within(screen.getByRole('navigation',{name:'Áreas do Club'}))
+ expect(nav.getAllByRole('link')).toHaveLength(3)
+ expect(nav.getByRole('link',{name:'Ferramentas'})).toHaveAttribute('href','/community/tools')
+ expect(nav.getByRole('link',{name:'Comunidade'})).toHaveAttribute('href','/community')
+ expect(nav.getByRole('link',{name:'Eventos'})).toHaveAttribute('aria-current','page')
  expect(screen.queryByText('Assuntos dos posts')).not.toBeInTheDocument()
  expect(screen.queryByRole('link',{name:'Pro'})).not.toBeInTheDocument()
  expect(screen.queryByRole('link',{name:'Meu agente'})).not.toBeInTheDocument()

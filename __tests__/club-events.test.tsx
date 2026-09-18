@@ -11,7 +11,7 @@ it('places Bench under Events and keeps the featured meeting out of duplicate ev
  render(await EventsPage())
  expect(screen.getByRole('heading',{level:1,name:'Eventos'})).toBeInTheDocument()
  expect(screen.getByRole('heading',{level:2,name:'Bench',hidden:true})).toBeInTheDocument()
- expect(document.querySelector('details#bench')).not.toHaveAttribute('open')
+ expect(screen.getByRole('heading',{level:2,name:'Bench'})).toBeVisible()
  expect(screen.queryByText('Featured Bench event')).not.toBeInTheDocument()
  cleanup()
 })

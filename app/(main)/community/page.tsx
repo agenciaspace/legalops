@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { EventShare } from '@/components/community/EventShare'
 import { CalendarDays, Heart, Lock, MessageCircle, Pin, Send } from 'lucide-react'
 import { MemberAvatar } from '@/components/community/MemberAvatar'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
@@ -35,7 +36,7 @@ export default async function CommunityPage({searchParams}:{searchParams?:{space
    <form action={createCommunityPost} className="space-y-4 p-5">
     <label className="block text-sm font-medium">Título<input name="title" required minLength={3} maxLength={180} className="mt-2 min-h-12 w-full rounded-xl border p-3 text-base" /></label>
     <label className="block text-sm font-medium">Sua publicação<textarea name="body" required minLength={3} maxLength={10000} rows={4} className="mt-2 w-full rounded-xl border p-3 text-base" /></label>
-    <label className="block text-sm font-medium">Assunto<select name="category" defaultValue={selectedSpace??'discussao'} className="mt-2 min-h-12 w-full rounded-xl border bg-white p-3 text-base">{Object.entries(COMMUNITY_CATEGORIES).filter(([key])=>key!=='anuncio').map(([key,value])=><option key={key} value={key}>{value.label}</option>)}</select></label>
+    <label className="block text-sm font-medium">Assunto<span id="post-category-help" className="mt-1 block text-xs font-normal leading-5 text-[#625E59]">Escolha um dos temas no menu abaixo para organizar sua publicação.</span><select aria-describedby="post-category-help" name="category" defaultValue={selectedSpace??'discussao'} className="mt-2 min-h-12 w-full rounded-xl border bg-white p-3 text-base">{Object.entries(COMMUNITY_CATEGORIES).filter(([key])=>key!=='anuncio').map(([key,value])=><option key={key} value={key}>{value.label}</option>)}</select></label>
     <button className="min-h-12 rounded-xl bg-[#24231F] px-5 text-sm font-semibold text-white">Publicar</button>
    </form>
   </details> : <Link href="/club/entrar" className="mb-6 inline-flex min-h-12 items-center underline">Completar perfil para participar</Link>}
@@ -52,7 +53,7 @@ export default async function CommunityPage({searchParams}:{searchParams?:{space
   {posts.length===0 && !(feedEvents?.length) ? <p className="py-8 text-sm leading-6 text-[#625E59]">{search||selectedSpace?'Nenhuma publicação encontrada.':'Ainda não há publicações. Compartilhe uma pergunta ou experiência para começar.'}</p> : null}
   <div className="space-y-4">
    {(feedEvents ?? []).map(event => <article key={`event-${event.id}`} className="rounded-xl border border-[#FFD8C8] bg-[#FFF8F4] p-4 sm:p-5">
-    <div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFE3D7] text-[#D9470F]"><CalendarDays className="h-5 w-5" /></div><div className="min-w-0 flex-1"><p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#D9470F]">Registro de evento</p><h2 className="mt-1 text-[17px] font-extrabold leading-6 tracking-[-0.015em] text-[#252420]">{event.title}</h2><p className="mt-2 text-[13px] leading-[1.65] text-[#68655F]">{event.description}</p><p className="mt-2 text-xs font-semibold text-[#88857F]">{new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium',timeStyle:'short',timeZone:'America/Sao_Paulo'}).format(new Date(event.starts_at))} · {event.location_label}</p><Link href={`/community/events/${event.slug}`} className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-[#24231F] px-4 text-xs font-bold text-white">Ver evento →</Link></div></div>
+    <div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFE3D7] text-[#D9470F]"><CalendarDays className="h-5 w-5" /></div><div className="min-w-0 flex-1"><p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#D9470F]">Registro de evento</p><h2 className="mt-1 text-[17px] font-extrabold leading-6 tracking-[-0.015em] text-[#252420]">{event.title}</h2><p className="mt-2 text-[13px] leading-[1.65] text-[#68655F]">{event.description}</p><p className="mt-2 text-xs font-semibold text-[#88857F]">{new Intl.DateTimeFormat('pt-BR',{dateStyle:'medium',timeStyle:'short',timeZone:'America/Sao_Paulo'}).format(new Date(event.starts_at))} · {event.location_label}</p><Link href={`/community/events/${event.slug}`} className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-[#24231F] px-4 text-xs font-bold text-white">Ver evento →</Link><div className="mt-2"><EventShare slug={event.slug} title={event.title} /></div></div></div>
    </article>)}
             {posts.map(post => {
               const author = post.author_id ? authorById.get(post.author_id) : null

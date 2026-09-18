@@ -1,8 +1,8 @@
 import { CalendarDays, Clock3, MapPin, Plus, Video } from 'lucide-react'
 import BenchSection from './BenchSection'
-import {BenchDisclosure} from './BenchDisclosure'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import Link from 'next/link'
+import { EventShare } from '@/components/community/EventShare'
 
 type Event = {
   id: string
@@ -46,7 +46,7 @@ export default async function CalendarPage() {
     .gte('starts_at', new Date().toISOString())
     .order('starts_at', { ascending: true }).limit(50)
 
-  const events = (rawEvents ?? []) as Event[]
+  const events = ((rawEvents ?? []) as Event[]).filter(event => !event.slug.startsWith('bench-'))
 
   return (
     <div className="mx-auto w-full max-w-[1000px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
@@ -61,7 +61,7 @@ export default async function CalendarPage() {
 
       <section id="outros-eventos" className="scroll-mt-24 mt-8 overflow-hidden rounded-xl border border-[#E1E1DD] bg-white">
         <div className="flex items-center justify-between border-b border-[#ECECE8] px-4 py-3.5 sm:px-5">
-          <h2 className="text-xs font-extrabold text-[#34332F]">Próximo encontro</h2>
+          <h2 className="text-xs font-extrabold text-[#34332F]">Outros encontros</h2>
 
         </div>
 
@@ -92,9 +92,13 @@ export default async function CalendarPage() {
                     <span>Com {event.host_name}</span>
                   </div>
                 </div>
+                <div className="flex flex-col gap-2">
+                <Link href={`/community/events/${event.slug}`} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#24231F] px-3 text-xs font-semibold text-white">Ver evento</Link>
+                <EventShare slug={event.slug} title={event.title} />
                 <a href={event.location_url ?? googleCalendarUrl(event)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-lg border border-[#DFDFDB] bg-white px-3 text-[10px] font-extrabold text-[#34332F] transition hover:border-[#FFB99E] hover:text-[#D9470F]">
                   {event.location_url ? <Video className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />} {event.location_url ? 'Participar' : 'Adicionar'}
                 </a>
+                </div>
               </article>
             )
           })}
@@ -106,7 +110,7 @@ export default async function CalendarPage() {
           ) : null}
         </div>
       </section>
-      <BenchDisclosure><BenchSection /></BenchDisclosure>
+      <BenchSection />
     </div>
   )
 }
