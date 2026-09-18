@@ -1,5 +1,6 @@
 import { getClubLocale, getClubTranslator } from '@/lib/club-locale-server'
 import Link from 'next/link'
+import { ChevronDown } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { hasActiveClubAccess } from '@/lib/community'
 import { registerPublicEvent } from '../../actions'
@@ -28,36 +29,59 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   const { data: discussions } = isMember ? await supabase.from('community_posts').select('id,title,body,created_at').eq('event_id', event.id).order('created_at', { ascending: false }).limit(20) : { data: [] }
   const past = new Date(event.ends_at || event.starts_at) < new Date()
   const joinUrl = `/club/entrar?next=${encodeURIComponent(`/community/events/${event.slug}`)}`
-  const activeTab = searchParams?.tab === 'documentos' ? 'documentos' : 'fotos'
+  const activeTab = searchParams?.tab === 'discussoes' ? 'discussoes' : searchParams?.tab === 'documentos' ? 'documentos' : 'fotos'
   const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
-  return <main className="mx-auto w-full max-w-3xl px-4 py-7 sm:px-6 lg:py-12">
-    <Link href="/community/calendar" className="text-xs font-bold text-[#D9470F]">{t("← Eventos")}</Link>
-    {isMember && <Link href="/community/contact" className="ml-4 inline-flex min-h-11 items-center rounded-lg border border-[#CEC8BD] bg-white px-3 text-xs font-semibold">{t("Meu QR code de contato")}</Link>}
-    <article className="mt-5 rounded-2xl border border-[#E1E1DD] bg-white p-5 sm:p-8">
-      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#D9470F]">{past ? t("Evento realizado") : t("Próximo evento")} · {event.event_type}</p>
-      <h1 className="mt-3 text-2xl font-extrabold tracking-[-0.03em] text-[#24231F] sm:text-3xl">{event.title}</h1>
-      <div className="mt-4"><EventShare slug={event.slug} title={event.title} /></div>
-      <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[#625E59]">{event.description}</p>
-      <dl className="mt-6 grid gap-3 border-t border-[#ECECE8] pt-5 text-sm text-[#625E59] sm:grid-cols-2"><div><dt className="text-[9px] font-black uppercase tracking-wider text-[#999690]">{t("Quando")}</dt><dd className="mt-1 font-semibold">{new Intl.DateTimeFormat(getClubLocale(),{dateStyle:'full',timeStyle:'short',timeZone:'America/Sao_Paulo'}).format(new Date(event.starts_at))}</dd></div><div><dt className="text-[9px] font-black uppercase tracking-wider text-[#999690]">{t("Onde")}</dt><dd className="mt-1 font-semibold">{event.location_label}</dd></div><div><dt className="text-[9px] font-black uppercase tracking-wider text-[#999690]">{t("Organização")}</dt><dd className="mt-1 font-semibold">{event.host_name}</dd></div></dl>
-      {searchParams?.registered ? <p role="status" className="mt-6 rounded-lg bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">{t("Cadastro recebido. Para acessar materiais e discussões, entre na comunidade.")}</p> : null}
-      {!isMember && !past ? <form action={registerPublicEvent} className="mt-7 rounded-xl bg-[#F5F1E8] p-4 sm:p-5"><input type="hidden" name="event_id" value={event.id} /><h2 className="font-bold">{t("Reserve sua vaga")}</h2><p className="mt-1 text-xs leading-5 text-[#716B65]">{t("O cadastro é público. Seu acesso aos materiais depois do encontro depende de uma conta da comunidade.")}</p><div className="mt-4 grid gap-3 sm:grid-cols-2"><input name="name" required minLength={2} placeholder={t("Nome")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /><input name="email" required type="email" placeholder={t("E-mail")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /><input name="role" required minLength={2} placeholder={t("Cargo")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /><input name="organization" required minLength={2} placeholder={t("Onde trabalha")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /></div><button className="mt-4 min-h-11 rounded-lg bg-[#24231F] px-5 text-sm font-bold text-white">{t("Confirmar cadastro")}</button></form> : null}
-      {!isMember ? <section className="mt-6 rounded-xl border border-[#CEC8BD] bg-[#F5F1E8] p-4 text-sm text-[#625E59]">
+  const overview = <div className="space-y-5">
+    <p className="whitespace-pre-wrap break-words text-sm leading-6 text-[#625E59]">{event.description}</p>
+    <dl className="space-y-4 text-sm text-[#625E59]">
+      <div><dt className="text-xs font-semibold text-[#817A73]">{t('Quando')}</dt><dd className="mt-1">{new Intl.DateTimeFormat(getClubLocale(), { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(event.starts_at))}</dd></div>
+      <div><dt className="text-xs font-semibold text-[#817A73]">{t('Onde')}</dt><dd className="mt-1 break-words">{event.location_label}</dd></div>
+      <div><dt className="text-xs font-semibold text-[#817A73]">{t('Organização')}</dt><dd className="mt-1 break-words">{event.host_name}</dd></div>
+    </dl>
+    <div className="space-y-2 border-t border-[#E6DED0] pt-4">
+      <EventShare slug={event.slug} title={event.title} />
+      {isMember && <Link href="/community/contact" className="inline-flex min-h-11 items-center text-xs font-semibold text-[#625E59] underline">{t('Meu QR code de contato')}</Link>}
+    </div>
+  </div>
+  return <main className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 lg:py-6">
+    <header className="mb-4 sm:mb-5">
+      <div className="flex min-h-11 items-center gap-3 text-xs">
+        <Link href="/community/calendar" className="inline-flex min-h-11 items-center font-semibold text-[#A94E38]">{t('← Eventos')}</Link>
+        <span className="text-[#817A73]">{past ? t('Evento realizado') : t('Próximo evento')}</span>
+      </div>
+      <h1 className="text-xl font-semibold leading-tight tracking-tight text-[#24231F] sm:text-2xl">{event.title}</h1>
+    </header>
+    <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-6">
+      <div className="min-w-0">
+        <details open={!isMember || !past} className="mb-4 rounded-xl border border-[#CEC8BD] bg-white xl:hidden">
+          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 text-sm font-semibold [&::-webkit-details-marker]:hidden">{t('Sobre o encontro')}<ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0" /></summary>
+          <div className="border-t border-[#E6DED0] p-4">{overview}</div>
+        </details>
+        {isMember && <nav id="publicacoes" aria-label={t('Conteúdo do evento')} className="mb-4 flex scroll-mt-20 gap-1 border-b border-[#CEC8BD]">
+          {([{ key: 'fotos', label: 'Fotos' }, { key: 'documentos', label: 'Documentos' }, { key: 'discussoes', label: 'Conversas' }] as const).map(tab => <Link key={tab.key} href={`/community/events/${event.slug}?tab=${tab.key}#publicacoes`} aria-current={activeTab === tab.key ? 'page' : undefined} className={`inline-flex min-h-12 flex-1 items-center justify-center border-b-2 px-2 text-sm font-semibold sm:flex-none sm:px-5 ${activeTab === tab.key ? 'border-[#A94E38] text-[#A94E38]' : 'border-transparent text-[#625E59] hover:text-[#24231F]'}`}>{t(tab.label)}</Link>)}
+        </nav>}
+      {searchParams?.registered ? <p role="status" className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">{t("Cadastro recebido. Para acessar materiais e discussões, entre na comunidade.")}</p> : null}
+      {!isMember && !past ? <form action={registerPublicEvent} className="mb-4 rounded-xl bg-[#F5F1E8] p-4 sm:p-5"><input type="hidden" name="event_id" value={event.id} /><h2 className="font-bold">{t("Reserve sua vaga")}</h2><p className="mt-1 text-xs leading-5 text-[#716B65]">{t("O cadastro é público. Seu acesso aos materiais depois do encontro depende de uma conta da comunidade.")}</p><div className="mt-4 grid gap-3 sm:grid-cols-2"><input name="name" required minLength={2} placeholder={t("Nome")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /><input name="email" required type="email" placeholder={t("E-mail")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /><input name="role" required minLength={2} placeholder={t("Cargo")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /><input name="organization" required minLength={2} placeholder={t("Onde trabalha")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /></div><button className="mt-4 min-h-11 rounded-lg bg-[#24231F] px-5 text-sm font-bold text-white">{t("Confirmar cadastro")}</button></form> : null}
+      {!isMember ? <section className="mb-4 rounded-xl border border-[#CEC8BD] bg-[#F5F1E8] p-4 text-sm text-[#625E59]">
         <h2 className="font-semibold text-[#24231F]">{t("Inscreva-se na comunidade para acessar este encontro")}</h2>
         <p className="mt-2 leading-6">{t("Fotos, documentos e discussões ficam na área dos membros. Entre na comunidade para acompanhar as conversas; participantes e organizadores também podem compartilhar os materiais do evento.")}</p>
         <Link className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-[#24231F] px-4 font-semibold text-white" href={joinUrl}>{user ? t("Completar meu cadastro") : t("Inscrever-me na comunidade")}</Link>
         {!user && <Link className="ml-3 inline-flex min-h-11 items-center font-semibold underline" href={`/login?next=${encodeURIComponent(joinUrl)}`}>{t("Já tenho conta")}</Link>}
       </section> : null}
-      {isMember && user && !past && <details className="mt-6 rounded-xl border border-[#CEC8BD] bg-[#F5F1E8] p-4"><summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">{attendance?.response === 'confirmed' ? t("Revisar minha participação") : t("Confirmar minha participação")}</summary><div className="mt-4"><BenchClient eventId={event.id} initial={attendance} member={{ name: member?.display_name || '', role: member?.current_role || '', email: user.email || '' }} /></div></details>}
-      {isMember && !canContribute && past && <p className="mt-6 rounded-lg border border-[#CEC8BD] p-4 text-sm leading-6 text-[#625E59]">{t("As fotos e documentos são exclusivos de participantes confirmados e organizadores. Se você participou e não tem acesso, peça à organização para conferir sua inscrição.")}</p>}
-      {canContribute ? <section id="publicacoes" className="mt-8 border-t border-[#E6DED0] pt-6">
-        <h2 className="text-lg font-bold">{t("Publicações do evento")}</h2>
-        <nav className="mt-4 flex gap-2" aria-label={t("Conteúdo do evento")}>
-          {(['fotos', 'documentos'] as const).map(tab => <Link key={tab} href={`/community/events/${event.slug}?tab=${tab}#publicacoes`} aria-current={activeTab === tab ? 'page' : undefined} className={`min-h-11 rounded-lg px-4 py-3 text-sm font-semibold ${activeTab === tab ? 'bg-[#24231F] text-white' : 'border border-[#CEC8BD] bg-white'}`}>{tab === 'fotos' ? t("Fotos") : t("Documentos")}</Link>)}
-        </nav>
-        <EventUpload key={activeTab} eventId={event.id} photos={activeTab === 'fotos'} />
-        <EventPublications resources={visibleResources} authors={authors ?? []} />
-      </section> : null}
-      {isMember ? <section className="mt-8 border-t border-[#ECECE8] pt-6"><h2 className="text-lg font-bold">{t("Discussões do evento")}</h2>{discussions?.length ? <div className="mt-3 space-y-3">{discussions.map(post => <Link key={post.id} href={`/community?post=${post.id}`} className="block rounded-lg border border-[#E4E2DD] p-3 hover:border-[#FFB99E]"><p className="text-sm font-bold">{post.title}</p><p className="mt-1 line-clamp-2 text-xs text-[#716B65]">{post.body}</p></Link>)}</div> : <p className="mt-2 text-sm text-[#77746E]">{t("A discussão será criada pelos participantes.")}</p>}</section> : null}
-    </article>
+      {isMember && user && !past && <details className="mb-4 rounded-xl border border-[#CEC8BD] bg-[#F5F1E8] p-4"><summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">{attendance?.response === 'confirmed' ? t("Revisar minha participação") : t("Confirmar minha participação")}</summary><div className="mt-4"><BenchClient eventId={event.id} initial={attendance} member={{ name: member?.display_name || '', role: member?.current_role || '', email: user.email || '' }} /></div></details>}
+      {isMember && !canContribute && activeTab !== 'discussoes' && past && <p className="mb-4 rounded-lg border border-[#CEC8BD] p-4 text-sm leading-6 text-[#625E59]">{t("As fotos e documentos são exclusivos de participantes confirmados e organizadores. Se você participou e não tem acesso, peça à organização para conferir sua inscrição.")}</p>}
+
+        {canContribute && activeTab !== 'discussoes' && <section aria-label={t('Publicações do evento')}>
+          <EventUpload key={activeTab} eventId={event.id} photos={activeTab === 'fotos'} />
+          <EventPublications resources={visibleResources} authors={authors ?? []} />
+        </section>}
+      {isMember && activeTab === 'discussoes' ? <section className="rounded-xl border border-[#CEC8BD] bg-white p-4 sm:p-5"><h2 className="text-lg font-bold">{t("Discussões do evento")}</h2>{discussions?.length ? <div className="mt-3 space-y-3">{discussions.map(post => <Link key={post.id} href={`/community?post=${post.id}`} className="block rounded-lg border border-[#E4E2DD] p-3 hover:border-[#FFB99E]"><p className="text-sm font-bold">{post.title}</p><p className="mt-1 line-clamp-2 text-xs text-[#716B65]">{post.body}</p></Link>)}</div> : <p className="mt-2 text-sm text-[#77746E]">{t("A discussão será criada pelos participantes.")}</p>}</section> : null}
+
+      </div>
+      <aside aria-label={t('Sobre o encontro')} className="sticky top-20 hidden min-w-0 rounded-xl border border-[#CEC8BD] bg-white p-5 xl:block">
+        <h2 className="mb-4 text-sm font-semibold">{t('Sobre o encontro')}</h2>
+        {overview}
+      </aside>
+    </div>
   </main>
 }

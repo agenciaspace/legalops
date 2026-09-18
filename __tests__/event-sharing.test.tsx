@@ -27,7 +27,7 @@ it.each([false, true])('invites a nonmember to join without reading private mate
   expect(state.tables).not.toContain('community_event_resources')
   expect(state.tables).not.toContain('community_posts')
   expect(screen.queryByText('Private upload')).not.toBeInTheDocument()
-  const share = new URL(screen.getByRole('link', { name: 'Compartilhar no WhatsApp' }).getAttribute('href')!)
+  const share = new URL(screen.getAllByRole('link', { name: 'Compartilhar no WhatsApp' })[0].getAttribute('href')!)
   expect(share.origin).toBe('https://wa.me')
   expect(share.searchParams.get('text')).toContain('https://legalops.club/community/events/bench-nubank')
   expect(share.searchParams.get('text')).toContain('Bench & contratos')

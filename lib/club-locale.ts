@@ -3,6 +3,7 @@ export type ClubLocale = 'pt-BR' | 'en'
 export function normalizeClubLocale(value?: string | null): ClubLocale { return value === 'en' ? 'en' : 'pt-BR' }
 
 const english: Record<string, string> = {
+  'Sobre o encontro': 'About the meeting', 'Conversas': 'Conversations',
   'Anúncios': 'Announcements', 'Apresentações': 'Introductions', 'Dados, métricas & BI': 'Data, metrics & BI',
   'Tech stack & integrações': 'Tech stack & integrations', 'Spend & fornecedores': 'Spend & vendors', 'Pessoas & liderança': 'People & leadership',
   'Ampliar foto {n} de {total}': 'Enlarge photo {n} of {total}', 'Foto {n} de {total}': 'Photo {n} of {total}',
