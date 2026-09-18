@@ -1005,3 +1005,41 @@ export const extraEnglish: Record<string, string> = {
   "English": "English",
   "Español": "Spanish"
 }
+
+// Daily WhatsApp summary availability.
+Object.assign(extraEnglish, {
+  "Programação em preparação.": "Schedule being prepared.",
+  "O resumo está atrasado. Uma nova tentativa será feita automaticamente.": "The summary is delayed. We will retry automatically.",
+  "Resumo em preparação. Ele aparecerá aqui assim que a geração terminar.": "Summary being prepared. It will appear here when generation finishes.",
+  "Próximo resumo: {date} (Brasília).": "Next summary: {date} (Brasília).",
+  "As conversas do grupo legalops.club · conversa, reunidas aqui e no próprio grupo.": "Conversations from legalops.club · conversa, summarized here and in the group.",
+  "Todos os dias, a partir das 18h (Brasília)": "Every day, from 6 pm (Brasília)",
+  "Não foi possível consultar a programação. Tente novamente em instantes.": "Could not load the schedule. Please try again shortly.",
+  "Cada edição cobre as 24 horas anteriores às 18h. A geração pode levar alguns minutos. Sem novas mensagens, não há edição nem envio ao grupo.": "Each edition covers the 24 hours before 6 pm Brasília time. Generation may take a few minutes. If there are no new messages, no edition is published or sent.",
+  "Último período verificado: nenhuma mensagem disponível para resumir.": "Last period checked: no messages available to summarize.",
+  "O primeiro resumo será publicado após o horário indicado acima, se houver mensagens no período.": "The first summary will be published after the time shown above, if there are messages in that period.",
+  "mensagens": "messages",
+  "participantes": "participants",
+  "Síntese por IA": "AI summary",
+  "{n} mídias sem texto ou transcrição não analisadas": "{n} media items without text or transcripts were not analyzed",
+  "Enviado também ao grupo.": "Also sent to the group.",
+  "Disponível no app; envio ao grupo pendente.": "Available in the app; group delivery pending."
+})
+Object.assign(spanish, {
+  "Programação em preparação.": "Programación en preparación.",
+  "O resumo está atrasado. Uma nova tentativa será feita automaticamente.": "El resumen está retrasado. Se volverá a intentar automáticamente.",
+  "Resumo em preparação. Ele aparecerá aqui assim que a geração terminar.": "Resumen en preparación. Aparecerá aquí cuando termine la generación.",
+  "Próximo resumo: {date} (Brasília).": "Próximo resumen: {date} (Brasilia).",
+  "As conversas do grupo legalops.club · conversa, reunidas aqui e no próprio grupo.": "Las conversaciones de legalops.club · conversa, resumidas aquí y en el grupo.",
+  "Todos os dias, a partir das 18h (Brasília)": "Todos los días, a partir de las 18:00 (Brasilia)",
+  "Não foi possível consultar a programação. Tente novamente em instantes.": "No se pudo consultar la programación. Inténtalo de nuevo en unos instantes.",
+  "Cada edição cobre as 24 horas anteriores às 18h. A geração pode levar alguns minutos. Sem novas mensagens, não há edição nem envio ao grupo.": "Cada edición cubre las 24 horas anteriores a las 18:00 de Brasilia. La generación puede tardar unos minutos. Sin mensajes nuevos, no se publica ni se envía una edición.",
+  "Último período verificado: nenhuma mensagem disponível para resumir.": "Último período revisado: no hay mensajes para resumir.",
+  "O primeiro resumo será publicado após o horário indicado acima, se houver mensagens no período.": "El primer resumen se publicará después de la hora indicada, si hay mensajes en ese período.",
+  "mensagens": "mensajes",
+  "participantes": "participantes",
+  "Síntese por IA": "Resumen con IA",
+  "{n} mídias sem texto ou transcrição não analisadas": "{n} archivos sin texto ni transcripción no se analizaron",
+  "Enviado também ao grupo.": "También enviado al grupo.",
+  "Disponível no app; envio ao grupo pendente.": "Disponible en la app; envío al grupo pendiente."
+})

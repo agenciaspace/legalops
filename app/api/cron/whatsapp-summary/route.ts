@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   if (!input) return reply({ error: 'Invalid source, period or messages' }, 400)
   const { data: schedule, error: scheduleError } = await db.from('club_whatsapp_summary_schedule').select('*').eq('id','community').single()
   if (scheduleError || !schedule) return reply({error:'Schedule unavailable'},503)
-  if (!schedule.enabled) return reply({error:'Summary paused'},409)
+  if (!schedule.enabled && !input.preview) return reply({error:'Summary paused'},409)
   if (!input.preview && new Date(input.end) < new Date(schedule.first_run_at)) return reply({error:'Before first scheduled period'},409)
   const { data: existing, error: readError } = await db.from('club_whatsapp_summaries').select('*').eq('period_end',input.end).maybeSingle()
   if (readError) return reply({error:'Summary unavailable'},503)
