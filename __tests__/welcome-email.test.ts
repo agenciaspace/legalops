@@ -3,6 +3,7 @@ import {
   sendWelcomeEmailIfNeeded,
   sendClubWelcomeEmailIfNeeded,
   sendClubInvitationEmail,
+  sendSignupConfirmationEmail,
 } from '@/lib/welcome-email'
 
 const sendCloudflareTransactionalEmailMock =
@@ -63,6 +64,22 @@ describe('sendClubInvitationEmail', () => {
       subject: 'Seu convite para o LegalOps Club',
       textBody: expect.stringContaining('token=abc'),
       htmlBody: expect.stringContaining('href="https://project.supabase.co/auth/v1/verify?token=abc&amp;type=invite"'),
+    }))
+  })
+})
+
+describe('sendSignupConfirmationEmail', () => {
+  it('sends the app confirmation link through Cloudflare Email Service', async () => {
+    await sendSignupConfirmationEmail({
+      email: 'ana@example.com',
+      confirmationLink: 'https://legalops.club/auth/confirm?token_hash=abc&type=email',
+    })
+
+    expect(sendCloudflareTransactionalEmailMock).toHaveBeenCalledWith(expect.objectContaining({
+      to: ['ana@example.com'],
+      subject: 'Confirme seu email no LegalOps Club',
+      textBody: expect.stringContaining('token_hash=abc'),
+      htmlBody: expect.stringContaining('token_hash=abc&amp;type=email'),
     }))
   })
 })

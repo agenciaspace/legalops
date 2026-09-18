@@ -36,6 +36,7 @@ it('allows QR landing and downloads to enforce their own contact privacy, while 
 describe('Club admission and Pro routing', () => {
   it('allows signup and requires login for member content', async () => {
     expect((await request('/cadastro')).status).toBe(200)
+    expect((await request('/api/auth/signup')).status).toBe(200)
     expect((await request('/community')).headers.get('location')).toContain('/login?next=')
   })
   it('sends accounts without membership to the professional profile', async () => {

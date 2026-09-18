@@ -1,14 +1,11 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
 import { BrandWordmark } from '@/components/BrandLogo'
 import { GoogleSignIn } from '@/components/community/GoogleSignIn'
 import { clubReturnPath } from '@/lib/club-return-path'
 
 export default function ClubSignupPage() {
-  const router = useRouter()
   const [returnPath,setReturnPath] = useState('/club/entrar')
   useEffect(() => {
     const next = new URLSearchParams(window.location.search).get('next')
@@ -23,20 +20,25 @@ export default function ClubSignupPage() {
     event.preventDefault(); setError(''); setBusy(true)
     const form = new FormData(event.currentTarget)
     try {
-      const supabase = createClient()
-      const { data, error } = await supabase.auth.signUp({
-        email: String(form.get('email')).trim(), password: String(form.get('password')),
-        options: { emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(returnPath)}` },
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: String(form.get('email')).trim(),
+          password: String(form.get('password')),
+          next: returnPath,
+        }),
       })
-      if (error) {
-        if (error.code === 'weak_password') setError('Escolha outra senha com pelo menos 8 caracteres. Evite senhas muito comuns.')
-        else if (error.code === 'email_address_invalid') setError('Confira se o endereço de email está correto.')
-        else if (error.code === 'over_email_send_rate_limit' || error.code === 'over_request_rate_limit') setError('Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.')
-        else if (/sending confirmation email/i.test(error.message)) setError('Não conseguimos enviar o email de confirmação. Tente novamente em alguns instantes.')
+      const result = await response.json().catch(() => ({})) as { code?: string }
+      if (!response.ok) {
+        if (result.code === 'weak_password') setError('Escolha outra senha com pelo menos 8 caracteres. Evite senhas muito comuns.')
+        else if (result.code === 'email_address_invalid') setError('Confira se o endereço de email está correto.')
+        else if (result.code === 'over_email_send_rate_limit' || result.code === 'over_request_rate_limit') setError('Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.')
+        else if (result.code === 'email_delivery_failed') setError('Não conseguimos enviar o email de confirmação. Tente novamente em alguns instantes.')
         else setError('Não foi possível criar a conta. Confira os dados ou tente entrar se já tiver cadastro.')
         return
       }
-      if (data.session) { router.push(returnPath); router.refresh() } else setSent(true)
+      setSent(true)
     } catch { setError('Não foi possível conectar. Tente novamente em alguns instantes.') }
     finally { setBusy(false) }
   }

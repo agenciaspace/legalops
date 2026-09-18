@@ -6,6 +6,7 @@ import { hasActiveClubAccess } from '@/lib/community'
 const ACCOUNT_WELCOME_SUBJECT = 'Sua conta LegalOps está pronta'
 const CLUB_WELCOME_SUBJECT = 'Bem-vindo ao LegalOps Club'
 const CLUB_INVITATION_SUBJECT = 'Seu convite para o LegalOps Club'
+const SIGNUP_CONFIRMATION_SUBJECT = 'Confirme seu email no LegalOps Club'
 
 function escapeHtmlAttribute(value: string) {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -26,6 +27,24 @@ export async function sendClubInvitationEmail({ email, actionLink }: { email: st
   return sendCloudflareTransactionalEmail({
     to: [email],
     subject: CLUB_INVITATION_SUBJECT,
+    textBody,
+    htmlBody,
+  })
+}
+
+export async function sendSignupConfirmationEmail({ email, confirmationLink }: { email: string; confirmationLink: string }) {
+  const textBody = [
+    'Confirme seu email para concluir seu cadastro no LegalOps Club.',
+    '',
+    confirmationLink,
+    '',
+    'Se você não criou esta conta, ignore esta mensagem.',
+  ].join('\n')
+  const htmlBody = `${buildHtmlEmail(textBody)}<p><a href="${escapeHtmlAttribute(confirmationLink)}">Confirmar meu email</a></p>`
+
+  return sendCloudflareTransactionalEmail({
+    to: [email],
+    subject: SIGNUP_CONFIRMATION_SUBJECT,
     textBody,
     htmlBody,
   })

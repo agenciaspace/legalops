@@ -29,7 +29,8 @@ export async function middleware(request: NextRequest) {
     || pathname === '/bench/nubank-2026-09-17'
     || isPublicEventPage
     || isContactPage
-  const publicWebhookPaths = new Set([
+  const publicApiPaths = new Set([
+    '/api/auth/signup',
     '/api/webhooks/brevo/inbound',
     '/api/webhooks/cloudflare/inbound',
   ])
@@ -70,10 +71,10 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!user) {
-    if (publicWebhookPaths.has(pathname)) {
+    if (publicApiPaths.has(pathname)) {
       return supabaseResponse
     }
-    if (pathname.startsWith('/api/') && !publicWebhookPaths.has(pathname)) {
+    if (pathname.startsWith('/api/') && !publicApiPaths.has(pathname)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     if (!isPublicPage) {

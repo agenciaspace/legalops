@@ -45,6 +45,13 @@ Sender: hello@mail.legalops.work
 
 Use implicit TLS. Cloudflare does not use STARTTLS on port 587.
 
+The public signup route first uses Supabase Auth SMTP so Supabase keeps its
+normal signup and email rate limits. If Supabase reports an SMTP handoff
+failure, `/api/auth/signup` generates the same one-time Auth confirmation link
+without sending it and delivers that link through the Cloudflare Email Sending
+REST API. If REST delivery fails, the route removes the unconfirmed user so a
+retry does not leave a blocked account.
+
 In `Authentication > URL Configuration`, set the canonical site URL and add
 the three public domains plus the confirmation callback paths as allowed
 redirect URLs. The application sends the current host explicitly when a user
