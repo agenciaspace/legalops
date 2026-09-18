@@ -200,3 +200,8 @@ it.each([
   expect(sent.htmlBody).toContain(action)
   expect(sent.htmlBody).toContain('https://legalops.club/brand/legalops-club-email.png')
 })
+it('uses signup metadata when the profile language has not initialized yet', async () => {
+  adminClient = chainableClient([{ welcome_email_sent_at: null, preferred_locale: null }])
+  await sendWelcomeEmailIfNeeded({ id: 'new-account', email: 'fixture@resend.dev', user_metadata: { locale: 'es' } })
+  expect(sendCloudflareTransactionalEmailMock).toHaveBeenCalledWith(expect.objectContaining({ htmlBody: expect.stringContaining('<html lang="es">') }))
+})
