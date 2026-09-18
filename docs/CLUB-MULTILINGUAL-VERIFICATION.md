@@ -20,3 +20,7 @@ Implementation, database migrations, generation and reading are enabled. Product
 - During the pilot, 22 completed translation runs reported USD 0.004738536. This is a measured snapshot, not a monthly estimate; later runs and separate synthetic/catalog generation are additional. Daily runtime budget is USD 1.
 - All three test users, their posts/comments, sessions and cached translations were deleted after verification; scoped cleanup returned zero remaining fixture rows. Temporary evaluator previews were disabled and their credentials removed. No real community original was overwritten.
 
+
+## Deployment
+
+[GitHub Actions run 35390235319](https://github.com/agenciaspace/legalops/actions/runs/35390235319) passed: Bend proofs, 415 tests, OpenNext build, exact-version application deployment, cron and inbound-email deployment, and public routing checks. Routine application publication now uses version upload/deploy; the former route-permission failure is resolved. Final public checks returned 200 for localized signup/login and the email logo, and 401 for an unauthenticated translation-cron request.
