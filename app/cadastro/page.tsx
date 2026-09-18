@@ -18,6 +18,7 @@ export default function ClubSignupPage() {
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(''); setBusy(true)
     const form = new FormData(event.currentTarget)
@@ -27,7 +28,14 @@ export default function ClubSignupPage() {
         email: String(form.get('email')).trim(), password: String(form.get('password')),
         options: { emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(returnPath)}` },
       })
-      if (error) { setError('Não foi possível criar a conta. Confira os dados ou tente entrar se já tiver cadastro.'); return }
+      if (error) {
+        if (error.code === 'weak_password') setError('Escolha outra senha com pelo menos 8 caracteres. Evite senhas muito comuns.')
+        else if (error.code === 'email_address_invalid') setError('Confira se o endereço de email está correto.')
+        else if (error.code === 'over_email_send_rate_limit' || error.code === 'over_request_rate_limit') setError('Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.')
+        else if (/sending confirmation email/i.test(error.message)) setError('Não conseguimos enviar o email de confirmação. Tente novamente em alguns instantes.')
+        else setError('Não foi possível criar a conta. Confira os dados ou tente entrar se já tiver cadastro.')
+        return
+      }
       if (data.session) { router.push(returnPath); router.refresh() } else setSent(true)
     } catch { setError('Não foi possível conectar. Tente novamente em alguns instantes.') }
     finally { setBusy(false) }
@@ -41,8 +49,11 @@ export default function ClubSignupPage() {
       : <form onSubmit={submit} className="mt-8 space-y-5">
         <GoogleSignIn />
         <label className="block text-sm font-semibold">Email<input name="email" type="email" autoComplete="email" required maxLength={254} className="mt-2 w-full rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] px-4 py-3 font-normal" /></label>
-        <label className="block text-sm font-semibold">Senha<input name="password" type="password" autoComplete="new-password" required minLength={10} maxLength={128} aria-describedby="password-help" className="mt-2 w-full rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] px-4 py-3 font-normal" /></label>
-        <p id="password-help" className="text-xs text-[#69635E]">Use pelo menos 10 caracteres.</p>
+        <label className="block text-sm font-semibold">Senha<input name="password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" required minLength={8} maxLength={128} aria-describedby="password-help" className="mt-2 w-full rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] px-4 py-3 font-normal" /></label>
+        <div className="flex items-center justify-between gap-3">
+          <p id="password-help" className="text-xs text-[#69635E]">Use pelo menos 8 caracteres. Sem obrigação de maiúsculas, números ou símbolos.</p>
+          <button type="button" aria-pressed={showPassword} onClick={() => setShowPassword(value => !value)} className="min-h-11 shrink-0 text-sm font-semibold underline">{showPassword ? 'Ocultar senha' : 'Mostrar senha'}</button>
+        </div>
         {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
         <button disabled={busy} className="w-full rounded-lg bg-[#111111] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'Criando conta…' : 'Criar conta gratuita'}</button>
         <p className="text-sm text-[#69635E]">Já tem conta? <Link href={`/login?next=${encodeURIComponent(returnPath)}`} className="font-semibold underline">Entrar</Link></p>
