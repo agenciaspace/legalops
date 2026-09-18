@@ -1,3 +1,4 @@
+import { getClubTranslator } from '@/lib/club-locale-server'
 import { ArrowUpRight, BookOpen, FileCheck2, GitBranch, Map, Scale } from 'lucide-react'
 
 export const metadata = { title: 'Ferramentas | legalops.club', description: 'Projetos abertos da comunidade para gestão de contratos.' }
@@ -9,17 +10,19 @@ const projects = [
 ]
 
 export default function ToolsPage() {
+ const t = getClubTranslator()
+
   return <main className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
-    <h1 className="text-2xl font-semibold tracking-tight">Ferramentas</h1>
-    <p className="mt-2 max-w-2xl text-sm leading-6 text-[#625E59]">Projetos abertos para usar, adaptar e construir a várias mãos.</p>
-    <div className="mt-6 grid gap-4 sm:grid-cols-2">{projects.map(project => <article key={project.title} className="flex min-w-0 flex-col rounded-2xl border border-[#CEC8BD] bg-white p-5 sm:p-6">
+    <h1 className="text-2xl font-semibold tracking-tight">{t("Ferramentas")}</h1>
+    <p className="mt-2 max-w-2xl text-sm leading-6 text-[#625E59]">{t("Projetos abertos para usar, adaptar e construir a várias mãos.")}</p>
+    <div className="mt-6 grid gap-4 sm:grid-cols-2">{projects.map(project => <article key={t(project.title)} className="flex min-w-0 flex-col rounded-2xl border border-[#CEC8BD] bg-white p-5 sm:p-6">
       <project.icon aria-hidden="true" className="h-6 w-6 text-[#A94E38]" />
-      <h2 className="mt-4 text-lg font-semibold">{project.title}</h2>
-      <p className="mt-2 text-sm leading-6 text-[#625E59]">{project.description}</p>
-      <div className="mt-auto pt-5"><a href={project.href} className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-[#24231F] px-4 py-3 text-sm font-semibold text-white">{project.action}<ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0" /></a>
-        <a href={project.repository} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-[#625E59] underline"><GitBranch aria-hidden="true" className="h-4 w-4" />Código e contribuições</a>
+      <h2 className="mt-4 text-lg font-semibold">{t(project.title)}</h2>
+      <p className="mt-2 text-sm leading-6 text-[#625E59]">{t(project.description)}</p>
+      <div className="mt-auto pt-5"><a href={project.href} className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-[#24231F] px-4 py-3 text-sm font-semibold text-white">{t(project.action)}<ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0" /></a>
+        <a href={project.repository} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-[#625E59] underline"><GitBranch aria-hidden="true" className="h-4 w-4" />{t("Código e contribuições")}</a>
       </div>
     </article>)}</div>
-    <p className="mt-5 text-xs leading-5 text-[#817A73]">Os projetos abrem no legalops.dev. Propostas da comunidade passam por revisão antes de integrar as versões públicas.</p>
+    <p className="mt-5 text-xs leading-5 text-[#817A73]">{t("Os projetos abrem no legalops.dev. Propostas da comunidade passam por revisão antes de integrar as versões públicas.")}</p>
   </main>
 }

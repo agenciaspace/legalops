@@ -1,10 +1,13 @@
+import { getClubLocale, getClubTranslator } from '@/lib/club-locale-server'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { EventShare } from '@/components/community/EventShare'
 
-const dateFormat = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'medium', timeStyle: 'short' })
 
 export default async function BenchSection() {
+ const t = getClubTranslator()
+ const dateFormat = new Intl.DateTimeFormat(getClubLocale(), { timeZone: 'America/Sao_Paulo', dateStyle: 'medium', timeStyle: 'short' })
+
   const supabase = await createServerSupabaseClient()
   const { data: events, error } = await supabase.from('community_events')
     .select('id,slug,title,description,starts_at,ends_at,location_label')
@@ -14,20 +17,20 @@ export default async function BenchSection() {
   const past = (events ?? []).filter(event => new Date(event.ends_at || event.starts_at).getTime() < now)
   return <section id="bench" aria-labelledby="bench-heading" className="mt-8 scroll-mt-24">
     <h2 id="bench-heading" className="text-xl font-semibold tracking-tight">Bench</h2>
-    <p className="mt-2 text-sm leading-6 text-[#625E59]">Encontros para trocar experiências. Abra um encontro para participar ou acessar as fotos, documentos e conversas.</p>
-    {error ? <p role="alert" className="mt-4 text-sm">Não foi possível carregar os encontros. Atualize a página para tentar novamente.</p> : !events?.length ? <p className="mt-4 text-sm text-[#625E59]">Os próximos encontros de Bench serão publicados aqui.</p> : <div className="mt-5 space-y-6">{[{ title: 'Próximos encontros', items: upcoming, ended: false }, { title: 'Encontros realizados', items: past, ended: true }].filter(group => group.items.length).map(group => <div key={group.title}>
+    <p className="mt-2 text-sm leading-6 text-[#625E59]">{t("Encontros para trocar experiências. Abra um encontro para participar ou acessar as fotos, documentos e conversas.")}</p>
+    {error ? <p role="alert" className="mt-4 text-sm">{t("Não foi possível carregar os encontros. Atualize a página para tentar novamente.")}</p> : !events?.length ? <p className="mt-4 text-sm text-[#625E59]">{t("Os próximos encontros de Bench serão publicados aqui.")}</p> : <div className="mt-5 space-y-6">{[{ title: t("Próximos encontros"), items: upcoming, ended: false }, { title: t("Encontros realizados"), items: past, ended: true }].filter(group => group.items.length).map(group => <div key={group.title}>
       <h3 className="mb-3 text-sm font-semibold text-[#625E59]">{group.title}</h3>
       <div className="grid gap-4 sm:grid-cols-2">{group.items.map(event => <article key={event.id} className="flex min-w-0 flex-col rounded-xl border border-[#CEC8BD] bg-white p-5">
         <p className="text-xs text-[#817A73]">{dateFormat.format(new Date(event.starts_at))} · Brasília</p>
         <h4 className="mt-2 text-lg font-semibold">{event.title}</h4>
         <p className="mt-2 text-sm text-[#625E59]">{event.location_label}</p>
         <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#625E59]">{event.description}</p>
-        <div className="mt-auto pt-4"><Link href={`/community/events/${event.slug}`} className="inline-flex min-h-11 items-center rounded-lg bg-[#24231F] px-4 text-sm font-semibold text-white">{group.ended ? 'Ver encontro e publicações' : 'Ver encontro e participar'}</Link>
-          {group.ended && <div className="mt-2 flex flex-wrap gap-4 text-sm"><Link className="inline-flex min-h-11 items-center underline" href={`/community/events/${event.slug}?tab=fotos#publicacoes`}>Fotos</Link><Link className="inline-flex min-h-11 items-center underline" href={`/community/events/${event.slug}?tab=documentos#publicacoes`}>Documentos</Link></div>}
+        <div className="mt-auto pt-4"><Link href={`/community/events/${event.slug}`} className="inline-flex min-h-11 items-center rounded-lg bg-[#24231F] px-4 text-sm font-semibold text-white">{group.ended ? t("Ver encontro e publicações") : t("Ver encontro e participar")}</Link>
+          {group.ended && <div className="mt-2 flex flex-wrap gap-4 text-sm"><Link className="inline-flex min-h-11 items-center underline" href={`/community/events/${event.slug}?tab=fotos#publicacoes`}>{t("Fotos")}</Link><Link className="inline-flex min-h-11 items-center underline" href={`/community/events/${event.slug}?tab=documentos#publicacoes`}>{t("Documentos")}</Link></div>}
           <div className="mt-2"><EventShare slug={event.slug} title={event.title} /></div>
         </div>
       </article>)}</div>
     </div>)}</div>}
-    <Link href="/community/tools" className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold underline">Avaliação de CLM e projetos abertos → Ferramentas</Link>
+    <Link href="/community/tools" className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold underline">{t("Avaliação de CLM e projetos abertos → Ferramentas")}</Link>
   </section>
 }

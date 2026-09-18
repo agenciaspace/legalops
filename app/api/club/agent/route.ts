@@ -1,3 +1,4 @@
+import { CLUB_LOCALE_COOKIE, normalizeClubLocale } from '@/lib/club-locale'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
@@ -80,7 +81,7 @@ export async function POST(request:NextRequest) {
       OPENCLM_AGENT_SOURCE,
     ]
     const selected=rankAgentSources(sources,question,[...(profile.data?.areas_of_expertise??[]),profile.data?.current_role??'',profile.data?.organization_description??'',prefs.focus,...prefs.topics.map((topic:string)=>COMMUNITY_CATEGORIES[topic]?.label??topic)])
-    const prompt=personalAgentPrompt({profile:profile.data,focus:prefs.focus,topics:prefs.topics,history:[...(history.data??[])].reverse() as AgentTurn[],sources:selected,question,activity,currentPage:typeof body.page==='string'&&/^\/community(?:\/[^?#]*)?$/.test(body.page)?body.page.slice(0,150):'/community'})
+    const prompt=personalAgentPrompt({locale:normalizeClubLocale(request.cookies.get(CLUB_LOCALE_COOKIE)?.value),profile:profile.data,focus:prefs.focus,topics:prefs.topics,history:[...(history.data??[])].reverse() as AgentTurn[],sources:selected,question,activity,currentPage:typeof body.page==='string'&&/^\/community(?:\/[^?#]*)?$/.test(body.page)?body.page.slice(0,150):'/community'})
     const answer=await generateOpenRouterText({...prompt,maxTokens:1400,temperature:0.2,timeoutMs:35000})
     if(!answer.trim())throw new Error('Empty agent response')
     const sourceLinks=selected.map(({title,url,kind})=>({title,url,kind}))

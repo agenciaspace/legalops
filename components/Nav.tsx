@@ -1,4 +1,6 @@
 'use client'
+import { ClubLanguageSelect, useClubLanguage } from '@/components/community/ClubLanguage'
+
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -16,6 +18,8 @@ interface NavProps {
 }
 
 export function Nav({ discoverCount, jobAlertCount, hasClubAccess, isClubAdmin = false, member }: NavProps) {
+ const { t } = useClubLanguage()
+
   const pathname = usePathname()
   const router = useRouter()
   const isCommunity = pathname.startsWith('/community')
@@ -59,8 +63,8 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess, isClubAdmin =
 
           </Link>
 
-          <div className="ml-auto flex shrink-0 items-center gap-1.5">
-            <details className="relative"><summary className="ml-0.5 flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-[#111111] text-[10px] font-black text-white" aria-label="Abrir menu do perfil"><MemberAvatar userId={member?.user_id} name={member?.display_name || 'Meu perfil'} path={member?.avatar_path} size="h-11 w-11" /></summary><div className="absolute right-0 top-12 w-52 rounded-xl border border-[#CEC8BD] bg-white p-2 text-sm shadow-lg"><Link href="/community/profile" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu perfil</Link><Link href="/community/members" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Membros</Link><Link href="/community/office" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Escritório</Link><Link href="/community/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Meu Pro</Link>{isClubAdmin&&<Link href="/club/admin/bench" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Revisar contribuições</Link>}{isClubAdmin&&<Link href="/club/admin/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Pagamentos do Pro</Link>}<button onClick={handleSignOut} className="w-full rounded-lg p-3 text-left hover:bg-[#F5F1E8]">Sair</button></div></details>
+          <div className="ml-auto flex shrink-0 items-center gap-1.5"><ClubLanguageSelect />
+            <details className="relative"><summary className="ml-0.5 flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full bg-[#111111] text-[10px] font-black text-white" aria-label={t("Abrir menu do perfil")}><MemberAvatar userId={member?.user_id} name={member?.display_name || t("Meu perfil")} path={member?.avatar_path} size="h-11 w-11" /></summary><div className="absolute right-0 top-12 w-52 rounded-xl border border-[#CEC8BD] bg-white p-2 text-sm shadow-lg"><Link href="/community/profile" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">{t("Meu perfil")}</Link><Link href="/community/members" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">{t("Membros")}</Link><Link href="/community/office" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">{t("Escritório")}</Link><Link href="/community/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">{t("Meu Pro")}</Link>{isClubAdmin&&<Link href="/club/admin/bench" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Revisar contribuições</Link>}{isClubAdmin&&<Link href="/club/admin/pro" className="block rounded-lg p-3 hover:bg-[#F5F1E8]">Pagamentos do Pro</Link>}<button onClick={handleSignOut} className="w-full rounded-lg p-3 text-left hover:bg-[#F5F1E8]">{t("Sair")}</button></div></details>
           </div>
         </div>
       </header>
@@ -103,9 +107,7 @@ export function Nav({ discoverCount, jobAlertCount, hasClubAccess, isClubAdmin =
           <button
             onClick={handleSignOut}
             className="rounded-full px-3 py-2 text-xs text-[#66615B] transition-colors hover:bg-white/70 hover:text-[#111111]"
-          >
-            Sair
-          </button>
+          > {t("Sair")} </button>
         </div>
       </div>
     </header>

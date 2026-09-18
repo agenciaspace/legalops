@@ -1,3 +1,5 @@
+import { ClubLanguageProvider } from '@/components/community/ClubLanguage'
+import { getClubLocale } from '@/lib/club-locale-server'
 import { isLegalOpsAdminEmail } from '@/lib/legalops-admin'
 import { hasClubProAccess } from '@/lib/club-membership'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
@@ -11,7 +13,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   const { data: { user } } = await supabase.auth.getUser()
   // Middleware protects the private routes. Public event pages also live in
   // this route group, so let those pages render without the authenticated nav.
-  if (!user) return <div className="min-h-screen bg-[#F5F1E8]">{children}</div>
+  if (!user) return <ClubLanguageProvider initialLocale={getClubLocale()}><div className="min-h-screen bg-[#F5F1E8]">{children}</div></ClubLanguageProvider>
 
   const [{ data: pipeline }, { data: clubAccess }] = await Promise.all([
     supabase
@@ -51,9 +53,9 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   ])
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8]">
+    <ClubLanguageProvider initialLocale={getClubLocale()}><div className="min-h-screen bg-[#F5F1E8]">
       <Nav member={clubAccess} discoverCount={count ?? 0} jobAlertCount={jobAlertCount ?? 0} hasClubAccess={hasClubAccess} isClubAdmin={isLegalOpsAdminEmail(user.email)} />
       <AppMain>{children}</AppMain>
-    </div>
+    </div></ClubLanguageProvider>
   )
 }

@@ -31,6 +31,8 @@ it.each([false, true])('invites a nonmember to join without reading private mate
   expect(share.origin).toBe('https://wa.me')
   expect(share.searchParams.get('text')).toContain('https://legalops.club/community/events/bench-nubank')
   expect(share.searchParams.get('text')).toContain('Bench & contratos')
+  expect(share.searchParams.get('text')).toMatch(/^\*Bench & contratos\*\n\n📸 /)
+  expect(share.searchParams.get('text')).toContain('👉 Acesse o espaço do evento:\nhttps://legalops.club/community/events/bench-nubank\n\n')
 })
 
 it('accepts event destinations and rejects external, management and encoded redirect paths', () => {

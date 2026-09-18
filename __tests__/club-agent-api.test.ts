@@ -32,6 +32,11 @@ it('enforces daily allowance before invoking the model',async()=>{
  expect((await POST(request({question:'Outra pergunta'}))).status).toBe(429)
  expect(state.generate).not.toHaveBeenCalled()
 })
+it('uses the saved language preference for the agent response',async()=>{
+ const req=new NextRequest('https://legalops.club/api/club/agent',{method:'POST',headers:{cookie:'club-locale=en'},body:JSON.stringify({question:'What should I follow?'})})
+ expect((await POST(req)).status).toBe(200)
+ expect(state.generate.mock.calls[0][0].systemPrompt).toContain('Respond in English.')
+})
 it('records failure and refunds the reservation instead of saving an invented answer',async()=>{
  state.generate.mockRejectedValue(new Error('provider down'))
  const log=vi.spyOn(console,'error').mockImplementation(()=>{})
