@@ -30,3 +30,16 @@ it('loads older messages in the same conversation without duplicating turns',asy
  render(<PersonalAgent />);fireEvent.click(await screen.findByRole('button',{name:'Carregar mensagens anteriores'}));await screen.findByText('Primeira resposta')
  expect(screen.getAllByText('Resposta anterior')).toHaveLength(1)
 })
+it('formats agent responses and copies the complete answer',async()=>{
+ const answer='## Próximos passos\n\n**Prioridade:** revisar contratos.\n\n- Primeiro item\n- Segundo item\n\n[Comunidade](https://legalops.club/community)'
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({turns:[{...turn,answer}],preferences:{focus:'',topics:[]},used:1})}))
+ const writeText=vi.fn().mockResolvedValue(undefined)
+ Object.defineProperty(navigator,'clipboard',{value:{writeText},configurable:true})
+ render(<PersonalAgent/>)
+ expect(await screen.findByRole('heading',{name:'Próximos passos'})).toBeInTheDocument()
+ expect(screen.getByText('Prioridade:').tagName).toBe('STRONG')
+ expect(screen.getAllByRole('listitem')).toHaveLength(2)
+ fireEvent.click(screen.getByRole('button',{name:'Copiar resposta'}))
+ await screen.findByRole('button',{name:'Resposta copiada'})
+ expect(writeText).toHaveBeenCalledWith(answer)
+})

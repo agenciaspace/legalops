@@ -52,6 +52,7 @@ export default async function MemberProfilePage({ params }: { params: { id: stri
           </div>
 
           <h1 className="mt-5 text-2xl font-extrabold tracking-[-0.025em] text-[#292824]">{member.display_name}</h1>
+          <Link href={`/contact/${member.user_id}`} className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-[#24231F] px-4 text-sm font-semibold text-white">Trocar contatos</Link>
           {member.public_headline ? <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[#5F5C56]">{member.public_headline}</p> : null}
 
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[10px] text-[#77746E]">

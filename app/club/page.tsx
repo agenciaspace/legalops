@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { BrandWordmark } from '@/components/BrandLogo'
 import { LegalOpsEcosystem } from '@/components/LegalOpsEcosystem'
+import { ResumeClubSession } from '@/components/community/ResumeClubSession'
 
 
 export const metadata: Metadata = {
@@ -43,6 +44,7 @@ function SignupLink() {
 export default function ClubLandingPage() {
   return (
     <div className="min-h-screen bg-[#F5F1E8] text-[#111111]" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
+      <ResumeClubSession />
       <header className="mx-auto flex max-w-[1180px] items-center justify-between gap-4 border-b border-[#CEC8BD] px-5 py-6 sm:px-8">
         <BrandWordmark suffix="club" className="inline-flex items-baseline text-[25px] leading-none sm:text-[30px]" />
         <Link href="/login?next=/community" className="text-sm font-semibold underline underline-offset-4">Entrar</Link>

@@ -26,6 +26,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
   return <main className="mx-auto w-full max-w-3xl px-4 py-7 sm:px-6 lg:py-12">
     <Link href="/community/calendar" className="text-xs font-bold text-[#D9470F]">← Eventos</Link>
+    {isMember && <Link href="/community/contact" className="ml-4 inline-flex min-h-11 items-center rounded-lg border border-[#CEC8BD] bg-white px-3 text-xs font-semibold">Meu QR code de contato</Link>}
     <article className="mt-5 rounded-2xl border border-[#E1E1DD] bg-white p-5 sm:p-8">
       <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#D9470F]">{past ? 'Evento realizado' : 'Próximo evento'} · {event.event_type}</p>
       <h1 className="mt-3 text-2xl font-extrabold tracking-[-0.03em] text-[#24231F] sm:text-3xl">{event.title}</h1>

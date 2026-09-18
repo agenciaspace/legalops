@@ -19,14 +19,20 @@ type Member = {
 
 export const dynamic = 'force-dynamic'
 
-export default async function MembersPage({ searchParams }: { searchParams?: { q?: string } }) {
+export default async function MembersPage({ searchParams }: { searchParams?: { q?: string; scope?: string } }) {
   const supabase = await createServerSupabaseClient()
   const search = searchParams?.q?.trim() ?? ''
+  const contactsOnly = searchParams?.scope === 'contacts'
   let membersQuery = supabase
     .from('community_members')
     .select('club_access_status,club_access_expires_at,user_id, display_name, current_role, areas_of_expertise, public_headline, public_bio, organization_name, profile_verification_status')
 
   if (search) membersQuery = membersQuery.ilike('display_name', `%${search}%`)
+  if (contactsOnly) {
+    const { data: { user } } = await supabase.auth.getUser()
+    const { data: contacts } = await supabase.from('community_saved_contacts').select('member_id').eq('user_id', user?.id ?? '')
+    membersQuery = membersQuery.in('user_id', contacts?.length ? contacts.map(contact => contact.member_id) : ['00000000-0000-0000-0000-000000000000'])
+  }
 
   const { data: rawMembers } = await membersQuery.order('created_at', { ascending: true })
   const members = ((rawMembers ?? []) as Member[]).filter(isDirectoryMember)
@@ -39,9 +45,11 @@ export default async function MembersPage({ searchParams }: { searchParams?: { q
           <p className="mt-1 text-xs text-[#77746E]">Encontre pessoas por experiência, função ou especialidade.</p>
         </div>
       </header>
+      <nav aria-label="Contatos" className="mt-4 flex flex-wrap gap-3 text-sm"><Link href="/community/members" aria-current={!contactsOnly ? 'page' : undefined} className={!contactsOnly ? 'font-bold underline' : ''}>Todos os membros</Link><Link href="/community/members?scope=contacts" aria-current={contactsOnly ? 'page' : undefined} className={contactsOnly ? 'font-bold underline' : ''}>Meus contatos</Link><Link href="/community/contact" className="font-semibold text-[#C9684F]">Meu QR code</Link></nav>
 
       <div className="mt-5 flex flex-col gap-2 sm:flex-row">
         <form className="relative flex-1" action="/community/members">
+          {contactsOnly && <input type="hidden" name="scope" value="contacts" />}
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999690]" />
           <input name="q" defaultValue={search} placeholder="Buscar membros" className="h-10 w-full rounded-lg border border-[#DFDFDB] bg-white pl-9 pr-3 text-xs outline-none transition focus:border-[#FFB99E] focus:ring-2 focus:ring-[#FFF0E9]" />
         </form>
@@ -80,7 +88,7 @@ export default async function MembersPage({ searchParams }: { searchParams?: { q
       {members.length === 0 ? (
         <div className="mt-5 rounded-xl border border-dashed border-[#D9D8D3] bg-white/60 p-10 text-center">
           <Users className="mx-auto h-7 w-7 text-[#FF5C1A]" />
-          <p className="mt-3 text-xs font-bold text-[#68655F]">{search ? 'Nenhum membro corresponde à busca.' : 'Os primeiros perfis aparecerão aqui.'}</p>
+          <p className="mt-3 text-xs font-bold text-[#68655F]">{search ? 'Nenhum membro corresponde à busca.' : contactsOnly ? 'Seus contatos salvos aparecerão aqui. Abra o cartão de um membro para adicioná-lo.' : 'Os primeiros perfis aparecerão aqui.'}</p>
         </div>
       ) : null}
     </div>

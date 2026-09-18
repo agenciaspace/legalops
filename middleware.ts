@@ -13,11 +13,7 @@ export async function middleware(request: NextRequest) {
 
   // Keep legalops.work as the job platform while legalops.club gets its own home.
   // x-forwarded-host is honored so the Cloudflare Club proxy keeps the correct product context.
-  if (isClubDomain && pathname === '/') {
-    const clubUrl = request.nextUrl.clone()
-    clubUrl.pathname = '/club'
-    return NextResponse.rewrite(clubUrl)
-  }
+  const isClubRoot = isClubDomain && pathname === '/'
 
   // Public Bench has its own input limits and publishes only reviewed content.
   // Keep this exact path independent of Club authentication and paid access.
@@ -28,9 +24,11 @@ export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
   const publicPaths = new Set(['/', '/club', '/club/about', '/club/checkout', '/cadastro', '/login', '/set-password', '/auth/confirm'])
   const isPublicEventPage = pathname.startsWith('/community/events/') && pathname.split('/').length === 4
+  const isContactPage = /^\/contact\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/(qr|vcard))?$/i.test(pathname)
   const isPublicPage = publicPaths.has(pathname)
     || pathname === '/bench/nubank-2026-09-17'
     || isPublicEventPage
+    || isContactPage
   const publicWebhookPaths = new Set([
     '/api/webhooks/brevo/inbound',
     '/api/webhooks/cloudflare/inbound',
@@ -54,6 +52,22 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+  const withSession = (response: NextResponse) => {
+    supabaseResponse.cookies.getAll().forEach(cookie => response.cookies.set(cookie))
+    return response
+  }
+
+  // Older installations may launch at / or /club. Resume the existing session
+  // before showing marketing content, carrying refreshed cookies on redirects.
+  if (user && isClubRoot) {
+    const { data: membership } = await supabase.from('community_members').select('club_access_status,club_access_expires_at').eq('user_id', user.id).maybeSingle()
+    return withSession(NextResponse.redirect(new URL(hasActiveClubAccess(membership) ? '/community' : '/club/entrar', request.url)))
+  }
+  if (isClubRoot) {
+    const clubUrl = request.nextUrl.clone()
+    clubUrl.pathname = '/club'
+    return withSession(NextResponse.rewrite(clubUrl))
+  }
 
   if (!user) {
     if (publicWebhookPaths.has(pathname)) {
@@ -65,7 +79,7 @@ export async function middleware(request: NextRequest) {
     if (!isPublicPage) {
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`)
-      return NextResponse.redirect(loginUrl)
+      return withSession(NextResponse.redirect(loginUrl))
     }
     return supabaseResponse
   }
@@ -76,11 +90,11 @@ export async function middleware(request: NextRequest) {
     const destination = requestedPath?.startsWith('/') && !requestedPath.startsWith('//') && !requestedPath.includes('\\')
       ? requestedPath
       : isClubDomain || pathname === '/cadastro' ? '/club/entrar' : '/dashboard'
-    return NextResponse.redirect(new URL(destination, request.url))
+    return withSession(NextResponse.redirect(new URL(destination, request.url)))
   }
 
   if (pathname.startsWith('/community/leaderboard')) {
-    return NextResponse.redirect(new URL('/community', request.url))
+    return withSession(NextResponse.redirect(new URL('/community', request.url)))
   }
 
   const requiresClub = pathname === '/onboard'
@@ -102,13 +116,13 @@ export async function middleware(request: NextRequest) {
         return NextResponse.json({ error: 'Complete seu perfil para entrar na comunidade.' }, { status: 403 })
       }
       const clubUrl = new URL('/club/entrar', request.url)
-      return NextResponse.redirect(clubUrl)
+      return withSession(NextResponse.redirect(clubUrl))
     }
   }
 
   if (isClubProPath(pathname) && !hasClubProAccess(clubAccess)) {
     if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Este recurso faz parte do Club Pro.' }, { status: 403 })
-    return NextResponse.redirect(new URL('/club#pro', request.url))
+    return withSession(NextResponse.redirect(new URL('/club#pro', request.url)))
   }
 
   // Check onboarding completion for non-onboarding, non-API routes
@@ -128,7 +142,7 @@ export async function middleware(request: NextRequest) {
     if (profile && profile.onboarding_completed === false) {
       const onboardUrl = new URL('/onboard', request.url)
       onboardUrl.searchParams.set('next', pathname)
-      return NextResponse.redirect(onboardUrl)
+      return withSession(NextResponse.redirect(onboardUrl))
     }
   }
 

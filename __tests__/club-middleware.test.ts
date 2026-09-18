@@ -1,9 +1,9 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
-const state = vi.hoisted(() => ({ user: null as { id: string } | null, member: {} as Record<string, unknown>, profileReads: 0 }))
-vi.mock('@supabase/ssr', () => ({ createServerClient: () => ({
-  auth: { getUser: async () => ({ data: { user: state.user } }) },
+const state = vi.hoisted(() => ({ user: null as { id: string } | null, member: {} as Record<string, unknown>, profileReads: 0, refresh: false }))
+vi.mock('@supabase/ssr', () => ({ createServerClient: (_url: string, _key: string, options: any) => ({
+  auth: { getUser: async () => { if(state.refresh)options.cookies.setAll([{name:'refreshed-session',value:'test-token',options:{path:'/',httpOnly:true}}]); return { data: { user: state.user } } } },
   from: (table: string) => {
     if (table === 'account_profiles') state.profileReads++
     const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: state.member }), single: async () => ({ data: { onboarding_completed: false } }) }
@@ -12,7 +12,27 @@ vi.mock('@supabase/ssr', () => ({ createServerClient: () => ({
 }) }))
 import { middleware } from '../middleware'
 const request = (path: string) => middleware(new NextRequest(`https://legalops.club${path}`, { headers: { host: 'legalops.club' } }))
-beforeEach(() => { state.user = null; state.member = {}; state.profileReads = 0 })
+beforeEach(() => { state.user = null; state.member = {}; state.profileReads = 0; state.refresh = false })
+it('resumes installed root launches automatically and preserves refreshed session cookies',async()=>{
+  state.user={id:'member'};state.member={club_access_status:'active'};state.refresh=true
+  const root=await request('/')
+  expect(root.headers.get('location')).toBe('https://legalops.club/community')
+  expect(root.cookies.get('refreshed-session')?.value).toBe('test-token')
+  expect((await request('/login')).cookies.get('refreshed-session')?.value).toBe('test-token')
+  // Pricing links remain accessible to signed-in members.
+  expect((await request('/club')).status).toBe(200)
+})
+it('keeps the public landing for guests and sends incomplete accounts to admission',async()=>{
+  expect((await request('/')).headers.get('x-middleware-rewrite')).toBe('https://legalops.club/club')
+  state.user={id:'new'}
+  expect((await request('/')).headers.get('location')).toBe('https://legalops.club/club/entrar')
+})
+it('allows QR landing and downloads to enforce their own contact privacy, while keeping settings private', async () => {
+  const id = '42499cb1-fd6f-4b45-aeac-9d10eea4c94d'
+  for (const suffix of ['', '/qr', '/vcard']) expect((await request(`/contact/${id}${suffix}`)).status).toBe(200)
+  expect((await request('/community/contact')).headers.get('location')).toContain('/login')
+  expect((await request(`/contact/${id}/admin`)).headers.get('location')).toContain('/login')
+})
 describe('Club admission and Pro routing', () => {
   it('allows signup and requires login for member content', async () => {
     expect((await request('/cadastro')).status).toBe(200)
