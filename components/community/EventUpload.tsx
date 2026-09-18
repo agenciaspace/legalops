@@ -50,6 +50,8 @@ export function EventUpload({ eventId, photos }: { eventId: string; photos: bool
   const [caption, setCaption] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
+  const [captionOpen, setCaptionOpen] = useState(false)
+  const input = useRef<HTMLInputElement>(null)
   const lock = useRef(false)
   const publication = useRef<string | null>(null)
   const urls = useRef(new Set<string>())
@@ -128,22 +130,33 @@ export function EventUpload({ eventId, photos }: { eventId: string; photos: bool
     urls.current.forEach(url => URL.revokeObjectURL(url))
     urls.current.clear()
     publication.current = null
-    setItems([]); setCaption(''); setMessage('')
+    setItems([]); setCaption(''); setMessage(''); setCaptionOpen(false)
   }
 
   const statusText = (item: Item) => ({ ready: 'Pronto para enviar', preparing: 'Preparando…', uploading: `Enviando ${item.progress}%`, saving: 'Salvando publicação…', done: 'Publicado', duplicate: 'Já publicado · não repetido', error: item.error ?? 'Falha no envio' })[item.status]
-  return <form onSubmit={event => { event.preventDefault(); void publish() }} className="mt-5 rounded-xl border border-[#CEC8BD] bg-[#FAF7F1] p-4 sm:p-5" aria-label="Nova publicação do evento">
-    <label htmlFor="event-caption" className="text-sm font-semibold text-[#24231F]">Compartilhe este encontro</label>
-    <textarea id="event-caption" value={caption} onChange={event => setCaption(event.target.value)} disabled={busy || started} maxLength={1000} rows={3} placeholder="O que você gostaria de compartilhar? (opcional)" className="mt-2 w-full rounded-lg border border-[#CEC8BD] bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-[#C9684F] disabled:opacity-60" />
-    <label className="mt-3 block text-sm font-semibold" htmlFor="event-files">{photos ? 'Adicionar fotos' : 'Adicionar documentos'}</label>
-    <input id="event-files" type="file" multiple disabled={busy || started} accept={photos ? 'image/jpeg,image/png,image/webp' : 'application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.doc,.docx'} onChange={event => { const files = Array.from(event.target.files ?? []); event.target.value = ''; void select(files) }} className="mt-2 w-full min-w-0 text-sm file:mr-3 file:min-h-11 file:rounded-lg file:border file:border-[#CEC8BD] file:bg-white file:px-3 file:font-semibold" />
-    <p className="mt-2 text-xs text-[#69635E]">Até 20 arquivos, 10 MB cada. {photos ? 'Fotos são otimizadas antes do envio e aparecem juntas em uma publicação.' : 'PDF, DOC e DOCX.'}</p>
-    {items.length > 0 && <ul className="mt-4 space-y-3">{items.map(item => <li key={item.id} className="flex min-w-0 items-center gap-3 rounded-lg border border-[#E6DED0] bg-white p-3">
-      {item.preview && <img src={item.preview} alt="Prévia da foto selecionada" className="h-14 w-14 shrink-0 rounded-lg object-cover" />}
-      <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{item.file.name}</p><p className={`mt-1 text-xs ${item.status === 'error' ? 'text-red-700' : 'text-[#69635E]'}`}>{statusText(item)}</p>{item.status === 'uploading' && <progress aria-label={`Envio de ${item.file.name}`} value={item.progress} max={100} className="mt-1 h-2 w-full accent-[#C9684F]" />}</div>
-      {!busy && !['done', 'duplicate'].includes(item.status) && <button type="button" aria-label={`Remover ${item.file.name}`} onClick={() => { if (item.preview) { URL.revokeObjectURL(item.preview); urls.current.delete(item.preview) }; setItems(current => current.filter(value => value.id !== item.id)) }} className="min-h-11 px-2 text-xs font-semibold">Remover</button>}
-    </li>)}</ul>}
-    <p role="status" aria-live="polite" className="mt-3 text-sm text-[#69635E]">{busy ? 'Envio em andamento. Aguarde a confirmação antes de sair.' : message}</p>
-    {finished ? <button type="button" onClick={reset} className="mt-3 min-h-11 rounded-lg bg-[#24231F] px-4 text-sm font-semibold text-white">Nova publicação</button> : <button type="submit" disabled={busy || !items.length} className="mt-3 min-h-11 rounded-lg bg-[#24231F] px-4 text-sm font-semibold text-white disabled:opacity-50">{busy ? 'Publicando…' : items.some(item => item.status === 'error') ? 'Tentar novamente os que falharam' : 'Publicar no evento'}</button>}
+  return <form onSubmit={event => { event.preventDefault(); void publish() }} className="mt-4 rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] p-3" aria-label="Nova publicação do evento">
+    <input ref={input} id="event-files" aria-label={photos ? 'Adicionar fotos' : 'Adicionar documentos'} type="file" multiple disabled={busy || started} accept={photos ? 'image/jpeg,image/png,image/webp' : 'application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.doc,.docx'} onChange={event => { const files = Array.from(event.target.files ?? []); event.target.value = ''; void select(files) }} className="sr-only" tabIndex={-1} />
+    {!finished && <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+      <button type="button" disabled={busy || started} onClick={() => input.current?.click()} className="min-h-11 rounded-lg px-2 text-sm font-semibold text-[#24231F] outline-none focus-visible:ring-2 focus-visible:ring-[#C9684F] disabled:opacity-50">{items.length ? '+ Adicionar mais' : photos ? '+ Adicionar fotos' : '+ Adicionar documentos'}</button>
+      <span className="text-xs text-[#69635E]">{items.length ? `${items.length} selecionado(s)` : 'Até 20 · 10 MB cada'}</span>
+    </div>}
+    {items.length > 0 && !finished && <>
+      <ul aria-label="Arquivos selecionados" className={photos ? 'mt-2 flex max-h-52 gap-2 overflow-auto pb-2' : 'mt-2 max-h-40 space-y-1 overflow-auto'}>
+        {items.map(item => <li key={item.id} className={photos ? 'relative w-28 shrink-0 rounded-lg border border-[#E6DED0] bg-white p-2' : 'flex min-w-0 items-center gap-2 rounded-lg bg-white px-2 py-1'}>
+          {item.preview && <img src={item.preview} alt="Prévia da foto selecionada" className="h-20 w-full rounded object-cover" />}
+          <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold" title={item.file.name}>{item.file.name}</p><p className={`mt-1 text-xs ${item.status === 'error' ? 'text-red-700' : 'text-[#69635E]'}`}>{statusText(item)}</p>{item.status === 'uploading' && <progress aria-label={`Envio de ${item.file.name}`} value={item.progress} max={100} className="mt-1 h-2 w-full accent-[#C9684F]" />}</div>
+          {!busy && !['done', 'duplicate'].includes(item.status) && <button type="button" aria-label={`Remover ${item.file.name}`} onClick={() => { if (item.preview) { URL.revokeObjectURL(item.preview); urls.current.delete(item.preview) }; setItems(current => current.filter(value => value.id !== item.id)) }} className={photos ? 'absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-lg bg-white/95 text-lg' : 'min-h-11 px-2 text-xs font-semibold'}>{photos ? '×' : 'Remover'}</button>}
+        </li>)}
+      </ul>
+      {captionOpen ? <textarea autoFocus aria-label="Legenda (opcional)" value={caption} onChange={event => setCaption(event.target.value)} disabled={busy || started} maxLength={1000} rows={2} placeholder="Escreva uma legenda…" className="mt-2 w-full rounded-lg border border-[#CEC8BD] bg-white p-2 text-sm outline-none focus:ring-2 focus:ring-[#C9684F] disabled:opacity-60" /> : <button type="button" disabled={busy || started} onClick={() => setCaptionOpen(true)} className="min-h-11 px-2 text-xs font-semibold text-[#69635E] disabled:opacity-50">Adicionar legenda</button>}
+      <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
+        {!started && <button type="button" disabled={busy} onClick={reset} className="min-h-11 px-3 text-xs font-semibold text-[#69635E] disabled:opacity-50">Cancelar</button>}
+        <button type="submit" disabled={busy} className="min-h-11 rounded-lg bg-[#24231F] px-4 text-sm font-semibold text-white disabled:opacity-50">{busy ? 'Publicando…' : items.some(item => item.status === 'error') ? 'Tentar novamente os que falharam' : 'Publicar no evento'}</button>
+      </div>
+    </>}
+    <div className={finished ? 'flex flex-wrap items-center justify-between gap-2' : ''}>
+      <p role="status" aria-live="polite" className={`text-xs text-[#69635E] ${!finished && (busy || message) ? 'mt-2' : ''}`}>{busy ? 'Preparando e enviando arquivos. Aguarde a confirmação.' : message}</p>
+      {finished && <button type="button" onClick={reset} className="min-h-11 shrink-0 rounded-lg px-2 text-xs font-semibold text-[#24231F]">Nova publicação</button>}
+    </div>
   </form>
 }

@@ -41,7 +41,7 @@ it('shows progress, blocks double submissions, and retries only failed files in 
   expect(UploadRequest.requests[2].form.get('publication_id')).toBe(UploadRequest.requests[0].form.get('publication_id'))
   act(()=>UploadRequest.requests[2].respond(200,{duplicate:true}))
   await screen.findByRole('button',{name:'Nova publicação'})
-  expect(screen.getByText('Já publicado · não repetido')).toBeInTheDocument()
+  expect(screen.getByRole('status')).toHaveTextContent('não foram repetidos')
   expect(mocks.refresh).toHaveBeenCalledTimes(2)
 })
 it('deduplicates selected files by content even when filenames differ',async()=>{
