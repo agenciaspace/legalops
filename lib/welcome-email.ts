@@ -134,7 +134,7 @@ function buildClubWelcomeEmail(email: string, displayName?: string | null, whats
   }
 }
 
-export async function sendWelcomeEmailIfNeeded(user: { id: string; email?: string | null }) {
+export async function sendWelcomeEmailIfNeeded(user: { id: string; email?: string | null; user_metadata?: { locale?: string } }) {
   const email = user.email?.trim().toLowerCase()
   if (!email) return false
 
@@ -148,7 +148,7 @@ export async function sendWelcomeEmailIfNeeded(user: { id: string; email?: strin
   if (profileError) throw profileError
   if (!profile || profile.welcome_email_sent_at) return false
 
-  const message = buildAccountWelcomeEmail(email, normalizeClubLocale(profile.preferred_locale))
+  const message = buildAccountWelcomeEmail(email, normalizeClubLocale(profile.preferred_locale ?? user.user_metadata?.locale))
   const result = await sendClubTransactionalEmail({
     idempotencyKey: `account-welcome/${user.id}`,
     to: [email],
@@ -169,7 +169,7 @@ export async function sendWelcomeEmailIfNeeded(user: { id: string; email?: strin
   return Boolean(marked?.length) && Boolean(result)
 }
 
-export async function sendClubWelcomeEmailIfNeeded(user: { id: string; email?: string | null }) {
+export async function sendClubWelcomeEmailIfNeeded(user: { id: string; email?: string | null; user_metadata?: { locale?: string } }) {
   const email = user.email?.trim().toLowerCase()
   if (!email) return false
 
@@ -191,7 +191,7 @@ export async function sendClubWelcomeEmailIfNeeded(user: { id: string; email?: s
   const invite = config?.whatsapp_invite_url
   const whatsappInviteUrl = typeof invite === 'string' && /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+$/.test(invite) ? invite : null
   const { data: languageProfile } = await admin.from('account_profiles').select('preferred_locale').eq('user_id', user.id).maybeSingle()
-  const message = buildClubWelcomeEmail(email, member.display_name, whatsappInviteUrl, normalizeClubLocale(languageProfile?.preferred_locale))
+  const message = buildClubWelcomeEmail(email, member.display_name, whatsappInviteUrl, normalizeClubLocale(languageProfile?.preferred_locale ?? user.user_metadata?.locale))
   const result = await sendClubTransactionalEmail({
     idempotencyKey: `club-welcome/${user.id}`,
     to: [email],

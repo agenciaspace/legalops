@@ -25,7 +25,7 @@ export default function SetPasswordPage() {
     const { error: updateError } = await createClient().auth.updateUser({ password })
     setLoading(false)
     if (updateError) {
-      setError(updateError.message)
+      setError('Não foi possível atualizar a senha. Tente novamente.')
       return
     }
     const requested = new URLSearchParams(window.location.search).get('next')
@@ -41,12 +41,12 @@ export default function SetPasswordPage() {
         <form onSubmit={submit} className="space-y-4 rounded-[26px] border border-[#CEC8BD] bg-white p-7 shadow-sm">
           <div>
             <h1 className="text-xl font-bold text-[#111]">{t("Crie sua senha")}</h1>
-            <p className="mt-1 text-sm text-[#6D6761]">{t("Depois vamos montar seu perfil para vagas e currículos personalizados.")}</p>
+            <p className="mt-1 text-sm text-[#6D6761]">{t("Escolha uma senha para acessar sua conta.")}</p>
           </div>
-          <input type="password" value={password} onChange={event => setPassword(event.target.value)} placeholder={t("Senha (mínimo 8 caracteres)")} required className="w-full rounded-2xl border border-[#CEC8BD] px-4 py-3 text-sm outline-none focus:border-[#E88A6A]" />
-          <input type="password" value={confirmation} onChange={event => setConfirmation(event.target.value)} placeholder={t("Repita a senha")} required className="w-full rounded-2xl border border-[#CEC8BD] px-4 py-3 text-sm outline-none focus:border-[#E88A6A]" />
+          <input aria-label={t("Nova senha")} type="password" value={password} onChange={event => setPassword(event.target.value)} placeholder={t("Senha (mínimo 8 caracteres)")} required className="w-full rounded-2xl border border-[#CEC8BD] px-4 py-3 text-sm outline-none focus:border-[#E88A6A]" />
+          <input aria-label={t("Repita a senha")} type="password" value={confirmation} onChange={event => setConfirmation(event.target.value)} placeholder={t("Repita a senha")} required className="w-full rounded-2xl border border-[#CEC8BD] px-4 py-3 text-sm outline-none focus:border-[#E88A6A]" />
           {error ? <p className="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700">{t(error)}</p> : null}
-          <button disabled={loading} className="w-full rounded-full bg-[#111] py-3 text-sm font-bold text-white disabled:opacity-50">{loading ? 'Salvando...' : 'Continuar'}</button>
+          <button disabled={loading} className="w-full rounded-full bg-[#111] py-3 text-sm font-bold text-white disabled:opacity-50">{t(loading ? 'Salvando…' : 'Continuar')}</button>
         </form>
       </div>
     </main>

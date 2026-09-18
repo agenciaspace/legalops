@@ -186,3 +186,17 @@ it('includes the direct WhatsApp invitation for active members', async () => {
   await sendClubWelcomeEmailIfNeeded({ id: 'user-1', email: 'ana@example.com' })
   expect(sendCloudflareTransactionalEmailMock).toHaveBeenCalledWith(expect.objectContaining({ textBody: expect.stringContaining('https://chat.whatsapp.com/TestInvite'), htmlBody: expect.stringContaining('href="https://chat.whatsapp.com/TestInvite"') }))
 })
+
+it.each([
+  ['en', 'your account is ready', 'Complete my profile'],
+  ['es', 'tu cuenta está lista', 'Completar mi perfil'],
+  ['pt-BR', 'sua conta está pronta', 'Completar meu perfil'],
+])('uses the saved %s locale for branded welcome content', async (locale, title, action) => {
+  adminClient = chainableClient([{ welcome_email_sent_at: null, preferred_locale: locale }])
+  await sendWelcomeEmailIfNeeded({ id: 'localized-account', email: 'fixture@resend.dev' })
+  const sent = sendCloudflareTransactionalEmailMock.mock.calls[0][0] as { htmlBody: string; textBody: string }
+  expect(sent.htmlBody).toContain(`<html lang="${locale}">`)
+  expect(sent.htmlBody).toContain(title)
+  expect(sent.htmlBody).toContain(action)
+  expect(sent.htmlBody).toContain('https://legalops.club/brand/legalops-club-email.png')
+})

@@ -36,4 +36,12 @@ with applied as(update public.club_translation_sources set translations='{"en":{
 delete from public.community_posts where id=current_setting('test.club_post')::uuid;
 select set_config('test.deleted_cache',count(*)::text,true) from public.club_translation_sources where post_id=current_setting('test.club_post')::uuid;
 select jsonb_build_object('anon_private',current_setting('test.anon_private'),'anon_public',current_setting('test.anon_public'),'member_private',current_setting('test.member_private'),'revoked_private',current_setting('test.revoked_private'),'translated_search',current_setting('test.search_translation'),'edit_invalidates',current_setting('test.edit_invalidates'),'budget_first',current_setting('test.budget_first'),'budget_second',current_setting('test.budget_second'),'stale_applied',current_setting('test.stale_applied'),'deleted_cache',current_setting('test.deleted_cache')) as results;
+do $$ begin
+  if current_setting('test.anon_private')<>'0' or current_setting('test.anon_public')<>'1'
+    or current_setting('test.member_private')<>'1' or current_setting('test.revoked_private')<>'0'
+    or current_setting('test.search_translation')<>'1' or current_setting('test.edit_invalidates')<>'true'
+    or current_setting('test.budget_first')<>'1' or current_setting('test.budget_second')<>'0'
+    or current_setting('test.stale_applied')<>'0' or current_setting('test.deleted_cache')<>'0'
+  then raise exception 'Club translation regression'; end if;
+end $$;
 rollback;
