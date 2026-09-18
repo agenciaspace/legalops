@@ -1,6 +1,7 @@
 export default {
   async scheduled(event, env, ctx) {
-    const path = event.cron === '0 21 * * 0'
+    const path = event.cron === '* * * * *' ? '/api/cron/club-translations'
+      : event.cron === '0 21 * * 0'
       ? '/api/cron/community-summary'
       : '/api/cron/scrape'
 

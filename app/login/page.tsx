@@ -1,4 +1,5 @@
 'use client'
+import { ClubLanguageSelect, useClubLanguage } from '@/components/community/ClubLanguage'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -8,9 +9,12 @@ import Link from 'next/link'
 import { GoogleSignIn } from '@/components/community/GoogleSignIn'
 
 export default function LoginPage() {
+  const { t, locale } = useClubLanguage()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [recovering, setRecovering] = useState(false)
+  const [recoverySent, setRecoverySent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isClub, setIsClub] = useState(false)
   const [signupHref, setSignupHref] = useState('/cadastro')
@@ -32,12 +36,19 @@ export default function LoginPage() {
       ? requestedPath
       : window.location.hostname.endsWith('legalops.club') ? '/community' : '/dashboard'
 
+    if (recovering) {
+      const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/confirm?next=%2Fset-password%3Fnext%3D%2Fcommunity` })
+      setLoading(false)
+      if (recoveryError) setError(t("Não foi possível conectar. Tente novamente em alguns instantes."))
+      else setRecoverySent(true)
+      return
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     setLoading(false)
 
     if (error) {
-      setError(error.message)
+      setError(error.code === 'email_not_confirmed' ? t("Confira seu email") : t("Email ou senha incorretos."))
       return
     }
 
@@ -56,26 +67,27 @@ export default function LoginPage() {
             suffix={isClub ? 'club' : 'work'}
             className="flex flex-col items-center"
             titleClassName="inline-flex items-baseline text-[34px] font-semibold leading-none tracking-[-0.055em] text-[#111111]"
-            subtitle={isClub ? 'Sua entrada para a comunidade de Legal Operations' : 'Sua conta para vagas, conteúdo e carreira em Legal Operations'}
+            subtitle={isClub ? t("Sua entrada para a comunidade de Legal Operations") : t("Sua conta para vagas, conteúdo e carreira em Legal Operations")}
             subtitleClassName="mt-4 max-w-sm text-sm leading-6 text-[#6D6761]"
           />
         </div>
 
+        <div className="mb-4 flex justify-end"><ClubLanguageSelect /></div>
         <form onSubmit={handleSubmit} className="space-y-4 rounded-[26px] border border-[#CEC8BD] bg-white/75 p-6 shadow-[0_20px_60px_rgba(17,17,17,0.06)] backdrop-blur sm:p-7">
           {isClub && <GoogleSignIn />}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#69635E]">Email</label>
+            <label className="mb-1.5 block text-xs font-semibold text-[#69635E]">{t("Email")}</label>
             <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              placeholder="seu@email.com"
+              placeholder="you@example.com"
               className="w-full rounded-2xl border border-[#CEC8BD] bg-[#FAF7F1] px-4 py-3 text-sm outline-none transition placeholder:text-[#9A938C] focus:border-[#E88A6A] focus:ring-4 focus:ring-[#E88A6A]/10"
             />
           </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#69635E]">Senha</label>
+          {!recovering && <div>
+            <label className="mb-1.5 block text-xs font-semibold text-[#69635E]">{t("Senha")}</label>
             <input
               type="password"
               value={password}
@@ -84,29 +96,30 @@ export default function LoginPage() {
               placeholder="••••••••"
               className="w-full rounded-2xl border border-[#CEC8BD] bg-[#FAF7F1] px-4 py-3 text-sm outline-none transition placeholder:text-[#9A938C] focus:border-[#E88A6A] focus:ring-4 focus:ring-[#E88A6A]/10"
             />
-          </div>
+          </div>}
+          {recoverySent && <p role="status" className="text-sm text-emerald-700">{t("Confira seu email para redefinir a senha.")}</p>}
 
           {error && (
-            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>
+            <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{t(error)}</p>
           )}
           <button
             type="submit"
             disabled={loading}
             className="w-full rounded-full bg-[#111111] py-3 text-sm font-bold text-white transition hover:bg-[#2A2927] disabled:opacity-50"
           >
-            {loading ? 'Carregando...' : 'Entrar'}
+            {loading ? t('Aguarde…') : t(recovering ? 'Enviar link de recuperação' : 'Entrar')}
           </button>
-          <p className="text-center text-xs leading-5 text-[#77716A]">
-            Ainda não tem conta? <Link href={signupHref} className="font-semibold underline">Cadastre-se gratuitamente no Club.</Link>
+          <button type="button" className="min-h-11 w-full text-sm underline" onClick={() => { setRecovering(value => !value); setRecoverySent(false); setError(null) }}>{t(recovering ? "Entrar" : "Esqueci minha senha")}</button>
+          <p className="text-center text-xs leading-5 text-[#77716A]"> {t("Ainda não tem conta?")} <Link href={signupHref} className="font-semibold underline">{t("Cadastre-se gratuitamente no Club.")}</Link>
           </p>
         </form>
 
         <div className="mt-6 flex items-center justify-center gap-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#918A83]">
-          <span>community</span>
+          <span>{t("community")}</span>
           <span className="h-1 w-1 rounded-full bg-[#E88A6A]" />
-          <span>knowledge</span>
+          <span>{t("knowledge")}</span>
           <span className="h-1 w-1 rounded-full bg-[#E88A6A]" />
-          <span>connection</span>
+          <span>{t("connection")}</span>
         </div>
 
         <div className="mt-5 flex justify-center opacity-35">

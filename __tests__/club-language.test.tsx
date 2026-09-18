@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({ refresh: vi.fn() }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: mocks.refresh }), usePathname: () => '/community/tools' }))
@@ -7,11 +7,13 @@ import { CommunityTabs } from '@/components/community/CommunityTabs'
 import { EventShare } from '@/components/community/EventShare'
 import { normalizeClubLocale, clubTranslator } from '@/lib/club-locale'
 import { personalAgentPrompt } from '@/lib/club-personal-agent'
-afterEach(() => { cleanup(); document.cookie = 'club-locale=; Max-Age=0; Path=/'; vi.clearAllMocks() })
-it('switches the interface and share message and restores the saved choice on the next visit', () => {
-  const renderApp = (initialLocale: 'en' | 'pt-BR') => render(<ClubLanguageProvider initialLocale={initialLocale}><ClubLanguageSelect /><CommunityTabs /><EventShare slug="bench-test" title="Título original" /></ClubLanguageProvider>)
+afterEach(() => { cleanup(); document.cookie = 'club-locale=; Max-Age=0; Path=/'; vi.clearAllMocks(); vi.unstubAllGlobals() })
+it('switches the interface and share message and restores the saved choice on the next visit', async () => {
+  vi.stubGlobal('fetch', vi.fn(async () => Response.json({ ok: true })))
+  const renderApp = (initialLocale: 'en' | 'pt-BR' | 'es') => render(<ClubLanguageProvider initialLocale={initialLocale}><ClubLanguageSelect /><CommunityTabs /><EventShare slug="bench-test" title="Título original" /></ClubLanguageProvider>)
   const view = renderApp('pt-BR')
-  fireEvent.change(screen.getByRole('combobox', { name: 'Idioma / Language' }), { target: { value: 'en' } })
+  fireEvent.change(screen.getByRole('combobox', { name: 'Idioma / Language / Idioma' }), { target: { value: 'en' } })
+  await waitFor(() => expect(document.cookie).toContain('club-locale=en'))
   const nav = within(screen.getByRole('navigation', { name: 'Club areas' }))
   expect(nav.getByRole('link', { name: 'Tools' })).toHaveAttribute('aria-current', 'page')
   expect(document.cookie).toContain('club-locale=en')

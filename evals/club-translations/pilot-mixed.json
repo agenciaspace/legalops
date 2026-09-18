@@ -1,0 +1,46 @@
+{
+  "input": {
+    "title": "CLM intake",
+    "body": "Vamos revisar el contrato tomorrow, 22/09. O orçamento é R$ 100. El equipo trabaja en Brasil."
+  },
+  "result": {
+    "detected_locale": "es",
+    "translations": {
+      "pt-BR": {
+        "title": "Intake de CLM",
+        "body": "Vamos revisar o contrato amanhã, 22/09. O orçamento é R$ 100. A equipe trabalha no Brasil."
+      },
+      "en": {
+        "title": "CLM intake",
+        "body": "Let's review the contract tomorrow, 22/09. The budget is R$ 100. The team works in Brazil."
+      },
+      "es": {
+        "title": "CLM intake",
+        "body": "Vamos revisar el contrato tomorrow, 22/09. O orçamento é R$ 100. El equipo trabaja en Brasil."
+      }
+    },
+    "usage": {
+      "prompt_tokens": 318,
+      "completion_tokens": 216,
+      "total_tokens": 534,
+      "cost": 0.000468072,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0004728,
+        "upstream_inference_prompt_cost": 0.0001272,
+        "upstream_inference_completions_cost": 0.0003456
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  }
+}

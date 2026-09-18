@@ -1,3 +1,5 @@
+import type {} from '@/lib/club-translations'
+vi.mock('@/lib/club-translations',()=>({loadClubTranslations:async()=>({enabled:false,sources:new Map()})}))
 import {expect,it,vi} from 'vitest'
 import {render,screen,cleanup} from '@testing-library/react'
 const mocks=vi.hoisted(()=>({redirect:vi.fn(),rows:[] as any[]}))

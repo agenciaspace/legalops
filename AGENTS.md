@@ -365,3 +365,11 @@ When changing authentication, submit the browser form; rendering it is not enoug
 - Run `python3 scripts/check-bend.py` before committing. Regenerate with `--write` after intentional policy changes and review the artifact diff.
 - Club and Pro access consume the generated exhaustive decision table, including in Cloudflare Workers. Host status/date parsing and database RLS are outside the proof and must remain tested.
 - Prefer parallel computation only for independent work that benefits from it; these constant-size policy lookups need none.
+
+## Club multilingual content (2026-09-18)
+
+- `account_profiles.preferred_locale` is authoritative after sign-in; country and timezone are independent. Middleware overwrites language headers before rendering. Supported locales: pt-BR, en, es.
+- Keep community originals immutable during translation. Database triggers atomically enqueue revisioned `club_translation_sources`; caller RLS follows each original, including event captions. Edit invalidates cache; deletion cascades; stale leases cannot commit.
+- Cloudflare cron calls `/api/cron/club-translations` every minute, with a required bearer secret, three leases and a transactionally reserved daily budget. Fixed model `openai/gpt-4.1-mini`; no per-reader model call. Never use the preview evaluator as a production entrypoint.
+- `TranslatedContent` shows only the selected language or a localized pending/error state, with explicit original/retry/report controls. Source correction belongs to the post/comment author. Files are not translated.
+- UI catalogs are static. Preserve canonical interest values; translate labels only. Branded Resend welcome and SMTP templates use account language metadata. Run the template generator after editing email shells.

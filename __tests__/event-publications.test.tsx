@@ -1,5 +1,6 @@
+vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, beforeAll, expect, it } from 'vitest'
+import { afterEach, beforeAll, expect, it, vi } from 'vitest'
 import { EventPublications } from '@/components/community/EventPublications'
 import { fileMatchesType, groupEventPublications, type EventResource } from '@/lib/event-publications'
 
@@ -14,7 +15,8 @@ it('renders one post with author and caption once for multiple inline photos', (
   expect(screen.getAllByRole('article')).toHaveLength(1)
   expect(screen.getAllByText('Uma ótima troca!')).toHaveLength(1)
   expect(screen.getAllByRole('img')).toHaveLength(2)
-  expect(screen.getByText('Jurídico · Empresa')).toBeInTheDocument()
+  expect(screen.getByText('Empresa')).toBeInTheDocument()
+  expect(screen.getByText('Jurídico')).toBeInTheDocument()
   expect(screen.queryByText('Encontro · one.jpg')).not.toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Ampliar foto 1 de 2' })).not.toHaveAttribute('href')
 })

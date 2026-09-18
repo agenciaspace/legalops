@@ -1,0 +1,46 @@
+{
+  "input": {
+    "title": "Contract review workshop",
+    "body": "Meet @Ana on 22/09 at 19:00. The fee is USD 199. Brazilian law applies. See https://example.com/legal and preserve `approve=false`."
+  },
+  "result": {
+    "detected_locale": "en",
+    "translations": {
+      "pt-BR": {
+        "title": "Oficina de revisão de contratos",
+        "body": "Encontre-se com @Ana em 22/09 às 19:00. A taxa é USD 199. Aplica-se a lei brasileira. Veja https://example.com/legal e preserve `approve=false`."
+      },
+      "en": {
+        "title": "Contract review workshop",
+        "body": "Meet @Ana on 22/09 at 19:00. The fee is USD 199. Brazilian law applies. See https://example.com/legal and preserve `approve=false`."
+      },
+      "es": {
+        "title": "Taller de revisión de contratos",
+        "body": "Reúnase con @Ana el 22/09 a las 19:00. La tarifa es USD 199. Se aplica la ley brasileña. Vea https://example.com/legal y preserve `approve=false`."
+      }
+    },
+    "usage": {
+      "prompt_tokens": 362,
+      "completion_tokens": 366,
+      "total_tokens": 728,
+      "cost": 0.000723096,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0007304,
+        "upstream_inference_prompt_cost": 0.0001448,
+        "upstream_inference_completions_cost": 0.0005856
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  }
+}

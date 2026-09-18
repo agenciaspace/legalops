@@ -65,6 +65,7 @@ it('generates and delivers a confirmation link when Supabase SMTP fails', async 
   expect(mocks.sendConfirmation).toHaveBeenCalledWith({
     email: 'ana@example.com',
     confirmationLink: expect.stringContaining('token_hash=secret-hash&type=email&next='),
+    locale: 'pt-BR',
   })
 })
 

@@ -1,8 +1,9 @@
+vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 import {render,screen,within} from '@testing-library/react'
 import {expect,it,vi} from 'vitest'
 const uid='11111111-1717-4717-8717-111111111111'
 vi.mock('@/lib/supabase-admin',()=>({createAdminClient:vi.fn(()=>{throw new Error('Service client must not be needed for author identity')})}))
-vi.mock('@/app/(main)/community/actions',()=>({createCommunityComment:vi.fn(),createCommunityPost:vi.fn(),toggleCommunityPostLike:vi.fn()}))
+vi.mock('@/app/(main)/community/actions',()=>({correctCommunitySourceLocale:vi.fn(),createCommunityComment:vi.fn(),createCommunityPost:vi.fn(),toggleCommunityPostLike:vi.fn()}))
 vi.mock('@/lib/supabase-server',()=>({createServerSupabaseClient:async()=>({
  auth:{getUser:async()=>({data:{user:{id:uid}}})},
  from:(table:string)=>{
@@ -16,7 +17,8 @@ it('shows the current member photo and workplace prominently on an existing post
  const {container}=render(await CommunityPage({}))
  const post=container.querySelector('#post-post-one') as HTMLElement
  expect(within(post).getByRole('link',{name:'Nome atual'})).toHaveAttribute('href',`/community/members/${uid}`)
- expect(within(post).getByText('Legal Ops · Empresa atual')).toBeVisible()
+ expect(within(post).getByText('Legal Ops')).toBeVisible()
+ expect(within(post).getByText('Empresa atual')).toBeVisible()
  const workplace=within(post).getByText('Organizo contratos e integrações no jurídico da empresa.')
  expect(workplace).toBeVisible()
  expect(workplace.compareDocumentPosition(within(post).getByRole('heading',{name:'Escolha de CLM'}))&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()

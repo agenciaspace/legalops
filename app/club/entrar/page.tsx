@@ -11,7 +11,7 @@ export default async function ClubJoinPage({ searchParams }: { searchParams?: {n
   if (!user) redirect(`/cadastro?next=${encodeURIComponent(destination)}`)
   const [{ data: member }, { data: profile }] = await Promise.all([
     supabase.from('community_members').select('club_access_status,club_access_expires_at').eq('user_id', user.id).maybeSingle(),
-    supabase.from('account_profiles').select('full_name,current_role,organization_name,linkedin_url,public_bio,preferred_locations,areas_of_expertise').eq('user_id', user.id).maybeSingle(),
+    supabase.from('account_profiles').select('country_code,timezone,full_name,current_role,organization_name,linkedin_url,public_bio,preferred_locations,areas_of_expertise').eq('user_id', user.id).maybeSingle(),
   ])
   if (hasActiveClubAccess(member)) redirect(destination)
   return <ClubJoinForm profile={profile ?? {}} destination={destination} />

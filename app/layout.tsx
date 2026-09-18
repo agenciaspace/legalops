@@ -1,3 +1,5 @@
+import { ClubLanguageProvider } from '@/components/community/ClubLanguage'
+import { getClubLocale } from '@/lib/club-locale-server'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Quicksand } from 'next/font/google'
 import './globals.css'
@@ -23,9 +25,9 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1, view
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang={getClubLocale()}>
       <body className={`${inter.variable} ${quicksand.variable} bg-[#F5F4F0] text-[#1A1A1A] antialiased selection:bg-[#E88A6A] selection:text-white`}>
-        {children}
+        <ClubLanguageProvider initialLocale={getClubLocale()}>{children}</ClubLanguageProvider>
       </body>
     </html>
   )

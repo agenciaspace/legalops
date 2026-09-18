@@ -1,4 +1,6 @@
-import { getClubLocale, getClubTranslator } from '@/lib/club-locale-server'
+import { TranslatedContent } from '@/components/community/TranslatedContent'
+import { loadClubTranslations } from '@/lib/club-translations'
+import { getClubLocale, getClubTranslator, getClubTimezone } from '@/lib/club-locale-server'
 import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
@@ -31,11 +33,12 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   const joinUrl = `/club/entrar?next=${encodeURIComponent(`/community/events/${event.slug}`)}`
   const activeTab = searchParams?.tab === 'discussoes' ? 'discussoes' : searchParams?.tab === 'documentos' ? 'documentos' : 'fotos'
   const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
+  const translations = await loadClubTranslations(supabase, [event.id,...(discussions ?? []).map(post => post.id),...(resources ?? []).map(resource => resource.id),...authorIds])
   const overview = <div className="space-y-5">
-    <p className="whitespace-pre-wrap break-words text-sm leading-6 text-[#625E59]">{event.description}</p>
+    <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{description:event.description,location_label:event.location_label}} enabled={translations.enabled} serverLocale={getClubLocale()} />
     <dl className="space-y-4 text-sm text-[#625E59]">
-      <div><dt className="text-xs font-semibold text-[#817A73]">{t('Quando')}</dt><dd className="mt-1">{new Intl.DateTimeFormat(getClubLocale(), { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(event.starts_at))}</dd></div>
-      <div><dt className="text-xs font-semibold text-[#817A73]">{t('Onde')}</dt><dd className="mt-1 break-words">{event.location_label}</dd></div>
+      <div><dt className="text-xs font-semibold text-[#817A73]">{t('Quando')}</dt><dd className="mt-1">{new Intl.DateTimeFormat(getClubLocale(), { dateStyle: 'long', timeStyle: 'short', timeZone: getClubTimezone() }).format(new Date(event.starts_at))}</dd></div>
+
       <div><dt className="text-xs font-semibold text-[#817A73]">{t('Organização')}</dt><dd className="mt-1 break-words">{event.host_name}</dd></div>
     </dl>
     <div className="space-y-2 border-t border-[#E6DED0] pt-4">
@@ -48,7 +51,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
         <Link href="/community/calendar" className="inline-flex min-h-11 items-center font-semibold text-[#A94E38]">{t('← Eventos')}</Link>
         <span className="text-[#817A73]">{past ? t('Evento realizado') : t('Próximo evento')}</span>
       </div>
-      <h1 className="text-xl font-semibold leading-tight tracking-tight text-[#24231F] sm:text-2xl">{event.title}</h1>
+      <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{title:event.title}} enabled={translations.enabled} serverLocale={getClubLocale()} />
     </header>
     <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-6">
       <div className="min-w-0">
@@ -57,7 +60,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
           <div className="border-t border-[#E6DED0] p-4">{overview}</div>
         </details>
         {isMember && <nav id="publicacoes" aria-label={t('Conteúdo do evento')} className="mb-4 flex scroll-mt-20 gap-1 border-b border-[#CEC8BD]">
-          {([{ key: 'fotos', label: 'Fotos' }, { key: 'documentos', label: 'Documentos' }, { key: 'discussoes', label: 'Conversas' }] as const).map(tab => <Link key={tab.key} href={`/community/events/${event.slug}?tab=${tab.key}#publicacoes`} aria-current={activeTab === tab.key ? 'page' : undefined} className={`inline-flex min-h-12 flex-1 items-center justify-center border-b-2 px-2 text-sm font-semibold sm:flex-none sm:px-5 ${activeTab === tab.key ? 'border-[#A94E38] text-[#A94E38]' : 'border-transparent text-[#625E59] hover:text-[#24231F]'}`}>{t(tab.label)}</Link>)}
+          {([{ key: 'fotos', label: t("Fotos") }, { key: 'documentos', label: t("Documentos") }, { key: 'discussoes', label: t("Conversas") }] as const).map(tab => <Link key={tab.key} href={`/community/events/${event.slug}?tab=${tab.key}#publicacoes`} aria-current={activeTab === tab.key ? 'page' : undefined} className={`inline-flex min-h-12 flex-1 items-center justify-center border-b-2 px-2 text-sm font-semibold sm:flex-none sm:px-5 ${activeTab === tab.key ? 'border-[#A94E38] text-[#A94E38]' : "border-transparent text-[#625E59] hover:text-[#24231F]"}`}>{t(tab.label)}</Link>)}
         </nav>}
       {searchParams?.registered ? <p role="status" className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">{t("Cadastro recebido. Para acessar materiais e discussões, entre na comunidade.")}</p> : null}
       {!isMember && !past ? <form action={registerPublicEvent} className="mb-4 rounded-xl bg-[#F5F1E8] p-4 sm:p-5"><input type="hidden" name="event_id" value={event.id} /><h2 className="font-bold">{t("Reserve sua vaga")}</h2><p className="mt-1 text-xs leading-5 text-[#716B65]">{t("O cadastro é público. Seu acesso aos materiais depois do encontro depende de uma conta da comunidade.")}</p><div className="mt-4 grid gap-3 sm:grid-cols-2"><input name="name" required minLength={2} placeholder={t("Nome")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /><input name="email" required type="email" placeholder={t("E-mail")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /><input name="role" required minLength={2} placeholder={t("Cargo")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /><input name="organization" required minLength={2} placeholder={t("Onde trabalha")} className="min-h-11 rounded-lg border bg-white px-3 text-sm" /></div><button className="mt-4 min-h-11 rounded-lg bg-[#24231F] px-5 text-sm font-bold text-white">{t("Confirmar cadastro")}</button></form> : null}
@@ -72,9 +75,9 @@ export default async function EventPage({ params, searchParams }: { params: { sl
 
         {canContribute && activeTab !== 'discussoes' && <section aria-label={t('Publicações do evento')}>
           <EventUpload key={activeTab} eventId={event.id} photos={activeTab === 'fotos'} />
-          <EventPublications resources={visibleResources} authors={authors ?? []} />
+          <EventPublications translations={translations} resources={visibleResources} authors={authors ?? []} />
         </section>}
-      {isMember && activeTab === 'discussoes' ? <section className="rounded-xl border border-[#CEC8BD] bg-white p-4 sm:p-5"><h2 className="text-lg font-bold">{t("Discussões do evento")}</h2>{discussions?.length ? <div className="mt-3 space-y-3">{discussions.map(post => <Link key={post.id} href={`/community?post=${post.id}`} className="block rounded-lg border border-[#E4E2DD] p-3 hover:border-[#FFB99E]"><p className="text-sm font-bold">{post.title}</p><p className="mt-1 line-clamp-2 text-xs text-[#716B65]">{post.body}</p></Link>)}</div> : <p className="mt-2 text-sm text-[#77746E]">{t("A discussão será criada pelos participantes.")}</p>}</section> : null}
+      {isMember && activeTab === 'discussoes' ? <section className="rounded-xl border border-[#CEC8BD] bg-white p-4 sm:p-5"><h2 className="text-lg font-bold">{t("Discussões do evento")}</h2>{discussions?.length ? <div className="mt-3 space-y-3">{discussions.map(post => <div key={post.id} className="block rounded-lg border border-[#E4E2DD] p-3 hover:border-[#FFB99E]"><TranslatedContent source={translations.sources.get(`post:${post.id}`)} original={{title:post.title,body:post.body}} enabled={translations.enabled} serverLocale={getClubLocale()} /><Link href={`/community?post=${post.id}`} className="inline-flex min-h-11 items-center underline">{t("Conversas")}</Link></div>)}</div> : <p className="mt-2 text-sm text-[#77746E]">{t("A discussão será criada pelos participantes.")}</p>}</section> : null}
 
       </div>
       <aside aria-label={t('Sobre o encontro')} className="sticky top-20 hidden min-w-0 rounded-xl border border-[#CEC8BD] bg-white p-5 xl:block">

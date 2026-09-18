@@ -1,9 +1,11 @@
 'use client'
+import { useClubLanguage } from './ClubLanguage'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { googleReturnPath } from '@/lib/google-login'
 // Uses only the Google OAuth client configured for this Supabase project.
 export function GoogleSignIn() {
+  const { t } = useClubLanguage()
   const [available, setAvailable] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -26,5 +28,5 @@ export function GoogleSignIn() {
     }
   }
   if (!available) return null
-  return <div className="space-y-3"><button type="button" disabled={busy} onClick={signIn} className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#CEC8BD] bg-white px-4 py-3 text-sm font-semibold disabled:opacity-50"><span aria-hidden="true" className="text-lg font-bold">G</span>{busy ? 'Abrindo Google…' : 'Continuar com Google'}</button>{error && <p role="alert" className="text-sm text-red-700">{error}</p>}<p className="text-center text-xs text-[#69635E]">ou continue com email</p></div>
+  return <div className="space-y-3"><button type="button" disabled={busy} onClick={signIn} className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#CEC8BD] bg-white px-4 py-3 text-sm font-semibold disabled:opacity-50"><span aria-hidden="true" className="text-lg font-bold">G</span>{t(busy ? 'Abrindo Google…' : 'Continuar com Google')}</button>{error && <p role="alert" className="text-sm text-red-700">{t(error)}</p>}<p className="text-center text-xs text-[#69635E]">{t("ou continue com email")}</p></div>
 }

@@ -1,3 +1,6 @@
+vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
+import type {} from '@/lib/club-translations'
+vi.mock('@/lib/club-translations',()=>({loadClubTranslations:async()=>({enabled:false,sources:new Map()})}))
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 const state = vi.hoisted(() => ({ rows: [] as any[], error: null as any }))

@@ -46,7 +46,7 @@ describe('Club admission and Pro routing', () => {
   it('allows free community access without career onboarding', async () => {
     state.user = { id: 'free' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive' }
     for (const path of ['/community', '/community/members', '/community/profile', '/club/entrar']) expect((await request(path)).status).toBe(200)
-    expect(state.profileReads).toBe(0)
+    expect(state.profileReads).toBe(4) // Locale preferences are read; career onboarding is not required.
   })
   it('blocks free users from Pro pages and AI APIs', async () => {
     state.user = { id: 'free' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive' }

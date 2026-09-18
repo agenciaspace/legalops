@@ -1,6 +1,22 @@
+import { spanish, extraEnglish } from './club-locale-extra'
 export const CLUB_LOCALE_COOKIE = 'club-locale'
-export type ClubLocale = 'pt-BR' | 'en'
-export function normalizeClubLocale(value?: string | null): ClubLocale { return value === 'en' ? 'en' : 'pt-BR' }
+export type ClubLocale = 'pt-BR' | 'en' | 'es'
+export const CLUB_LOCALES: ClubLocale[] = ['pt-BR', 'en', 'es']
+export function normalizeClubLocale(value?: string | null): ClubLocale {
+  const language = value?.toLowerCase().split('-')[0]
+  return language === 'en' ? 'en' : language === 'es' ? 'es' : 'pt-BR'
+}
+export function browserClubLocale(header: string | null): ClubLocale {
+  const choices = (header ?? '').split(',').map(part => {
+    const [value, weight] = part.trim().split(';q=')
+    return { value, weight: weight ? Number(weight) : 1 }
+  }).filter(item => item.weight > 0).sort((a, b) => b.weight - a.weight)
+  return normalizeClubLocale(choices.find(item => /^(pt|en|es)(-|$)/i.test(item.value))?.value)
+}
+export function normalizeClubTimezone(value?: string | null) {
+  try { if (value) { new Intl.DateTimeFormat('en', { timeZone: value }); return value } } catch {}
+  return 'UTC'
+}
 
 const english: Record<string, string> = {
   'Nova conversa': 'New conversation', 'Conversa anterior': 'Previous conversation', 'Suas conversas': 'Your conversations',
@@ -128,7 +144,7 @@ const english: Record<string, string> = {
 
 export function clubTranslator(locale: ClubLocale) {
   return (text: string, values: Record<string, string | number> = {}) => {
-    const translated = locale === 'en' ? english[text] ?? text : text
+    const translated = locale === 'en' ? english[text] ?? extraEnglish[text] ?? text : locale === 'es' ? spanish[text] ?? text : text
     return translated.replace(/\{(\w+)\}/g, (match, key) => key in values ? String(values[key]) : match)
   }
 }

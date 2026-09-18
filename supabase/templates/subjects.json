@@ -1,0 +1,27 @@
+{
+  "confirmation": [
+    "Confirme seu email",
+    "Confirm your email",
+    "Confirma tu email"
+  ],
+  "recovery": [
+    "Redefina sua senha",
+    "Reset your password",
+    "Restablece tu contraseña"
+  ],
+  "invite": [
+    "Seu convite para o legalops.club",
+    "Your invitation to legalops.club",
+    "Tu invitación a legalops.club"
+  ],
+  "magic_link": [
+    "Seu acesso ao legalops.club",
+    "Your access to legalops.club",
+    "Tu acceso a legalops.club"
+  ],
+  "email_change": [
+    "Confirme seu novo email",
+    "Confirm your new email",
+    "Confirma tu nuevo email"
+  ]
+}

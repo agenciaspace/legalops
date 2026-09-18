@@ -1,3 +1,5 @@
+import { clubEmailCopy } from '@/lib/club-email-copy'
+import { normalizeClubLocale, type ClubLocale } from '@/lib/club-locale'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { buildClubEmail, escapeEmailHtml } from '@/lib/club-email'
 import { sendClubTransactionalEmail } from '@/lib/club-email-delivery'
@@ -13,7 +15,8 @@ function escapeHtmlAttribute(value: string) {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-export async function sendClubInvitationEmail({ email, actionLink }: { email: string; actionLink: string }) {
+export async function sendClubInvitationEmail({ email, actionLink, locale = 'pt-BR' }: { email: string; actionLink: string; locale?: ClubLocale }) {
+  const copy = clubEmailCopy[locale]
   const textBody = [
     'Olá!',
     '',
@@ -25,19 +28,20 @@ export async function sendClubInvitationEmail({ email, actionLink }: { email: st
     'Se você não esperava este convite, ignore esta mensagem.',
   ].join('\n')
   const htmlBody = buildClubEmail({
-    title: 'seu convite chegou', preview: 'Ative sua conta e entre na comunidade legalops.club.',
-    contentHtml: '<p>Olá!</p><p>Seu acesso ao legalops.club foi liberado. Ative sua conta, crie uma senha e complete seu perfil para participar das conversas.</p>',
-    actionLabel: 'Ativar meu acesso', actionUrl: actionLink,
+    locale, title: copy.inviteTitle, preview: copy.inviteBody,
+    contentHtml: `<p>${copy.hello}!</p><p>${copy.inviteBody}</p>`,
+    actionLabel: copy.inviteAction, actionUrl: actionLink,
   })
   return sendClubTransactionalEmail({
     to: [email],
-    subject: CLUB_INVITATION_SUBJECT,
-    textBody,
+    subject: locale === 'pt-BR' ? CLUB_INVITATION_SUBJECT : `${copy.inviteTitle} — legalops.club`,
+    textBody: locale === 'pt-BR' ? textBody : `${copy.inviteBody}\n\n${actionLink}`,
     htmlBody,
   })
 }
 
-export async function sendSignupConfirmationEmail({ email, confirmationLink }: { email: string; confirmationLink: string }) {
+export async function sendSignupConfirmationEmail({ email, confirmationLink, locale = 'pt-BR' }: { email: string; confirmationLink: string; locale?: ClubLocale }) {
+  const copy = clubEmailCopy[locale]
   const textBody = [
     'Confirme seu email para concluir seu cadastro no LegalOps Club.',
     '',
@@ -46,20 +50,21 @@ export async function sendSignupConfirmationEmail({ email, confirmationLink }: {
     'Se você não criou esta conta, ignore esta mensagem.',
   ].join('\n')
   const htmlBody = buildClubEmail({
-    title: 'confirme seu email', preview: 'Falta só confirmar seu email para continuar o cadastro.',
-    contentHtml: '<p>Confirme seu email para continuar o cadastro no legalops.club.</p><p>Depois, complete seu perfil para conhecer outros profissionais e participar das conversas.</p>',
-    actionLabel: 'Confirmar meu email', actionUrl: confirmationLink,
+    locale, title: copy.confirmTitle, preview: copy.confirmBody,
+    contentHtml: `<p>${copy.confirmBody}</p>`,
+    actionLabel: copy.confirmAction, actionUrl: confirmationLink,
   })
 
   return sendCloudflareTransactionalEmail({
     to: [email],
-    subject: SIGNUP_CONFIRMATION_SUBJECT,
-    textBody,
+    subject: locale === 'pt-BR' ? SIGNUP_CONFIRMATION_SUBJECT : `${copy.confirmTitle} — legalops.club`,
+    textBody: locale === 'pt-BR' ? textBody : `${copy.confirmBody}\n\n${confirmationLink}`,
     htmlBody,
   })
 }
 
-function buildAccountWelcomeEmail(email: string) {
+function buildAccountWelcomeEmail(email: string, locale: ClubLocale) {
+  const copy = clubEmailCopy[locale]
   const textBody = [
     'Olá!',
     '',
@@ -79,18 +84,19 @@ function buildAccountWelcomeEmail(email: string) {
   ].join('\n')
 
   return {
-    subject: ACCOUNT_WELCOME_SUBJECT,
-    textBody,
+    subject: locale === 'pt-BR' ? ACCOUNT_WELCOME_SUBJECT : `${copy.accountTitle} — legalops.club`,
+    textBody: locale === 'pt-BR' ? textBody : `${copy.hello}!\n\n${copy.accountBody}\n\nhttps://legalops.club/club/entrar\n\n${copy.account}: ${email}`,
     htmlBody: buildClubEmail({
-      title: 'sua conta está pronta', preview: 'Complete seu perfil e encontre sua comunidade.',
-      contentHtml: `<p>Olá!</p><p>Você já tem uma conta no ecossistema legalops. Agora, complete seu perfil para entrar na comunidade gratuita.</p><p>Encontre pessoas, conversas e referências para os desafios do trabalho jurídico.</p><p style="font-size:13px">Conta: ${escapeEmailHtml(email)}</p>`,
-      actionLabel: 'Completar meu perfil', actionUrl: 'https://legalops.club/club/entrar',
+      locale, title: copy.accountTitle, preview: copy.accountPreview,
+      contentHtml: `<p>${copy.hello}!</p><p>${copy.accountBody}</p><p style="font-size:13px">${copy.account}: ${escapeEmailHtml(email)}</p>`,
+      actionLabel: copy.profileAction, actionUrl: 'https://legalops.club/club/entrar',
     }),
   }
 }
 
-function buildClubWelcomeEmail(email: string, displayName?: string | null, whatsappInviteUrl?: string | null) {
-  const greeting = displayName?.trim() ? `Olá, ${displayName.trim()}!` : 'Olá!'
+function buildClubWelcomeEmail(email: string, displayName?: string | null, whatsappInviteUrl?: string | null, locale: ClubLocale = 'pt-BR') {
+  const copy = clubEmailCopy[locale]
+  const greeting = displayName?.trim() ? `${copy.hello}, ${displayName.trim()}!` : `${copy.hello}!`
 
   const textBody = [
     greeting,
@@ -118,12 +124,12 @@ function buildClubWelcomeEmail(email: string, displayName?: string | null, whats
   ].join('\n')
 
   return {
-    subject: CLUB_WELCOME_SUBJECT,
-    textBody,
+    subject: locale === 'pt-BR' ? CLUB_WELCOME_SUBJECT : `${copy.clubTitle} — legalops.club`,
+    textBody: locale === 'pt-BR' ? textBody : `${greeting}\n\n${copy.clubBody}\n\nhttps://legalops.club/community/profile\nhttps://legalops.club/community\n${whatsappInviteUrl || ''}\n\n${copy.account}: ${email}`,
     htmlBody: buildClubEmail({
-      title: 'bem-vindo à comunidade', preview: 'Seu acesso está ativo. Apresente-se e entre nas conversas.',
-      contentHtml: `<p>${escapeEmailHtml(greeting)}</p><p>Seu acesso ao legalops.club está ativo. Troque experiências com quem vive os mesmos desafios do jurídico.</p><p>Para começar:</p><ol style="padding-left:20px"><li><a href="https://legalops.club/community/profile" style="color:#111111">Complete seu perfil</a> para que as pessoas conheçam você.</li><li>Apresente-se e participe das conversas por tema.</li><li>Acompanhe os próximos encontros no calendário.</li></ol>${whatsappInviteUrl ? `<p><a href="${escapeHtmlAttribute(whatsappInviteUrl)}" style="color:#111111">Entrar na comunidade do WhatsApp</a></p>` : ''}<p style="font-size:13px">Conta: ${escapeEmailHtml(email)}</p>`,
-      actionLabel: 'Entrar na comunidade', actionUrl: 'https://legalops.club/community',
+      locale, title: copy.clubTitle, preview: copy.clubPreview,
+      contentHtml: `<p>${escapeEmailHtml(greeting)}</p><p>${copy.clubBody}</p><p><a href="https://legalops.club/community/profile" style="color:#111111">${copy.profileAction}</a></p>${whatsappInviteUrl ? `<p><a href="${escapeHtmlAttribute(whatsappInviteUrl)}" style="color:#111111">${copy.whatsapp}</a></p>` : ''}<p style="font-size:13px">${copy.account}: ${escapeEmailHtml(email)}</p>`,
+      actionLabel: copy.communityAction, actionUrl: 'https://legalops.club/community',
     }),
   }
 }
@@ -135,14 +141,14 @@ export async function sendWelcomeEmailIfNeeded(user: { id: string; email?: strin
   const admin = createAdminClient()
   const { data: profile, error: profileError } = await admin
     .from('account_profiles')
-    .select('welcome_email_sent_at')
+    .select('welcome_email_sent_at, preferred_locale')
     .eq('user_id', user.id)
     .maybeSingle()
 
   if (profileError) throw profileError
   if (!profile || profile.welcome_email_sent_at) return false
 
-  const message = buildAccountWelcomeEmail(email)
+  const message = buildAccountWelcomeEmail(email, normalizeClubLocale(profile.preferred_locale))
   const result = await sendClubTransactionalEmail({
     idempotencyKey: `account-welcome/${user.id}`,
     to: [email],
@@ -184,7 +190,8 @@ export async function sendClubWelcomeEmailIfNeeded(user: { id: string; email?: s
   if (configError) throw configError
   const invite = config?.whatsapp_invite_url
   const whatsappInviteUrl = typeof invite === 'string' && /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+$/.test(invite) ? invite : null
-  const message = buildClubWelcomeEmail(email, member.display_name, whatsappInviteUrl)
+  const { data: languageProfile } = await admin.from('account_profiles').select('preferred_locale').eq('user_id', user.id).maybeSingle()
+  const message = buildClubWelcomeEmail(email, member.display_name, whatsappInviteUrl, normalizeClubLocale(languageProfile?.preferred_locale))
   const result = await sendClubTransactionalEmail({
     idempotencyKey: `club-welcome/${user.id}`,
     to: [email],

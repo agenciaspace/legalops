@@ -1,3 +1,4 @@
+import { CLUB_LOCALE_COOKIE, normalizeClubLocale, browserClubLocale, normalizeClubTimezone } from '@/lib/club-locale'
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { hasActiveClubAccess } from '@/lib/community'
@@ -53,6 +54,23 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+  let locale = request.cookies.has(CLUB_LOCALE_COOKIE)
+    ? normalizeClubLocale(request.cookies.get(CLUB_LOCALE_COOKIE)?.value)
+    : browserClubLocale(request.headers.get('accept-language'))
+  let timezone = normalizeClubTimezone(request.cookies.get('club-timezone')?.value)
+  if (user) {
+    const { data: preference } = await supabase.from('account_profiles').select('preferred_locale,timezone').eq('user_id', user.id).maybeSingle()
+    if (preference?.preferred_locale) locale = normalizeClubLocale(preference.preferred_locale)
+    else if (user.user_metadata?.locale) locale = normalizeClubLocale(user.user_metadata.locale)
+    if (preference?.timezone) timezone = normalizeClubTimezone(preference.timezone)
+  }
+  // Overwrite caller-supplied headers; profile preference is authoritative.
+  request.headers.set('x-club-locale', locale)
+  request.headers.set('x-club-timezone', timezone)
+  const refreshedCookies = supabaseResponse.cookies.getAll()
+  supabaseResponse = NextResponse.next({ request: { headers: request.headers } })
+  refreshedCookies.forEach(cookie => supabaseResponse.cookies.set(cookie))
+  supabaseResponse.cookies.set(CLUB_LOCALE_COOKIE, locale, { path: '/', maxAge: 31536000, sameSite: 'lax', secure: request.nextUrl.protocol === 'https:' })
   const withSession = (response: NextResponse) => {
     supabaseResponse.cookies.getAll().forEach(cookie => response.cookies.set(cookie))
     return response
@@ -67,7 +85,7 @@ export async function middleware(request: NextRequest) {
   if (isClubRoot) {
     const clubUrl = request.nextUrl.clone()
     clubUrl.pathname = '/club'
-    return withSession(NextResponse.rewrite(clubUrl))
+    return withSession(NextResponse.rewrite(clubUrl, { request: { headers: request.headers } }))
   }
 
   if (!user) {

@@ -1,3 +1,4 @@
+vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { clubReturnPath } from '@/lib/club-return-path'

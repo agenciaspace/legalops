@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 const mocks=vi.hoisted(()=>({fetch:vi.fn()}))
 vi.mock('@/lib/supabase',()=>({createClient:()=>({auth:{signInWithOAuth:vi.fn()}})}))
+vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
 import Signup from '@/app/cadastro/page'
 const next='/contact/42499cb1-fd6f-4b45-aeac-9d10eea4c94d'
 const signupCall=()=>mocks.fetch.mock.calls.find(call=>call[0]==='/api/auth/signup')

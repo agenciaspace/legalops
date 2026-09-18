@@ -1,3 +1,4 @@
+import { normalizeClubLocale } from '@/lib/club-locale'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createAdminClient } from '@/lib/supabase-admin'
@@ -34,6 +35,7 @@ export async function POST(request: NextRequest) {
   const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
   const password = typeof body?.password === 'string' ? body.password : ''
   const next = safeReturnPath(body?.next)
+  const locale = normalizeClubLocale(body?.locale ?? request.cookies.get('club-locale')?.value)
 
   if (!EMAIL_PATTERN.test(email) || email.length > 254) {
     return NextResponse.json({ code: 'email_address_invalid' }, { status: 400 })
@@ -53,7 +55,7 @@ export async function POST(request: NextRequest) {
   const { error: signupError } = await publicClient.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo },
+    options: { emailRedirectTo, data: { locale } },
   })
 
   if (!signupError) return NextResponse.json({ ok: true })
@@ -69,7 +71,7 @@ export async function POST(request: NextRequest) {
     type: 'signup',
     email,
     password,
-    options: { redirectTo: emailRedirectTo },
+    options: { redirectTo: emailRedirectTo, data: { locale } },
   })
 
   if (generateError || !generated.user || !generated.properties?.hashed_token) {
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest) {
   const confirmationLink = `${publicOrigin(request)}/auth/confirm?token_hash=${encodeURIComponent(generated.properties.hashed_token)}&type=email&next=${encodeURIComponent(next)}`
 
   try {
-    await sendSignupConfirmationEmail({ email, confirmationLink })
+    await sendSignupConfirmationEmail({ email, confirmationLink, locale })
   } catch (deliveryError) {
     console.error('[auth/signup] Cloudflare confirmation delivery failed:', deliveryError)
     const { error: cleanupError } = await admin.auth.admin.deleteUser(generated.user.id)

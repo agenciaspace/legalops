@@ -1,4 +1,6 @@
-import { getClubLocale, getClubTranslator } from '@/lib/club-locale-server'
+import { TranslatedContent } from '@/components/community/TranslatedContent'
+import { loadClubTranslations } from '@/lib/club-translations'
+import { getClubLocale, getClubTranslator, getClubTimezone } from '@/lib/club-locale-server'
 import { CalendarDays, Clock3, MapPin, Plus, Video } from 'lucide-react'
 import BenchSection from './BenchSection'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
@@ -51,12 +53,13 @@ export default async function CalendarPage() {
 
   const events = ((rawEvents ?? []) as Event[]).filter(event => !event.slug.startsWith('bench-'))
 
+  const translations = await loadClubTranslations(supabase, events.map(event => event.id))
   return (
     <div className="mx-auto w-full max-w-[1000px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">{t("Eventos")}</h1>
-          <p className="mt-1 text-xs text-[#77746E]">{t("Encontros, Bench e conversas da comunidade. Horários de Brasília.")}</p>
+          <p className="mt-1 text-xs text-[#77746E]">{t("Eventos")} · {getClubTimezone()}</p>
         </div>
         <Link href="/community/events/manage" className="inline-flex min-h-11 items-center rounded-lg border border-[#CEC8BD] bg-white px-3 text-xs font-bold">{t("Gerenciar eventos")}</Link>
 
@@ -71,10 +74,10 @@ export default async function CalendarPage() {
         <div className="divide-y divide-[#ECECE8]">
           {events.map((event, index) => {
             const date = new Date(event.starts_at)
-            const weekday = new Intl.DateTimeFormat(getClubLocale(), { timeZone: 'America/Sao_Paulo', weekday: 'short' }).format(date).replace('.', '')
-            const day = new Intl.DateTimeFormat(getClubLocale(), { timeZone: 'America/Sao_Paulo', day: '2-digit' }).format(date)
-            const month = new Intl.DateTimeFormat(getClubLocale(), { timeZone: 'America/Sao_Paulo', month: 'short' }).format(date).replace('.', '')
-            const time = new Intl.DateTimeFormat(getClubLocale(), { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' }).format(date)
+            const weekday = new Intl.DateTimeFormat(getClubLocale(), { timeZone: getClubTimezone(), weekday: 'short' }).format(date).replace('.', '')
+            const day = new Intl.DateTimeFormat(getClubLocale(), { timeZone: getClubTimezone(), day: '2-digit' }).format(date)
+            const month = new Intl.DateTimeFormat(getClubLocale(), { timeZone: getClubTimezone(), month: 'short' }).format(date).replace('.', '')
+            const time = new Intl.DateTimeFormat(getClubLocale(), { timeZone: getClubTimezone(), hour: '2-digit', minute: '2-digit' }).format(date)
             return (
               <article key={event.id} className="group grid gap-4 px-4 py-5 transition hover:bg-[#FAFAF8] sm:grid-cols-[64px_minmax(0,1fr)_auto] sm:items-center sm:px-5">
                 <div className={`flex h-16 w-16 flex-col items-center justify-center rounded-lg ${index === 0 ? 'bg-[#FFF0E9] text-[#D9470F]' : 'bg-[#F1F1EE] text-[#4C4A45]'}`}>
@@ -84,15 +87,14 @@ export default async function CalendarPage() {
                 </div>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[8px] font-black uppercase tracking-[0.1em] text-[#D9470F]">{t(eventLabels[event.event_type] ?? 'Encontro')}</span>
+                    <span className="text-[8px] font-black uppercase tracking-[0.1em] text-[#D9470F]">{t(eventLabels[event.event_type] ?? t("Encontro"))}</span>
                     {index === 0 ? <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wide text-emerald-700">{t("Próximo")}</span> : null}
                   </div>
-                  <h3 className="mt-1.5 text-sm font-extrabold tracking-[-0.01em] text-[#292824]">{event.title}</h3>
-                  <p className="mt-1.5 line-clamp-2 max-w-xl text-sm leading-6 text-[#7F7C76]">{event.description}</p>
+                  <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{title:event.title,description:event.description,location_label:event.location_label}} enabled={translations.enabled} serverLocale={getClubLocale()} />
                   <div className="mt-2.5 flex flex-wrap gap-3 text-xs font-semibold text-[#94918B]">
                     <span className="flex items-center gap-1"><Clock3 className="h-3 w-3" /> {time}</span>
-                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {event.location_label}</span>
-                    <span>Com {event.host_name}</span>
+
+                    <span>{event.host_name}</span>
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">

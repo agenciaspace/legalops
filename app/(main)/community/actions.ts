@@ -1,5 +1,6 @@
 'use server'
 
+import { CLUB_LOCALES, type ClubLocale } from '@/lib/club-locale'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
@@ -61,6 +62,7 @@ export async function createCommunityPost(formData: FormData) {
     title,
     body,
     visibility: 'members',
+    source_locale: CLUB_LOCALES.includes(String(formData.get('source_locale')) as ClubLocale) ? String(formData.get('source_locale')) : null,
   })
 
   if (!error) {
@@ -166,6 +168,7 @@ export async function createCommunityComment(formData: FormData) {
     author_id: user.id,
     author_name: profile?.full_name?.trim() || fallbackName,
     body,
+    source_locale: CLUB_LOCALES.includes(String(formData.get('source_locale')) as ClubLocale) ? String(formData.get('source_locale')) : null,
   })
 
   revalidatePath('/community')
@@ -269,4 +272,15 @@ export async function markClubJobAlertsRead() {
     revalidatePath('/community/jobs')
     revalidatePath('/community')
   }
+}
+
+
+export async function correctCommunitySourceLocale(formData: FormData) {
+  const id = String(formData.get('id') ?? '')
+  const kind = String(formData.get('kind') ?? '')
+  const locale = String(formData.get('source_locale') ?? '')
+  if (!/^[0-9a-f-]{36}$/i.test(id) || !['post', 'comment'].includes(kind) || (locale && !CLUB_LOCALES.includes(locale as ClubLocale))) return
+  const { supabase, user } = await getAuthenticatedMember()
+  await supabase.from(kind === 'post' ? 'community_posts' : 'community_comments').update({ source_locale: locale || null }).eq('id', id).eq('author_id', user.id)
+  revalidatePath('/community')
 }
