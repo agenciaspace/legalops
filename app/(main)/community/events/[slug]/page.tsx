@@ -40,7 +40,6 @@ export default async function EventPage({ params, searchParams }: { params: { sl
     </dl>
     <div className="space-y-2 border-t border-[#E6DED0] pt-4">
       <EventShare slug={event.slug} title={event.title} />
-      {isMember && <Link href="/community/contact" className="inline-flex min-h-11 items-center text-xs font-semibold text-[#625E59] underline">{t('Meu QR code de contato')}</Link>}
     </div>
   </div>
   return <main className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 lg:py-6">

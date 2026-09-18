@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { BrandLogo, BrandWordmark } from '@/components/BrandLogo'
 import Link from 'next/link'
+import { GoogleSignIn } from '@/components/community/GoogleSignIn'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -12,10 +13,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [isClub, setIsClub] = useState(false)
+  const [signupHref, setSignupHref] = useState('/cadastro')
   const router = useRouter()
 
   useEffect(() => {
     setIsClub(window.location.hostname.endsWith('legalops.club'))
+    const next = new URLSearchParams(window.location.search).get('next')
+    if (next) setSignupHref(`/cadastro?next=${encodeURIComponent(next)}`)
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -24,7 +28,7 @@ export default function LoginPage() {
     setLoading(true)
     const supabase = createClient()
     const requestedPath = new URLSearchParams(window.location.search).get('next')
-    const safePath = requestedPath?.startsWith('/') && !requestedPath.startsWith('//')
+    const safePath = requestedPath?.startsWith('/') && !requestedPath.startsWith('//') && !requestedPath.includes('\\')
       ? requestedPath
       : window.location.hostname.endsWith('legalops.club') ? '/community' : '/dashboard'
 
@@ -58,6 +62,7 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 rounded-[26px] border border-[#CEC8BD] bg-white/75 p-6 shadow-[0_20px_60px_rgba(17,17,17,0.06)] backdrop-blur sm:p-7">
+          {isClub && <GoogleSignIn />}
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-[#69635E]">Email</label>
             <input
@@ -92,7 +97,7 @@ export default function LoginPage() {
             {loading ? 'Carregando...' : 'Entrar'}
           </button>
           <p className="text-center text-xs leading-5 text-[#77716A]">
-            Ainda não tem conta? <Link href="/cadastro" className="font-semibold underline">Cadastre-se gratuitamente no Club.</Link>
+            Ainda não tem conta? <Link href={signupHref} className="font-semibold underline">Cadastre-se gratuitamente no Club.</Link>
           </p>
         </form>
 

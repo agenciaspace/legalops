@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/agenciaspace/clm-bench",
-  "revision": "2cc8200793daa3d706f78ea5b13109e43ac22a71",
+  "revision": "4eb3c70678e468bbeab0704a4437f95e3f54b7f1",
   "paths": [
     "cloudflare-landing/bench",
     "cloudflare-landing/mapa-contratos"

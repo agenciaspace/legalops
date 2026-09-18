@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
   // Keep this exact path independent of Club authentication and paid access.
   if (pathname === '/icon.svg' || pathname === '/club-sw.js' || /^\/club-pwa\/(manifest\.webmanifest|offline\.html|icon-(192|512|maskable)\.png)$/.test(pathname)) return NextResponse.next({ request })
 
-  if (pathname === '/api/bench/contributions') return NextResponse.next({ request })
+  if (pathname === '/api/bench/contributions' || pathname === '/api/contract-map') return NextResponse.next({ request })
 
   let supabaseResponse = NextResponse.next({ request })
   const publicPaths = new Set(['/', '/club', '/club/about', '/club/checkout', '/cadastro', '/login', '/set-password', '/auth/confirm'])
@@ -116,6 +116,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.json({ error: 'Complete seu perfil para entrar na comunidade.' }, { status: 403 })
       }
       const clubUrl = new URL('/club/entrar', request.url)
+      if (pathname === '/community/tools/mapa-contratos') clubUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`)
       return withSession(NextResponse.redirect(clubUrl))
     }
   }

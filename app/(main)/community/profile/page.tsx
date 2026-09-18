@@ -1,3 +1,4 @@
+import { ProfileContactCode } from '@/components/community/ProfileContactCode'
 import { ProfilePhoto } from '@/components/community/ProfilePhoto'
 import Link from 'next/link'
 import { BadgeCheck, Building2, Check, Clock3, Linkedin, ShieldCheck, UserRound } from 'lucide-react'
@@ -96,7 +97,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
     <div className="mx-auto w-full max-w-[980px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
       <header>
         <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">Meu perfil</h1>
-        <Link href="/community/contact" className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-[#CEC8BD] bg-white px-4 text-sm font-semibold">Meu QR code de contato</Link>
+        <details className="mt-3 max-w-sm"><summary className="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-[#CEC8BD] bg-white px-4 text-sm font-semibold">Meu QR code de contato</summary>{user && <div className="mt-3"><ProfileContactCode userId={user.id} own /></div>}</details>
         <p className="mt-1 text-xs text-[#77746E]">Apresente seu contexto à comunidade. Os campos de carreira são opcionais e podem apoiar os recursos personalizados do Pro.</p>
       </header>
 

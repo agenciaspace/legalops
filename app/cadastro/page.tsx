@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { BrandWordmark } from '@/components/BrandLogo'
+import { GoogleSignIn } from '@/components/community/GoogleSignIn'
 import { clubReturnPath } from '@/lib/club-return-path'
 
 export default function ClubSignupPage() {
@@ -38,6 +39,7 @@ export default function ClubSignupPage() {
       <p className="mt-4 text-sm leading-7 text-[#69635E]">A comunidade é gratuita para quem tem relação com o trabalho jurídico. Depois de confirmar seu email, complete o perfil com LinkedIn, atuação e assuntos de interesse.</p>
       {sent ? <section role="status" className="mt-8 border-y border-[#CEC8BD] py-6"><h2 className="font-semibold">Confira seu email</h2><p className="mt-3 text-sm leading-6">Abra o link de confirmação para continuar o cadastro. Já tinha conta? Entre com sua senha para acessar a comunidade e receber as boas-vindas.</p><Link href={`/login?next=${encodeURIComponent(returnPath)}`} className="mt-5 inline-block text-sm font-semibold underline">Entrar na minha conta</Link></section>
       : <form onSubmit={submit} className="mt-8 space-y-5">
+        <GoogleSignIn />
         <label className="block text-sm font-semibold">Email<input name="email" type="email" autoComplete="email" required maxLength={254} className="mt-2 w-full rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] px-4 py-3 font-normal" /></label>
         <label className="block text-sm font-semibold">Senha<input name="password" type="password" autoComplete="new-password" required minLength={10} maxLength={128} aria-describedby="password-help" className="mt-2 w-full rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] px-4 py-3 font-normal" /></label>
         <p id="password-help" className="text-xs text-[#69635E]">Use pelo menos 10 caracteres.</p>

@@ -5,7 +5,7 @@ export const metadata = { title: 'Ferramentas | legalops.club', description: 'Pr
 const projects = [
   { title: 'OpenCLM', description: 'Gestão de contratos em código aberto: solicitações, documentos, aprovações e integrações.', href: 'https://legalops.dev/openclm', action: 'Conhecer o OpenCLM', repository: 'https://github.com/agenciaspace/openclm', icon: FileCheck2 },
   { title: 'Playbook aberto', description: 'Construa posições de negociação, limites e regras de aprovação com a comunidade.', href: 'https://legalops.dev/playbook/', action: 'Abrir o playbook', repository: 'https://github.com/agenciaspace/open-playbook', icon: BookOpen },
-  { title: 'Mapa de Gestão de Contratos', description: 'Percorra o ciclo do contrato e defina atividades, responsáveis e entregas de cada etapa.', href: 'https://legalops.dev/mapa-contratos/', action: 'Explorar o mapa', repository: 'https://github.com/agenciaspace/clm-bench/tree/main/site/mapa-contratos', icon: Map },
+  { title: 'Mapa de Gestão de Contratos', description: 'Percorra o ciclo do contrato e defina atividades, responsáveis e entregas de cada etapa.', href: '/community/tools/mapa-contratos', action: 'Construir o mapa', repository: 'https://github.com/agenciaspace/clm-bench/tree/main/site/mapa-contratos', icon: Map },
   { title: 'Avaliação de CLMs', description: 'Compare ferramentas conforme as necessidades da sua empresa e entenda o resultado.', href: 'https://legalops.dev/bench/', action: 'Comparar CLMs', repository: 'https://github.com/agenciaspace/clm-bench', icon: Scale },
 ]
 
@@ -23,6 +23,6 @@ export default function ToolsPage() {
         <a href={project.repository} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-[#625E59] underline"><GitBranch aria-hidden="true" className="h-4 w-4" />{t("Código e contribuições")}</a>
       </div>
     </article>)}</div>
-    <p className="mt-5 text-xs leading-5 text-[#817A73]">{t("Os projetos abrem no legalops.dev. Propostas da comunidade passam por revisão antes de integrar as versões públicas.")}</p>
+    <p className="mt-5 text-xs leading-5 text-[#817A73]">{t("Explore os projetos abertos. No mapa de contratos, comente e proponha melhorias aqui no Club; membros-lead revisam antes da publicação.")}</p>
   </main>
 }

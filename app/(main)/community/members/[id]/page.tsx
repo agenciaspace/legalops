@@ -1,3 +1,4 @@
+import { ProfileContactCode } from '@/components/community/ProfileContactCode'
 import { MemberAvatar } from '@/components/community/MemberAvatar'
 import Link from 'next/link'
 import {isDirectoryMember} from '@/lib/community-directory'
@@ -53,6 +54,7 @@ export default async function MemberProfilePage({ params }: { params: { id: stri
 
           <h1 className="mt-5 text-2xl font-extrabold tracking-[-0.025em] text-[#292824]">{member.display_name}</h1>
           <Link href={`/contact/${member.user_id}`} className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-[#24231F] px-4 text-sm font-semibold text-white">Trocar contatos</Link>
+          <details className="mt-3 max-w-sm"><summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold underline">QR de contato deste perfil</summary><div className="mt-2"><ProfileContactCode userId={member.user_id} /></div></details>
           {member.public_headline ? <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[#5F5C56]">{member.public_headline}</p> : null}
 
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[10px] text-[#77746E]">
