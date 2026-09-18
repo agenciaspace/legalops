@@ -357,3 +357,11 @@ When changing authentication, submit the browser form; rendering it is not enoug
   Recreate the editor when its collaboration room changes.
 - Run `npm run test:collaboration` after changing the self-hosted server. Keep
   the MIT reference implementation in `clm-bench/integrations/legalops` in sync.
+
+## Bend policies
+
+- Read `bend guide` before changing `.bend` files; compiler version is pinned in `scripts/check-bend.py`.
+- `LAWS.bend` records access requirements; `PROOF.bend` proves them against `bend/access.bend`. Do not weaken a law to make a change pass.
+- Run `python3 scripts/check-bend.py` before committing. Regenerate with `--write` after intentional policy changes and review the artifact diff.
+- Club and Pro access consume the generated exhaustive decision table, including in Cloudflare Workers. Host status/date parsing and database RLS are outside the proof and must remain tested.
+- Prefer parallel computation only for independent work that benefits from it; these constant-size policy lookups need none.

@@ -11,7 +11,8 @@
     "build:cloudflare": "opennextjs-cloudflare build",
     "preview:cloudflare": "opennextjs-cloudflare preview",
     "deploy:cloudflare": "opennextjs-cloudflare deploy",
-    "test:collaboration": "node --test collaboration/server.integration.mjs"
+    "test:collaboration": "node --test collaboration/server.integration.mjs",
+    "test:bend": "python3 scripts/check-bend.py"
   },
   "dependencies": {
     "@hocuspocus/provider": "4.7.0",

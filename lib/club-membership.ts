@@ -1,3 +1,5 @@
+import { allowsEntitlement } from '@/lib/bend-access'
+
 export const CLUB_SECTORS = [
   ['legal_dept', 'Departamento jurídico'],
   ['law_firm', 'Escritório de advocacia'],
@@ -49,8 +51,9 @@ export type ClubProAccess = {
 }
 
 export function hasClubProAccess(access?: ClubProAccess | null, now = new Date()): boolean {
-  return Boolean(access && ['active', 'complimentary'].includes(access.club_pro_status ?? '')
-    && (!access.club_pro_expires_at || new Date(access.club_pro_expires_at).getTime() > now.getTime()))
+  const enabled = Boolean(access && ['active', 'complimentary'].includes(access.club_pro_status ?? ''))
+  const valid = Boolean(access && (!access.club_pro_expires_at || new Date(access.club_pro_expires_at).getTime() > now.getTime()))
+  return allowsEntitlement(enabled, valid)
 }
 
 export function isClubProPath(path: string): boolean {

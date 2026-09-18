@@ -7,6 +7,10 @@ on:
       - 'components/**'
       - 'public/**'
       - 'lib/**'
+      - 'bend/**'
+      - 'LAWS.bend'
+      - 'PROOF.bend'
+      - 'scripts/check-bend.py'
       - 'middleware.ts'
       - 'scripts/verify-public-auth-build.mjs'
       - 'package.json'
@@ -40,6 +44,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Prove Bend policies and verify generated runtime decisions
+        run: npm run test:bend
 
       - name: Build OpenNext worker
         id: build

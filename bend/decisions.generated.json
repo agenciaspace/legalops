@@ -1,0 +1,17 @@
+{
+  "compiler": "Bend 2.0.8",
+  "tables": {
+    "access": {
+      "inputs": [
+        "status_enabled",
+        "expiry_valid"
+      ],
+      "values": [
+        0,
+        0,
+        0,
+        1
+      ]
+    }
+  }
+}

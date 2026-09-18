@@ -1,3 +1,5 @@
+import { allowsEntitlement } from '@/lib/bend-access'
+
 export type CommunityCategoryGroup = 'start' | 'latent' | 'operations' | 'strategy'
 
 type CommunityCategory = {
@@ -162,7 +164,7 @@ export type ClubAccess = {
 }
 
 export function hasActiveClubAccess(access?: ClubAccess | null, now = new Date()) {
-  if (!access || !['active', 'complimentary'].includes(access.club_access_status ?? '')) return false
-  if (!access.club_access_expires_at) return true
-  return new Date(access.club_access_expires_at).getTime() > now.getTime()
+  const enabled = Boolean(access && ['active', 'complimentary'].includes(access.club_access_status ?? ''))
+  const valid = Boolean(access && (!access.club_access_expires_at || new Date(access.club_access_expires_at).getTime() > now.getTime()))
+  return allowsEntitlement(enabled, valid)
 }
