@@ -1,34 +1,36 @@
 import { CLUB_LOCALE_COOKIE, normalizeClubLocale } from '@/lib/club-locale'
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { agentSession as session, isConversationId, CONVERSATION_FIELDS } from '@/lib/club-agent-access'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { hasActiveClubAccess, COMMUNITY_CATEGORIES } from '@/lib/community'
-import { hasClubProAccess } from '@/lib/club-membership'
+import { COMMUNITY_CATEGORIES } from '@/lib/community'
 import { generateOpenRouterText } from '@/lib/openrouter'
 import { AgentSource, AgentTurn, OPENCLM_AGENT_SOURCE, personalAgentPrompt, rankAgentSources } from '@/lib/club-personal-agent'
 import { isPublishableJobRecord } from '@/lib/job-publication'
 export const maxDuration=60
-async function session() {
-  const supabase=await createServerSupabaseClient()
-  const {data:{user}}=await supabase.auth.getUser()
-  if(!user) return {error:NextResponse.json({error:'Entre na sua conta.'},{status:401})} as const
-  const {data:member}=await supabase.from('community_members').select('club_access_status,club_access_expires_at,club_pro_status,club_pro_expires_at').eq('user_id',user.id).maybeSingle()
-  if(!hasActiveClubAccess(member)||!hasClubProAccess(member)) return {error:NextResponse.json({error:'Este recurso faz parte do Club Pro.'},{status:403})} as const
-  return {supabase,user} as const
-}
 export async function GET(request:NextRequest) {
   const access=await session();if(access.error)return access.error
   const {supabase,user}=access
   const page=Number(request?.nextUrl.searchParams.get('page')||0)
   if(!Number.isInteger(page)||page<0||page>10000)return NextResponse.json({error:'Página inválida.'},{status:400})
+  const requested=request.nextUrl.searchParams.get('conversation_id')
+  if(requested!==null&&!isConversationId(requested))return NextResponse.json({error:'Conversa inválida.'},{status:400})
+  const conversations=await supabase.from('club_agent_conversations').select(CONVERSATION_FIELDS).eq('user_id',user.id).order('updated_at',{ascending:false}).order('id',{ascending:false}).range(0,30)
+  if(conversations.error)return NextResponse.json({error:'Não conseguimos carregar as conversas.'},{status:503})
+  const conversationId=requested??conversations.data?.[0]?.id??null
+  if(requested&&!conversations.data?.some(item=>item.id===requested)) {
+    const {data,error}=await supabase.from('club_agent_conversations').select('id').eq('user_id',user.id).eq('id',requested).maybeSingle()
+    if(error)return NextResponse.json({error:'Não conseguimos carregar a conversa.'},{status:503})
+    if(!data)return NextResponse.json({error:'Conversa não encontrada.'},{status:404})
+  }
   const [turns,preferences,usage]=await Promise.all([
-    supabase.from('club_agent_turns').select('id,question,answer,sources,status,created_at').eq('user_id',user.id).eq('status','completed').order('created_at',{ascending:false}).order('id',{ascending:false}).range(page*30,page*30+30),
+    conversationId?supabase.from('club_agent_turns').select('id,question,answer,sources,status,created_at').eq('user_id',user.id).eq('conversation_id',conversationId).eq('status','completed').order('created_at',{ascending:false}).order('id',{ascending:false}).range(page*30,page*30+30):Promise.resolve({data:[],error:null}),
     supabase.from('club_agent_preferences').select('focus,topics').eq('user_id',user.id).maybeSingle(),
     supabase.from('club_agent_usage').select('used').eq('user_id',user.id).eq('day',new Date().toISOString().slice(0,10)).maybeSingle(),
   ])
   if(turns.error||preferences.error||usage.error)return NextResponse.json({error:'Não conseguimos carregar seu agente.'},{status:503})
-  return NextResponse.json({turns:(turns.data??[]).slice(0,30).reverse(),has_more:(turns.data?.length??0)>30,page,preferences:preferences.data??{focus:'',topics:[]},used:usage.data?.used??0})
+  return NextResponse.json({conversation_id:conversationId,conversations:(conversations.data??[]).slice(0,30),has_more_conversations:(conversations.data?.length??0)>30,turns:(turns.data??[]).slice(0,30).reverse(),has_more:(turns.data?.length??0)>30,page,preferences:preferences.data??{focus:'',topics:[]},used:usage.data?.used??0})
 }
+
 export async function PATCH(request:NextRequest) {
   const access=await session();if(access.error)return access.error
   const body=await request.json().catch(()=>null)
@@ -36,29 +38,36 @@ export async function PATCH(request:NextRequest) {
   const {error}=await access.supabase.from('club_agent_preferences').upsert({user_id:access.user.id,focus:body.focus.trim(),topics:Array.from(new Set(body.topics)),updated_at:new Date().toISOString()})
   return error?NextResponse.json({error:'Não conseguimos salvar suas preferências.'},{status:503}):NextResponse.json({ok:true})
 }
-export async function DELETE() {
+export async function DELETE(request:NextRequest) {
   const access=await session();if(access.error)return access.error
-  // Usage is stored separately, so deleting history cannot reset the daily limit.
-  const {error}=await createAdminClient().from('club_agent_turns').delete().eq('user_id',access.user.id).neq('status','pending')
-  return error?NextResponse.json({error:'Não conseguimos apagar o histórico.'},{status:503}):NextResponse.json({ok:true})
+  const conversationId=request.nextUrl.searchParams.get('conversation_id')
+  if(!isConversationId(conversationId))return NextResponse.json({error:'Escolha a conversa que deseja apagar.'},{status:400})
+  const {data,error}=await createAdminClient().rpc('delete_club_agent_conversation',{member_id:access.user.id,conversation_uuid:conversationId})
+  if(error)return NextResponse.json({error:error.message.includes('QUESTION_IN_PROGRESS')?'Aguarde a resposta antes de apagar esta conversa.':'Não conseguimos apagar a conversa.'},{status:error.message.includes('QUESTION_IN_PROGRESS')?409:503})
+  return data?NextResponse.json({ok:true}):NextResponse.json({error:'Conversa não encontrada.'},{status:404})
 }
 export async function POST(request:NextRequest) {
   const access=await session();if(access.error)return access.error
   const body=await request.json().catch(()=>null)
   const question=typeof body?.question==='string'?body.question.trim():''
   if(question.length<3||question.length>2000)return NextResponse.json({error:'Escreva uma pergunta de 3 a 2.000 caracteres.'},{status:400})
+  const conversationId=body?.conversation_id??null
+  if(conversationId!==null&&!isConversationId(conversationId))return NextResponse.json({error:'Conversa inválida.'},{status:400})
   const {supabase,user}=access
   const admin=createAdminClient()
-  const {data:turnId,error:reservationError}=await admin.rpc('reserve_club_agent_turn',{member_id:user.id,question_text:question})
-  if(reservationError||!turnId) {
+  const {data:reservation,error:reservationError}=await admin.rpc('reserve_club_agent_conversation_turn',{member_id:user.id,question_text:question,conversation_uuid:conversationId})
+  const turnId=reservation?.turn_id
+  const selectedConversation=reservation?.conversation_id
+  if(reservationError||!turnId||!selectedConversation) {
     const message=reservationError?.message??''
+    if(message.includes('CONVERSATION_NOT_FOUND'))return NextResponse.json({error:'Conversa não encontrada.'},{status:404})
     return NextResponse.json({error:message.includes('DAILY_LIMIT')?'Você chegou às 30 perguntas de hoje. O limite renova às 21h de Brasília (00h UTC).':message.includes('QUESTION_IN_PROGRESS')?'Aguarde a resposta anterior antes de perguntar novamente.':'Não conseguimos iniciar a conversa. Confira seu acesso Pro.'},{status:message.includes('DAILY_LIMIT')||message.includes('QUESTION_IN_PROGRESS')?429:503})
   }
   try {
     const results=await Promise.all([
       supabase.from('account_profiles').select('full_name,current_role,organization_name,organization_description,public_bio,areas_of_expertise,desired_roles').eq('user_id',user.id).maybeSingle(),
       supabase.from('club_agent_preferences').select('focus,topics').eq('user_id',user.id).maybeSingle(),
-      supabase.from('club_agent_turns').select('id,question,answer,sources,status,created_at').eq('user_id',user.id).eq('status','completed').order('created_at',{ascending:false}).limit(8),
+      supabase.from('club_agent_turns').select('id,question,answer,sources,status,created_at').eq('user_id',user.id).eq('conversation_id',selectedConversation).eq('status','completed').order('created_at',{ascending:false}).order('id',{ascending:false}).limit(8),
       supabase.from('community_posts').select('id,title,body,category,created_at,community_comments(body,created_at)').order('created_at',{ascending:false}).limit(50),
       supabase.from('community_discussion_summaries').select('title,summary,period_start,period_end').order('period_end',{ascending:false}).limit(4),
       supabase.from('community_events').select('id,title,description,starts_at,ends_at,location_label').eq('is_published',true).gte('starts_at',new Date(Date.now()-30*86400000).toISOString()).order('starts_at',{ascending:false}).limit(12),
@@ -87,10 +96,10 @@ export async function POST(request:NextRequest) {
     const sourceLinks=selected.map(({title,url,kind})=>({title,url,kind}))
     const {error:saveError}=await admin.rpc('finish_club_agent_turn',{turn_id:turnId,answer_text:answer,source_links:sourceLinks,failed:false})
     if(saveError)throw new Error('Could not save agent response')
-    return NextResponse.json({turn:{id:turnId,question,answer,sources:sourceLinks,status:'completed',created_at:new Date().toISOString()}})
+    return NextResponse.json({conversation_id:selectedConversation,turn:{id:turnId,question,answer,sources:sourceLinks,status:'completed',created_at:new Date().toISOString()}})
   } catch(error) {
     console.error('[club/agent] request failed:',error)
     await admin.rpc('finish_club_agent_turn',{turn_id:turnId,answer_text:null,source_links:[],failed:true})
-    return NextResponse.json({error:'O agente não conseguiu responder agora. Tente novamente em alguns instantes.'},{status:503})
+    return NextResponse.json({conversation_id:selectedConversation,error:'O agente não conseguiu responder agora. Tente novamente em alguns instantes.'},{status:503})
   }
 }

@@ -3,6 +3,16 @@ export type ClubLocale = 'pt-BR' | 'en'
 export function normalizeClubLocale(value?: string | null): ClubLocale { return value === 'en' ? 'en' : 'pt-BR' }
 
 const english: Record<string, string> = {
+  'Nova conversa': 'New conversation', 'Conversa anterior': 'Previous conversation', 'Suas conversas': 'Your conversations',
+  'Fechar lista de conversas': 'Close conversation list', 'Nenhuma conversa ainda.': 'No conversations yet.',
+  'Apagar conversa: {title}': 'Delete conversation: {title}', 'Carregar mais conversas': 'Load more conversations',
+  'Apagar conversa': 'Delete conversation', 'Apagar “{title}” e suas mensagens?': 'Delete “{title}” and its messages?',
+  'Apagando…': 'Deleting…', 'Conversa apagada.': 'Conversation deleted.',
+  'Não conseguimos criar a conversa.': 'Could not create the conversation.',
+  'Não conseguimos apagar a conversa.': 'Could not delete the conversation.',
+  'Não conseguimos carregar as conversas.': 'Could not load conversations.',
+  'Cada conversa tem seu próprio histórico. Seu contexto salvo vale para todas. O limite diário é compartilhado e renova às 21h de Brasília.': 'Each conversation has its own history. Your saved context applies to all of them. The daily limit is shared and resets at 00:00 UTC.',
+  'Comece um assunto aqui ou abra outra conversa na lista.': 'Start a topic here or open another conversation from the list.',
   'Sobre o encontro': 'About the meeting', 'Conversas': 'Conversations',
   'Anúncios': 'Announcements', 'Apresentações': 'Introductions', 'Dados, métricas & BI': 'Data, metrics & BI',
   'Tech stack & integrações': 'Tech stack & integrations', 'Spend & fornecedores': 'Spend & vendors', 'Pessoas & liderança': 'People & leadership',

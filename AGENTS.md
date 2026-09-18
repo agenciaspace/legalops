@@ -323,8 +323,10 @@ When changing authentication, submit the browser form; rendering it is not enoug
 - `account_profiles.organization_description` and `avatar_path` synchronize to
   `community_members`. Posts read current author identity rather than a stale
   text snapshot. Photo upload strips source metadata through canvas conversion.
-- The personal agent has one conversation, paginated history and a bottom
-  composer. Model context remains the latest eight turns plus saved preferences.
+- The personal agent supports multiple private conversations, individual deletion,
+  paginated history and a bottom composer. Model context contains only the selected
+  conversation’s latest eight turns plus shared saved preferences. Daily quota is
+  shared across conversations and is not reset by deletion.
 - Demo community content was removed by the scoped migration
   `20260917164211_remove_club_demo_content.sql`; retain real events and profiles.
 - Cloudflare remains production. Legacy Vercel project now recognizes Next.js;
@@ -334,7 +336,7 @@ When changing authentication, submit the browser form; rendering it is not enoug
 ## Progressive community experience (2026-09-17)
 
 - Feed starts with three recent posts and one publish action. Filters are collapsed; no welcome panels, directory counts or install banner on entry. Install control lives in Profile.
-- Do not add subject-specific agents. The single conversation uses owner-only post/comment/like history, published events, profile, and authorized sources; no read tracking is claimed. API remains Pro-gated.
+- Do not add subject-specific agents. Each conversation uses owner-only post/comment/like history, published events, profile, and authorized sources; no read tracking is claimed. API remains Pro-gated.
 - Imported generic member rows are access records, not directory profiles. `isDirectoryMember` controls visibility without deleting real accounts.
 - Bench frontend source is `agenciaspace/clm-bench`; community-owned catalog, three steps, one criteria group at a time. Keep external discovery attribution out of the product UI; preserve research history separately.
 - Open Playbook frontend source is `agenciaspace/open-playbook`, published at `/playbook/`; browser drafts and explicit GitHub proposals, no approved clauses until reviewed.
