@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase-admin'
-import { buildHtmlEmail } from '@/lib/brevo'
+import { buildClubEmail, escapeEmailHtml } from '@/lib/club-email'
+import { sendClubTransactionalEmail } from '@/lib/club-email-delivery'
 import { sendCloudflareTransactionalEmail } from '@/lib/cloudflare-email'
 import { hasActiveClubAccess } from '@/lib/community'
 
@@ -23,8 +24,12 @@ export async function sendClubInvitationEmail({ email, actionLink }: { email: st
     '',
     'Se você não esperava este convite, ignore esta mensagem.',
   ].join('\n')
-  const htmlBody = `${buildHtmlEmail(textBody)}<p><a href="${escapeHtmlAttribute(actionLink)}">Ativar meu acesso ao LegalOps Club</a></p>`
-  return sendCloudflareTransactionalEmail({
+  const htmlBody = buildClubEmail({
+    title: 'seu convite chegou', preview: 'Ative sua conta e entre na comunidade legalops.club.',
+    contentHtml: '<p>Olá!</p><p>Seu acesso ao legalops.club foi liberado. Ative sua conta, crie uma senha e complete seu perfil para participar das conversas.</p>',
+    actionLabel: 'Ativar meu acesso', actionUrl: actionLink,
+  })
+  return sendClubTransactionalEmail({
     to: [email],
     subject: CLUB_INVITATION_SUBJECT,
     textBody,
@@ -40,7 +45,11 @@ export async function sendSignupConfirmationEmail({ email, confirmationLink }: {
     '',
     'Se você não criou esta conta, ignore esta mensagem.',
   ].join('\n')
-  const htmlBody = `${buildHtmlEmail(textBody)}<p><a href="${escapeHtmlAttribute(confirmationLink)}">Confirmar meu email</a></p>`
+  const htmlBody = buildClubEmail({
+    title: 'confirme seu email', preview: 'Falta só confirmar seu email para continuar o cadastro.',
+    contentHtml: '<p>Confirme seu email para continuar o cadastro no legalops.club.</p><p>Depois, complete seu perfil para conhecer outros profissionais e participar das conversas.</p>',
+    actionLabel: 'Confirmar meu email', actionUrl: confirmationLink,
+  })
 
   return sendCloudflareTransactionalEmail({
     to: [email],
@@ -72,7 +81,11 @@ function buildAccountWelcomeEmail(email: string) {
   return {
     subject: ACCOUNT_WELCOME_SUBJECT,
     textBody,
-    htmlBody: buildHtmlEmail(textBody),
+    htmlBody: buildClubEmail({
+      title: 'sua conta está pronta', preview: 'Complete seu perfil e encontre sua comunidade.',
+      contentHtml: `<p>Olá!</p><p>Você já tem uma conta no ecossistema legalops. Agora, complete seu perfil para entrar na comunidade gratuita.</p><p>Encontre pessoas, conversas e referências para os desafios do trabalho jurídico.</p><p style="font-size:13px">Conta: ${escapeEmailHtml(email)}</p>`,
+      actionLabel: 'Completar meu perfil', actionUrl: 'https://legalops.club/club/entrar',
+    }),
   }
 }
 
@@ -107,7 +120,11 @@ function buildClubWelcomeEmail(email: string, displayName?: string | null, whats
   return {
     subject: CLUB_WELCOME_SUBJECT,
     textBody,
-    htmlBody: `${buildHtmlEmail(textBody)}${whatsappInviteUrl ? `<p><a href="${escapeHtmlAttribute(whatsappInviteUrl)}">Entrar na comunidade do WhatsApp</a></p>` : ''}`,
+    htmlBody: buildClubEmail({
+      title: 'bem-vindo à comunidade', preview: 'Seu acesso está ativo. Apresente-se e entre nas conversas.',
+      contentHtml: `<p>${escapeEmailHtml(greeting)}</p><p>Seu acesso ao legalops.club está ativo. Troque experiências com quem vive os mesmos desafios do jurídico.</p><p>Para começar:</p><ol style="padding-left:20px"><li><a href="https://legalops.club/community/profile" style="color:#111111">Complete seu perfil</a> para que as pessoas conheçam você.</li><li>Apresente-se e participe das conversas por tema.</li><li>Acompanhe os próximos encontros no calendário.</li></ol>${whatsappInviteUrl ? `<p><a href="${escapeHtmlAttribute(whatsappInviteUrl)}" style="color:#111111">Entrar na comunidade do WhatsApp</a></p>` : ''}<p style="font-size:13px">Conta: ${escapeEmailHtml(email)}</p>`,
+      actionLabel: 'Entrar na comunidade', actionUrl: 'https://legalops.club/community',
+    }),
   }
 }
 
@@ -126,7 +143,8 @@ export async function sendWelcomeEmailIfNeeded(user: { id: string; email?: strin
   if (!profile || profile.welcome_email_sent_at) return false
 
   const message = buildAccountWelcomeEmail(email)
-  const result = await sendCloudflareTransactionalEmail({
+  const result = await sendClubTransactionalEmail({
+    idempotencyKey: `account-welcome/${user.id}`,
     to: [email],
     subject: message.subject,
     textBody: message.textBody,
@@ -167,7 +185,8 @@ export async function sendClubWelcomeEmailIfNeeded(user: { id: string; email?: s
   const invite = config?.whatsapp_invite_url
   const whatsappInviteUrl = typeof invite === 'string' && /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+$/.test(invite) ? invite : null
   const message = buildClubWelcomeEmail(email, member.display_name, whatsappInviteUrl)
-  const result = await sendCloudflareTransactionalEmail({
+  const result = await sendClubTransactionalEmail({
+    idempotencyKey: `club-welcome/${user.id}`,
     to: [email],
     subject: message.subject,
     textBody: message.textBody,
