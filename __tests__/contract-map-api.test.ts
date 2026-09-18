@@ -23,3 +23,15 @@ it('recomputes accepted changes on the server instead of trusting supplied conte
  expect(mocks.rpc).toHaveBeenCalledWith('contract_map_publish_notify',expect.objectContaining({p_content:{type:'doc',content:[paragraph('New A'),paragraph('Keep'),paragraph('B')]}}));
 })
 it('rejects incomplete partial reviews and invalid mention IDs',async()=>{expect((await post({...proposal,action:'accept',id:'00000000-0000-0000-0000-000000000001',decisions:[null]})).status).toBe(400);expect((await post({...proposal,mentions:['spoof']})).status).toBe(400);expect(mocks.rpc).not.toHaveBeenCalled()})
+
+it('persists a selected text anchor through the member RPC and returns its id',async()=>{
+ const anchor={start:10,end:15,prefix:'Antes ',suffix:' depois',source:'published'}
+ expect((await post({action:'comment',section:'contexto',version:1,note:'Revisar prazo',quote:'prazo',anchor})).status).toBe(200)
+ expect(mocks.rpc).toHaveBeenCalledWith('contract_map_comment_anchor',expect.objectContaining({p_anchor:anchor,p_quote:'prazo',p_parent:null}))
+})
+it('rejects invalid anchors and anchors attached to replies',async()=>{
+ const anchor={start:-1,end:10,prefix:'',suffix:'',source:'published'}
+ expect((await post({action:'comment',section:'contexto',version:1,note:'Revisar prazo',quote:'prazo',anchor})).status).toBe(400)
+ expect((await post({action:'comment',section:'contexto',version:1,note:'Revisar prazo',quote:'prazo',anchor:{...anchor,start:1},parent:'00000000-0000-0000-0000-000000000001'})).status).toBe(400)
+ expect(mocks.rpc).not.toHaveBeenCalled()
+})

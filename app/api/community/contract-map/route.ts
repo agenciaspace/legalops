@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { hasActiveClubAccess } from '@/lib/community'
+import { validCommentAnchor } from '@/lib/map-comments'
 import { mergeMapChanges } from '@/lib/map-diff'
 import { MAP_SECTION_IDS, validMapContent } from '@/lib/contract-map'
 export const dynamic = 'force-dynamic'
@@ -54,10 +55,12 @@ export async function POST(request: Request) {
   if (body.mentions !== undefined && (!Array.isArray(body.mentions) || body.mentions.length > 10 || body.mentions.some((id: unknown) => typeof id !== 'string' || !/^[0-9a-f-]{36}$/i.test(id)))) return reply({error:'Selecione até 10 membros para mencionar.'},400)
   if (body.quote !== undefined && (typeof body.quote !== 'string' || body.quote.length > 1000)) return reply({error:'Selecione um trecho de até 1.000 caracteres.'},400)
   if (body.parent !== undefined && (typeof body.parent !== 'string' || !/^[0-9a-f-]{36}$/i.test(body.parent))) return reply({error:'Resposta inválida.'},400)
+  if (body.anchor !== undefined && (action !== 'comment' || body.parent || !body.quote || !validCommentAnchor(body.anchor))) return reply({error:'Selecione novamente o trecho para comentar.'},400)
   let result
   if (action === 'comment' || action === 'suggest') {
     if (action === 'suggest' && body.license !== true) return reply({ error: 'Confirme a publicação sob licença MIT.' }, 400)
-    result = await auth.db!.rpc('contract_map_submit', { p_section: section, p_kind: action === 'comment' ? 'comment' : 'suggestion', p_body: note.trim(), p_version: version, p_content: action === 'suggest' ? content : null, p_license: body.license === true, p_quote: body.quote || null, p_parent: body.parent || null, p_mentions: body.mentions ?? [] })
+    if (body.anchor) result = await auth.db!.rpc('contract_map_comment_anchor', { p_section: section, p_body: note.trim(), p_version: version, p_quote: body.quote, p_anchor: body.anchor, p_parent: null, p_mentions: body.mentions ?? [] })
+    else result = await auth.db!.rpc('contract_map_submit', { p_section: section, p_kind: action === 'comment' ? 'comment' : 'suggestion', p_body: note.trim(), p_version: version, p_content: action === 'suggest' ? content : null, p_license: body.license === true, p_quote: body.quote || null, p_parent: body.parent || null, p_mentions: body.mentions ?? [] })
   } else if (action === 'publish' || action === 'accept') {
     result = await auth.db!.rpc('contract_map_publish_notify', { p_section: section, p_version: version, p_content: reviewedContent, p_note: note.trim(), p_contribution: action === 'accept' ? id : null, p_mentions: body.mentions ?? [] })
   } else if (isReview && ['rejected','resolved'].includes(body.status)) {
@@ -70,5 +73,5 @@ export async function POST(request: Request) {
     if (message.includes('DAILY_LIMIT')) return reply({ error: 'Limite de 50 contribuições por dia atingido.' }, 429)
     return reply({ error: 'Não foi possível salvar. Confira os dados e atualize o mapa.' }, 400)
   }
-  return reply({ ok: true })
+  return reply({ ok: true, ...((action === 'comment' || action === 'suggest') ? { id: result.data } : {}) })
 }

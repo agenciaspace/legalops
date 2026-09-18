@@ -1,5 +1,9 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Extension } from '@tiptap/core'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { editorCommentDecorations, editorCommentSelection } from './comment-decorations'
+import type { CommentSelection } from '@/lib/map-comments'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TableKit } from '@tiptap/extension-table'
@@ -10,10 +14,10 @@ import Mention from '@tiptap/extension-mention'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 import * as Y from 'yjs'
 import { createClient } from '@/lib/supabase'
-import type { MapNode } from '@/lib/contract-map'
+import type { MapNode, MapContribution } from '@/lib/contract-map'
 import { cleanMapMentions } from '@/lib/map-diff'
 import type { MentionMember } from './MentionField'
-type Props={collaborationUrl?:string;content:MapNode;sectionId:string;version:number;userId:string;userName:string;onChange:(value:MapNode)=>void;onQuote:(quote:string)=>void;onMentions:(ids:string[])=>void;onReady:(ready:boolean)=>void}
+type Props={collaborationUrl?:string;content:MapNode;sectionId:string;version:number;userId:string;userName:string;onChange:(value:MapNode)=>void;onQuote:(selection:CommentSelection)=>void;comments?:MapContribution[];activeComment?:string|null;onComment?:(id:string)=>void;onMentions:(ids:string[])=>void;onReady:(ready:boolean)=>void}
 export function MapEditor(props:Props) {
  const [provider,setProvider]=useState<HocuspocusProvider|null>(null)
  const [ready,setReady]=useState(false)
@@ -38,9 +42,10 @@ export function MapEditor(props:Props) {
  return <div><div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[#625E59]"><p role="status">{status}</p>{people.length>0&&<p aria-label="Pessoas no rascunho">{people.join(' · ')}</p>}</div><p className="mb-3 text-xs leading-5 text-[#625E59]">Membros editam juntos este rascunho. Ele só altera o documento público depois da revisão de um lead.</p>{provider&&<EditorSurface key={provider.configuration.name} {...props} provider={provider} ready={ready}/>}</div>
 }
 function EditorSurface({provider,ready,...props}:Props&{provider:HocuspocusProvider;ready:boolean}) {
- const [quote,setQuote]=useState('')
+ const [selection,setSelection]=useState<CommentSelection|null>(null)
+ const latest=useRef(props);latest.current=props
  const editor=useEditor({
-  extensions:[StarterKit.configure({heading:{levels:[2,3]},code:false,codeBlock:false,horizontalRule:false,strike:false,link:false,underline:false,orderedList:false,undoRedo:false}),TableKit.configure({table:{resizable:false}}),TaskList,TaskItem.configure({nested:true}),
+  extensions:[Extension.create({name:'documentComments',addProseMirrorPlugins(){return[new Plugin({key:new PluginKey('documentComments'),props:{decorations:state=>editorCommentDecorations(state.doc,latest.current.comments??[],latest.current.activeComment),handleClick:(_view,_pos,event)=>{const mark=(event.target as HTMLElement).closest('[data-comment-id]');if(mark){latest.current.onComment?.(mark.getAttribute('data-comment-id')!);return true}return false},handleKeyDown:(view,event)=>{if((event.ctrlKey||event.metaKey)&&event.altKey&&event.key.toLowerCase()==='m'){const value=editorCommentSelection(view.state.doc,view.state.selection.from,view.state.selection.to);if(value){event.preventDefault();latest.current.onQuote(value);return true}}return false}}})]}}),StarterKit.configure({heading:{levels:[2,3]},code:false,codeBlock:false,horizontalRule:false,strike:false,link:false,underline:false,orderedList:false,undoRedo:false}),TableKit.configure({table:{resizable:false}}),TaskList,TaskItem.configure({nested:true}),
    Collaboration.configure({document:provider.document}),CollaborationCaret.configure({provider,user:{id:props.userId,name:props.userName,color:'#A94E38'}}),
    Mention.configure({HTMLAttributes:{class:'map-mention'},suggestion:{
     items:async({query})=>{try{const response=await fetch(`/api/community/contract-map/members?q=${encodeURIComponent(query)}`);const result=await response.json();return result.members??[]}catch{return[]}},
@@ -51,7 +56,7 @@ function EditorSurface({provider,ready,...props}:Props&{provider:HocuspocusProvi
    }}),
   ],immediatelyRender:false,editable:ready,
   editorProps:{attributes:{class:'contract-map-prose min-h-64 p-4 outline-none','aria-label':'Texto da proposta',role:'textbox','aria-multiline':'true'}},
-  onSelectionUpdate:({editor})=>{const {from,to}=editor.state.selection;setQuote(editor.state.doc.textBetween(from,to,' ').slice(0,1000))},
+  onSelectionUpdate:({editor})=>{const {from,to}=editor.state.selection;setSelection(editorCommentSelection(editor.state.doc,from,to))},
   onUpdate:({editor})=>{
    const json=editor.getJSON() as MapNode;props.onChange(cleanMapMentions(json));const ids:string[]=[]
    editor.state.doc.descendants(node=>{if(node.type.name==='mention'&&node.attrs.id)ids.push(node.attrs.id)})
@@ -59,6 +64,7 @@ function EditorSurface({provider,ready,...props}:Props&{provider:HocuspocusProvi
   },
  })
  useEffect(()=>{editor?.setEditable(ready);if(ready&&editor)props.onChange(cleanMapMentions(editor.getJSON() as MapNode))},[ready,editor])
+ useEffect(()=>{if(editor&&!editor.isDestroyed)editor.view.dispatch(editor.state.tr.setMeta('commentsChanged',true))},[editor,props.comments,props.activeComment])
  if(!editor)return <p className="p-4 text-sm">Carregando editor…</p>
  return <div className="overflow-hidden rounded-xl border border-[#CEC8BD] bg-white"><div role="toolbar" aria-label="Formatar e colaborar" className="flex flex-wrap gap-1 border-b border-[#CEC8BD] bg-[#FAF7F1] p-2">
   <button disabled={!ready} type="button" onClick={()=>editor.chain().focus().toggleBold().run()} className="map-format font-bold">Negrito</button>
@@ -68,7 +74,7 @@ function EditorSurface({provider,ready,...props}:Props&{provider:HocuspocusProvi
   <button disabled={!ready} type="button" onClick={()=>editor.chain().focus().toggleTaskList().run()} className="map-format">Checklist</button>
   <button disabled={!ready} type="button" onClick={()=>editor.chain().focus().insertTable({rows:3,cols:3,withHeaderRow:true}).run()} className="map-format">Tabela</button>
   <button disabled={!ready} type="button" onClick={()=>editor.chain().focus().insertContent('@').run()} className="map-format">@ Mencionar</button>
-  <button disabled={!ready||!quote} type="button" onClick={()=>props.onQuote(quote)} className="map-format">Comentar trecho</button>
+  <button disabled={!ready||!selection} type="button" onMouseDown={event=>event.preventDefault()} onClick={()=>selection&&props.onQuote(selection)} className="map-format">Comentar trecho</button>
   <button disabled={!ready} type="button" onClick={()=>editor.chain().focus().undo().run()} className="map-format">Desfazer</button>
  </div><EditorContent editor={editor}/><div className="flex flex-wrap gap-1 border-t border-[#CEC8BD] p-2"><button disabled={!ready} type="button" className="map-format" onClick={()=>editor.chain().focus().addRowAfter().run()}>+ Linha</button><button disabled={!ready} type="button" className="map-format" onClick={()=>editor.chain().focus().addColumnAfter().run()}>+ Coluna</button><button disabled={!ready} type="button" className="map-format" onClick={()=>editor.chain().focus().deleteRow().run()}>Excluir linha</button><button disabled={!ready} type="button" className="map-format" onClick={()=>editor.chain().focus().deleteTable().run()}>Remover tabela</button></div></div>
 }

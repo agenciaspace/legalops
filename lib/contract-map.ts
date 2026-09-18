@@ -1,7 +1,8 @@
 import migration from './clm-migration.json'
+import type { CommentAnchor } from './map-comments'
 export type MapNode = { type: string; text?: string; content?: MapNode[]; attrs?: { level?: number; start?: number; checked?: boolean; colspan?: number; rowspan?: number; colwidth?: number[] | null }; marks?: { type: string }[] }
 export type MapSection = { id: string; title: string; position: number; content: MapNode; version: number; updated_at: string; journey?: string }
-export type MapContribution = { id: string; section_id: string; author_id: string; body: string; kind: 'comment' | 'suggestion'; proposed_content: MapNode | null; base_version: number; status: 'open' | 'accepted' | 'rejected' | 'resolved'; created_at: string; review_note: string | null; reviewer_id: string | null; anchor_quote?: string | null; parent_id?: string | null; mentioned_user_ids?: string[] }
+export type MapContribution = { id: string; section_id: string; author_id: string; body: string; kind: 'comment' | 'suggestion'; proposed_content: MapNode | null; base_version: number; status: 'open' | 'accepted' | 'rejected' | 'resolved'; created_at: string; review_note: string | null; reviewer_id: string | null; anchor_quote?: string | null; anchor?: CommentAnchor | null; parent_id?: string | null; mentioned_user_ids?: string[] }
 export type MapRevision = { section_id: string; version: number; content: MapNode; editor_id: string | null; note: string; created_at: string }
 export type MapWorkspace = { sections: MapSection[]; contributions: MapContribution[]; revisions: MapRevision[]; authors: { user_id: string; display_name: string }[]; isLead: boolean; userId: string; userName?: string }
 export const MAP_PATH = '/community/tools/mapa-contratos'

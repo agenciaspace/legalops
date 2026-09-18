@@ -38,9 +38,15 @@ RPC, advances the public version and saves history. Old rooms become stale and
 disconnect. The UI preserves previous local text while moving to a new room.
 Submitted proposals are snapshots independent of subsequent draft edits.
 
-Comments preserve their selected quote and base version; they are references
-to that text, not moving character anchors across future rewrites. Replies,
-explicit mentions and in-app notifications stay private to members. Leads
+Comments open beside highlighted document text, in both the approved reader
+and the shared editor. Mobile uses a bottom panel and keeps the selected text
+visible above it. Comments persist the quote, base version and surrounding
+text; matching reattaches unchanged quotes after insertions. Ambiguous or
+removed quotes stay in the margin with their original citation instead of
+being attached to an arbitrary occurrence. These are contextual text anchors,
+not Yjs relative positions across arbitrary rewrites. Replies, resolution,
+explicit mentions and in-app notifications stay private to members. Highlights
+are reader markup / ProseMirror decorations and never enter published JSON. Leads
 review changed blocks (paragraphs, lists, tables), with accepted blocks merged
 on the server. The exact published result is stored in revision history.
 
