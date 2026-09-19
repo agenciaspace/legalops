@@ -1,3 +1,4 @@
+import { directoryEnglish, directorySpanish } from './club-directory-copy'
 import { spanish, extraEnglish } from './club-locale-extra'
 export const CLUB_LOCALE_COOKIE = 'club-locale'
 export type ClubLocale = 'pt-BR' | 'en' | 'es'
@@ -144,7 +145,7 @@ const english: Record<string, string> = {
 
 export function clubTranslator(locale: ClubLocale) {
   return (text: string, values: Record<string, string | number> = {}) => {
-    const translated = locale === 'en' ? english[text] ?? extraEnglish[text] ?? text : locale === 'es' ? spanish[text] ?? text : text
+    const translated = locale === 'en' ? directoryEnglish[text] ?? english[text] ?? extraEnglish[text] ?? text : locale === 'es' ? directorySpanish[text] ?? spanish[text] ?? text : text
     return translated.replace(/\{(\w+)\}/g, (match, key) => key in values ? String(values[key]) : match)
   }
 }

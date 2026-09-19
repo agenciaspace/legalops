@@ -197,9 +197,14 @@ export async function updateCommunityProfile(formData: FormData) {
   const jobAlertsEnabled = formData.get('job_alerts_enabled') === 'on'
   const cvSuggestionsEnabled = formData.get('cv_suggestions_enabled') === 'on'
   const isPublic = formData.get('is_public') === 'on'
+  const directoryCountry = String(formData.get('directory_country') ?? '').trim()
+  const directoryRegion = String(formData.get('directory_region') ?? '').trim()
+  const directoryCity = String(formData.get('directory_city') ?? '').trim()
+  const directoryQualifications = commaSeparatedValues(formData, 'directory_qualifications', 15)
 
   if (
-    fullName.length < 3 || fullName.length > 120
+    (directoryCountry !== '' && !/^[A-Z]{2}$/.test(directoryCountry)) || directoryRegion.length > 120 || directoryCity.length > 120
+    || fullName.length < 3 || fullName.length > 120
     || currentRole.length < 2 || currentRole.length > 120
     || headline.length < 3 || headline.length > 160
     || organizationName.length < 2 || organizationName.length > 120
@@ -218,6 +223,10 @@ export async function updateCommunityProfile(formData: FormData) {
   const { error } = await supabase
     .from('account_profiles')
     .update({
+      directory_country: directoryCountry || null,
+      directory_region: directoryRegion || null,
+      directory_city: directoryCity || null,
+      directory_qualifications: directoryQualifications,
       full_name: fullName,
       current_role: currentRole,
       public_headline: headline,

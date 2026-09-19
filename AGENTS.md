@@ -382,3 +382,10 @@ When changing authentication, submit the browser form; rendering it is not enoug
 - Cloudflare cron calls `/api/cron/club-translations` every minute, with a required bearer secret, three leases and a transactionally reserved daily budget. Fixed model `openai/gpt-4.1-mini`; no per-reader model call. Never use the preview evaluator as a production entrypoint.
 - `TranslatedContent` shows only the selected language or a localized pending/error state, with explicit original/retry/report controls. Source correction belongs to the post/comment author. Files are not translated.
 - UI catalogs are static. Preserve canonical interest values; translate labels only. Branded Resend welcome and SMTP templates use account language metadata. Run the template generator after editing email shells.
+
+## Member discovery and verification (2026-09-18)
+
+- `/community/members` uses `search_club_members` (security invoker) with 24 results per page and combined public-field filters. Keep private CV/job preferences out of search and facets.
+- Public location/qualifications are opt-in `directory_*` profile fields. Never infer or backfill them from private career preferences or locale/timezone settings.
+- Only a real pending request may be labeled “Em análise”. Owners request at `/community/profile#verification`; configured admins review at `/club/admin/members`. Preserve private reasons, review history and identity-change invalidation; verification never changes Club/Pro entitlements.
+- Read `docs/MEMBER-DIRECTORY-VERIFICATION.md` and run the rollback SQL checks when changing directory/RLS/review behavior.

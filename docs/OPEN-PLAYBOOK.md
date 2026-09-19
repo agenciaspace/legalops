@@ -9,3 +9,7 @@ Five initial sections provide construction prompts, not approved contractual pos
 GET `/api/playbook` selects only published fields using the anonymous client's RLS. The Dev page fetches live content on load and every 30 seconds while visible, supports JSON export, and explicitly reports fetch failures. It never substitutes an old static library. Old browser-only drafts remain in localStorage and can be downloaded from a recovery section on their original origin. They are never uploaded automatically.
 
 Initial source is `lib/open-playbook.json`; the seed migration runs once. Subsequent editorial changes are database records and never overwritten by application deployments. The former open-playbook repository is historical source, not the canonical content store or runtime frontend.
+
+## Verification and rollout (2026-09-18 BRT)
+
+Shared API tests and the remote rollback transaction in `supabase/tests/playbook_access.sql` cover anonymous published reads, private proposal denial, member suggestion, lead-only acceptance, history and stale version rejection. Browser preview checks the actual shared editor against an isolated collaboration server, publication payloads and responsive layouts at 320/390/768/1280 pixels. Application, Pages and collaboration CI passed for `55cf3f7`. Production `/api/playbook` and `/playbook/` were checked: five initial published sections, working editor links and no GitHub contribution link.

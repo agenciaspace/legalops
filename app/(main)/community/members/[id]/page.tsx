@@ -1,3 +1,5 @@
+import { verificationState } from '@/lib/member-verification'
+import { PROFESSIONAL_ENVIRONMENTS } from '@/lib/member-directory'
 import { getClubLocale, getClubTranslator, getClubTimezone } from '@/lib/club-locale-server'
 import { TranslatedContent } from '@/components/community/TranslatedContent'
 import { loadClubTranslations } from '@/lib/club-translations'
@@ -11,6 +13,11 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getAvatarTone, getInitials } from '@/lib/community'
 
 type Member = {
+  directory_country: string | null
+  directory_region: string | null
+  directory_city: string | null
+  directory_qualifications: string[]
+  professional_type: string | null
   avatar_path: string | null
   organization_description: string | null
   user_id: string
@@ -32,12 +39,14 @@ export default async function MemberProfilePage({ params }: { params: { id: stri
   const supabase = await createServerSupabaseClient()
   const { data } = await supabase
     .from('community_members')
-    .select('club_access_status,club_access_expires_at,avatar_path, organization_description, user_id, display_name, current_role, areas_of_expertise, public_headline, public_bio, organization_name, linkedin_url, profile_verification_status, profile_verified_at')
+    .select('directory_country,directory_region,directory_city,directory_qualifications,professional_type,club_access_status,club_access_expires_at,avatar_path, organization_description, user_id, display_name, current_role, areas_of_expertise, public_headline, public_bio, organization_name, linkedin_url, profile_verification_status, profile_verified_at')
     .eq('user_id', params.id)
     .maybeSingle()
 
   if (!data || !isDirectoryMember(data)) notFound()
   const member = data as Member
+  const countryNames = new Intl.DisplayNames([getClubLocale()], { type: 'region' })
+  const location = [member.directory_city,member.directory_region,member.directory_country ? countryNames.of(member.directory_country) : null].filter(Boolean).join(' · ')
   const verified = member.profile_verification_status === 'verified'
 
   const translations = await loadClubTranslations(supabase, [member.user_id])
@@ -53,7 +62,7 @@ export default async function MemberProfilePage({ params }: { params: { id: stri
             {verified ? (
               <span className="inline-flex self-start items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[9px] font-black text-emerald-700 sm:self-auto"><BadgeCheck className="h-4 w-4" /> {t("Perfil validado")}</span>
             ) : (
-              <span className="inline-flex self-start items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1.5 text-[9px] font-bold text-stone-600 sm:self-auto"><ShieldCheck className="h-4 w-4" /> {t("Validação pendente")}</span>
+              <span className="inline-flex self-start items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1.5 text-[9px] font-bold text-stone-600 sm:self-auto"><ShieldCheck className="h-4 w-4" /> {t(verificationState(member.profile_verification_status).publicLabel)}</span>
             )}
           </div>
 
@@ -62,7 +71,10 @@ export default async function MemberProfilePage({ params }: { params: { id: stri
           <details className="mt-3 max-w-sm"><summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold underline">{t("QR de contato deste perfil")}</summary><div className="mt-2"><ProfileContactCode userId={member.user_id} /></div></details>
           <TranslatedContent source={translations.sources.get(`member:${member.user_id}`)} original={{public_headline:member.public_headline,current_role:member.current_role,organization_description:member.organization_description,public_bio:member.public_bio,areas_of_expertise:member.areas_of_expertise}} enabled={translations.enabled} serverLocale={getClubLocale()} />
 
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[10px] text-[#77746E]">
+          {location && <p className="mt-4 text-sm text-[#625E59]">{location}</p>}
+          {member.professional_type && <p className="mt-2 text-sm text-[#625E59]">{t(PROFESSIONAL_ENVIRONMENTS[member.professional_type] ?? member.professional_type)}</p>}
+          {!!member.directory_qualifications?.length && <section className="mt-5"><h2 className="text-base font-semibold">{t('Qualificações públicas')}</h2><div className="mt-2 flex flex-wrap gap-2">{member.directory_qualifications.map(value=><span key={value} className="rounded-lg bg-[#F5F1E8] px-3 py-2 text-sm">{value}</span>)}</div><p className="mt-2 text-xs text-[#625E59]">{t('Informações declaradas pelo membro, sem certificação pelo Club.')}</p></section>}
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#77746E]">
 
             {member.organization_name ? <span className="flex items-center gap-1.5"><Building2 className="h-4 w-4" /> {member.organization_name}</span> : null}
             {member.linkedin_url ? <a href={member.linkedin_url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 font-bold text-[#D9470F] hover:underline"><Linkedin className="h-4 w-4" /> {t("LinkedIn")}</a> : null}
