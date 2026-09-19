@@ -1,0 +1,142 @@
+[
+  {
+    "id": "playbook-contexto",
+    "title": "Contexto e escopo",
+    "position": 201,
+    "content": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Identifique os tipos de contrato, países, situações e objetivos que este playbook deve cobrir."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Estrutura inicial para construção coletiva. Ainda não contém posições contratuais aprovadas."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "playbook-posicoes",
+    "title": "Posições de negociação",
+    "position": 202,
+    "content": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Acrescente um título para cada tema. Registre a posição proposta, a justificativa, as evidências e o contexto em que ela faz sentido."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Estrutura inicial para construção coletiva. Ainda não contém posições contratuais aprovadas."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "playbook-limites",
+    "title": "Alternativas e limites",
+    "position": 203,
+    "content": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Para cada tema, descreva as alternativas aceitáveis, os limites da negociação e as situações que exigem análise específica."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Estrutura inicial para construção coletiva. Ainda não contém posições contratuais aprovadas."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "playbook-aprovacoes",
+    "title": "Exceções e aprovações",
+    "position": 204,
+    "content": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Descreva quando pedir aprovação, quem deve avaliar e quais informações precisam acompanhar o pedido."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Estrutura inicial para construção coletiva. Ainda não contém posições contratuais aprovadas."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "playbook-governanca",
+    "title": "Revisão e manutenção",
+    "position": 205,
+    "content": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Defina responsáveis pela revisão, critérios para atualizar posições e como registrar decisões e aprendizados."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Estrutura inicial para construção coletiva. Ainda não contém posições contratuais aprovadas."
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

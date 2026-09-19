@@ -20,7 +20,7 @@ export async function middleware(request: NextRequest) {
   // Keep this exact path independent of Club authentication and paid access.
   if (pathname === '/icon.svg' || pathname === '/club-sw.js' || /^\/club-pwa\/(manifest\.webmanifest|offline\.html|icon-(192|512|maskable)\.png)$/.test(pathname)) return NextResponse.next({ request })
 
-  if (pathname === '/api/bench/contributions' || pathname === '/api/contract-map') return NextResponse.next({ request })
+  if (pathname === '/api/bench/contributions' || pathname === '/api/contract-map' || pathname === '/api/playbook') return NextResponse.next({ request })
 
   let supabaseResponse = NextResponse.next({ request })
   const publicPaths = new Set(['/', '/club', '/club/about', '/club/checkout', '/cadastro', '/login', '/set-password', '/auth/confirm'])

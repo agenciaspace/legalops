@@ -14,14 +14,19 @@ async function access() {
   if (!hasActiveClubAccess(member)) return { response: reply({ error: 'Complete seu cadastro na comunidade.' }, 403) }
   return { db, user, userName: member?.display_name }
 }
-export async function GET() {
+export async function GET(request: Request) {
+  const project = new URL(request.url).searchParams.get('project') ?? 'migration'
+  if (!['migration', 'playbook'].includes(project)) return reply({ error: 'Projeto inválido.' }, 400)
   const accessResult = await access()
   if (accessResult.response) return accessResult.response
   const { db, user } = accessResult
+  const { data: sections, error: sectionsError } = await db!.from('contract_map_sections').select('id,title,position,content,version,updated_at,journey').in('journey', project === 'playbook' ? ['open-playbook'] : ['clm-migration', 'contract-lifecycle']).order('position')
+  if (sectionsError) return reply({ error: 'Não foi possível carregar o documento.' }, 503)
+  const sectionIds = (sections ?? []).map(section => section.id)
   const results = await Promise.all([
-    db!.from('contract_map_sections').select('id,title,position,content,version,updated_at,journey').order('position'),
-    db!.from('contract_map_contributions').select('*').order('created_at', { ascending: false }).limit(500),
-    db!.from('contract_map_revisions').select('section_id,version,content,editor_id,note,created_at').order('created_at', { ascending: false }).limit(100),
+    Promise.resolve({ data: sections, error: null }),
+    db!.from('contract_map_contributions').select('*').in('section_id', sectionIds).order('created_at', { ascending: false }).limit(500),
+    db!.from('contract_map_revisions').select('section_id,version,content,editor_id,note,created_at').in('section_id', sectionIds).order('created_at', { ascending: false }).limit(100),
     db!.from('contract_map_leads').select('user_id').eq('user_id', user!.id),
   ])
   if (results.some(result => result.error)) return reply({ error: 'Não foi possível carregar o mapa.' }, 503)

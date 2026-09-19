@@ -35,3 +35,10 @@ it('rejects invalid anchors and anchors attached to replies',async()=>{
  expect((await post({action:'comment',section:'contexto',version:1,note:'Revisar prazo',quote:'prazo',anchor:{...anchor,start:1},parent:'00000000-0000-0000-0000-000000000001'})).status).toBe(400)
  expect(mocks.rpc).not.toHaveBeenCalled()
 })
+
+it('uses the same membership and review boundary for Playbook sections', async () => {
+  expect((await post({ ...proposal, section: 'playbook-posicoes' })).status).toBe(200)
+  expect(mocks.rpc).toHaveBeenCalledWith('contract_map_submit', expect.objectContaining({ p_section: 'playbook-posicoes' }))
+  mocks.rpc.mockResolvedValue({ error: { message: 'LEAD_REQUIRED' } })
+  expect((await post({ ...proposal, action: 'publish', section: 'playbook-posicoes' })).status).toBe(403)
+})

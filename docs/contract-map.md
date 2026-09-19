@@ -5,7 +5,7 @@ Member workspace: https://legalops.club/community/tools/mapa-contratos
 
 The default journey has 12 stages in four phases, from internal diagnosis through procurement, migration, adoption and ongoing governance. Each stage includes five consideration groups, owners, deliverable, advance criteria and context adaptations. The original eight lifecycle sections remain available as an archive; their IDs, content, versions and contributions are preserved.
 
-The integrated Tiptap editor supports suggestions and editorial review by section. It does not offer simultaneous cursors or shared live drafts. Each submitted suggestion stores its base version. Publishing checks that version inside a locked database transaction, records a revision and accepts the suggestion atomically. A stale draft is retained in the browser and requires comparison with the current published version before resubmission.
+The integrated Tiptap editor supports suggestions and editorial review by section. It offers simultaneous cursors and private shared live drafts through Hocuspocus. Each submitted suggestion stores its base version. Publishing checks that version inside a locked database transaction, records a revision and accepts the suggestion atomically. A stale draft is retained in the browser and requires comparison with the current published version before resubmission.
 
 Active community members can comment and suggest. Only active members listed in `contract_map_leads` can publish, accept, reject or resolve. Leon is the initial lead. Additional leads are explicitly assigned in this table by an administrator; never derive that privilege from editable user metadata. Pro is not required.
 

@@ -3,5 +3,9 @@
   "revision": "375a79c5dbc16d3bd6060e3cc1182b09697dfe2b",
   "paths": [
     "cloudflare-landing/playbook"
-  ]
+  ],
+  "status": "historical-reference",
+  "canonical_content": "Supabase contract_map_sections, journey=open-playbook",
+  "frontend": "legalops/cloudflare-landing/playbook",
+  "sync_policy": "Do not overwrite with the historical GitHub contribution frontend."
 }

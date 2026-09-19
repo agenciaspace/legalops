@@ -1,4 +1,5 @@
 import migration from './clm-migration.json'
+import playbook from './open-playbook.json'
 import type { CommentAnchor } from './map-comments'
 export type MapNode = { type: string; text?: string; content?: MapNode[]; attrs?: { level?: number; start?: number; checked?: boolean; colspan?: number; rowspan?: number; colwidth?: number[] | null }; marks?: { type: string }[] }
 export type MapSection = { id: string; title: string; position: number; content: MapNode; version: number; updated_at: string; journey?: string }
@@ -6,8 +7,10 @@ export type MapContribution = { id: string; section_id: string; author_id: strin
 export type MapRevision = { section_id: string; version: number; content: MapNode; editor_id: string | null; note: string; created_at: string }
 export type MapWorkspace = { sections: MapSection[]; contributions: MapContribution[]; revisions: MapRevision[]; authors: { user_id: string; display_name: string }[]; isLead: boolean; userId: string; userName?: string }
 export const MAP_PATH = '/community/tools/mapa-contratos'
+export const PLAYBOOK_SECTIONS = playbook
+export function documentPath(section: string) { return section.startsWith('playbook-') ? '/community/tools/playbook' : MAP_PATH }
 export const LEGACY_MAP_SECTION_IDS = ['solicitacao','triagem','elaboracao','negociacao','aprovacao','assinatura','execucao','renovacao'] as const
-export const MAP_SECTION_IDS: readonly string[] = [...LEGACY_MAP_SECTION_IDS, ...migration.stages.map(stage => stage.id)]
+export const MAP_SECTION_IDS: readonly string[] = [...LEGACY_MAP_SECTION_IDS, ...migration.stages.map(stage => stage.id), ...playbook.map(section => section.id)]
 export const MIGRATION_PHASES = migration.phases
 export const MIGRATION_STAGES = migration.stages
 const children: Record<string, string[]> = {

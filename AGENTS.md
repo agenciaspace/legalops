@@ -350,7 +350,7 @@ When changing authentication, submit the browser form; rendering it is not enoug
 - Do not add subject-specific agents. Each conversation uses owner-only post/comment/like history, published events, profile, and authorized sources; no read tracking is claimed. API remains Pro-gated.
 - Imported generic member rows are access records, not directory profiles. `isDirectoryMember` controls visibility without deleting real accounts.
 - Bench frontend source is `agenciaspace/clm-bench`; community-owned catalog, three steps, one criteria group at a time. Keep external discovery attribution out of the product UI; preserve research history separately.
-- Open Playbook frontend source is `agenciaspace/open-playbook`, published at `/playbook/`; browser drafts and explicit GitHub proposals, no approved clauses until reviewed.
+- Open Playbook is edited at `/community/tools/playbook` using the shared MapWorkspace/Tiptap editor, member comments, private Yjs drafts and lead review. Published content lives in Supabase (`journey=open-playbook`) and `/playbook/` reads `/api/playbook` directly. GitHub is only source-code hosting, never a content contribution or publication dependency. Preserve old browser drafts through the public recovery/download option.
 
 ## Collaborative document responsive checks (2026-09-18)
 
