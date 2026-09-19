@@ -8,7 +8,7 @@ it('collapses, keeps navigation accessible, restores preference and expands agai
   fireEvent.click(screen.getByRole('button', { name: 'Recolher menu lateral' }))
   expect(localStorage.getItem('club-sidebar-collapsed')).toBe('1')
   expect(screen.getByRole('button', { name: 'Expandir menu lateral' })).toHaveAttribute('aria-expanded', 'false')
-  expect(screen.getAllByRole('link', { name: 'Ferramentas' })[0]).toHaveAttribute('href', '/community/tools')
+  expect(screen.getAllByRole('link', { name: 'Recursos' })[0]).toHaveAttribute('href', '/community/tools')
   view.unmount(); render(<CommunityTabs />)
   fireEvent.click(screen.getByRole('button', { name: 'Expandir menu lateral' }))
   expect(localStorage.getItem('club-sidebar-collapsed')).toBe('0')

@@ -15,6 +15,6 @@ export function personalAgentPrompt(args: { profile: unknown; focus: string; top
   }
 }
 export const OPENCLM_AGENT_SOURCE: AgentSource = {
-  kind:'dev',title:'OpenCLM — projeto aberto no legalops.dev',url:'https://legalops.dev/openclm',
-  content:'OpenCLM é um projeto aberto de gestão de contratos em português, licença MIT, para instalação própria. A versão inicial tem formulário de solicitação, documentos DOCX/TXT, aprovações sequenciais e integrações opcionais com DocuSign e Ollama. Uma organização por instalação. Não é um CLM corporativo completo. A página pública reúne recursos, instalação e documentação. Código: https://github.com/agenciaspace/openclm. O agente pode indicar essa referência; não instala nem modifica o projeto pelo usuário.',
+  kind:'dev',title:'OpenCLM — gestão de contratos',url:'https://legalops.dev/openclm',
+  content:'OpenCLM ajuda a organizar solicitações, documentos e aprovações de contratos em português. A versão atual atende uma organização e oferece conexões opcionais com DocuSign e Ollama. Ainda não substitui um CLM corporativo completo. A página reúne uma apresentação dos recursos e orientações para quem quiser avaliar o uso.',
 }

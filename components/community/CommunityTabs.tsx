@@ -1,17 +1,79 @@
 'use client'
-import { useClubLanguage } from '@/components/community/ClubLanguage'
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import {usePathname} from 'next/navigation'
-import {PanelLeftClose, PanelLeftOpen, CalendarDays, MessageCircle, Users, FileText, MessageSquareText, Wrench} from 'lucide-react'
+import { useClubLanguage } from '@/components/community/ClubLanguage'
 import { COMMUNITY_CATEGORIES } from '@/lib/community'
-const items=[{href:'/community',label:'Comunidade',icon:MessageCircle},{href:'/community/calendar',label:'Eventos',icon:CalendarDays},{href:'/community/tools',label:'Ferramentas',icon:Wrench}]
-const forumKeys=['discussao','cases','ia-automacao','dados-metricas','contratos-clm','processos-projetos','ferramentas','financeiro-fornecedores','governanca-conhecimento','estrategia-maturidade','modelos-entrega','carreira']
-export function CommunityTabs(){
- const { t } = useClubLanguage()
-const path=usePathname()
- const [collapsed,setCollapsed] = useState(false)
- useEffect(() => { try { setCollapsed(localStorage.getItem('club-sidebar-collapsed') === '1') } catch {} }, [])
- const toggle = () => { const value=!collapsed; setCollapsed(value); try { localStorage.setItem('club-sidebar-collapsed',value?'1':'0') } catch {} }
- return <><aside aria-label={t("Menu lateral")} className={`hidden lg:block lg:sticky lg:top-16 lg:h-[calc(100dvh-4rem)] lg:self-start lg:overflow-y-auto lg:shrink-0 lg:border-r lg:border-[#CEC8BD] lg:bg-[#F5F1E8] lg:py-4 ${collapsed ? 'lg:w-20 lg:px-3' : 'lg:w-64 lg:px-4'}`}><button type="button" onClick={toggle} aria-expanded={!collapsed} aria-controls="club-sidebar-content" aria-label={t(collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral')} title={t(collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral')} className="sticky top-0 z-20 mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-[#CEC8BD] bg-white text-[#625E59] hover:bg-[#E9E4D9]">{collapsed ? <PanelLeftOpen className="h-5 w-5"/> : <PanelLeftClose className="h-5 w-5"/>}</button><div id="club-sidebar-content">{!collapsed && <Link href="/community" className="flex items-center gap-2 px-3 text-sm font-extrabold">LegalOps Club</Link>}<p hidden={collapsed} className="mt-7 px-3 text-[9px] font-black uppercase tracking-[0.14em] text-[#999690]">{t("Navegação")}</p><div className="mt-2 space-y-1">{[["/community",t("Comunidade"),MessageCircle],["/community/calendar",t("Eventos"),CalendarDays],["/community/tools",t("Ferramentas"),Wrench],["/community/members",t("Membros"),Users],["/community/summaries",t("Resumos do WhatsApp"),FileText]].map(([href,label,Icon])=><Link key={href as string} href={href as string} aria-label={t(label as string)} title={collapsed ? t(label as string) : undefined} className={`flex min-h-11 items-center gap-2 rounded-lg px-3 text-xs font-semibold ${(href==='/community'?path==='/community':path.startsWith(href as string))?'bg-[#E9E4D9] text-[#A94E38]':'text-[#625E59]'}`}><Icon className="h-4 w-4 shrink-0"/>{!collapsed && t(label as string)}</Link>)}</div><p hidden={collapsed} className="mt-7 px-3 text-[9px] font-black uppercase tracking-[0.14em] text-[#999690]">{t("Fóruns por assunto")}</p><div hidden={collapsed} className="mt-2 max-h-[42dvh] space-y-1 overflow-y-auto">{forumKeys.map(key=><Link key={key} href={`/community?space=${key}`} className={`flex min-h-10 items-center gap-2 rounded-lg px-3 text-[11px] font-semibold ${path==='/community'?'text-[#625E59]':'text-[#625E59]'}`}><MessageSquareText className="h-3.5 w-3.5 text-[#C9684F]"/>{t(COMMUNITY_CATEGORIES[key].label)}</Link>)}</div><p hidden={collapsed} className="mt-6 rounded-lg bg-white/60 px-3 py-3 text-[10px] leading-4 text-[#716B65]">{t("No app, organizamos por assunto. No WhatsApp, a conversa é geral para não fechar a comunidade em um único tema.")}</p></div></aside><nav aria-label={t("Áreas do Club")} className="club-bottom-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-[#CEC8BD] bg-[#F5F1E8] px-2 pt-1 lg:hidden">{items.map(item=>{const active=item.href==='/community'?path===item.href:path.startsWith(item.href)||(item.href==='/community/calendar'&&path.startsWith('/community/events/'));return <Link key={item.href} href={item.href} aria-current={active?'page':undefined} className={`flex min-h-14 items-center justify-center gap-2 rounded-xl text-xs font-semibold sm:text-sm ${active?'bg-[#E9E4D9] text-[#A94E38]':'text-[#625E59]'}`}><item.icon className="h-4 w-4 shrink-0"/>{t(item.label)}</Link>})}</nav></>}
+import {
+  CalendarDays,
+  FileText,
+  MessageCircle,
+  MessageSquareText,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Users,
+  Wrench,
+} from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+
+const mobileItems = [
+  { href: '/community', label: 'Comunidade', icon: MessageCircle },
+  { href: '/community/calendar', label: 'Eventos', icon: CalendarDays },
+  { href: '/community/tools', label: 'Recursos', icon: Wrench },
+]
+
+const forumKeys = [
+  'discussao', 'cases', 'ia-automacao', 'dados-metricas', 'contratos-clm', 'processos-projetos',
+  'ferramentas', 'financeiro-fornecedores', 'governanca-conhecimento', 'estrategia-maturidade',
+  'modelos-entrega', 'carreira',
+]
+
+export function CommunityTabs() {
+  const { t } = useClubLanguage()
+  const path = usePathname()
+  const [collapsed, setCollapsed] = useState(false)
+
+  useEffect(() => {
+    try { setCollapsed(localStorage.getItem('club-sidebar-collapsed') === '1') } catch {}
+  }, [])
+
+  const toggle = () => {
+    const value = !collapsed
+    setCollapsed(value)
+    try { localStorage.setItem('club-sidebar-collapsed', value ? '1' : '0') } catch {}
+  }
+
+  const desktopItems = [
+    ['/community', t('Comunidade'), MessageCircle],
+    ['/community/calendar', t('Eventos'), CalendarDays],
+    ['/community/tools', t('Recursos'), Wrench],
+    ['/community/members', t('Membros'), Users],
+    ['/community/summaries', t('Resumos do WhatsApp'), FileText],
+  ] as const
+
+  return <>
+    <aside aria-label={t('Menu lateral')} className={`hidden lg:sticky lg:top-16 lg:block lg:h-[calc(100dvh-4rem)] lg:shrink-0 lg:self-start lg:overflow-y-auto lg:border-r lg:border-[#CEC8BD] lg:bg-[#F5F1E8] lg:py-4 ${collapsed ? 'lg:w-20 lg:px-3' : 'lg:w-64 lg:px-4'}`}>
+      <button type="button" onClick={toggle} aria-expanded={!collapsed} aria-controls="club-sidebar-content" aria-label={t(collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral')} title={t(collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral')} className="sticky top-0 z-20 mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-[#CEC8BD] bg-white text-[#625E59] hover:bg-[#E9E4D9]">
+        {collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+      </button>
+      <div id="club-sidebar-content">
+        {!collapsed && <Link href="/community" className="flex items-center gap-2 px-3 text-sm font-extrabold">LegalOps Club</Link>}
+        <p hidden={collapsed} className="mt-7 px-3 text-[9px] font-black uppercase tracking-[0.14em] text-[#999690]">{t('Navegação')}</p>
+        <div className="mt-2 space-y-1">
+          {desktopItems.map(([href, label, Icon]) => <Link key={href} href={href} aria-label={label} title={collapsed ? label : undefined} className={`flex min-h-11 items-center gap-2 rounded-lg px-3 text-xs font-semibold ${(href === '/community' ? path === '/community' : path.startsWith(href)) ? 'bg-[#E9E4D9] text-[#A94E38]' : 'text-[#625E59]'}`}><Icon className="h-4 w-4 shrink-0" />{!collapsed && label}</Link>)}
+        </div>
+        <p hidden={collapsed} className="mt-7 px-3 text-[9px] font-black uppercase tracking-[0.14em] text-[#999690]">{t('Fóruns por assunto')}</p>
+        <div hidden={collapsed} className="mt-2 max-h-[42dvh] space-y-1 overflow-y-auto">
+          {forumKeys.map(key => <Link key={key} href={`/community?space=${key}`} className="flex min-h-10 items-center gap-2 rounded-lg px-3 text-[11px] font-semibold text-[#625E59]"><MessageSquareText className="h-3.5 w-3.5 text-[#C9684F]" />{t(COMMUNITY_CATEGORIES[key].label)}</Link>)}
+        </div>
+        <p hidden={collapsed} className="mt-6 rounded-lg bg-white/60 px-3 py-3 text-[10px] leading-4 text-[#716B65]">{t('No app, organizamos por assunto. No WhatsApp, a conversa é geral para não fechar a comunidade em um único tema.')}</p>
+      </div>
+    </aside>
+    <nav aria-label={t('Áreas do Club')} className="club-bottom-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-[#CEC8BD] bg-[#F5F1E8] px-2 pt-1 lg:hidden">
+      {mobileItems.map(item => {
+        const active = item.href === '/community' ? path === item.href : path.startsWith(item.href) || (item.href === '/community/calendar' && path.startsWith('/community/events/'))
+        return <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} className={`flex min-h-14 items-center justify-center gap-2 rounded-xl text-xs font-semibold sm:text-sm ${active ? 'bg-[#E9E4D9] text-[#A94E38]' : 'text-[#625E59]'}`}><item.icon className="h-4 w-4 shrink-0" />{t(item.label)}</Link>
+      })}
+    </nav>
+  </>
+}

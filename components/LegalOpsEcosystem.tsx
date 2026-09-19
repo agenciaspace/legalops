@@ -22,8 +22,8 @@ const products = {
     {
       key: 'dev' as const,
       domain: 'legalops.dev',
-      role: 'open source',
-      description: 'Produtos Legal Tech abertos, construídos em comunidade por quem opera o jurídico.',
+      role: 'recursos',
+      description: 'Guias e ferramentas práticas para quem trabalha no jurídico.',
       href: 'https://legalops.dev',
     },
   ],
@@ -45,8 +45,8 @@ const products = {
     {
       key: 'dev' as const,
       domain: 'legalops.dev',
-      role: 'open source',
-      description: 'Open source Legal Tech built by the people who run Legal.',
+      role: 'resources',
+      description: 'Practical guides and tools for people working in legal.',
       href: 'https://legalops.dev',
     },
   ],

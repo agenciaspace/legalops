@@ -8,13 +8,13 @@ const labels = {
   pt: {
     club: 'comunidade',
     work: 'vagas',
-    dev: 'open source',
+    dev: 'recursos',
     login: 'Entrar',
   },
   en: {
     club: 'community',
     work: 'jobs',
-    dev: 'open source',
+    dev: 'resources',
     login: 'Sign in',
   },
 } as const

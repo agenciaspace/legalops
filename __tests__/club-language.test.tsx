@@ -15,7 +15,7 @@ it('switches the interface and share message and restores the saved choice on th
   fireEvent.change(screen.getByRole('combobox', { name: 'Idioma / Language / Idioma' }), { target: { value: 'en' } })
   await waitFor(() => expect(document.cookie).toContain('club-locale=en'))
   const nav = within(screen.getByRole('navigation', { name: 'Club areas' }))
-  expect(nav.getByRole('link', { name: 'Tools' })).toHaveAttribute('aria-current', 'page')
+  expect(nav.getByRole('link', { name: 'Resources' })).toHaveAttribute('aria-current', 'page')
   expect(document.cookie).toContain('club-locale=en')
   expect(document.documentElement.lang).toBe('en')
   expect(mocks.refresh).toHaveBeenCalledOnce()

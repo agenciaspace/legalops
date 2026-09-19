@@ -32,6 +32,6 @@ export default async function BenchSection() {
         </div>
       </article>)}</div>
     </div>)}</div>}
-    <Link href="/community/tools" className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold underline">{t("Avaliação de CLM e projetos abertos → Ferramentas")}</Link>
+    <Link href="/community/tools" className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold underline">{t("Avaliação de CLM e outros recursos → Recursos")}</Link>
   </section>
 }

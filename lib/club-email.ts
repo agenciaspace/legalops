@@ -9,10 +9,10 @@ export function buildClubEmail({ title, preview, contentHtml, actionLabel, actio
 }) {
   const escape = escapeEmailHtml
   const labels = locale === 'en'
-    ? ['community · people · conversations', 'community', 'jobs', 'legalops.club — connect with people facing the same challenges in legal work.', 'If you did not request this email, you can ignore it.']
+    ? ['community · people · conversations', 'community', 'jobs', 'legalops.club — connect with people facing the same challenges in legal work.', 'If you did not request this email, you can ignore it.', 'resources']
     : locale === 'es'
-      ? ['comunidad · personas · conversaciones', 'comunidad', 'empleos', 'legalops.club — conecta con quienes viven los mismos desafíos del trabajo jurídico.', 'Si no solicitaste este email, puedes ignorarlo.']
-      : ['comunidade · pessoas · conversas', 'comunidade', 'vagas', 'legalops.club — troque com quem vive os mesmos problemas do jurídico.', 'Se você não solicitou este email, pode ignorá-lo.']
+      ? ['comunidad · personas · conversaciones', 'comunidad', 'empleos', 'legalops.club — conecta con quienes viven los mismos desafíos del trabajo jurídico.', 'Si no solicitaste este email, puedes ignorarlo.', 'recursos']
+      : ['comunidade · pessoas · conversas', 'comunidade', 'vagas', 'legalops.club — troque com quem vive os mesmos problemas do jurídico.', 'Se você não solicitou este email, pode ignorá-lo.', 'recursos']
   return `<!doctype html>
 <html lang="${locale}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>${escape(title)}</title>
 <style>@media only screen and (max-width:480px){.email-padding{padding:24px 20px!important}.email-heading{font-size:28px!important}.email-wrap{padding:12px 8px!important}}</style></head>
@@ -30,7 +30,7 @@ export function buildClubEmail({ title, preview, contentHtml, actionLabel, actio
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px"><tr><td bgcolor="#111111" style="background-color:#111111;border-radius:8px;mso-padding-alt:16px 24px"><a href="${escape(actionUrl)}" style="display:inline-block;padding:16px 24px;font-size:15px;line-height:20px;font-weight:bold;color:#ffffff;text-decoration:none;border:1px solid #111111;border-radius:8px">${escape(actionLabel)}</a></td></tr></table>
 </td></tr>
 <tr><td class="email-padding" style="padding:28px 32px;border-top:1px solid #CEC8BD">
-<p style="margin:0 0 12px;font-size:13px;line-height:24px"><a href="https://legalops.club/community" style="color:#111111;text-decoration:underline">${labels[1]}</a> &nbsp;·&nbsp; <a href="https://legalops.work" style="color:#111111;text-decoration:underline">${labels[2]}</a> &nbsp;·&nbsp; <a href="https://legalops.dev" style="color:#111111;text-decoration:underline">open source</a></p>
+<p style="margin:0 0 12px;font-size:13px;line-height:24px"><a href="https://legalops.club/community" style="color:#111111;text-decoration:underline">${labels[1]}</a> &nbsp;·&nbsp; <a href="https://legalops.work" style="color:#111111;text-decoration:underline">${labels[2]}</a> &nbsp;·&nbsp; <a href="https://legalops.dev" style="color:#111111;text-decoration:underline">${labels[5]}</a></p>
 <p style="margin:0;font-size:12px;line-height:20px;color:#817A73">${labels[3]}</p>
 <p style="margin:12px 0 0;font-size:12px;line-height:20px;color:#817A73">${labels[4]}</p>
 </td></tr></table><!--[if mso]></td></tr></table><![endif]--></td></tr></table></body></html>`

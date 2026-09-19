@@ -7,10 +7,10 @@ import { ResumeClubSession } from '@/components/community/ResumeClubSession'
 
 export const metadata: Metadata = {
   title: 'legalops.club | comunidade para profissionais do jurídico',
-  description: 'Comunidade gratuita para perfis ligados ao jurídico, com LinkedIn e apresentação profissional. Pro reúne agente pessoal e integrações com Work e Dev.',
+  description: 'Comunidade gratuita para perfis ligados ao jurídico, com LinkedIn e apresentação profissional. O Pro reúne agente pessoal, vagas e recursos práticos.',
   openGraph: {
     title: 'legalops.club | vamos falar de trabalho no jurídico',
-    description: 'Cadastre-se na comunidade com seu perfil profissional. Conheça também o Pro: agente pessoal e integrações em preparação.',
+    description: 'Cadastre-se na comunidade com seu perfil profissional. Conheça também o Pro e seu agente pessoal.',
     url: 'https://legalops.club',
     siteName: 'legalops.club',
     type: 'website',
@@ -28,8 +28,8 @@ const plannedFeatures = [
     description: 'Consulte vagas verificadas do Work na mesma conversa. O agente usa seu perfil para contextualizar as oportunidades e explicar o que merece atenção.',
   },
   {
-    title: 'conexão com o Dev',
-    description: 'Leve uma dúvida sobre contratos para a conversa e encontre referências do OpenCLM, com links para a página do projeto e seu código aberto. O agente orienta; não instala nem altera o projeto por você.',
+    title: 'recursos para contratos',
+    description: 'Leve uma dúvida sobre contratos para a conversa e encontre guias, ferramentas e referências do OpenCLM para apoiar seus próximos passos.',
   },
   {
     title: 'assuntos que você quer seguir',
@@ -80,7 +80,7 @@ export default function ClubLandingPage() {
         <LegalOpsEcosystem active="club" descriptions={{
           club: 'Trocas entre profissionais do jurídico.',
           work: 'Vagas e acompanhamento de candidaturas.',
-          dev: 'Projetos abertos de tecnologia jurídica.',
+          dev: 'Guias e ferramentas para o trabalho jurídico.',
         }} />
         <section id="como-funciona" className="border-y border-[#CEC8BD] bg-[#FAF7F1]">
           <div className="mx-auto grid max-w-[1180px] gap-6 px-5 py-10 sm:px-8 sm:py-12 md:grid-cols-[.6fr_1.4fr] md:items-center">
@@ -91,13 +91,13 @@ export default function ClubLandingPage() {
         <section aria-label="Comunidade e Pro" className="mx-auto max-w-[1180px] px-5 pt-14 sm:px-8">
           <div className="grid border-y border-[#CEC8BD] md:grid-cols-2">
             <div className="py-8 md:pr-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Comunidade · gratuita</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>pessoas e conversas</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Perfil profissional, troca de experiências, encontros e contato com outros membros. A entrada depende do seu perfil e das regras da comunidade.</p></div>
-            <div className="border-t border-[#CEC8BD] py-8 md:border-l md:border-t-0 md:pl-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Club Pro</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>agente e integrações</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Agente privado com histórico e preferências, referências das discussões do site, vagas do Work e conteúdo do OpenCLM no Dev.</p></div>
+            <div className="border-t border-[#CEC8BD] py-8 md:border-l md:border-t-0 md:pl-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Club Pro</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>agente e referências</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Agente privado com histórico e preferências, discussões do Club, vagas selecionadas e recursos para o trabalho jurídico.</p></div>
           </div>
         </section>
         <section id="pro" className="mx-auto max-w-[1180px] scroll-mt-8 px-5 py-14 sm:px-8 sm:py-20">
           <p className="text-xs font-semibold uppercase tracking-[.15em] text-[#A24D36]">Club Pro · primeira versão</p>
           <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-[-.045em] sm:text-5xl" style={headingFont}>um agente para acompanhar seu contexto<span className="text-[#E88A6A]">.</span></h2>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#625E59] sm:text-base">Converse com seu agente, salve o contexto e consulte fontes do Club, Work e Dev. A primeira versão inclui até 30 perguntas por dia. A leitura automática do WhatsApp e o aplicativo próprio ainda estão em preparação.</p>
+          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#625E59] sm:text-base">Converse com seu agente, salve o contexto e consulte discussões, vagas e materiais de apoio em uma só conversa. A primeira versão inclui até 30 perguntas por dia. A leitura automática do WhatsApp e o aplicativo próprio ainda estão em preparação.</p>
           <Link href="/club/checkout" className="mt-6 inline-flex min-h-12 items-center rounded-lg bg-[#111] px-6 py-3 text-sm font-semibold text-white">Ver plano Pro e pagamento por PIX →</Link>
           <div className="mt-10 border-t border-[#CEC8BD]">
             {plannedFeatures.map((feature, index) => (

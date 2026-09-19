@@ -67,7 +67,7 @@ export default function ClubSignupPage() {
       <aside className="mt-8 rounded-xl bg-[#111111] p-5 text-[#F5F1E8]">
         <p className="text-xs font-semibold uppercase tracking-wider text-[#E88A6A]">{t("Club Pro")}</p>
         <h2 className="mt-2 text-lg font-semibold">{t("Seu agente para acompanhar o que importa.")}</h2>
-        <p className="mt-3 text-sm leading-6 text-[#CEC8BD]">{t("Converse com seu histórico salvo, consulte discussões do Club, vagas do Work e referências do OpenCLM no Dev.")}</p>
+        <p className="mt-3 text-sm leading-6 text-[#CEC8BD]">{t("Converse com seu histórico salvo e consulte discussões, vagas e materiais de apoio.")}</p>
         <Link href="/club/checkout" className="mt-4 inline-flex min-h-11 items-center font-semibold text-[#E88A6A] underline underline-offset-4">{t("Conhecer o plano Pro →")}</Link>
       </aside>
     </div>

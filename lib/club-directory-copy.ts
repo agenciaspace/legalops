@@ -49,7 +49,6 @@ const labels: Array<[string,string,string]> = [
  ['Salve as alterações do perfil antes de solicitar.','Save profile changes before requesting verification.','Guarda los cambios del perfil antes de solicitar la verificación.'],
  ['A validação confere nome, cargo, organização e LinkedIn. Alterar esses dados exige nova análise. Não há prazo de conclusão definido.','Verification checks your name, role, organization and LinkedIn. Changing these details requires another review. No completion deadline is set.','La verificación comprueba nombre, cargo, organización y LinkedIn. Cambiar estos datos requiere otra revisión. No hay un plazo de resolución definido.'],
  ['No Playbook e em Migração de CLM, comente e proponha melhorias aqui no Club; membros-lead revisam antes da publicação.','Comment and suggest improvements to the Playbook and CLM Migration here in the Club; lead members review before publication.','Comenta y propón mejoras al Playbook y a la Migración de CLM aquí en el Club; los miembros líderes revisan antes de publicar.'],
- ['Código-fonte','Source code','Código fuente'],
 ]
 export const directoryEnglish: Record<string,string> = Object.fromEntries(labels.map(([pt,en])=>[pt,en]))
 export const directorySpanish: Record<string,string> = Object.fromEntries(labels.map(([pt,,es])=>[pt,es]))
