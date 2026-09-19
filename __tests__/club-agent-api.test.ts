@@ -40,9 +40,21 @@ it('uses the saved language preference for the agent response',async()=>{
 it('records failure and refunds the reservation instead of saving an invented answer',async()=>{
  state.generate.mockRejectedValue(new Error('provider down'))
  const log=vi.spyOn(console,'error').mockImplementation(()=>{})
+ const warn=vi.spyOn(console,'warn').mockImplementation(()=>{})
  expect((await POST(request({question:'Como usar o OpenCLM?'}))).status).toBe(503)
+ expect(state.generate).toHaveBeenCalledTimes(2)
  expect(state.rpc).toHaveBeenCalledWith('finish_club_agent_turn',{turn_id:'turn',answer_text:null,source_links:[],failed:true})
+ warn.mockRestore()
  log.mockRestore()
+})
+it('retries one transient model failure before returning the answer',async()=>{
+ state.generate.mockRejectedValueOnce(new Error('OpenRouter request failed with 503: upstream unavailable')).mockResolvedValueOnce('Resposta recuperada.')
+ const warn=vi.spyOn(console,'warn').mockImplementation(()=>{})
+ const response=await POST(request({question:'Como usar o OpenCLM?'}))
+ expect(response.status).toBe(200)
+ expect(state.generate).toHaveBeenCalledTimes(2)
+ expect(state.rpc).toHaveBeenCalledWith('finish_club_agent_turn',expect.objectContaining({turn_id:'turn',answer_text:'Resposta recuperada.',failed:false}))
+ warn.mockRestore()
 })
 it('grounds personalized digests in the owner interactions and published events',async()=>{
  await POST(request({question:'Resuma minhas interações e recomende Bench',page:'/community/calendar',user_id:'intruder'}))

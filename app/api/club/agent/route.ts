@@ -7,6 +7,19 @@ import { generateOpenRouterText } from '@/lib/openrouter'
 import { AgentSource, AgentTurn, OPENCLM_AGENT_SOURCE, personalAgentPrompt, rankAgentSources } from '@/lib/club-personal-agent'
 import { isPublishableJobRecord } from '@/lib/job-publication'
 export const maxDuration=60
+
+async function generatePersonalAgentAnswer(prompt:ReturnType<typeof personalAgentPrompt>) {
+  const request={...prompt,maxTokens:1400,temperature:0.2,timeoutMs:24000}
+  try {
+    return await generateOpenRouterText(request)
+  } catch(error) {
+    const message=error instanceof Error?error.message:''
+    if(message.includes('OPENROUTER_API_KEY is not configured')||/OpenRouter request failed with (400|401|403|404|422):/.test(message)) throw error
+    console.warn('[club/agent] transient model failure; retrying once:',error)
+    return generateOpenRouterText(request)
+  }
+}
+
 export async function GET(request:NextRequest) {
   const access=await session();if(access.error)return access.error
   const {supabase,user}=access
@@ -91,7 +104,7 @@ export async function POST(request:NextRequest) {
     ]
     const selected=rankAgentSources(sources,question,[...(profile.data?.areas_of_expertise??[]),profile.data?.current_role??'',profile.data?.organization_description??'',prefs.focus,...prefs.topics.map((topic:string)=>COMMUNITY_CATEGORIES[topic]?.label??topic)])
     const prompt=personalAgentPrompt({locale:normalizeClubLocale(request.headers.get('x-club-locale') ?? request.cookies.get(CLUB_LOCALE_COOKIE)?.value),profile:profile.data,focus:prefs.focus,topics:prefs.topics,history:[...(history.data??[])].reverse() as AgentTurn[],sources:selected,question,activity,currentPage:typeof body.page==='string'&&/^\/community(?:\/[^?#]*)?$/.test(body.page)?body.page.slice(0,150):'/community'})
-    const answer=await generateOpenRouterText({...prompt,maxTokens:1400,temperature:0.2,timeoutMs:35000})
+    const answer=await generatePersonalAgentAnswer(prompt)
     if(!answer.trim())throw new Error('Empty agent response')
     const sourceLinks=selected.map(({title,url,kind})=>({title,url,kind}))
     const {error:saveError}=await admin.rpc('finish_club_agent_turn',{turn_id:turnId,answer_text:answer,source_links:sourceLinks,failed:false})
