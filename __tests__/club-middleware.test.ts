@@ -14,7 +14,7 @@ import { middleware } from '../middleware'
 const request = (path: string) => middleware(new NextRequest(`https://legalops.club${path}`, { headers: { host: 'legalops.club' } }))
 beforeEach(() => { state.user = null; state.member = {}; state.profileReads = 0; state.refresh = false })
 it('resumes installed root launches automatically and preserves refreshed session cookies',async()=>{
-  state.user={id:'member'};state.member={club_access_status:'active'};state.refresh=true
+  state.user={id:'member'};state.member={club_access_status:'active',avatar_path:'member/photo.jpg'};state.refresh=true
   const root=await request('/')
   expect(root.headers.get('location')).toBe('https://legalops.club/community')
   expect(root.cookies.get('refreshed-session')?.value).toBe('test-token')
@@ -44,18 +44,24 @@ describe('Club admission and Pro routing', () => {
     expect((await request('/community')).headers.get('location')).toBe('https://legalops.club/club/entrar')
   })
   it('allows free community access without career onboarding', async () => {
-    state.user = { id: 'free' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive' }
+    state.user = { id: 'free' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive', avatar_path:'free/photo.jpg' }
     for (const path of ['/community', '/community/members', '/community/profile', '/club/entrar']) expect((await request(path)).status).toBe(200)
     expect(state.profileReads).toBe(4) // Locale preferences are read; career onboarding is not required.
   })
+  it('requires legacy members without a photo to complete it without blocking the upload endpoint', async () => {
+    state.user = { id: 'legacy' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive', avatar_path:null }
+    expect((await request('/community')).headers.get('location')).toBe('https://legalops.club/community/profile?photo=required')
+    expect((await request('/community/profile')).status).toBe(200)
+    expect((await request('/api/club/avatar')).status).toBe(200)
+  })
   it('blocks free users from Pro pages and AI APIs', async () => {
-    state.user = { id: 'free' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive' }
+    state.user = { id: 'free' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive', avatar_path:'free/photo.jpg' }
     expect((await request('/community/jobs')).headers.get('location')).toBe('https://legalops.club/club#pro')
     expect((await request('/api/ai/cover-letter')).status).toBe(403)
     expect((await request('/api/pipeline/job/cv')).status).toBe(403)
   })
   it('allows Pro but keeps community access after Pro expires', async () => {
-    state.user = { id: 'pro' }; state.member = { club_access_status: 'active', club_pro_status: 'active' }
+    state.user = { id: 'pro' }; state.member = { club_access_status: 'active', club_pro_status: 'active', avatar_path:'pro/photo.jpg' }
     expect((await request('/community/jobs')).status).toBe(200)
     state.member.club_pro_expires_at = '2000-01-01'
     expect((await request('/community/jobs')).status).toBe(307)
@@ -73,7 +79,7 @@ it('serves public PWA assets without exposing community data', async () => {
   for (const path of ['/icon.svg','/icon.svg?brand=current','/club-sw.js','/club-pwa/manifest.webmanifest','/club-pwa/offline.html','/club-pwa/icon-192.png']) expect((await request(path)).status).toBe(200)
   expect((await request('/club-pwa/private')).headers.get('location')).toContain('/login')
   expect((await request('/community/bench')).headers.get('location')).toContain('/login')
-  state.user={id:'free'};state.member={club_access_status:'active',club_pro_status:'inactive'}
+  state.user={id:'free'};state.member={club_access_status:'active',club_pro_status:'inactive',avatar_path:'free/photo.jpg'}
   expect((await request('/community/pro')).status).toBe(200)
   expect((await request('/community/assistant')).status).toBe(200)
 })

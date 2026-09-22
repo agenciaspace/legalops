@@ -9,7 +9,7 @@ O cadastro é aberto a pessoas com atuação ou interesse profissional compatív
 com a comunidade jurídica, Legal Ops e Legal Tech. Participar da comunidade
 não depende de contratar o Pro.
 
-O perfil de entrada deve informar nome, email confirmado, LinkedIn pessoal,
+O perfil de entrada deve informar foto, nome, email confirmado, LinkedIn pessoal,
 atuação/cargo, organização ou contexto profissional, cidade/região, breve
 apresentação e assuntos de interesse. Autônomos, estudantes e pessoas em
 transição podem explicar seu contexto; não se exige vínculo empregatício.
@@ -49,10 +49,10 @@ Preservar os direitos já concedidos aos membros existentes na migração.
 
 ## Admission implementation
 
-Email confirmation plus a complete, self-declared professional profile enables
-free membership automatically. This is a profile criterion, not identity proof
-or manual approval. Rejected profiles require administration review. LinkedIn
-URLs and imported data never automatically confer a verified badge.
+Email confirmation plus an owned profile photo and a complete, self-declared
+professional profile enable free membership automatically. The profile-complete
+badge follows the same deterministic criteria and updates after every profile
+change. It is not identity proof, credential certification or manual approval.
 
 The database RPC admits only the authenticated, confirmed-email user and ignores
 billing and Pro fields. Existing active/complimentary benefits were migrated to

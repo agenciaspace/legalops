@@ -60,7 +60,7 @@ export default async function MemberProfilePage({ params }: { params: { id: stri
           <div className="-mt-9 flex flex-col gap-4 sm:-mt-10 sm:flex-row sm:items-end sm:justify-between">
             <MemberAvatar userId={member.user_id} path={member.avatar_path} name={member.display_name} size="h-20 w-20 border-4 border-white" />
             {verified ? (
-              <span className="inline-flex self-start items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[9px] font-black text-emerald-700 sm:self-auto"><BadgeCheck className="h-4 w-4" /> {t("Perfil validado")}</span>
+              <span className="inline-flex self-start items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[9px] font-black text-emerald-700 sm:self-auto"><BadgeCheck className="h-4 w-4" /> {t(verificationState(member.profile_verification_status).publicLabel)}</span>
             ) : (
               <span className="inline-flex self-start items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1.5 text-[9px] font-bold text-stone-600 sm:self-auto"><ShieldCheck className="h-4 w-4" /> {t(verificationState(member.profile_verification_status).publicLabel)}</span>
             )}

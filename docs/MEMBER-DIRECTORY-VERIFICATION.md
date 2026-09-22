@@ -1,29 +1,36 @@
-# Member directory and profile verification
+# Member directory and automatic profile completeness
 
-Member directory: `/community/members`. Owner workflow: `/community/profile#verification`. Administrator queue: `/club/admin/members`.
+Member directory: `/community/members`. Owner workflow: `/community/profile`.
 
-## States and access
+## Status and admission
 
-- `unverified`: no current approval, labeled “Validação não solicitada” to the owner and “Não validado” in the directory. Never imply a queued review.
-- `pending`: an explicit request is in the administrator queue. Repeat submissions reuse the same pending request.
-- `verified`: an administrator checked name, role, organization and LinkedIn. The badge does not certify skills or degrees.
-- `rejected`: owner sees “Ajustes solicitados” and the private explanation, can edit and resubmit. The directory says “Não validado”.
+- `verified`: the owned photo and required professional fields are present. The UI calls this “Perfil completo”.
+- `unverified`: at least one required field is missing. The UI calls this “Perfil incompleto”.
+- `pending` and `rejected`: retained only for compatibility with historical rows; the migration normalizes current profiles automatically.
 
-Community and Pro entitlements are independent and are not changed by requesting or reviewing a profile. Existing profiles are not silently queued or automatically approved. At rollout, all nine member rows were `unverified`, despite the former directory labeling them as under review.
+The badge is calculated by the database after every profile change. It is a
+completeness signal for self-declared data, not identity proof or certification
+of degrees or skills. The former administrator queue is retired and its records
+remain only as audit history.
 
-Requests store an immutable identity snapshot, date, decision, reviewer and reason. RLS allows only the owner to read their requests; configured administrators read via the server. Only the service role can call the atomic review RPC, and each server action checks the authenticated admin email before constructing that client. No approval flag is taken from editable user metadata. The request RPC uses authenticated identity and requires active Club access.
+A private photo is required before `join_club` can activate free membership.
+Active members cannot remove it without replacing it. Legacy members without a
+photo are redirected to their profile, and profiles without a photo do not
+appear in directory results.
 
-Changing name, role, organization or LinkedIn revokes a prior approval and supersedes pending requests. Both submission and review lock the profile before the member/request rows, so an outdated identity cannot be approved. Historical requests are preserved. Rejected moderation state is preserved across edits until the member explicitly resubmits. No review deadline or automatic verification is promised; the owner follows the result on their profile.
+Community and Pro entitlements remain independent from the badge.
 
 ## Search and privacy
 
-`search_club_members` is a security-invoker RPC, with membership checks and existing member/contact RLS. Results contain explicitly selected public fields, not account profiles or CV data. Search uses every term, ignoring common Portuguese/Spanish accents, and treats `%` and `_` literally. Filters combine country, state/region, city, professional environment, expertise, qualifications and verification. Saved-contact scope and filters survive pagination via query parameters. Pages contain at most 24 profiles; sorting is stable by normalized name and ID, or newest first.
-
-`directory_country`, `directory_region`, `directory_city`, and `directory_qualifications` are optional, explicitly member-visible fields maintained in the profile. Private CVs, skills, job-location preferences and account timezone/country preferences are not copied into the directory. Professional environment mirrors the existing declared professional context. Missing location/qualification data is not guessed; owners can add it. Review reasons are never included in search results or facets.
+`search_club_members` remains a security-invoker RPC with membership checks and
+member/contact RLS. Results contain only explicitly selected public fields, never
+private CV or job-preference data. Search is accent-insensitive, treats `%` and
+`_` literally, and combines country, region, city, professional environment,
+expertise, qualifications and completeness filters. Location and qualifications
+remain optional and self-declared.
 
 ## Verification
 
-- Remote transaction `supabase/tests/member_directory_verification.sql`: accent-insensitive combined search; literal wildcard treatment; pagination; CV exclusion; anonymous/inactive denial; owner-only review records; request idempotency; self-approval denial; atomic administrator approval; unchanged entitlements; duplicate/stale review denial; identity-change invalidation; resubmission/history. Entire test rolls back.
-- Vitest checks query normalization and links, accurate status labels, request/review authorization, owner next steps and localization.
-- Production Next build passes. Browser preview with isolated fixtures verifies controls, search submission, pagination and no horizontal overflow at 320, 390, 768 and 1280 pixels. English controls checked. No real profile was approved or rejected during testing.
-- Supabase advisors: the authenticated request RPC is intentionally security-definer with identity/membership checks. Search remains security-invoker; the service-only review RPC is not publicly executable. Existing unrelated advisories were not changed.
+- `supabase/tests/club_admission.sql` checks photo-gated admission, free/Pro separation and automatic completeness.
+- `supabase/tests/member_directory_verification.sql` checks automatic status changes and confirms that the manual request RPC is no longer executable by members.
+- Vitest covers the upload boundary, server-side admission check, member gate, labels and translations.

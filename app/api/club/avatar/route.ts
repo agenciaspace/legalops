@@ -9,12 +9,15 @@ export async function DELETE() {
   const supabase=await createServerSupabaseClient()
   const {data:{user}}=await supabase.auth.getUser()
   if(!user)return NextResponse.json({error:'Entre na sua conta.'},{status:401})
-  const {data:member}=await supabase.from('community_members').select('club_access_status,club_access_expires_at,avatar_path').eq('user_id',user.id).maybeSingle()
-  if(!hasActiveClubAccess(member))return NextResponse.json({error:'Complete seu perfil no Club.'},{status:403})
+  const [{data:member},{data:profile}]=await Promise.all([
+    supabase.from('community_members').select('club_access_status,club_access_expires_at').eq('user_id',user.id).maybeSingle(),
+    supabase.from('account_profiles').select('avatar_path').eq('user_id',user.id).maybeSingle(),
+  ])
+  if(hasActiveClubAccess(member))return NextResponse.json({error:'A foto é obrigatória. Envie outra imagem para substituí-la.'},{status:409})
   try {
     const admin=createAdminClient()
-    if(isOwnedAvatarPath(member?.avatar_path,user.id)) {
-      const {error}=await admin.storage.from('club-avatars').remove([member.avatar_path])
+    if(isOwnedAvatarPath(profile?.avatar_path,user.id)) {
+      const {error}=await admin.storage.from('club-avatars').remove([profile.avatar_path])
       if(error)throw error
     }
     const {error}=await admin.from('account_profiles').update({avatar_path:null}).eq('user_id',user.id)
@@ -26,8 +29,8 @@ export async function POST(request:NextRequest) {
   const supabase=await createServerSupabaseClient()
   const {data:{user}}=await supabase.auth.getUser()
   if(!user)return NextResponse.json({error:'Entre na sua conta.'},{status:401})
-  const {data:member}=await supabase.from('community_members').select('club_access_status,club_access_expires_at,avatar_path').eq('user_id',user.id).maybeSingle()
-  if(!hasActiveClubAccess(member))return NextResponse.json({error:'Complete seu perfil no Club.'},{status:403})
+  const {data:profile}=await supabase.from('account_profiles').select('avatar_path').eq('user_id',user.id).maybeSingle()
+  if(!profile)return NextResponse.json({error:'Não encontramos seu perfil. Atualize a página e tente novamente.'},{status:409})
   if(request.headers.get('content-type')!=='image/jpeg')return NextResponse.json({error:'Selecione uma foto pelo formulário.'},{status:415})
   if(Number(request.headers.get('content-length'))>MAX_AVATAR_BYTES)return NextResponse.json({error:'A foto ficou muito grande.'},{status:413})
   try {
@@ -41,7 +44,7 @@ export async function POST(request:NextRequest) {
     if(uploadError)throw new Error('upload failed')
     const {data:saved,error}=await admin.from('account_profiles').update({avatar_path:path}).eq('user_id',user.id).select('user_id').maybeSingle()
     if(error||!saved){await admin.storage.from('club-avatars').remove([path]);throw new Error('profile update failed')}
-    if(isOwnedAvatarPath(member?.avatar_path,user.id))await admin.storage.from('club-avatars').remove([member.avatar_path])
+    if(isOwnedAvatarPath(profile.avatar_path,user.id))await admin.storage.from('club-avatars').remove([profile.avatar_path])
     return NextResponse.json({url:`/api/club/avatar/${user.id}?v=${path.split('/')[1]}`},{headers:{'Cache-Control':'no-store'}})
   }catch{return NextResponse.json({error:'Não conseguimos salvar sua foto. Tente novamente.'},{status:503})}
 }

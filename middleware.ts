@@ -79,8 +79,9 @@ export async function middleware(request: NextRequest) {
   // Older installations may launch at / or /club. Resume the existing session
   // before showing marketing content, carrying refreshed cookies on redirects.
   if (user && isClubRoot) {
-    const { data: membership } = await supabase.from('community_members').select('club_access_status,club_access_expires_at').eq('user_id', user.id).maybeSingle()
-    return withSession(NextResponse.redirect(new URL(hasActiveClubAccess(membership) ? '/community' : '/club/entrar', request.url)))
+    const { data: membership } = await supabase.from('community_members').select('club_access_status,club_access_expires_at,avatar_path').eq('user_id', user.id).maybeSingle()
+    const destination = hasActiveClubAccess(membership) ? (membership?.avatar_path ? '/community' : '/community/profile?photo=required') : '/club/entrar'
+    return withSession(NextResponse.redirect(new URL(destination, request.url)))
   }
   if (isClubRoot) {
     const clubUrl = request.nextUrl.clone()
@@ -116,16 +117,17 @@ export async function middleware(request: NextRequest) {
     return withSession(NextResponse.redirect(new URL('/community', request.url)))
   }
 
+  const isAvatarApi = pathname === '/api/club/avatar' || pathname.startsWith('/api/club/avatar/')
   const requiresClub = pathname === '/onboard'
     || ['/dashboard', '/discover', '/pipeline', '/jobs', '/settings', '/professionals'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
-    || ['/api/club', '/api/profile', '/api/pipeline', '/api/jobs', '/api/ai'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
+    || (!isAvatarApi && ['/api/club', '/api/profile', '/api/pipeline', '/api/jobs', '/api/ai'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`)))
     || pathname === '/community' || pathname.startsWith('/community/') && !isPublicEventPage
 
-  let clubAccess: { club_access_status: string | null; club_access_expires_at: string | null; club_pro_status: string | null; club_pro_expires_at: string | null } | null = null
+  let clubAccess: { club_access_status: string | null; club_access_expires_at: string | null; club_pro_status: string | null; club_pro_expires_at: string | null; avatar_path: string | null } | null = null
   if (requiresClub) {
     const { data } = await supabase
       .from('community_members')
-      .select('club_access_status, club_access_expires_at, club_pro_status, club_pro_expires_at')
+      .select('club_access_status, club_access_expires_at, club_pro_status, club_pro_expires_at, avatar_path')
       .eq('user_id', user.id)
       .maybeSingle()
     clubAccess = data
@@ -137,6 +139,13 @@ export async function middleware(request: NextRequest) {
       const clubUrl = new URL('/club/entrar', request.url)
       if (pathname === '/community/tools/mapa-contratos') clubUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`)
       return withSession(NextResponse.redirect(clubUrl))
+    }
+
+    const isPhotoCompletionPage = pathname === '/community/profile'
+    const isClubExperience = pathname === '/community' || pathname.startsWith('/community/') || pathname.startsWith('/api/club')
+    if (isClubExperience && !isPhotoCompletionPage && !clubAccess?.avatar_path) {
+      if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Adicione sua foto para continuar.' }, { status: 403 })
+      return withSession(NextResponse.redirect(new URL('/community/profile?photo=required', request.url)))
     }
   }
 

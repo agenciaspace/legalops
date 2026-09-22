@@ -15,17 +15,19 @@ it('bounds search and pagination and rejects malformed filter values',()=>{
  expect(directoryFilters({page:'Infinity'}).page).toBe(1)
  expect(directoryFilters({page:'3.5'}).page).toBe(1)
 })
-it('never labels unrequested or rejected profiles as under review',()=>{
- expect(verificationState('pending').publicLabel).toBe('Em análise')
- expect(verificationState('unverified').label).toBe('Validação não solicitada')
- expect(verificationState('rejected').publicLabel).toBe('Não validado')
- expect(verificationState('unknown').publicLabel).toBe('Não validado')
+it('describes the automatic completeness status without implying manual review',()=>{
+ expect(verificationState('verified').publicLabel).toBe('Perfil completo')
+ expect(verificationState('pending').publicLabel).toBe('Perfil incompleto')
+ expect(verificationState('unverified').label).toBe('Cadastro incompleto')
+ expect(verificationState('rejected').publicLabel).toBe('Perfil incompleto')
+ expect(verificationState('unknown').publicLabel).toBe('Perfil incompleto')
 })
-it('requires the actual review fields without requiring CV, photo or optional qualifications',()=>{
- expect(verificationMissing({full_name:'Ana Silva',current_role:'Advogada',organization_name:'Autônoma',linkedin_url:'https://www.linkedin.com/in/ana',public_bio:'Atuo em operações jurídicas e contratos.',areas_of_expertise:['Contratos']})).toEqual([])
+it('requires the admission photo and professional fields without requiring CV or optional qualifications',()=>{
+ expect(verificationMissing({avatar_path:'user/photo.jpg',full_name:'Ana Silva',current_role:'Advogada',organization_name:'Autônoma',linkedin_url:'https://www.linkedin.com/in/ana',public_bio:'Atuo em operações jurídicas e contratos.',areas_of_expertise:['Contratos']})).toEqual([])
+ expect(verificationMissing({full_name:'Ana Silva',current_role:'Advogada',organization_name:'Autônoma',linkedin_url:'https://www.linkedin.com/in/ana',public_bio:'Atuo em operações jurídicas e contratos.',areas_of_expertise:['Contratos']})).toContain('Foto')
  expect(verificationMissing(null)).toContain('LinkedIn')
 })
 it('translates the new review states and search controls into English and Spanish',()=>{
- expect(clubTranslator('en')('Validação não solicitada')).toBe('Verification not requested')
+ expect(clubTranslator('en')('Cadastro completo')).toBe('Complete profile')
  expect(clubTranslator('es')('Estado / região')).toBe('Estado / región')
 })

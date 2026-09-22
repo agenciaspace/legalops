@@ -4,7 +4,7 @@ export type DirectoryResult = { members:DirectoryMember[];total:number;page:numb
 export function directoryFilters(input:Record<string,string|string[]|undefined> = {}) {
   const text = (key:string,max=120) => typeof input[key] === 'string' ? input[key].trim().slice(0,max) : ''
   const rawPage=Number(text('page')); const type=text('type');const verification=text('verification');
-  return { q:text('q',200),scope:text('scope')==='contacts'?'contacts':'',country:/^[A-Z]{2}$/.test(text('country'))?text('country'):'',region:text('region'),city:text('city'),type:Object.hasOwn(PROFESSIONAL_ENVIRONMENTS,type)?type:'',expertise:text('expertise'),qualification:text('qualification',160),verification:['verified','pending','unverified'].includes(verification)?verification:'',sort:text('sort')==='recent'?'recent':'name',page:Number.isSafeInteger(rawPage)&&rawPage>0?Math.min(10000,rawPage):1 }
+  return { q:text('q',200),scope:text('scope')==='contacts'?'contacts':'',country:/^[A-Z]{2}$/.test(text('country'))?text('country'):'',region:text('region'),city:text('city'),type:Object.hasOwn(PROFESSIONAL_ENVIRONMENTS,type)?type:'',expertise:text('expertise'),qualification:text('qualification',160),verification:['verified','unverified'].includes(verification)?verification:'',sort:text('sort')==='recent'?'recent':'name',page:Number.isSafeInteger(rawPage)&&rawPage>0?Math.min(10000,rawPage):1 }
 }
 export function directoryUrl(filters:ReturnType<typeof directoryFilters>,changes:Partial<ReturnType<typeof directoryFilters>>={}) {
   const values={...filters,...changes};const query=new URLSearchParams();

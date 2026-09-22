@@ -1,6 +1,5 @@
 import { COUNTRY_CODES } from '@/lib/club-countries'
 import { verificationState, verificationMissing } from '@/lib/member-verification'
-import { requestProfileVerification } from './verification-actions'
 import { ClubRegionPreferences } from '@/components/community/ClubRegionPreferences'
 import { getClubTranslator, getClubLocale } from '@/lib/club-locale-server'
 import { ProfileContactCode } from '@/components/community/ProfileContactCode'
@@ -48,12 +47,12 @@ type Verification = {
 
 export const dynamic = 'force-dynamic'
 
-export default async function CommunityProfilePage({ searchParams }: { searchParams?: { saved?: string; error?: string; verification?: string } }) {
+export default async function CommunityProfilePage({ searchParams }: { searchParams?: { saved?: string; error?: string; photo?: string } }) {
   const t = getClubTranslator()
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: rawProfile }, { data: rawVerification }, { data: reviews }] = await Promise.all([
+  const [{ data: rawProfile }, { data: rawVerification }] = await Promise.all([
     supabase
       .from('account_profiles')
       .select('directory_country,directory_region,directory_city,directory_qualifications,country_code, timezone, avatar_path, organization_description, full_name, current_role, public_headline, public_bio, organization_name, linkedin_url, areas_of_expertise, professional_type, desired_roles, preferred_remote, preferred_locations, skills, tools_used, career_summary, career_highlights, base_cv_text, open_to_opportunities, job_alerts_enabled, cv_suggestions_enabled, is_public')
@@ -64,14 +63,12 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
       .select('profile_verification_status, profile_verified_at')
       .eq('user_id', user?.id ?? '')
       .maybeSingle(),
-    supabase.from('club_profile_reviews').select('id,status,submitted_at,reviewed_at,review_note').eq('user_id',user?.id ?? '').order('submitted_at',{ascending:false}).limit(1),
   ])
 
   const profile = rawProfile as Profile | null
   const verification = rawVerification as Verification | null
   const status = verificationState(verification?.profile_verification_status)
   const missing = verificationMissing(profile)
-  const review = reviews?.[0]
   const countryNames = new Intl.DisplayNames([getClubLocale()], { type: 'region' })
   const completedFields = [
     profile?.avatar_path,
@@ -101,9 +98,10 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
       ) : null}
 
       {searchParams?.error ? <p role="alert" className="mt-4 text-sm text-red-700">{t("Não conseguimos salvar. Confira a foto, o contexto profissional e os campos obrigatórios.")}</p> : null}
+      {searchParams?.photo === 'required' ? <p role="alert" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">{t('Adicione uma foto para continuar na comunidade.')}</p> : null}
       <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
         <form action={updateCommunityProfile} className="rounded-xl border border-[#E1E1DD] bg-white p-5 sm:p-6">
-          <ProfilePhoto userId={user?.id ?? ""} path={profile?.avatar_path ?? null} name={profile?.full_name ?? t("Seu perfil")} />
+          <ProfilePhoto userId={user?.id ?? ""} path={profile?.avatar_path ?? null} name={profile?.full_name ?? t("Seu perfil")} required />
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="text-[10px] font-extrabold text-[#4D4B46]"> {t("Nome completo")} <input name="full_name" required minLength={3} maxLength={120} defaultValue={profile?.full_name ?? ''} className="mt-1.5 h-10 w-full rounded-lg border border-[#DFDFDB] px-3 text-xs font-medium outline-none focus:border-[#FF9E77]" />
             </label>
@@ -195,13 +193,8 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
               <h2 className="text-xs font-extrabold">{t(status.label)}</h2>
             </div>
             <p className="mt-2 text-sm leading-6">{t(status.description)}</p>
-            {searchParams?.verification==='requested' && <p role="status" className="mt-3 text-sm">{t('Solicitação recebida. Acompanhe a decisão nesta área.')}</p>}
-            {['error','incomplete'].includes(searchParams?.verification ?? '') && <p role="alert" className="mt-3 text-sm">{t('Não foi possível solicitar. Confira os campos indicados e tente novamente.')}</p>}
-            {review && <p className="mt-3 text-xs">{t('Última solicitação')}: {new Date(review.submitted_at).toLocaleDateString('pt-BR')}</p>}
-            {review?.review_note && <p className="mt-3 rounded-lg bg-white/70 p-3 text-sm leading-6">{review.review_note}</p>}
-            {!!missing.length && <p className="mt-3 text-sm">{t('Complete antes de solicitar')}: {missing.map(field => t(field)).join(', ')}.</p>}
-            {!['verified','pending'].includes(verification?.profile_verification_status ?? '') && <form action={requestProfileVerification} className="mt-4"><button disabled={!!missing.length} className="min-h-11 w-full rounded-lg bg-[#24231F] px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">{t('Solicitar validação')}</button><p className="mt-2 text-xs leading-5">{t('Salve as alterações do perfil antes de solicitar.')}</p></form>}
-            <p className="mt-3 text-xs leading-5">{t('A validação confere nome, cargo, organização e LinkedIn. Alterar esses dados exige nova análise. Não há prazo de conclusão definido.')}</p>
+            {!!missing.length && <p className="mt-3 text-sm">{t('Falta completar')}: {missing.map(field => t(field)).join(', ')}.</p>}
+            <p className="mt-3 text-xs leading-5">{t('O selo é atualizado automaticamente quando a foto e os campos profissionais obrigatórios estão completos.')}</p>
           </section>
 
           <section className="rounded-xl border border-[#E1E1DD] bg-white p-4">
@@ -210,8 +203,8 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
             <div className="mt-4 space-y-2 text-[9px] text-[#77746E]">
               <p className="flex items-center gap-2"><UserRound className="h-3.5 w-3.5" /> {t("Identidade e contexto profissional")}</p>
               <p className="flex items-center gap-2"><Building2 className="h-3.5 w-3.5" /> {t("Organização e cargo atual")}</p>
-              <p className="flex items-center gap-2"><Linkedin className="h-3.5 w-3.5" /> {t("LinkedIn para conferência")}</p>
-              <p className="flex items-center gap-2"><ShieldCheck className="h-3.5 w-3.5" /> {t("Selo visível após validação")}</p>
+              <p className="flex items-center gap-2"><Linkedin className="h-3.5 w-3.5" /> {t("LinkedIn profissional")}</p>
+              <p className="flex items-center gap-2"><ShieldCheck className="h-3.5 w-3.5" /> {t("Selo automático de cadastro completo")}</p>
               <p className="flex items-center gap-2"><BadgeCheck className="h-3.5 w-3.5" /> {t("Vagas e ajustes de CV pelo perfil")}</p>
             </div>
           </section>

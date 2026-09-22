@@ -5,17 +5,21 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { BrandWordmark } from '@/components/BrandLogo'
+import { ProfilePhoto } from '@/components/community/ProfilePhoto'
 import { CLUB_INTERESTS, CLUB_SECTORS } from '@/lib/club-membership'
 import { joinClub } from './actions'
-type Profile = { country_code?: string | null; timezone?: string | null; full_name?: string | null; current_role?: string | null; organization_name?: string | null; linkedin_url?: string | null; public_bio?: string | null; preferred_locations?: string[] | null; areas_of_expertise?: string[] | null }
+type Profile = { country_code?: string | null; timezone?: string | null; avatar_path?: string | null; full_name?: string | null; current_role?: string | null; organization_name?: string | null; linkedin_url?: string | null; public_bio?: string | null; preferred_locations?: string[] | null; areas_of_expertise?: string[] | null }
 const input = 'mt-2 w-full rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] px-3 py-3 text-sm font-normal'
-export function ClubJoinForm({ profile, destination = '/community' }: { profile: Profile; destination?: string }) {
+export function ClubJoinForm({ userId, profile, destination = '/community' }: { userId: string; profile: Profile; destination?: string }) {
   const { t } = useClubLanguage()
   const router = useRouter()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [hasPhoto, setHasPhoto] = useState(Boolean(profile.avatar_path))
   async function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setBusy(true); setError('')
+    event.preventDefault(); setError('')
+    if (!hasPhoto) { setError(t('Adicione sua foto para concluir o cadastro.')); return }
+    setBusy(true)
     const form = new FormData(event.currentTarget)
     try {
       const result = await joinClub({ ...Object.fromEntries(form.entries()), interests: form.getAll('interests'), accepted_rules: form.get('accepted_rules') === 'on' })
@@ -30,6 +34,7 @@ export function ClubJoinForm({ profile, destination = '/community' }: { profile:
       <h1 className="mt-10 font-[var(--font-quicksand)] text-4xl font-semibold tracking-tight">{t("conte um pouco sobre você")}<span className="text-[#E88A6A]">.</span></h1>
       <p className="mt-4 text-sm leading-7 text-[#69635E]">{t("O Club reúne quem trabalha, estuda ou desenvolve soluções para o jurídico. Seu perfil ajuda os outros membros a entender seu contexto. Não precisamos de currículo nem de pagamento para sua entrada.")}</p>
       <ClubRegionPreferences country={profile.country_code} timezone={profile.timezone} />
+      <div className="mt-8"><ProfilePhoto userId={userId} path={profile.avatar_path ?? null} name={profile.full_name ?? t('Seu perfil')} required onPhotoChange={setHasPhoto} /></div>
       <form onSubmit={submit} className="mt-8 space-y-6">
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="text-sm font-semibold">{t("Nome completo")}<input className={input} name="full_name" required minLength={3} maxLength={160} autoComplete="name" defaultValue={profile.full_name ?? ''} /></label>
@@ -43,7 +48,8 @@ export function ClubJoinForm({ profile, destination = '/community' }: { profile:
         <fieldset><legend className="text-sm font-semibold">{t("Assuntos de interesse")}</legend><div className="mt-3 grid gap-3 sm:grid-cols-2">{CLUB_INTERESTS.map(interest => <label key={interest} className="flex items-center gap-3 text-sm"><input type="checkbox" name="interests" value={interest} defaultChecked={profile.areas_of_expertise?.includes(interest)} />{t(interest)}</label>)}</div></fieldset>
         <div className="border-y border-[#CEC8BD] py-5"><p className="text-sm leading-6 text-[#69635E]">{t("Respeite os colegas, preserve dados de clientes e evite spam. Divulgação comercial deve ser combinada com a administração. Seus dados de apresentação ficam disponíveis aos membros; currículo e email não fazem parte do diretório.")}</p><label className="mt-4 flex items-start gap-3 text-sm"><input className="mt-1" type="checkbox" name="accepted_rules" required /><span>{t("Meus dados são verdadeiros, minha atuação tem relação com a comunidade e concordo com essas regras.")}</span></label></div>
         {error && <p role="alert" className="text-sm text-red-700">{t(error)}</p>}
-        <button disabled={busy} className="w-full rounded-lg bg-[#111111] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? t("Salvando…") : t("Entrar na comunidade gratuita")}</button>
+        {!hasPhoto && <p role="status" className="text-sm font-medium text-[#8B3F2D]">{t('Adicione sua foto para liberar a entrada na comunidade.')}</p>}
+        <button disabled={busy||!hasPhoto} className="w-full rounded-lg bg-[#111111] px-5 py-3 font-semibold text-white disabled:opacity-50">{busy ? t("Salvando…") : t("Entrar na comunidade gratuita")}</button>
       </form>
     </div>
   </main>
