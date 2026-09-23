@@ -25,8 +25,8 @@ export function WhatsAppSummaries({summaries,schedule,unavailable,translations={
     <section className="mt-5 rounded-xl border border-[#FFD6C7] bg-[#FFF6F1] p-5" aria-live="polite">
       <h2 className="text-sm font-bold">{t("Todos os dias, a partir das 18h (Brasília)")}</h2>
       <p className="mt-2 text-sm">{unavailable ? t('Não foi possível consultar a programação. Tente novamente em instantes.') : summaryAvailability(schedule,now,locale)}</p>
-      <p className="mt-2 text-xs leading-5 text-[#68655F]">{t("Cada edição cobre as 24 horas anteriores às 18h. A geração pode levar alguns minutos. Sem novas mensagens, não há edição nem envio ao grupo.")}</p>
-      {schedule?.last_status === 'empty' && <p className="mt-2 text-xs">{t("Último período verificado: nenhuma mensagem disponível para resumir.")}</p>}
+      <p className="mt-2 text-xs leading-5 text-[#68655F]">{t("Cada edição cobre as 24 horas anteriores às 18h. A geração pode levar alguns minutos. Sem conteúdo substantivo, não há edição nem envio ao grupo.")}</p>
+      {schedule?.last_status === 'empty' && <p className="mt-2 text-xs">{t("Último período verificado: nenhuma conversa substantiva para resumir.")}</p>}
     </section>
     {!summaries.length && !unavailable && <p className="mt-6 text-sm text-[#68655F]">{t("O primeiro resumo será publicado após o horário indicado acima, se houver mensagens no período.")}</p>}
     <div className="mt-5 space-y-4">{summaries.map(item=><article key={item.id} className="break-words rounded-xl border border-[#E1E1DD] bg-white p-5 sm:p-6">

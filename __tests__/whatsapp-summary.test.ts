@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { latestSummarySlot, validateWhatsAppInput, parseWhatsAppDigest } from '@/lib/whatsapp-summary'
+import { latestSummarySlot, validateWhatsAppInput, parseWhatsAppDigest, whatsAppDigestPrompt } from '@/lib/whatsapp-summary'
 import { summaryAvailability } from '@/components/community/WhatsAppSummaries'
 vi.mock('@/lib/supabase-admin',()=>({createAdminClient:vi.fn()}))
 vi.mock('@/lib/openrouter',()=>({generateOpenRouterText:vi.fn(),getOpenRouterModel:()=> 'test'}))
@@ -32,10 +32,26 @@ describe('community WhatsApp summary',()=>{
   expect(validateWhatsAppInput(rolling,now)).toBeNull()
   expect(validateWhatsAppInput({...rolling,action:'preview'},now)).not.toBeNull()
  })
- it('rejects malformed or oversized model output',()=>{
+ it('requires a structured, specific digest or an explicit skip',()=>{
   expect(parseWhatsAppDigest('not JSON')).toBeNull()
-  expect(parseWhatsAppDigest(JSON.stringify({title:'Tema',summary:'Síntese da conversa.',key_points:Array(6).fill('Ponto')}))).toBeNull()
-  expect(parseWhatsAppDigest('```json\n{"title":"Tema","summary":"Síntese da conversa.","key_points":[]}\n```')).not.toBeNull()
+  expect(parseWhatsAppDigest(JSON.stringify({publish:false}))).toEqual({publish:false})
+  expect(parseWhatsAppDigest(JSON.stringify({publish:true,title:'Tema',summary:'Síntese da conversa.',highlights:Array(6).fill({type:'context',owner:null,text:'Ponto concreto'})}))).toBeNull()
+  expect(parseWhatsAppDigest('```json\n{"publish":true,"title":"Acesso ao playbook após o cadastro","summary":"Bea encontrou o playbook apenas depois de explorar os menus.","highlights":[{"type":"feedback","owner":"Bea","text":"O evento do Nubank domina a tela após o login e dificulta encontrar o playbook."},{"type":"next_step","owner":"Leon","text":"Tornar playbooks e ferramentas mais visíveis no pós-login."}]}\n```')).toEqual({
+    publish:true,
+    title:'Acesso ao playbook após o cadastro',
+    summary:'Bea encontrou o playbook apenas depois de explorar os menus.',
+    key_points:[
+      'Feedback — Bea: O evento do Nubank domina a tela após o login e dificulta encontrar o playbook.',
+      'Próximo passo — Leon: Tornar playbooks e ferramentas mais visíveis no pós-login.',
+    ],
+  })
+ })
+ it('asks for names, concrete details and silence on low-signal chatter',()=>{
+  const prompt=whatsAppDigestPrompt([{id:'1',at:'2026-09-18T20:00:00Z',author:'Bea',text:'Depois do login só aparece o evento do Nubank.'}])
+  expect(prompt).toContain('Bea')
+  expect(prompt).toContain('nomes fornecidos')
+  expect(prompt).toContain('publish":false')
+  expect(prompt).toContain('elogios genéricos')
  })
  it('shows the actual first slot and a pending state when overdue',()=>{
   const schedule={enabled:true,first_run_at:payload.period_end,next_run_at:payload.period_end,last_status:'scheduled' as const,last_period_end:null,last_checked_at:null}

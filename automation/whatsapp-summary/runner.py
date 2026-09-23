@@ -6,6 +6,7 @@ import fcntl
 import json
 import os
 from pathlib import Path
+import re
 import sqlite3
 import urllib.request
 
@@ -14,6 +15,18 @@ GROUP = '120363427485795268@g.us'
 OWNER = '5511947519397'
 PREFIX = '*Resumo diário · legalops.club*'
 DAY = dt.timedelta(days=1)
+
+def clean_display_name(value):
+    clean = ' '.join(''.join(char for char in (value or '') if char.isalpha() or char in " -',.").split()).strip(' ,.-')
+    if not clean or len(clean) > 80 or not any(char.isalpha() for char in clean): return None
+    if ',' in clean:
+        family, given = (part.strip() for part in clean.split(',', 1))
+        clean = f'{given} {family}'.strip()
+    return clean
+
+def sanitize_text(value):
+    value = re.sub(r'@\d{6,20}', '@membro', value)
+    return re.sub(r'(?<!\d)\+?\d{10,15}(?!\d)', '[contato omitido]', value)
 
 def iso(value):
     return value.astimezone(UTC).isoformat().replace('+00:00', 'Z')
@@ -37,11 +50,11 @@ def post(url, body, headers):
         return json.load(response)
 
 def collect(db, end):
-    rows = db.execute('''select wm_id,ts,sender_jid,text,msg_id from messages
+    rows = db.execute('''select wm_id,ts,sender_jid,sender_name,from_me,text,msg_id from messages
       where chat_jid=? and owner=? and coalesce(deleted,0)=0 and ts>=? and ts<? order by ts,wm_id''',
       (GROUP, OWNER, (end-DAY).timestamp(), end.timestamp())).fetchall()
     messages, authors, seen, omitted = [], {}, set(), 0
-    for row_id, timestamp, author, text, message_id in rows:
+    for row_id, timestamp, author, sender_name, from_me, text, message_id in rows:
         identity = message_id or str(row_id)
         if identity in seen: continue
         seen.add(identity)
@@ -55,8 +68,9 @@ def collect(db, end):
         # No silent truncation: retry/log locally if the period exceeds the API budget.
         if len(text) > 12000: raise ValueError('Source message exceeds supported length')
         author = author or OWNER
-        authors.setdefault(author, f'Participante {len(authors)+1}')
-        messages.append({'id':str(row_id),'at':iso(dt.datetime.fromtimestamp(timestamp,UTC)), 'author':authors[author], 'text':text})
+        display_name = 'Leon' if from_me or author.startswith(OWNER) else clean_display_name(sender_name)
+        authors.setdefault(author, display_name or f'Membro {len(authors)+1}')
+        messages.append({'id':str(row_id),'at':iso(dt.datetime.fromtimestamp(timestamp,UTC)), 'author':authors[author], 'text':sanitize_text(text)})
     if len(messages) > 2000: raise ValueError('Period exceeds supported message count')
     return messages, omitted
 
