@@ -348,7 +348,7 @@ When changing authentication, submit the browser form; rendering it is not enoug
 
 - Feed starts with three recent posts and one publish action. Filters are collapsed; no welcome panels, directory counts or install banner on entry. Install control lives in Profile.
 - Do not add subject-specific agents. Each conversation uses owner-only post/comment/like history, published events, profile, and authorized sources; no read tracking is claimed. API remains Pro-gated.
-- Imported generic member rows are access records, not directory profiles. `isDirectoryMember` controls visibility without deleting real accounts.
+- Imported member rows keep their granted access. Generic placeholder cards remain outside the directory until they have a real name, role and organization; profile completeness is shown separately.
 - Bench frontend source is `agenciaspace/clm-bench`; community-owned catalog, three steps, one criteria group at a time. Keep external discovery attribution out of the product UI; preserve research history separately.
 - Open Playbook is edited at `/community/tools/playbook` using the shared MapWorkspace/Tiptap editor, member comments, private Yjs drafts and lead review. Published content lives in Supabase (`journey=open-playbook`) and `/playbook/` reads `/api/playbook` directly. GitHub is only source-code hosting, never a content contribution or publication dependency. Preserve old browser drafts through the public recovery/download option.
 
@@ -387,6 +387,6 @@ When changing authentication, submit the browser form; rendering it is not enoug
 
 - `/community/members` uses `search_club_members` (security invoker) with 24 results per page and combined public-field filters. Keep private CV/job preferences out of search and facets.
 - Public location/qualifications are opt-in `directory_*` profile fields. Never infer or backfill them from private career preferences or locale/timezone settings.
-- A private profile photo is required before admission and remains required for active members. Profiles without photos stay out of the directory and are sent to `/community/profile` when they return.
+- A private profile photo is required before new admission. Existing active members without a complete profile keep access and, when their basic professional identity is configured, directory visibility; generic placeholder cards stay hidden. They receive a persistent link to `/community/profile` instead of a blocking redirect.
 - The profile-complete badge is automatic when the owned photo and required professional fields are present. It describes completeness of self-declared data, not identity, degrees or skills. The former manual review queue is retired; preserve its rows only as history.
 - Read `docs/MEMBER-DIRECTORY-VERIFICATION.md` and run the rollback SQL checks when changing directory/RLS/review behavior.

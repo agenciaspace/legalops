@@ -98,7 +98,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
       ) : null}
 
       {searchParams?.error ? <p role="alert" className="mt-4 text-sm text-red-700">{t("Não conseguimos salvar. Confira a foto, o contexto profissional e os campos obrigatórios.")}</p> : null}
-      {searchParams?.photo === 'required' ? <p role="alert" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">{t('Adicione uma foto para continuar na comunidade.')}</p> : null}
+      {searchParams?.photo === 'required' ? <p role="alert" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">{t('Adicione uma foto para completar seu perfil.')}</p> : null}
       <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
         <form action={updateCommunityProfile} className="rounded-xl border border-[#E1E1DD] bg-white p-5 sm:p-6">
           <ProfilePhoto userId={user?.id ?? ""} path={profile?.avatar_path ?? null} name={profile?.full_name ?? t("Seu perfil")} required />

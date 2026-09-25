@@ -48,11 +48,13 @@ describe('Club admission and Pro routing', () => {
     for (const path of ['/community', '/community/members', '/community/profile', '/club/entrar']) expect((await request(path)).status).toBe(200)
     expect(state.profileReads).toBe(4) // Locale preferences are read; career onboarding is not required.
   })
-  it('requires legacy members without a photo to complete it without blocking the upload endpoint', async () => {
+  it('keeps legacy members without a photo active while they complete their profile', async () => {
     state.user = { id: 'legacy' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive', avatar_path:null }
-    expect((await request('/community')).headers.get('location')).toBe('https://legalops.club/community/profile?photo=required')
-    expect((await request('/community/profile')).status).toBe(200)
-    expect((await request('/api/club/avatar')).status).toBe(200)
+    for (const path of ['/', '/community', '/community/members', '/community/profile', '/api/club/avatar']) {
+      const response = await request(path)
+      if (path === '/') expect(response.headers.get('location')).toBe('https://legalops.club/community')
+      else expect(response.status).toBe(200)
+    }
   })
   it('blocks free users from Pro pages and AI APIs', async () => {
     state.user = { id: 'free' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive', avatar_path:'free/photo.jpg' }

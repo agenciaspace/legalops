@@ -57,6 +57,11 @@ change. It is not identity proof, credential certification or manual approval.
 The database RPC admits only the authenticated, confirmed-email user and ignores
 billing and Pro fields. Existing active/complimentary benefits were migrated to
 independent Pro status; future Pro expiry does not expire community membership.
+Existing active members remain in the community when their profile is incomplete;
+the interface reminds them to complete it without blocking access. A profile
+with a real name, role and organization remains in the directory even without a
+photo, while generic imported placeholder cards stay hidden. The stricter photo
+requirement applies to new admission.
 PIX checkout and manual activation are implemented. Price and period must be
 explicitly configured before opening sales; no legacy founder price is assumed.
 

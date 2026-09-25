@@ -13,6 +13,6 @@ export default async function ClubJoinPage({ searchParams }: { searchParams?: {n
     supabase.from('community_members').select('club_access_status,club_access_expires_at').eq('user_id', user.id).maybeSingle(),
     supabase.from('account_profiles').select('country_code,timezone,avatar_path,full_name,current_role,organization_name,linkedin_url,public_bio,preferred_locations,areas_of_expertise').eq('user_id', user.id).maybeSingle(),
   ])
-  if (hasActiveClubAccess(member)) redirect(profile?.avatar_path ? destination : '/community/profile?photo=required')
+  if (hasActiveClubAccess(member)) redirect(destination)
   return <ClubJoinForm userId={user.id} profile={profile ?? {}} destination={destination} />
 }

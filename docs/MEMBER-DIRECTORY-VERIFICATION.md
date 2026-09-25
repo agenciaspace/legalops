@@ -15,8 +15,10 @@ remain only as audit history.
 
 A private photo is required before `join_club` can activate free membership.
 Active members cannot remove it without replacing it. Legacy members without a
-photo are redirected to their profile, and profiles without a photo do not
-appear in directory results.
+photo keep access and, when they already have a real name, role and organization,
+remain visible in the directory. Generic imported placeholder cards stay hidden
+until configured. All incomplete active members receive a persistent
+profile-completion reminder with a direct link to add the missing information.
 
 Community and Pro entitlements remain independent from the badge.
 
@@ -32,5 +34,5 @@ remain optional and self-declared.
 ## Verification
 
 - `supabase/tests/club_admission.sql` checks photo-gated admission, free/Pro separation and automatic completeness.
-- `supabase/tests/member_directory_verification.sql` checks automatic status changes and confirms that the manual request RPC is no longer executable by members.
+- `supabase/tests/member_directory_verification.sql` checks automatic status changes, keeps incomplete active members visible and confirms that the manual request RPC is no longer executable by members.
 - Vitest covers the upload boundary, server-side admission check, member gate, labels and translations.

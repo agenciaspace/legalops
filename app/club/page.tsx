@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { BrandWordmark } from '@/components/BrandLogo'
 import { LegalOpsEcosystem } from '@/components/LegalOpsEcosystem'
 import { ResumeClubSession } from '@/components/community/ResumeClubSession'
+import { createAdminClient } from '@/lib/supabase-admin'
 
 
 export const metadata: Metadata = {
@@ -41,13 +42,27 @@ function SignupLink() {
   return <Link href="/cadastro" className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#111111] px-6 py-3 text-sm font-semibold text-white hover:bg-[#2A2927] sm:w-auto">Criar meu perfil gratuito →</Link>
 }
 
-export default function ClubLandingPage() {
+async function getActiveMemberCount() {
+  const now = new Date().toISOString()
+  const { count, error } = await createAdminClient()
+    .from('community_members')
+    .select('user_id', { count: 'exact', head: true })
+    .in('club_access_status', ['active', 'complimentary'])
+    .or(`club_access_expires_at.is.null,club_access_expires_at.gt.${now}`)
+  return error ? null : count
+}
+
+export default async function ClubLandingPage() {
+  const memberCount = await getActiveMemberCount()
   return (
     <div className="min-h-screen bg-[#F5F1E8] text-[#111111]" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
       <ResumeClubSession />
       <header className="mx-auto flex max-w-[1180px] items-center justify-between gap-4 border-b border-[#CEC8BD] px-5 py-6 sm:px-8">
         <BrandWordmark suffix="club" className="inline-flex items-baseline text-[25px] leading-none sm:text-[30px]" />
-        <Link href="/login?next=/community" className="text-sm font-semibold underline underline-offset-4">Entrar</Link>
+        <div className="flex items-center gap-3 sm:gap-5">
+          {memberCount !== null ? <span className="text-xs font-semibold text-[#625E59] sm:text-sm">{memberCount} {memberCount === 1 ? 'pessoa' : 'pessoas'} na comunidade</span> : null}
+          <Link href="/login?next=/community" className="shrink-0 text-sm font-semibold underline underline-offset-4">Entrar</Link>
+        </div>
       </header>
       <main>
         <section className="mx-auto grid max-w-[1180px] gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[1.2fr_.8fr] lg:items-center lg:gap-16 lg:py-24">

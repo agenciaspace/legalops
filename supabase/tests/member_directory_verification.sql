@@ -26,6 +26,11 @@ end $$;
 update public.account_profiles set avatar_path=null
 where user_id='11111111-1919-4919-8919-111111111111';
 
+update public.community_members set
+  club_access_status='active',
+  club_access_expires_at=null
+where user_id='11111111-1919-4919-8919-111111111111';
+
 do $$ begin
   assert exists(
     select 1 from public.community_members
@@ -38,6 +43,21 @@ do $$ begin
   assert not has_function_privilege('service_role','public.review_club_profile(uuid,uuid,text,text)','EXECUTE'),
     'Manual service review must stay disabled';
 end $$;
+
+select set_config('request.jwt.claim.sub','11111111-1919-4919-8919-111111111111',true);
+set local role authenticated;
+
+do $$
+declare directory jsonb;
+begin
+  directory := public.search_club_members('{}'::jsonb);
+  assert exists(
+    select 1 from jsonb_array_elements(directory->'members') member
+    where member->>'user_id'='11111111-1919-4919-8919-111111111111'
+  ), 'An active member with an incomplete profile must remain in the directory';
+end $$;
+
+reset role;
 
 select 'Automatic profile completeness assertions passed' as result;
 rollback;
