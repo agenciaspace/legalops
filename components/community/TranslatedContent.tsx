@@ -8,7 +8,7 @@ import { useClubLanguage } from './ClubLanguage'
 
 let lastRefreshAt = 0
 
-export function TranslatedContent({ source, original, enabled, serverLocale, compact = false }: { source?: TranslationSource; original: TranslationPayload; enabled: boolean; serverLocale: ClubLocale; compact?: boolean }) {
+export function TranslatedContent({ source, original, enabled, serverLocale, compact = false, titleAs = 'h2', titleClassName, bodyClassName }: { source?: TranslationSource; original: TranslationPayload; enabled: boolean; serverLocale: ClubLocale; compact?: boolean; titleAs?: 'h1' | 'h2' | 'h3'; titleClassName?: string; bodyClassName?: string }) {
   const { locale, t } = useClubLanguage()
   const router = useRouter()
   const [originalSelection, setOriginalSelection] = useState<string | null>(null)
@@ -38,12 +38,13 @@ export function TranslatedContent({ source, original, enabled, serverLocale, com
       router.refresh()
     } catch { setFailedAction(true) } finally { setBusy(false) }
   }
+  const Title = titleAs
   return <div className={compact ? 'text-sm leading-6' : 'text-[13px] leading-[1.65]'}>
     {available && visible ? Object.entries(original).map(([field]) => {
       const value = visible[field]
       if (!value) return null
       if (Array.isArray(value)) return <ul key={field} className="list-disc pl-5">{value.map((item, i) => <li key={i}>{item}</li>)}</ul>
-      return field === 'title' ? <h2 key={field} className="text-[17px] font-extrabold leading-6 text-[#252420]">{value}</h2> : <p key={field} className="mt-2 whitespace-pre-wrap break-words text-[#68655F]">{value}</p>
+      return field === 'title' ? <Title key={field} className={titleClassName ?? "text-[17px] font-extrabold leading-6 text-[#252420]"}>{value}</Title> : <p key={field} className={bodyClassName ?? "mt-2 whitespace-pre-wrap break-words text-[#68655F]"}>{value}</p>
     }) : <p role="status" className="text-[#69635E]">{source?.status === 'failed' ? t('Tradução indisponível. Tente novamente.') : t('Traduzindo para seu idioma…')}</p>}
     {enabled && !sameLanguage && <div className="mt-2 flex flex-wrap items-center gap-x-3 text-xs text-[#817A73]">
       {translated && !showOriginal && <span>{t('Tradução automática')}</span>}
