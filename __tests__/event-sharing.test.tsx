@@ -3,21 +3,21 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { clubReturnPath } from '@/lib/club-return-path'
 
-const state = vi.hoisted(() => ({ user: null as null | { id: string }, member: null as any, tables: [] as string[] }))
+const state = vi.hoisted(() => ({ user: null as null | { id: string }, member: null as any, tables: [] as string[], location: '' }))
 vi.mock('@/app/(main)/community/actions', () => ({ registerPublicEvent: vi.fn() }))
 vi.mock('@/components/community/EventUpload', () => ({ EventUpload: () => <p>Private upload</p> }))
 vi.mock('@/lib/supabase-server', () => ({ createServerSupabaseClient: async () => ({
   auth: { getUser: async () => ({ data: { user: state.user } }) },
   from: (table: string) => {
     state.tables.push(table)
-    const data = table === 'community_events' ? { id: 'event', slug: 'bench-nubank', title: 'Bench & contratos', starts_at: '2026-09-17T12:00:00Z' } : table === 'community_members' ? state.member : null
+    const data = table === 'community_events' ? { id: 'event', slug: 'bench-nubank', title: 'Bench & contratos', starts_at: '2026-09-17T12:00:00Z', location_label: state.location } : table === 'community_members' ? state.member : null
     const query: any = { select: () => query, eq: () => query, maybeSingle: async () => ({ data }) }
     return query
   },
 }) }))
 import EventPage from '@/app/(main)/community/events/[slug]/page'
 
-beforeEach(() => { state.user = null; state.member = null; state.tables = [] })
+beforeEach(() => { state.user = null; state.member = null; state.tables = []; state.location = '' })
 afterEach(cleanup)
 
 it.each([false, true])('invites a nonmember to join without reading private materials (signed in: %s)', async signedIn => {
@@ -34,6 +34,14 @@ it.each([false, true])('invites a nonmember to join without reading private mate
   expect(share.searchParams.get('text')).toContain('Bench & contratos')
   expect(share.searchParams.get('text')).toMatch(/^\*Bench & contratos\*\n\n📸 /)
   expect(share.searchParams.get('text')).toContain('👉 Acesse o espaço do evento:\nhttps://legalops.club/community/events/bench-nubank\n\n')
+})
+
+it('keeps public registration open while the event date is still being confirmed', async () => {
+  state.location = 'Remoto — data a confirmar'
+  render(await EventPage({ params: { slug: 'bench-nubank' } }))
+  expect(screen.getAllByText('Data a confirmar')).toHaveLength(2)
+  expect(screen.getByRole('heading', { name: 'Reserve sua vaga' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Confirmar cadastro' })).toBeInTheDocument()
 })
 
 it('accepts event destinations and rejects external, management and encoded redirect paths', () => {

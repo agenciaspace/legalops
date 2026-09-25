@@ -29,7 +29,8 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   const authorIds = Array.from(new Set(resources?.map(item => item.uploader_id) ?? []))
   const { data: authors } = authorIds.length ? await supabase.from('community_members').select('user_id,display_name,avatar_path,current_role,organization_name').in('user_id', authorIds) : { data: [] }
   const { data: discussions } = isMember ? await supabase.from('community_posts').select('id,title,body,created_at').eq('event_id', event.id).order('created_at', { ascending: false }).limit(20) : { data: [] }
-  const past = new Date(event.ends_at || event.starts_at) < new Date()
+  const dateTbd = /data a confirmar/i.test(event.location_label || '')
+  const past = !dateTbd && new Date(event.ends_at || event.starts_at) < new Date()
   const joinUrl = `/club/entrar?next=${encodeURIComponent(`/community/events/${event.slug}`)}`
   const activeTab = searchParams?.tab === 'discussoes' ? 'discussoes' : searchParams?.tab === 'documentos' ? 'documentos' : 'fotos'
   const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
@@ -37,7 +38,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   const overview = <div className="space-y-5">
     <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{description:event.description,location_label:event.location_label}} enabled={translations.enabled} serverLocale={getClubLocale()} />
     <dl className="space-y-4 text-sm text-[#625E59]">
-      <div><dt className="text-xs font-semibold text-[#817A73]">{t('Quando')}</dt><dd className="mt-1">{new Intl.DateTimeFormat(getClubLocale(), { dateStyle: 'long', timeStyle: 'short', timeZone: getClubTimezone() }).format(new Date(event.starts_at))}</dd></div>
+      <div><dt className="text-xs font-semibold text-[#817A73]">{t('Quando')}</dt><dd className="mt-1">{dateTbd ? t('Data a confirmar') : new Intl.DateTimeFormat(getClubLocale(), { dateStyle: 'long', timeStyle: 'short', timeZone: getClubTimezone() }).format(new Date(event.starts_at))}</dd></div>
 
       <div><dt className="text-xs font-semibold text-[#817A73]">{t('Organização')}</dt><dd className="mt-1 break-words">{event.host_name}</dd></div>
     </dl>
