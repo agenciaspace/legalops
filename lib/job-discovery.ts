@@ -94,6 +94,8 @@ const DEFAULT_CAREER_SITES = [
 const DEFAULT_GUPY_SEARCH_TERMS = [
   'legal ops',
   'legal operations',
+  'estágio legal ops',
+  'estágio operações jurídicas',
   'operações jurídicas',
   'controladoria jurídica',
   'controller jurídico',
@@ -104,13 +106,13 @@ const DEFAULT_GUPY_SEARCH_TERMS = [
 
 const DEFAULT_LINKEDIN_SEARCHES = [
   { keywords: 'Legal Operations', maxPages: 8 },
+  { keywords: 'Estágio Legal Operations', maxPages: 4 },
   { keywords: 'Controladoria Jurídica', maxPages: 8 },
   { keywords: 'Operações Jurídicas', maxPages: 3 },
 ] as const
 
 const JOB_URL_HINT = /(?:\/|^)(?:jobs?|careers?|vagas?|oportunidades?|openings?|positions?)(?:\/|\?|$)/i
 const LATAM_TEXT = /\b(?:brazil|brasil|latam|latin america|south america|s[aã]o paulo|rio de janeiro|belo horizonte|bras[ií]lia|curitiba|porto alegre|florian[oó]polis|recife|salvador|fortaleza|goi[aâ]nia|campinas|manaus)\b/i
-const INTERN_TITLE = /\b(?:intern(?:ship)?|est[aá]gio|estagi[aá]ri[oa])\b/i
 const TALENT_POOL_TITLE = /\b(?:banco\s+de\s+talentos?|talent\s+pool|vaga\s+banco)\b/i
 const REQUEST_TIMEOUT_MS = 12_000
 const SITE_URL_LIMIT = 24
@@ -124,7 +126,7 @@ function envList(name: string, fallback: readonly string[]): string[] {
 }
 
 function eligibleTitle(title: string): boolean {
-  return matchesLegalOpsTitle(title) && !INTERN_TITLE.test(title) && !TALENT_POOL_TITLE.test(title)
+  return matchesLegalOpsTitle(title) && !TALENT_POOL_TITLE.test(title)
 }
 
 function cleanString(value: unknown): string | null {
@@ -527,7 +529,7 @@ export function parseGupyPortalJobs(payload: unknown, now = new Date()): Discove
     const deadline = cleanString(job.applicationDeadline)
 
     if (!title || !url || !company || !eligibleTitle(title)) return []
-    if (vacancyType.includes('internship') || vacancyType.includes('talent_pool')) return []
+    if (vacancyType.includes('talent_pool')) return []
     if (deadlineHasPassed(deadline, now)) return []
 
     const location = formatLocation([

@@ -144,7 +144,7 @@ describe('multi-source job discovery parsers', () => {
     }
   })
 
-  it('excludes LinkedIn internships and talent pools', () => {
+  it('includes Legal Ops internships and excludes talent pools from LinkedIn', () => {
     const jobs = parseLinkedInJobCards(`
       <li><div data-entity-urn="urn:li:jobPosting:4454450311">
         <a class="base-card__full-link" href="https://br.linkedin.com/jobs/view/4454450311"></a>
@@ -160,7 +160,12 @@ describe('multi-source job discovery parsers', () => {
       </div></li>
     `)
 
-    expect(jobs).toEqual([])
+    expect(jobs).toHaveLength(1)
+    expect(jobs[0]).toMatchObject({
+      title: 'Estágio em Legal Operations',
+      source_board: 'linkedin',
+      accepts_brazil: true,
+    })
   })
 
   it('parses an Ashby Legal Operations role in Brazil', () => {
@@ -214,7 +219,7 @@ describe('multi-source job discovery parsers', () => {
     }
   })
 
-  it('parses only active non-internship Gupy portal roles', () => {
+  it('parses active Legal Ops roles including internships from Gupy', () => {
     const jobs = parseGupyPortalJobs({
       data: [
         {
@@ -267,7 +272,7 @@ describe('multi-source job discovery parsers', () => {
       ],
     }, new Date('2026-08-20T12:00:00Z'))
 
-    expect(jobs).toHaveLength(1)
+    expect(jobs).toHaveLength(2)
     expect(jobs[0]).toMatchObject({
       title: 'Analista de Legal Ops',
       source_board: 'gupy',
@@ -275,6 +280,12 @@ describe('multi-source job discovery parsers', () => {
       location: 'São Paulo, Brasil',
       accepts_brazil: true,
       company_logo_url: 'https://assets.gupy.io/production/companies/123/career/logo.png',
+    })
+    expect(jobs[1]).toMatchObject({
+      title: 'Estágio Legal Operations - Cadastro',
+      company: 'Reis Advogados',
+      source_board: 'gupy',
+      accepts_brazil: true,
     })
     expect(jobs[0].url).toBe('https://cgmadvogados.gupy.io/job/active')
   })

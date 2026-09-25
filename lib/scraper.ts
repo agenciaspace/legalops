@@ -85,7 +85,9 @@ Find job listings posted or updated in the last 30 days that are still accepting
 
 Include roles whose primary work is Legal Operations, Legal Ops, operações jurídicas, operações legais, controladoria jurídica, Legal Project Management, Legal Process, Legal Innovation, Legal Technology/LegalTech, CLM or contract operations, legal spend/e-billing, legal data/BI/automation, or law department strategy and operations.
 
-Exclude generic lawyer, attorney, counsel, General Counsel, Chief Legal Officer, Head of Legal, compliance, privacy, and paralegal roles unless the title itself clearly identifies Legal Operations work. Exclude internships, expired/closed listings, duplicates, and roles whose location rules exclude Brazil/LATAM.
+Include internships and entry-level roles when their title or primary work is clearly related to Legal Operations. Look for Portuguese titles such as "Estágio em Legal Ops", "Estagiário(a) de Operações Jurídicas" and their English equivalents such as "Legal Operations Intern".
+
+Exclude generic lawyer, attorney, counsel, General Counsel, Chief Legal Officer, Head of Legal, compliance, privacy, and paralegal roles unless the title itself clearly identifies Legal Operations work. Exclude expired/closed listings, duplicates, talent pools, and roles whose location rules exclude Brazil/LATAM.
 
 Search public LinkedIn Jobs pages, Gupy, Indeed Brasil, company career sites, CLOC Jobs, Legal.io, LegalOperators, GoInhouse, Quero Home, and Radar da Gestão. Prefer the employer's careers page or canonical ATS posting as applicationLink. A public LinkedIn /jobs/view/ posting is also acceptable when it contains the job description, employer identity and an active application path. Never return a search page, login page, or a repost on Indeed, CLOC, Legal.io, LegalOperators, GoInhouse, Jooble or Adzuna. Return the publication date as YYYY-MM-DD when available. Set acceptsBrazilCandidates to true only when the location is Brazil/LATAM or the listing explicitly accepts remote candidates based in Brazil/LATAM.`
 }

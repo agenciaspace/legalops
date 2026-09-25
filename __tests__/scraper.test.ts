@@ -134,6 +134,13 @@ describe('matchesLegalOpsTitle', () => {
     expect(matchesLegalOpsTitle('Advogado(a) Trabalhista Sênior')).toBe(false)
   })
 
+  it('matches Legal Ops internship titles in Portuguese and English', () => {
+    expect(matchesLegalOpsTitle('Estágio em Legal Operations')).toBe(true)
+    expect(matchesLegalOpsTitle('Estagiária de Operações Jurídicas')).toBe(true)
+    expect(matchesLegalOpsTitle('Legal Operations Intern')).toBe(true)
+    expect(matchesLegalOpsTitle('Estágio em Marketing')).toBe(false)
+  })
+
   it('matches adjacent operations titles found in the Brazilian LinkedIn audit', () => {
     expect(matchesLegalOpsTitle('Controller Jurídico')).toBe(true)
     expect(matchesLegalOpsTitle('ANL OPER JURIDICO JR')).toBe(true)
@@ -171,6 +178,8 @@ describe('buildFirecrawlAgentPrompt', () => {
     expect(prompt).toContain('last 30 days')
     expect(prompt).toContain('Roles in Brazil')
     expect(prompt).toContain('operações jurídicas')
+    expect(prompt).toContain('Include internships and entry-level roles')
+    expect(prompt).not.toContain('Exclude internships')
     expect(prompt).toContain('Exclude generic lawyer')
     expect(prompt).toContain('Prefer the employer')
     expect(prompt).toContain('public LinkedIn /jobs/view/ posting')
