@@ -13,19 +13,19 @@ vi.mock('@supabase/ssr', () => ({ createServerClient: (_url: string, _key: strin
 import { middleware } from '../middleware'
 const request = (path: string) => middleware(new NextRequest(`https://legalops.club${path}`, { headers: { host: 'legalops.club' } }))
 beforeEach(() => { state.user = null; state.member = {}; state.authReads = 0; state.profileReads = 0; state.refresh = false })
-it('resumes installed root launches automatically and preserves refreshed session cookies',async()=>{
+it('keeps the public root available without waiting for session refresh',async()=>{
   state.user={id:'member'};state.member={club_access_status:'active',avatar_path:'member/photo.jpg'};state.refresh=true
   const root=await request('/')
-  expect(root.headers.get('location')).toBe('https://legalops.club/community')
-  expect(root.cookies.get('refreshed-session')?.value).toBe('test-token')
+  expect(root.headers.get('x-middleware-rewrite')).toBe('https://legalops.club/club')
+  expect(state.authReads).toBe(0)
   expect((await request('/login')).cookies.get('refreshed-session')?.value).toBe('test-token')
   // Pricing links remain accessible to signed-in members.
   expect((await request('/club')).status).toBe(200)
 })
-it('keeps the public landing for guests and sends incomplete accounts to admission',async()=>{
+it('keeps the public landing available for guests and incomplete accounts',async()=>{
   expect((await request('/')).headers.get('x-middleware-rewrite')).toBe('https://legalops.club/club')
   state.user={id:'new'}
-  expect((await request('/')).headers.get('location')).toBe('https://legalops.club/club/entrar')
+  expect((await request('/')).headers.get('x-middleware-rewrite')).toBe('https://legalops.club/club')
 })
 it('allows QR landing and downloads to enforce their own contact privacy, while keeping settings private', async () => {
   const id = '42499cb1-fd6f-4b45-aeac-9d10eea4c94d'
@@ -52,7 +52,7 @@ describe('Club admission and Pro routing', () => {
     state.user = { id: 'legacy' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive', avatar_path:null }
     for (const path of ['/', '/community', '/community/members', '/community/profile', '/api/club/avatar']) {
       const response = await request(path)
-      if (path === '/') expect(response.headers.get('location')).toBe('https://legalops.club/community')
+      if (path === '/') expect(response.headers.get('x-middleware-rewrite')).toBe('https://legalops.club/club')
       else expect(response.status).toBe(200)
     }
   })

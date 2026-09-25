@@ -49,6 +49,7 @@ async function getActiveMemberCount() {
     .select('user_id', { count: 'exact', head: true })
     .in('club_access_status', ['active', 'complimentary'])
     .or(`club_access_expires_at.is.null,club_access_expires_at.gt.${now}`)
+    .abortSignal(AbortSignal.timeout(1500))
   return error ? null : count
 }
 

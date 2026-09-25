@@ -17,6 +17,22 @@ export async function middleware(request: NextRequest) {
   // x-forwarded-host is honored so the Cloudflare Club proxy keeps the correct product context.
   const isClubRoot = isClubDomain && pathname === '/'
 
+  // The public Club home must not wait for Auth. ResumeClubSession restores an
+  // existing member session in the browser when Supabase is available again.
+  if (isClubDomain && (pathname === '/' || pathname === '/club')) {
+    const requestHeaders = new Headers(request.headers)
+    const locale = request.cookies.has(CLUB_LOCALE_COOKIE)
+      ? normalizeClubLocale(request.cookies.get(CLUB_LOCALE_COOKIE)?.value)
+      : browserClubLocale(request.headers.get('accept-language'))
+    requestHeaders.set('x-club-locale', locale)
+    requestHeaders.set('x-club-timezone', normalizeClubTimezone(request.cookies.get('club-timezone')?.value))
+    const response = isClubRoot
+      ? NextResponse.rewrite(new URL('/club', request.url), { request: { headers: requestHeaders } })
+      : NextResponse.next({ request: { headers: requestHeaders } })
+    response.cookies.set(CLUB_LOCALE_COOKIE, locale, { path: '/', maxAge: 31536000, sameSite: 'lax', secure: request.nextUrl.protocol === 'https:' })
+    return response
+  }
+
   // Published event landings must remain reachable during an Auth/Data API outage.
   // Visitors without a Supabase session can use the reviewed static event snapshot;
   // signed-in members continue through the normal private event workspace.

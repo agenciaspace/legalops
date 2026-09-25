@@ -8,7 +8,9 @@ vi.mock('@/lib/supabase-admin', () => ({
     from: () => ({
       select: () => ({
         in: () => ({
-          or: async () => ({ count: mocks.count, error: mocks.error }),
+          or: () => ({
+            abortSignal: async () => ({ count: mocks.count, error: mocks.error }),
+          }),
         }),
       }),
     }),
