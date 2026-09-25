@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { hasActiveClubAccess } from '@/lib/community'
 import { hasClubProAccess, isClubProPath } from '@/lib/club-membership'
+import { getPublicEventFallback } from '@/lib/public-events'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -15,6 +16,21 @@ export async function middleware(request: NextRequest) {
   // Keep legalops.work as the job platform while legalops.club gets its own home.
   // x-forwarded-host is honored so the Cloudflare Club proxy keeps the correct product context.
   const isClubRoot = isClubDomain && pathname === '/'
+
+  // Published event landings must remain reachable during an Auth/Data API outage.
+  // Visitors without a Supabase session can use the reviewed static event snapshot;
+  // signed-in members continue through the normal private event workspace.
+  const publicEventSlug = pathname.match(/^\/community\/events\/([^/]+)$/)?.[1]
+  const hasSupabaseSessionCookie = request.cookies.getAll().some(({ name }) => /^sb-.+-auth-token(?:\.\d+)?$/.test(name))
+  if (publicEventSlug && getPublicEventFallback(publicEventSlug) && !hasSupabaseSessionCookie) {
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-public-event-fallback', publicEventSlug)
+    requestHeaders.set('x-club-locale', request.cookies.has(CLUB_LOCALE_COOKIE)
+      ? normalizeClubLocale(request.cookies.get(CLUB_LOCALE_COOKIE)?.value)
+      : browserClubLocale(request.headers.get('accept-language')))
+    requestHeaders.set('x-club-timezone', normalizeClubTimezone(request.cookies.get('club-timezone')?.value))
+    return NextResponse.next({ request: { headers: requestHeaders } })
+  }
 
   // Public Bench has its own input limits and publishes only reviewed content.
   // Keep this exact path independent of Club authentication and paid access.

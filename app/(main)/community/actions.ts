@@ -8,6 +8,8 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { COMMUNITY_CATEGORIES, hasActiveClubAccess } from '@/lib/community'
 import { generateClubJobAlerts } from '@/lib/club-job-matching'
 import { hasClubProAccess, normalizeLinkedInProfile } from '@/lib/club-membership'
+import { getPublicEventFallback } from '@/lib/public-events'
+import { sendClubTransactionalEmail } from '@/lib/club-email-delivery'
 
 const PROFESSIONAL_TYPES = new Set(['law_firm', 'legal_dept', 'public_sector', 'freelance', 'other'])
 const REMOTE_PREFERENCES = new Set(['remote', 'hybrid', 'onsite', 'any'])
@@ -18,6 +20,10 @@ function commaSeparatedValues(formData: FormData, field: string, limit: number) 
     .map(value => value.trim().slice(0, 120))
     .filter(Boolean)
     .slice(0, limit)
+}
+
+function escapeEmailHtml(value: string) {
+  return value.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]!)
 }
 
 async function getAuthenticatedMember(requirePro = false) {
@@ -86,16 +92,49 @@ export async function createCommunitySubtopic(formData: FormData) {
 
 export async function registerPublicEvent(formData: FormData) {
   const eventId = String(formData.get('event_id') ?? '').trim()
+  const eventSlug = String(formData.get('event_slug') ?? '').trim().slice(0, 160)
   const name = String(formData.get('name') ?? '').trim().slice(0, 120)
   const email = String(formData.get('email') ?? '').trim().slice(0, 240).toLowerCase()
   const role = String(formData.get('role') ?? '').trim().slice(0, 120)
   const organization = String(formData.get('organization') ?? '').trim().slice(0, 120)
-  if (!/^[0-9a-f-]{36}$/i.test(eventId) || name.length < 2 || role.length < 2 || organization.length < 2 || !email.includes('@')) return
+  const staticEvent = getPublicEventFallback(eventSlug)
+  const validEventId = /^[0-9a-f-]{36}$/i.test(eventId)
+  if ((!validEventId && !staticEvent) || name.length < 2 || role.length < 2 || organization.length < 2 || !email.includes('@')) return
+
   const admin = createAdminClient()
-  const { data: event } = await admin.from('community_events').select('slug').eq('id', eventId).eq('is_published', true).maybeSingle()
-  if (!event) return
-  await admin.from('community_event_rsvps').insert({ event_id: eventId, user_id: null, response: 'confirmed', guest_name: name, guest_email: email, guest_role: role, organization_name: organization, confirmed_at: new Date().toISOString() })
-  redirect(`/community/events/${event.slug}?registered=1`)
+  const eventQuery = admin.from('community_events').select('id,slug').eq('is_published', true)
+  const { data: event } = await (validEventId ? eventQuery.eq('id', eventId) : eventQuery.eq('slug', eventSlug))
+    .abortSignal(AbortSignal.timeout(3500))
+    .maybeSingle()
+
+  let saved = false
+  if (event) {
+    const { error } = await admin.from('community_event_rsvps').insert({ event_id: event.id, user_id: null, response: 'confirmed', guest_name: name, guest_email: email, guest_role: role, organization_name: organization, confirmed_at: new Date().toISOString() }).abortSignal(AbortSignal.timeout(3500))
+    saved = !error
+  }
+
+  const slug = event?.slug || staticEvent?.slug
+  if (!slug) return
+  if (!saved) {
+    const organizerEmail = process.env.LEGALOPS_ADMIN_EMAILS?.split(',').map(value => value.trim()).find(Boolean)
+    if (!organizerEmail || !staticEvent) redirect(`/community/events/${slug}?registration=error`)
+    const textBody = [
+      `Nova inscrição no ${staticEvent.title}`,
+      `Nome: ${name}`,
+      `Email: ${email}`,
+      `Cargo: ${role}`,
+      `Organização: ${organization}`,
+      '',
+      'Registro enviado por email porque o banco estava indisponível.',
+    ].join('\n')
+    const htmlBody = `<p>${escapeEmailHtml(textBody).replace(/\n/g, '<br>')}</p>`
+    try {
+      await sendClubTransactionalEmail({ to: [organizerEmail], replyTo: email, subject: `Inscrição · ${staticEvent.title}`, textBody, htmlBody })
+    } catch {
+      redirect(`/community/events/${slug}?registration=error`)
+    }
+  }
+  redirect(`/community/events/${slug}?registered=1`)
 }
 
 

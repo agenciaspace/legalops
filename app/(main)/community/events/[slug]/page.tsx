@@ -11,26 +11,18 @@ import { EventPublications } from '@/components/community/EventPublications'
 import BenchClient from '../../bench/BenchClient'
 import { EventShare } from '@/components/community/EventShare'
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
+import { getPublicEventFallback, type PublicEvent } from '@/lib/public-events'
 
 export const dynamic = 'force-dynamic'
 
-type PublicEvent = {
-  id: string
-  slug: string
-  title: string
-  description: string
-  host_name: string
-  starts_at: string
-  ends_at: string | null
-  location_label: string
-  event_type: string
-  is_published: boolean
-  participation_mode: 'remoto' | 'presencial' | 'hibrido'
-  participation_details: string
-  pre_questions: string[] | null
-}
-
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const fallback = getPublicEventFallback(params.slug)
+  if (fallback) {
+    const description = fallback.description.length > 180 ? `${fallback.description.slice(0, 177).trim()}…` : fallback.description
+    const url = `https://legalops.club/community/events/${fallback.slug}`
+    return { title: `${fallback.title} | legalops.club`, description, alternates: { canonical: url }, openGraph: { title: fallback.title, description, url, siteName: 'legalops.club', type: 'website' } }
+  }
   const supabase = await createServerSupabaseClient()
   const { data: event } = await supabase.from('community_events').select('slug,title,description').eq('slug', params.slug).eq('is_published', true).maybeSingle()
   if (!event) return { title: 'Evento | legalops.club' }
@@ -44,11 +36,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-function PublicEventLanding({ event, translations, user, registered, dateTbd, past }: {
+function PublicEventLanding({ event, translations, user, registered, registrationError, dateTbd, past }: {
   event: PublicEvent
   translations: Awaited<ReturnType<typeof loadClubTranslations>>
   user: { id: string } | null
   registered: boolean
+  registrationError: boolean
   dateTbd: boolean
   past: boolean
 }) {
@@ -94,8 +87,14 @@ function PublicEventLanding({ event, translations, user, registered, dateTbd, pa
             <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em]">{t('Seu interesse está confirmado.')}</h2>
             <p className="mt-3 text-sm leading-6 text-[#625E59]">{t('Você receberá as informações quando a data e o acesso forem definidos.')}</p>
             <Link href={joinUrl} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[#24231F] px-4 text-sm font-bold">{user ? t('Completar meu cadastro') : t('Conhecer a comunidade')} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          </div> : registrationError ? <div role="alert">
+            <p className="text-xs font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Inscrição pendente')}</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em]">{t('Não foi possível registrar agora.')}</h2>
+            <p className="mt-3 text-sm leading-6 text-[#625E59]">{t('Envie seus dados por email e a organização confirmará sua participação.')}</p>
+            <a href={`mailto:contato@legalops.club?subject=${encodeURIComponent(`Inscrição · ${event.title}`)}`} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#24231F] px-4 text-sm font-bold text-white">{t('Enviar por email')} <ArrowRight className="ml-2 h-4 w-4" /></a>
           </div> : <form action={registerPublicEvent}>
-            <input type="hidden" name="event_id" value={event.id} />
+            {event.id ? <input type="hidden" name="event_id" value={event.id} /> : null}
+            <input type="hidden" name="event_slug" value={event.slug} />
             <p className="text-xs font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Inscrição gratuita')}</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em]">{t('Reserve sua vaga')}</h2>
             <p className="mt-2 text-sm leading-6 text-[#625E59]">{t('Você não precisa criar uma conta para registrar seu interesse.')}</p>
@@ -159,8 +158,13 @@ function PublicEventLanding({ event, translations, user, registered, dateTbd, pa
   </main>
 }
 
-export default async function EventPage({ params, searchParams }: { params: { slug: string }, searchParams?: { registered?: string, shared?: string, tab?: string } }) {
+export default async function EventPage({ params, searchParams }: { params: { slug: string }, searchParams?: { registered?: string, registration?: string, shared?: string, tab?: string } }) {
  const t = getClubTranslator()
+
+  const fallback = getPublicEventFallback(params.slug)
+  if (fallback && headers().get('x-public-event-fallback') === params.slug) {
+    return <PublicEventLanding event={fallback} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd past={false} />
+  }
 
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -184,7 +188,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   const activeTab = searchParams?.tab === 'discussoes' ? 'discussoes' : searchParams?.tab === 'documentos' ? 'documentos' : 'fotos'
   const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
   const translations = await loadClubTranslations(supabase, [event.id,...(discussions ?? []).map(post => post.id),...(resources ?? []).map(resource => resource.id),...authorIds])
-  if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} dateTbd={dateTbd} past={past} />
+  if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} />
 
   const overview = <div className="space-y-5">
     <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{description:event.description,location_label:event.location_label}} enabled={translations.enabled} serverLocale={getClubLocale()} />

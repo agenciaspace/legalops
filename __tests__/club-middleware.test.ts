@@ -1,9 +1,9 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
-const state = vi.hoisted(() => ({ user: null as { id: string } | null, member: {} as Record<string, unknown>, profileReads: 0, refresh: false }))
+const state = vi.hoisted(() => ({ user: null as { id: string } | null, member: {} as Record<string, unknown>, authReads: 0, profileReads: 0, refresh: false }))
 vi.mock('@supabase/ssr', () => ({ createServerClient: (_url: string, _key: string, options: any) => ({
-  auth: { getUser: async () => { if(state.refresh)options.cookies.setAll([{name:'refreshed-session',value:'test-token',options:{path:'/',httpOnly:true}}]); return { data: { user: state.user } } } },
+  auth: { getUser: async () => { state.authReads++; if(state.refresh)options.cookies.setAll([{name:'refreshed-session',value:'test-token',options:{path:'/',httpOnly:true}}]); return { data: { user: state.user } } } },
   from: (table: string) => {
     if (table === 'account_profiles') state.profileReads++
     const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: state.member }), single: async () => ({ data: { onboarding_completed: false } }) }
@@ -12,7 +12,7 @@ vi.mock('@supabase/ssr', () => ({ createServerClient: (_url: string, _key: strin
 }) }))
 import { middleware } from '../middleware'
 const request = (path: string) => middleware(new NextRequest(`https://legalops.club${path}`, { headers: { host: 'legalops.club' } }))
-beforeEach(() => { state.user = null; state.member = {}; state.profileReads = 0; state.refresh = false })
+beforeEach(() => { state.user = null; state.member = {}; state.authReads = 0; state.profileReads = 0; state.refresh = false })
 it('resumes installed root launches automatically and preserves refreshed session cookies',async()=>{
   state.user={id:'member'};state.member={club_access_status:'active',avatar_path:'member/photo.jpg'};state.refresh=true
   const root=await request('/')
@@ -75,6 +75,13 @@ it('exposes only the exact Bench intake path and keeps moderation authenticated'
   expect((await request('/api/bench/contributions')).status).toBe(200)
   expect((await request('/api/bench/contributions/admin')).status).toBe(401)
   expect((await request('/club/admin/bench')).headers.get('location')).toContain('/login?next=')
+})
+
+it('serves the reviewed public event snapshot without waiting for Supabase', async () => {
+  const response = await request('/community/events/bench-honorarios-exito-2026')
+  expect(response.status).toBe(200)
+  expect(response.headers.get('x-middleware-request-x-public-event-fallback')).toBe('bench-honorarios-exito-2026')
+  expect(state.authReads).toBe(0)
 })
 
 it('serves public PWA assets without exposing community data', async () => {
