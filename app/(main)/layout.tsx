@@ -5,8 +5,13 @@ import { Nav } from '@/components/Nav'
 import { AppMain } from '@/components/AppMain'
 import { redirect } from 'next/navigation'
 import { hasActiveClubAccess } from '@/lib/community'
+import { headers } from 'next/headers'
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
+  // Reviewed public event snapshots must render independently of session refresh.
+  // The nested community layout supplies their public header.
+  if (headers().get('x-public-event-fallback')) return <>{children}</>
+
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   // Middleware protects the private routes. Public event pages also live in

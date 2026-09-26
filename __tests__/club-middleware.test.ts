@@ -11,7 +11,7 @@ vi.mock('@supabase/ssr', () => ({ createServerClient: (_url: string, _key: strin
   },
 }) }))
 import { middleware } from '../middleware'
-const request = (path: string) => middleware(new NextRequest(`https://legalops.club${path}`, { headers: { host: 'legalops.club' } }))
+const request = (path: string, cookie?: string) => middleware(new NextRequest(`https://legalops.club${path}`, { headers: { host: 'legalops.club', ...(cookie ? { cookie } : {}) } }))
 beforeEach(() => { state.user = null; state.member = {}; state.authReads = 0; state.profileReads = 0; state.refresh = false })
 it('keeps the public root available without waiting for session refresh',async()=>{
   state.user={id:'member'};state.member={club_access_status:'active',avatar_path:'member/photo.jpg'};state.refresh=true
@@ -78,9 +78,11 @@ it('exposes only the exact Bench intake path and keeps moderation authenticated'
 })
 
 it('serves the reviewed public event snapshot without waiting for Supabase', async () => {
-  const response = await request('/community/events/bench-honorarios-exito-2026')
-  expect(response.status).toBe(200)
-  expect(response.headers.get('x-middleware-request-x-public-event-fallback')).toBe('bench-honorarios-exito-2026')
+  for (const cookie of [undefined, 'sb-project-auth-token=session']) {
+    const response = await request('/community/events/bench-honorarios-exito-2026', cookie)
+    expect(response.status).toBe(200)
+    expect(response.headers.get('x-middleware-request-x-public-event-fallback')).toBe('bench-honorarios-exito-2026')
+  }
   expect(state.authReads).toBe(0)
 })
 

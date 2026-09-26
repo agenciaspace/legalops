@@ -34,11 +34,10 @@ export async function middleware(request: NextRequest) {
   }
 
   // Published event landings must remain reachable during an Auth/Data API outage.
-  // Visitors without a Supabase session can use the reviewed static event snapshot;
-  // signed-in members continue through the normal private event workspace.
+  // A public URL cannot depend on session refresh: installed PWAs and signed-in
+  // browsers carry Supabase cookies even when the visitor only wants the landing.
   const publicEventSlug = pathname.match(/^\/community\/events\/([^/]+)$/)?.[1]
-  const hasSupabaseSessionCookie = request.cookies.getAll().some(({ name }) => /^sb-.+-auth-token(?:\.\d+)?$/.test(name))
-  if (publicEventSlug && getPublicEventFallback(publicEventSlug) && !hasSupabaseSessionCookie) {
+  if (publicEventSlug && getPublicEventFallback(publicEventSlug)) {
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-public-event-fallback', publicEventSlug)
     requestHeaders.set('x-club-locale', request.cookies.has(CLUB_LOCALE_COOKIE)
