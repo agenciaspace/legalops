@@ -35,3 +35,11 @@ it('provides an installable manifest with resolvable 192 and 512 icons',()=>{
  expect(m.display).toBe('standalone');expect(m.start_url).toBe('/community')
  for(const size of [192,512]) {const icon=m.icons.find((i:any)=>i.sizes===`${size}x${size}` && i.purpose==='any');const png=readFileSync(`public${icon.src}`);expect(png.readUInt32BE(16)).toBe(size);expect(png.readUInt32BE(20)).toBe(size)}
 })
+it('associates the signed Android app with the Club origin',()=>{
+ const links=JSON.parse(readFileSync('public/.well-known/assetlinks.json','utf8'))
+ expect(links).toEqual([expect.objectContaining({
+  relation:['delegate_permission/common.handle_all_urls'],
+  target:expect.objectContaining({namespace:'android_app',package_name:'club.legalops.app'})
+ })])
+ expect(links[0].target.sha256_cert_fingerprints).toEqual([expect.stringMatching(/^(?:[0-9A-F]{2}:){31}[0-9A-F]{2}$/)])
+})

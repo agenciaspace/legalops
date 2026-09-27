@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "club.legalops.app",
+        "sha256_cert_fingerprints": ["4E:E4:3B:84:D9:ED:DE:EB:EA:CC:41:77:CE:7D:82:94:41:AA:D9:1D:41:1D:5F:0F:A1:9F:D6:9B:99:34:85:3D"]
+      }
+    }]

@@ -8,4 +8,14 @@ supabase/.temp
 .agents/
 .aider*
 .cursorignore
+android/.gradle/
+android/.idea/
+android/local.properties
+android/**/build/
+android/*.apk
+android/*.aab
+android/*.idsig
+android/*.keystore
+dist/*.apk
+dist/*.aab
 .codeiumignore
