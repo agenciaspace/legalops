@@ -15,6 +15,8 @@ export default function ClubSignupPage() {
     else if (clubReturnPath(next)) setReturnPath(`/club/entrar?next=${encodeURIComponent(next!)}`)
   }, [])
   const [sent, setSent] = useState(false)
+  const [signupEmail, setSignupEmail] = useState('')
+  const [resent, setResent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -41,8 +43,19 @@ export default function ClubSignupPage() {
         else setError(t("Não foi possível criar a conta. Confira os dados ou tente entrar se já tiver cadastro."))
         return
       }
+      setSignupEmail(String(form.get('email')).trim())
       setSent(true)
     } catch { setError(t("Não foi possível conectar. Tente novamente em alguns instantes.")) }
+    finally { setBusy(false) }
+  }
+  async function resend() {
+    setError(''); setBusy(true); setResent(false)
+    try {
+      const response = await fetch('/api/auth/resend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: signupEmail, next: returnPath }) })
+      const result = await response.json().catch(() => ({})) as { code?: string }
+      if (!response.ok) setError(result.code === 'over_email_send_rate_limit' || result.code === 'over_request_rate_limit' ? t('Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.') : t('Não conseguimos reenviar agora. Tente novamente em alguns instantes.'))
+      else setResent(true)
+    } catch { setError(t('Não foi possível conectar. Tente novamente em alguns instantes.')) }
     finally { setBusy(false) }
   }
   return <main className="min-h-screen bg-[#F5F1E8] px-5 py-12 text-[#111111] sm:py-20">
@@ -51,7 +64,7 @@ export default function ClubSignupPage() {
       <div className="mt-5"><ClubLanguageSelect /></div>
       <h1 className="mt-10 font-[var(--font-quicksand)] text-4xl font-semibold tracking-tight">{t("crie sua conta")}<span className="text-[#E88A6A]">.</span></h1>
       <p className="mt-4 text-sm leading-7 text-[#69635E]">{t("A comunidade é gratuita para quem tem relação com o trabalho jurídico. Depois de confirmar seu email, complete o perfil com LinkedIn, atuação e assuntos de interesse.")}</p>
-      {sent ? <section role="status" className="mt-8 border-y border-[#CEC8BD] py-6"><h2 className="font-semibold">{t("Confira seu email")}</h2><p className="mt-3 text-sm leading-6">{t("Abra o link de confirmação para continuar o cadastro. Já tinha conta? Entre com sua senha para acessar a comunidade e receber as boas-vindas.")}</p><Link href={`/login?next=${encodeURIComponent(returnPath)}`} className="mt-5 inline-block text-sm font-semibold underline">{t("Entrar na minha conta")}</Link></section>
+      {sent ? <section role="status" className="mt-8 border-y border-[#CEC8BD] py-6"><h2 className="font-semibold">{t("Confira seu email")}</h2><p className="mt-3 text-sm leading-6">{t("Abra o link de confirmação para continuar o cadastro. Já tinha conta? Entre com sua senha para acessar a comunidade e receber as boas-vindas.")}</p>{resent && <p className="mt-3 text-sm font-semibold text-emerald-700">{t('Email reenviado.')}</p>}{error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}<div className="mt-5 flex flex-wrap gap-4"><button type="button" disabled={busy} onClick={resend} className="min-h-11 text-sm font-semibold underline disabled:opacity-50">{busy ? t('Reenviando…') : t('Reenviar email')}</button><Link href={`/login?next=${encodeURIComponent(returnPath)}`} className="inline-flex min-h-11 items-center text-sm font-semibold underline">{t("Entrar na minha conta")}</Link></div></section>
       : <form onSubmit={submit} className="mt-8 space-y-5">
         <GoogleSignIn />
         <label className="block text-sm font-semibold">{t("Email")}<input name="email" type="email" autoComplete="email" required maxLength={254} className="mt-2 w-full rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] px-4 py-3 font-normal" /></label>

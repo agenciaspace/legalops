@@ -16,6 +16,8 @@ export default function LoginPage() {
   const [recovering, setRecovering] = useState(false)
   const [recoverySent, setRecoverySent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [canResendConfirmation, setCanResendConfirmation] = useState(false)
+  const [confirmationResent, setConfirmationResent] = useState(false)
   const [isClub, setIsClub] = useState(false)
   const [signupHref, setSignupHref] = useState('/cadastro')
   const router = useRouter()
@@ -29,6 +31,8 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    setCanResendConfirmation(false)
+    setConfirmationResent(false)
     setLoading(true)
     const supabase = createClient()
     const requestedPath = new URLSearchParams(window.location.search).get('next')
@@ -49,11 +53,24 @@ export default function LoginPage() {
 
     if (error) {
       setError(error.code === 'email_not_confirmed' ? t("Confira seu email") : t("Email ou senha incorretos."))
+      setCanResendConfirmation(error.code === 'email_not_confirmed')
       return
     }
 
     router.push(safePath)
     router.refresh()
+  }
+
+  async function resendConfirmation() {
+    setLoading(true); setError(null); setConfirmationResent(false)
+    try {
+      const requestedPath = new URLSearchParams(window.location.search).get('next')
+      const next = requestedPath?.startsWith('/') && !requestedPath.startsWith('//') && !requestedPath.includes('\\') ? `/club/entrar?next=${encodeURIComponent(requestedPath)}` : '/club/entrar'
+      const response = await fetch('/api/auth/resend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, next }) })
+      if (response.ok) setConfirmationResent(true)
+      else setError(t('Não conseguimos reenviar agora. Aguarde alguns minutos e tente novamente.'))
+    } catch { setError(t('Não foi possível conectar. Tente novamente em alguns instantes.')) }
+    finally { setLoading(false) }
   }
 
   return (
@@ -102,6 +119,8 @@ export default function LoginPage() {
           {error && (
             <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{t(error)}</p>
           )}
+          {confirmationResent && <p role="status" className="text-sm text-emerald-700">{t('Email de confirmação reenviado.')}</p>}
+          {canResendConfirmation && <button type="button" disabled={loading} onClick={resendConfirmation} className="min-h-11 w-full text-sm font-semibold underline disabled:opacity-50">{t('Reenviar email de confirmação')}</button>}
           <button
             type="submit"
             disabled={loading}

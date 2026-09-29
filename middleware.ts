@@ -63,6 +63,7 @@ export async function middleware(request: NextRequest) {
     || isContactPage
   const publicApiPaths = new Set([
     '/api/auth/signup',
+    '/api/auth/resend',
     '/api/webhooks/brevo/inbound',
     '/api/webhooks/cloudflare/inbound',
   ])

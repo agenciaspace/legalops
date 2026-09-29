@@ -4,6 +4,11 @@ One authorized destination: `legalops.club · conversa` (`120363427485795268@g.u
 The independent systemd runner reads only that group's messages from the existing personal
 instance SQLite mirror. It does not change gateway processes or legacy summary flags.
 
+The same read-only runner also watches the allowlisted WhatsApp group for the honorários Bench.
+When new textual context appears, the protected endpoint conservatively extracts only a final
+date/time decision and updates the published event. Proposals and poll votes do not change the
+event; the last processed local message id prevents repeated model calls.
+
 Every day at 21:00 UTC (18:00 Brasília), publish the previous **fixed 24-hour period** to
 `club_whatsapp_summaries`, then send the same digest to the group. First window ends
 2026-09-18 at 21:00 UTC. Empty windows produce no WhatsApp notification. The 5-minute timer

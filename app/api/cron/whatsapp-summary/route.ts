@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { generateOpenRouterText } from '@/lib/openrouter'
 import { DAY_MS, parseWhatsAppDigest, validateWhatsAppInput, whatsAppDigestPrompt, WHATSAPP_SUMMARY_MODEL } from '@/lib/whatsapp-summary'
+import { BENCH_WHATSAPP_SOURCES, BENCH_WHATSAPP_SYNC_MODEL, benchSchedulePrompt, parseBenchScheduleDecision, validateBenchSyncInput } from '@/lib/bench-whatsapp-sync'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 const reply = (data: unknown, status = 200) => NextResponse.json(data, { status, headers: { 'Cache-Control': 'private, no-store' } })
@@ -13,6 +14,50 @@ export async function POST(request: Request) {
   let raw
   try { raw = JSON.parse(text) } catch { return reply({ error: 'Invalid JSON' }, 400) }
   const db = createAdminClient()
+  if (raw?.action === 'sync-bench-event') {
+    const input = validateBenchSyncInput(raw)
+    if (!input) return reply({ error: 'Invalid Bench source or messages' }, 400)
+    const source = BENCH_WHATSAPP_SOURCES[input.groupId]
+    try {
+      const generated = await generateOpenRouterText({
+        systemPrompt: 'Você extrai decisões de agenda de forma conservadora. Nunca trate uma sugestão como confirmação.',
+        userPrompt: benchSchedulePrompt(input.messages, new Date(), source.timeZone),
+        model: BENCH_WHATSAPP_SYNC_MODEL,
+        maxTokens: 350,
+        temperature: 0,
+        timeoutMs: 45_000,
+      })
+      const decision = parseBenchScheduleDecision(generated, input.messages)
+      if (!decision) return reply({ error: 'Schedule extraction was inconclusive' }, 503)
+      if (!decision.confirmed) return reply({ ok: true, confirmed: false })
+
+      const { data: event, error: readError } = await db
+        .from('community_events')
+        .select('id,starts_at,ends_at,location_label,participation_details')
+        .eq('slug', source.eventSlug)
+        .eq('is_published', true)
+        .maybeSingle()
+      if (readError || !event) return reply({ error: 'Bench event unavailable' }, 503)
+
+      const changed = event.starts_at !== decision.startsAt
+        || (event.ends_at ?? null) !== decision.endsAt
+        || /data a confirmar/i.test(event.location_label ?? '')
+        || /data e hor[aá]rio a confirmar/i.test(event.participation_details ?? '')
+      if (changed) {
+        const { error: updateError } = await db.from('community_events').update({
+          starts_at: decision.startsAt,
+          ends_at: decision.endsAt,
+          location_label: 'Remoto — acesso enviado às pessoas inscritas',
+          participation_details: 'Encontro remoto. As informações de acesso serão enviadas às pessoas inscritas.',
+        }).eq('id', event.id)
+        if (updateError) return reply({ error: 'Bench event update failed' }, 503)
+      }
+      return reply({ ok: true, confirmed: true, updated: changed, event_slug: source.eventSlug, starts_at: decision.startsAt })
+    } catch {
+      console.error('[bench-whatsapp-sync] Schedule extraction or update failed')
+      return reply({ error: 'Bench schedule sync will retry' }, 503)
+    }
+  }
   if (raw?.action === 'delivered') {
     if (typeof raw.id !== 'string' || !/^[0-9a-f-]{36}$/i.test(raw.id)) return reply({error:'Invalid delivery'},400)
     const { error } = await db.from('club_whatsapp_summaries').update({ whatsapp_sent_at: new Date().toISOString() }).eq('id', raw.id).is('whatsapp_sent_at', null)

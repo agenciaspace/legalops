@@ -13,6 +13,7 @@ import { EventShare } from '@/components/community/EventShare'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { getPublicEventFallback, type PublicEvent } from '@/lib/public-events'
+import { loadLivePublicEvent } from '@/lib/public-event-live'
 
 export const dynamic = 'force-dynamic'
 
@@ -163,7 +164,11 @@ export default async function EventPage({ params, searchParams }: { params: { sl
 
   const fallback = getPublicEventFallback(params.slug)
   if (fallback && headers().get('x-public-event-fallback') === params.slug) {
-    return <PublicEventLanding event={fallback} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd past={false} />
+    const liveEvent = await loadLivePublicEvent(params.slug)
+    const publicEvent = liveEvent ?? fallback
+    const dateTbd = /data a confirmar/i.test(publicEvent.location_label || '')
+    const past = !dateTbd && new Date(publicEvent.ends_at || publicEvent.starts_at) < new Date()
+    return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} />
   }
 
   const supabase = await createServerSupabaseClient()

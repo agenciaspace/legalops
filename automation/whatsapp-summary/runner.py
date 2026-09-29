@@ -15,6 +15,9 @@ GROUP = '120363427485795268@g.us'
 OWNER = '5511947519397'
 PREFIX = '*Resumo diário · legalops.club*'
 DAY = dt.timedelta(days=1)
+BENCH_GROUPS = {
+    '120363412671923182@g.us': 'bench-honorarios-exito-2026',
+}
 
 def clean_display_name(value):
     clean = ' '.join(''.join(char for char in (value or '') if char.isalpha() or char in " -',.").split()).strip(' ,.-')
@@ -74,6 +77,37 @@ def collect(db, end):
     if len(messages) > 2000: raise ValueError('Period exceeds supported message count')
     return messages, omitted
 
+def collect_bench_messages(db, group, now):
+    rows = db.execute('''select wm_id,ts,sender_jid,sender_name,from_me,text,msg_id from messages
+      where chat_jid=? and owner=? and coalesce(deleted,0)=0 and ts>=? and ts<=?
+      and msg_type in ('Conversation','ExtendedTextMessage') and coalesce(text,'')<>''
+      order by ts,wm_id''', (group, OWNER, (now-dt.timedelta(days=31)).timestamp(), now.timestamp())).fetchall()
+    messages, authors, seen = [], {}, set()
+    for row_id, timestamp, author, sender_name, from_me, text, message_id in rows:
+        identity = message_id or str(row_id)
+        if identity in seen: continue
+        seen.add(identity)
+        author = author or OWNER
+        display_name = 'Leon' if from_me or author.startswith(OWNER) else clean_display_name(sender_name)
+        authors.setdefault(author, display_name or f'Membro {len(authors)+1}')
+        messages.append({'id':str(row_id),'at':iso(dt.datetime.fromtimestamp(timestamp,UTC)), 'author':authors[author], 'text':sanitize_text(text)})
+    if len(messages) > 200: messages = messages[-200:]
+    return messages, max((row[0] for row in rows), default=0)
+
+def sync_bench_events(db, config, state_dir, headers, now):
+    state_path = state_dir/'bench-sync.json'
+    state = json.loads(state_path.read_text()) if state_path.exists() else {}
+    endpoint = config['APP_URL'].rstrip('/')+'/api/cron/whatsapp-summary'
+    changed = False
+    for group in BENCH_GROUPS:
+        messages, latest_row = collect_bench_messages(db, group, now)
+        if not messages or latest_row <= int(state.get(group, 0)): continue
+        result = post(endpoint, {'action':'sync-bench-event','group_id':group,'messages':messages}, headers)
+        if not result.get('ok'): raise RuntimeError('Bench sync service rejected request')
+        state[group] = latest_row
+        changed = True
+    if changed: save(state_path, state)
+
 def render(summary):
     end=dt.datetime.fromisoformat(summary['period_end'].replace('Z','+00:00')).astimezone(dt.timezone(dt.timedelta(hours=-3)))
     start=end-DAY
@@ -97,6 +131,7 @@ def run(config, preview=False):
         db=sqlite3.connect(f"file:{config['DATABASE']}?mode=ro",uri=True)
         headers={'Authorization':'Bearer '+config['INGEST_SECRET']}
         endpoint=config['APP_URL'].rstrip('/')+'/api/cron/whatsapp-summary'
+        if not preview: sync_bench_events(db,config,state_dir,headers,now)
         state_path=state_dir/(end.strftime('%Y%m%dT%H%M%S')+'.json')
         state=json.loads(state_path.read_text()) if state_path.exists() else {}
         if not preview and state.get('status') in ('done','empty'):

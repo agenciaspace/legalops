@@ -33,13 +33,27 @@ class SummaryTests(unittest.TestCase):
         self.assertEqual(runner.clean_display_name('Gonçalves, Mario'), 'Mario Gonçalves')
         self.assertEqual(runner.clean_display_name('Leon 🤖'), 'Leon')
         self.assertEqual(runner.sanitize_text('Valeu @5511982018903, ligue +5511999999999'), 'Valeu @membro, ligue [contato omitido]')
+    def test_bench_sync_sends_new_context_once(self):
+        db=sqlite3.connect(':memory:')
+        db.execute('create table messages(wm_id,ts,sender_jid,sender_name,from_me,text,msg_id,chat_jid,owner,deleted,msg_type)')
+        now=dt.datetime(2026,9,29,18,tzinfo=runner.UTC)
+        group=next(iter(runner.BENCH_GROUPS))
+        db.execute('insert into messages values(1,?,?,?,?,?,?,?,?,?,?)',(now.timestamp()-60,'author','Alexander',0,'Ficamos para dia 14, às 19','m1',group,runner.OWNER,0,'Conversation'))
+        with tempfile.TemporaryDirectory() as temp, patch.object(runner,'post',return_value={'ok':True,'confirmed':True}) as post:
+            config={'APP_URL':'https://example.test'};headers={'Authorization':'Bearer secret'};state=Path(temp)
+            runner.sync_bench_events(db,config,state,headers,now)
+            runner.sync_bench_events(db,config,state,headers,now)
+            self.assertEqual(post.call_count,1)
+            payload=post.call_args.args[1]
+            self.assertEqual(payload['group_id'],group)
+            self.assertEqual(payload['messages'][0]['text'],'Ficamos para dia 14, às 19')
     def test_confirmed_send_only_retries_receipt(self):
         with tempfile.TemporaryDirectory() as temp:
             end=runner.slot(dt.datetime.now(runner.UTC))
             state=Path(temp)/(end.strftime('%Y%m%dT%H%M%S')+'.json')
             runner.save(state,{'status':'sent','summary_id':'saved-id'})
             config={'STATE_DIR':temp,'FIRST_RUN_AT':'2026-01-01T21:00:00Z','DATABASE':':memory:','APP_URL':'https://example.test','INGEST_SECRET':'secret'}
-            with patch.object(runner.sqlite3,'connect') as connect, patch.object(runner,'post',return_value={'ok':True}) as post:
+            with patch.object(runner.sqlite3,'connect') as connect, patch.object(runner,'sync_bench_events'), patch.object(runner,'post',return_value={'ok':True}) as post:
                 runner.run(config)
             self.assertEqual(post.call_count,1)
             self.assertEqual(post.call_args.args[1],{'action':'delivered','id':'saved-id'})
@@ -50,7 +64,7 @@ class SummaryTests(unittest.TestCase):
             state=Path(temp)/(end.strftime('%Y%m%dT%H%M%S')+'.json')
             runner.save(state,{'status':'sending','summary_id':'saved-id','text':'summary'})
             config={'STATE_DIR':temp,'FIRST_RUN_AT':'2026-01-01T21:00:00Z','DATABASE':':memory:','APP_URL':'https://example.test','INGEST_SECRET':'secret'}
-            with patch.object(runner.sqlite3,'connect') as connect, patch.object(runner,'post') as post:
+            with patch.object(runner.sqlite3,'connect') as connect, patch.object(runner,'sync_bench_events'), patch.object(runner,'post') as post:
                 connect.return_value.execute.return_value.fetchone.return_value=None
                 with self.assertRaises(RuntimeError):runner.run(config)
                 post.assert_not_called()
