@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
     requestHeaders.set('x-club-locale', request.cookies.has(CLUB_LOCALE_COOKIE)
       ? normalizeClubLocale(request.cookies.get(CLUB_LOCALE_COOKIE)?.value)
       : browserClubLocale(request.headers.get('accept-language')))
-    requestHeaders.set('x-club-timezone', normalizeClubTimezone(request.cookies.get('club-timezone')?.value))
+    requestHeaders.set('x-club-timezone', normalizeClubTimezone(request.cookies.get('club-timezone')?.value ?? 'America/Sao_Paulo'))
     return NextResponse.next({ request: { headers: requestHeaders } })
   }
 

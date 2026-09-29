@@ -82,6 +82,7 @@ it('serves the reviewed public event snapshot without waiting for Supabase', asy
     const response = await request('/community/events/bench-honorarios-exito-2026', cookie)
     expect(response.status).toBe(200)
     expect(response.headers.get('x-middleware-request-x-public-event-fallback')).toBe('bench-honorarios-exito-2026')
+    expect(response.headers.get('x-middleware-request-x-club-timezone')).toBe('America/Sao_Paulo')
   }
   expect(state.authReads).toBe(0)
 })
