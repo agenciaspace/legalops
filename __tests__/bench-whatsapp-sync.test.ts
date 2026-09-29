@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { benchSchedulePrompt, parseBenchScheduleDecision, validateBenchSyncInput } from '@/lib/bench-whatsapp-sync'
+import { benchSchedulePrompt, extractExplicitBenchSchedule, parseBenchScheduleDecision, validateBenchSyncInput } from '@/lib/bench-whatsapp-sync'
 
 const now = new Date('2026-09-29T18:00:00Z')
 const messages = [
@@ -17,6 +17,15 @@ describe('Bench WhatsApp schedule sync', () => {
     const prompt = benchSchedulePrompt(messages, now, 'America/Sao_Paulo')
     expect(prompt).toContain('A confirmação mais recente substitui datas cogitadas antes')
     expect(prompt).toContain('Ficamos para dia 14')
+  })
+
+  it('deterministically resolves the latest explicit confirmation from earlier month context', () => {
+    expect(extractExplicitBenchSchedule(messages, 'America/Sao_Paulo')).toEqual({
+      confirmed: true,
+      startsAt: '2026-10-14T22:00:00.000Z',
+      endsAt: null,
+      sourceMessageIds: ['1', '2'],
+    })
   })
 
   it('parses a sourced future decision and rejects invented sources', () => {

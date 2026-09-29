@@ -17,6 +17,65 @@ export type BenchScheduleDecision = {
   sourceMessageIds: string[]
 }
 
+function localDateTimeToIso(year: number, month: number, day: number, hour: number, minute: number, timeZone: string) {
+  const target = Date.UTC(year, month - 1, day, hour, minute, 0)
+  let guess = target
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+  })
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const parts = Object.fromEntries(formatter.formatToParts(new Date(guess)).filter(part => part.type !== 'literal').map(part => [part.type, part.value]))
+    const observed = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), Number(parts.hour), Number(parts.minute), Number(parts.second))
+    const delta = target - observed
+    guess += delta
+    if (delta === 0) break
+  }
+  const resolved = new Date(guess)
+  const check = Object.fromEntries(formatter.formatToParts(resolved).filter(part => part.type !== 'literal').map(part => [part.type, part.value]))
+  if (Number(check.year) !== year || Number(check.month) !== month || Number(check.day) !== day || Number(check.hour) !== hour || Number(check.minute) !== minute) return null
+  return resolved.toISOString()
+}
+
+export function extractExplicitBenchSchedule(messages: WhatsAppSource[], timeZone: string): BenchScheduleDecision | null {
+  const confirmation = /\b(ficamos(?:\s+para)?|fechad[oa]s?|confirmad[oa]s?|vamos\s+de)\b/i
+  const fullDate = /\b([0-3]?\d)[/-]([01]?\d)(?:[/-](\d{2,4}))?\b/
+  const dayOnly = /\bdia\s+([0-3]?\d)\b/i
+  const time = /(?:\bàs|\bas|\ba)\s+([0-2]?\d)(?:(?::|h)([0-5]\d))?\b/i
+
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index]
+    if (!confirmation.test(message.text)) continue
+    const timeMatch = message.text.match(time)
+    const currentDateMatch = message.text.match(fullDate)
+    const dayMatch = currentDateMatch ?? message.text.match(dayOnly)
+    if (!timeMatch || !dayMatch) continue
+
+    const messageDate = new Date(message.at)
+    const localParts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(messageDate).filter(part => part.type !== 'literal').map(part => [part.type, part.value]))
+    let month = currentDateMatch ? Number(currentDateMatch[2]) : 0
+    let year = currentDateMatch?.[3] ? Number(currentDateMatch[3]) : Number(localParts.year)
+    const sourceMessageIds = [message.id]
+
+    if (!month) {
+      for (let contextIndex = index - 1; contextIndex >= 0; contextIndex -= 1) {
+        const contextMatch = messages[contextIndex].text.match(fullDate)
+        if (!contextMatch) continue
+        month = Number(contextMatch[2])
+        year = contextMatch[3] ? Number(contextMatch[3]) : Number(localParts.year)
+        sourceMessageIds.unshift(messages[contextIndex].id)
+        break
+      }
+    }
+    if (year < 100) year += 2000
+    if (!currentDateMatch?.[3] && month < Number(localParts.month)) year += 1
+    const startsAt = localDateTimeToIso(year, month, Number(dayMatch[1]), Number(timeMatch[1]), Number(timeMatch[2] ?? 0), timeZone)
+    if (!startsAt) continue
+    return { confirmed: true, startsAt, endsAt: null, sourceMessageIds }
+  }
+  return null
+}
+
 export function validateBenchSyncInput(input: unknown, now = new Date()): {
   groupId: BenchSourceId
   messages: WhatsAppSource[]

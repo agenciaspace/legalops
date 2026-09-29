@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { generateOpenRouterText } from '@/lib/openrouter'
 import { DAY_MS, parseWhatsAppDigest, validateWhatsAppInput, whatsAppDigestPrompt, WHATSAPP_SUMMARY_MODEL } from '@/lib/whatsapp-summary'
-import { BENCH_WHATSAPP_SOURCES, BENCH_WHATSAPP_SYNC_MODEL, benchSchedulePrompt, parseBenchScheduleDecision, validateBenchSyncInput } from '@/lib/bench-whatsapp-sync'
+import { BENCH_WHATSAPP_SOURCES, BENCH_WHATSAPP_SYNC_MODEL, benchSchedulePrompt, extractExplicitBenchSchedule, parseBenchScheduleDecision, validateBenchSyncInput } from '@/lib/bench-whatsapp-sync'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 const reply = (data: unknown, status = 200) => NextResponse.json(data, { status, headers: { 'Cache-Control': 'private, no-store' } })
@@ -19,15 +19,15 @@ export async function POST(request: Request) {
     if (!input) return reply({ error: 'Invalid Bench source or messages' }, 400)
     const source = BENCH_WHATSAPP_SOURCES[input.groupId]
     try {
-      const generated = await generateOpenRouterText({
-        systemPrompt: 'Você extrai decisões de agenda de forma conservadora. Nunca trate uma sugestão como confirmação.',
-        userPrompt: benchSchedulePrompt(input.messages, new Date(), source.timeZone),
-        model: BENCH_WHATSAPP_SYNC_MODEL,
-        maxTokens: 350,
-        temperature: 0,
-        timeoutMs: 45_000,
-      })
-      const decision = parseBenchScheduleDecision(generated, input.messages)
+      const explicitDecision = extractExplicitBenchSchedule(input.messages, source.timeZone)
+      const decision = explicitDecision ?? parseBenchScheduleDecision(await generateOpenRouterText({
+          systemPrompt: 'Você extrai decisões de agenda de forma conservadora. Nunca trate uma sugestão como confirmação.',
+          userPrompt: benchSchedulePrompt(input.messages, new Date(), source.timeZone),
+          model: BENCH_WHATSAPP_SYNC_MODEL,
+          maxTokens: 350,
+          temperature: 0,
+          timeoutMs: 45_000,
+        }), input.messages)
       if (!decision) return reply({ error: 'Schedule extraction was inconclusive' }, 503)
       if (!decision.confirmed) return reply({ ok: true, confirmed: false })
 
