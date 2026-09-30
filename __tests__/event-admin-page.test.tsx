@@ -36,6 +36,10 @@ it('shows event registration details and Club linkage only after admin authoriza
       },
     ],
     counts: { total: 2, confirmed: 1, declined: 1, pending: 0, clubLinked: 1 },
+    whatsapp: {
+      config: { enabled: true, summary_hour_local: 18, time_zone: 'America/Sao_Paulo', next_run_at: '2026-09-30T21:00:00Z', last_status: 'scheduled', last_period_end: null, last_checked_at: null },
+      summaries: [],
+    },
   })
 
   render(await EventRegistrationsAdminPage({ params: { slug: 'bench-netlex-2026' } }))
@@ -48,4 +52,6 @@ it('shows event registration details and Club linkage only after admin authoriza
   expect(screen.getByText('Perfil ativo no Club')).toBeInTheDocument()
   expect(screen.getByText('Sem cadastro no Club')).toBeInTheDocument()
   expect(screen.getByText('Quer comparar integrações.')).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'Resumos do WhatsApp' })).toBeInTheDocument()
+  expect(screen.getByText('Diariamente às 18h')).toBeInTheDocument()
 })

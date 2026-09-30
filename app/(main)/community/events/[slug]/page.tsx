@@ -2,10 +2,10 @@ import { TranslatedContent } from '@/components/community/TranslatedContent'
 import { loadClubTranslations } from '@/lib/club-translations'
 import { getClubLocale, getClubTranslator, getClubTimezone } from '@/lib/club-locale-server'
 import Link from 'next/link'
-import { ArrowRight, CalendarDays, CheckCircle2, ChevronDown, MapPin, ShieldCheck, UserRound } from 'lucide-react'
+import { ArrowRight, CalendarDays, CheckCircle2, ChevronDown, MapPin, MessageCircle, Send, ShieldCheck, UserRound } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { hasActiveClubAccess } from '@/lib/community'
-import { registerPublicEvent } from '../../actions'
+import { createCommunityComment, registerPublicEvent } from '../../actions'
 import { EventUpload } from '@/components/community/EventUpload'
 import { EventPublications } from '@/components/community/EventPublications'
 import BenchClient from '../../bench/BenchClient'
@@ -15,6 +15,9 @@ import { headers } from 'next/headers'
 import { getPublicEventFallback, type PublicEvent } from '@/lib/public-events'
 import { loadLivePublicEvent } from '@/lib/public-event-live'
 import { loadConfirmedEventRegistrationCount } from '@/lib/event-registration-count'
+import { loadPublicEventWhatsAppSummaries } from '@/lib/public-event-whatsapp-summaries'
+import { isEventWhatsAppSummaryEnabled, type EventWhatsAppSummary } from '@/lib/event-whatsapp-summary'
+import { loadPublicEventConversationTopics, type EventConversationTopic } from '@/lib/event-conversation-topics'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +41,35 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-function PublicEventLanding({ event, translations, user, registered, registrationError, dateTbd, past, registrationCount }: {
+function EventWhatsAppSummaryArchive({ summaries }: { summaries: EventWhatsAppSummary[] }) {
+  const format = (value: string) => new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(value))
+  return <section id="resumos" className="scroll-mt-20 rounded-2xl border border-[#CEC8BD] bg-white p-6 sm:p-8">
+    <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#A94E38]">Acompanhe sem perder contexto</p>
+    <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Resumos do grupo</h2>
+    <p className="mt-3 max-w-3xl text-sm leading-7 text-[#625E59]">Todos os dias, às 18h, as discussões substantivas do WhatsApp são reunidas aqui de forma anônima, sem nomes ou dados de contato.</p>
+    {summaries.length ? <div className="mt-6 space-y-4">{summaries.map(item => <article key={item.id} className="rounded-xl border border-[#E6DED0] bg-[#FAF7F1] p-5">
+      <div className="flex flex-wrap items-start justify-between gap-2"><h3 className="text-lg font-bold">{item.title}</h3><time className="text-xs text-[#817A73]" dateTime={item.period_end}>{format(item.period_end)}</time></div>
+      <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[#55514B]">{item.summary}</p>
+      {item.key_points.length ? <ul className="mt-4 space-y-2 border-t border-[#DED6C9] pt-4 text-sm leading-6 text-[#625E59]">{item.key_points.map(point => <li key={point} className="flex gap-2"><span aria-hidden="true" className="text-[#A94E38]">•</span><span>{point}</span></li>)}</ul> : null}
+      <p className="mt-4 text-[11px] text-[#817A73]">{item.source_message_count} mensagens sintetizadas · sem identificação dos participantes</p>
+    </article>)}</div> : <p className="mt-5 rounded-xl bg-[#F5F1E8] p-4 text-sm leading-6 text-[#625E59]">O primeiro resumo será publicado após as 18h, se houver discussão relevante no período.</p>}
+  </section>
+}
+
+function EventConversationTopicDirectory({ topics, eventSlug, linked = false }: { topics: EventConversationTopic[], eventSlug: string, linked?: boolean }) {
+  if (!topics.length) return null
+  return <section id="conversas" className="scroll-mt-20 rounded-2xl border border-[#CEC8BD] bg-[#F5F1E8] p-6 sm:p-8">
+    <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#A94E38]">Conversas organizadas</p>
+    <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Tópicos do Bench</h2>
+    <p className="mt-3 max-w-3xl text-sm leading-7 text-[#625E59]">O grupo de WhatsApp continua aberto para a conversa geral. No legalops.club, cada frente tem um espaço próprio para registrar experiências e respostas.</p>
+    <div className="mt-6 grid gap-3 sm:grid-cols-2">{topics.map((topic, index) => {
+      const content = <><span className="text-[10px] font-black text-[#A94E38]">0{topic.display_order || index + 1}</span><h3 className="mt-2 font-bold">{topic.title}</h3><p className="mt-2 text-sm leading-6 text-[#625E59]">{topic.description}</p>{linked && topic.id ? <span className="mt-3 inline-flex items-center text-xs font-bold text-[#A94E38]">Abrir conversa <ArrowRight className="ml-1 h-3.5 w-3.5" /></span> : null}</>
+      return linked && topic.id ? <Link key={topic.id} href={`/community/events/${eventSlug}?tab=discussoes&topic=${topic.id}#publicacoes`} className="rounded-xl border border-[#DED6C9] bg-white p-4 hover:border-[#A94E38]">{content}</Link> : <article key={topic.id || topic.title} className="rounded-xl border border-[#DED6C9] bg-white p-4">{content}</article>
+    })}</div>
+  </section>
+}
+
+function PublicEventLanding({ event, translations, user, registered, registrationError, dateTbd, past, registrationCount, whatsappSummaries, conversationTopics }: {
   event: PublicEvent
   translations: Awaited<ReturnType<typeof loadClubTranslations>>
   user: { id: string } | null
@@ -47,6 +78,8 @@ function PublicEventLanding({ event, translations, user, registered, registratio
   dateTbd: boolean
   past: boolean
   registrationCount: number | null
+  whatsappSummaries: EventWhatsAppSummary[]
+  conversationTopics: EventConversationTopic[]
 }) {
   const t = getClubTranslator()
   const locale = getClubLocale()
@@ -138,6 +171,9 @@ function PublicEventLanding({ event, translations, user, registered, registratio
           <h2 className="mt-3 text-2xl font-semibold tracking-[-.035em]">{t('Como vai funcionar')}</h2>
           <div className="mt-3 max-w-3xl"><TranslatedContent source={source} original={{participation_details:event.participation_details}} enabled={translations.enabled} serverLocale={locale} bodyClassName="whitespace-pre-wrap text-sm leading-7 text-[#5D574F]" /></div>
         </article> : null}
+
+        <EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} />
+        {isEventWhatsAppSummaryEnabled(event.slug) ? <EventWhatsAppSummaryArchive summaries={whatsappSummaries} /> : null}
       </div>
 
       <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">
@@ -162,7 +198,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
   </main>
 }
 
-export default async function EventPage({ params, searchParams }: { params: { slug: string }, searchParams?: { registered?: string, registration?: string, shared?: string, tab?: string } }) {
+export default async function EventPage({ params, searchParams }: { params: { slug: string }, searchParams?: { registered?: string, registration?: string, shared?: string, tab?: string, topic?: string } }) {
  const t = getClubTranslator()
 
   const fallback = getPublicEventFallback(params.slug)
@@ -171,17 +207,19 @@ export default async function EventPage({ params, searchParams }: { params: { sl
     const publicEvent = liveEvent ?? fallback
     const dateTbd = /data(?: e formato)? a confirmar/i.test(publicEvent.location_label || '')
     const past = !dateTbd && new Date(publicEvent.ends_at || publicEvent.starts_at) < new Date()
-    const registrationCount = await loadConfirmedEventRegistrationCount(publicEvent.id)
-    return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} registrationCount={registrationCount} />
+    const [registrationCount, whatsappSummaries, conversationTopics] = await Promise.all([loadConfirmedEventRegistrationCount(publicEvent.id), loadPublicEventWhatsAppSummaries(publicEvent.id), loadPublicEventConversationTopics(publicEvent.id, publicEvent.slug)])
+    return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
   }
 
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   const { data: event } = await supabase.from('community_events').select('id,slug,title,description,host_name,starts_at,ends_at,location_label,event_type,is_published,participation_mode,participation_details,pre_questions').eq('slug', params.slug).eq('is_published', true).maybeSingle()
   if (!event) return <div className="mx-auto max-w-2xl px-5 py-16"><h1 className="text-2xl font-bold">{t("Evento não encontrado")}</h1><Link className="mt-4 inline-flex underline" href="/community/calendar">{t("Voltar para eventos")}</Link></div>
-  const [registrationCount, memberResult] = await Promise.all([
+  const [registrationCount, memberResult, whatsappSummaries, conversationTopics] = await Promise.all([
     loadConfirmedEventRegistrationCount(event.id),
     user ? supabase.from('community_members').select('display_name,current_role,club_access_status,club_access_expires_at').eq('user_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
+    loadPublicEventWhatsAppSummaries(event.id),
+    loadPublicEventConversationTopics(event.id, event.slug),
   ])
   const { data: member } = memberResult
   const isMember = hasActiveClubAccess(member)
@@ -192,16 +230,18 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   const canContribute = Boolean(attendance?.response === 'confirmed' || eventAdmin)
   const [{ data: resources }, { data: discussions }] = await Promise.all([
     canContribute ? supabase.from('community_event_resources').select('id,publication_id,uploader_id,title,description,kind,resource_url,storage_path,created_at').eq('event_id', event.id).is('duplicate_of', null).order('created_at', { ascending: false }) : Promise.resolve({ data: [] }),
-    isMember ? supabase.from('community_posts').select('id,title,body,created_at').eq('event_id', event.id).order('created_at', { ascending: false }).limit(20) : Promise.resolve({ data: [] }),
+    canContribute ? supabase.from('community_posts').select('id,topic_id,title,body,created_at,community_comments(id,author_name,body,created_at)').eq('event_id', event.id).order('created_at', { ascending: false }).limit(50) : Promise.resolve({ data: [] }),
   ])
   const authorIds = Array.from(new Set(resources?.map(item => item.uploader_id) ?? []))
   const { data: authors } = authorIds.length ? await supabase.from('community_members').select('user_id,display_name,avatar_path,current_role,organization_name').in('user_id', authorIds) : { data: [] }
   const dateTbd = /data(?: e formato)? a confirmar/i.test(event.location_label || '')
   const past = !dateTbd && new Date(event.ends_at || event.starts_at) < new Date()
-  const activeTab = searchParams?.tab === 'discussoes' ? 'discussoes' : searchParams?.tab === 'documentos' ? 'documentos' : 'fotos'
+  const activeTab = searchParams?.tab === 'discussoes' || searchParams?.topic ? 'discussoes' : searchParams?.tab === 'documentos' ? 'documentos' : 'fotos'
+  const selectedTopic = conversationTopics.find(topic => topic.id && topic.id === searchParams?.topic) ?? null
+  const selectedDiscussions = selectedTopic ? (discussions ?? []).filter(post => post.topic_id === selectedTopic.id) : []
   const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
-  const translations = await loadClubTranslations(supabase, [event.id,...(discussions ?? []).map(post => post.id),...(resources ?? []).map(resource => resource.id),...authorIds])
-  if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} registrationCount={registrationCount} />
+  const translations = await loadClubTranslations(supabase, [event.id,...(discussions ?? []).flatMap(post => [post.id, ...(post.community_comments ?? []).map(comment => comment.id)]),...(resources ?? []).map(resource => resource.id),...authorIds])
+  if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
 
   const overview = <div className="space-y-5">
     <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{description:event.description,location_label:event.location_label}} enabled={translations.enabled} serverLocale={getClubLocale()} />
@@ -228,6 +268,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
           <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 text-sm font-semibold [&::-webkit-details-marker]:hidden">{t('Sobre o encontro')}<ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0" /></summary>
           <div className="border-t border-[#E6DED0] p-4">{overview}</div>
         </details>
+        {isEventWhatsAppSummaryEnabled(event.slug) ? <div className="mb-4"><EventWhatsAppSummaryArchive summaries={whatsappSummaries} /></div> : null}
         {isMember && <nav id="publicacoes" aria-label={t('Conteúdo do evento')} className="mb-4 flex scroll-mt-20 gap-1 border-b border-[#CEC8BD]">
           {([{ key: 'fotos', label: t("Fotos") }, { key: 'documentos', label: t("Documentos") }, { key: 'discussoes', label: t("Conversas") }] as const).map(tab => <Link key={tab.key} href={`/community/events/${event.slug}?tab=${tab.key}#publicacoes`} aria-current={activeTab === tab.key ? 'page' : undefined} className={`inline-flex min-h-12 flex-1 items-center justify-center border-b-2 px-2 text-sm font-semibold sm:flex-none sm:px-5 ${activeTab === tab.key ? 'border-[#A94E38] text-[#A94E38]' : "border-transparent text-[#625E59] hover:text-[#24231F]"}`}>{t(tab.label)}</Link>)}
         </nav>}
@@ -238,7 +279,24 @@ export default async function EventPage({ params, searchParams }: { params: { sl
           <EventUpload key={activeTab} eventId={event.id} photos={activeTab === 'fotos'} />
           <EventPublications translations={translations} resources={visibleResources} authors={authors ?? []} />
         </section>}
-      {isMember && activeTab === 'discussoes' ? <section className="rounded-xl border border-[#CEC8BD] bg-white p-4 sm:p-5"><h2 className="text-lg font-bold">{t("Discussões do evento")}</h2>{discussions?.length ? <div className="mt-3 space-y-3">{discussions.map(post => <div key={post.id} className="block rounded-lg border border-[#E4E2DD] p-3 hover:border-[#FFB99E]"><TranslatedContent source={translations.sources.get(`post:${post.id}`)} original={{title:post.title,body:post.body}} enabled={translations.enabled} serverLocale={getClubLocale()} /><Link href={`/community?post=${post.id}`} className="inline-flex min-h-11 items-center underline">{t("Conversas")}</Link></div>)}</div> : <p className="mt-2 text-sm text-[#77746E]">{t("A discussão será criada pelos participantes.")}</p>}</section> : null}
+      {isMember && activeTab === 'discussoes' ? <div className="space-y-4">
+        <EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} linked={canContribute} />
+        {!canContribute ? <p className="rounded-xl border border-[#CEC8BD] bg-white p-5 text-sm leading-6 text-[#625E59]">Confirme sua participação no Bench para entrar nas conversas específicas do evento.</p> : selectedTopic ? <section className="rounded-xl border border-[#CEC8BD] bg-white p-4 sm:p-6">
+          <Link href={`/community/events/${event.slug}?tab=discussoes#publicacoes`} className="inline-flex min-h-11 items-center text-xs font-bold text-[#A94E38]">← Todos os tópicos</Link>
+          <h2 className="mt-2 text-2xl font-bold tracking-[-.03em]">{selectedTopic.title}</h2>
+          <p className="mt-2 text-sm leading-6 text-[#625E59]">{selectedTopic.description}</p>
+          {selectedDiscussions.length ? <div className="mt-6 space-y-5">{selectedDiscussions.map(post => <article key={post.id} className="rounded-xl bg-[#F8F5EF] p-4 sm:p-5">
+            <TranslatedContent source={translations.sources.get(`post:${post.id}`)} original={{title:post.title,body:post.body}} enabled={translations.enabled} serverLocale={getClubLocale()} />
+            {(post.community_comments ?? []).length ? <div className="mt-5 space-y-3 border-t border-[#DED6C9] pt-5">{[...(post.community_comments ?? [])].sort((a,b)=>a.created_at.localeCompare(b.created_at)).map(comment => <div key={comment.id} className="rounded-lg bg-white p-3 text-sm leading-6"><p className="text-xs font-bold text-[#817A73]">{comment.author_name}</p><TranslatedContent source={translations.sources.get(`comment:${comment.id}`)} original={{body:comment.body}} enabled={translations.enabled} serverLocale={getClubLocale()} compact /></div>)}</div> : null}
+            <form action={createCommunityComment} className="mt-5 flex gap-2 border-t border-[#DED6C9] pt-5">
+              <input type="hidden" name="post_id" value={post.id} />
+              <input type="hidden" name="return_to" value={`/community/events/${event.slug}?tab=discussoes&topic=${selectedTopic.id}#publicacoes`} />
+              <input name="body" required maxLength={3000} aria-label="Responder neste tópico" placeholder="Compartilhe sua experiência ou pergunta…" className="min-h-11 min-w-0 flex-1 rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" />
+              <button aria-label="Enviar resposta" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-[#24231F] text-white"><Send className="h-4 w-4" /></button>
+            </form>
+          </article>)}</div> : <p className="mt-5 rounded-lg bg-[#F5F1E8] p-4 text-sm">A conversa deste tópico será aberta pela organização.</p>}
+        </section> : <p className="rounded-xl border border-dashed border-[#CEC8BD] bg-white p-5 text-sm leading-6 text-[#625E59]"><MessageCircle className="mr-2 inline h-4 w-4" />Escolha um tópico acima para acompanhar e participar da conversa.</p>}
+      </div> : null}
 
       </div>
       <aside aria-label={t('Sobre o encontro')} className="sticky top-20 hidden min-w-0 rounded-xl border border-[#CEC8BD] bg-white p-5 xl:block">

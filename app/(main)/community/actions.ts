@@ -197,6 +197,7 @@ export async function toggleCommunityPostLike(formData: FormData) {
 export async function createCommunityComment(formData: FormData) {
   const postId = String(formData.get('post_id') ?? '')
   const body = String(formData.get('body') ?? '').trim()
+  const returnTo = String(formData.get('return_to') ?? '')
   if (!postId || body.length < 1 || body.length > 3000) return
 
   const { supabase, user, profile } = await getAuthenticatedMember()
@@ -211,6 +212,10 @@ export async function createCommunityComment(formData: FormData) {
   })
 
   revalidatePath('/community')
+  if (/^\/community\/events\/[a-z0-9-]+(?:\?[^#]*)?(?:#.*)?$/.test(returnTo)) {
+    revalidatePath(returnTo.split(/[?#]/)[0])
+    redirect(returnTo)
+  }
 }
 
 export async function updateCommunityProfile(formData: FormData) {

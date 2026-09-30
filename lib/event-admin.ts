@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase-admin'
+import type { EventWhatsAppSummary, EventWhatsAppSummaryConfig } from '@/lib/event-whatsapp-summary'
 
 type EventRow = {
   id: string
@@ -47,6 +48,10 @@ export type EventAdminOverview = {
     pending: number
     clubLinked: number
   }
+  whatsapp: {
+    config: EventWhatsAppSummaryConfig | null
+    summaries: EventWhatsAppSummary[]
+  }
 }
 async function findAuthUsersByEmail(
   admin: ReturnType<typeof createAdminClient>,
@@ -78,14 +83,26 @@ export async function loadEventAdminOverview(slug: string): Promise<EventAdminOv
   if (eventError) throw eventError
   if (!event) return null
 
-  const { data: rawRegistrations, error: registrationsError } = await admin
-    .from('community_event_rsvps')
-    .select('id,user_id,response,guest_name,guest_role,organization_name,guest_email,guest_phone,dietary_restrictions,accessibility_needs,arrival_notes,confirmed_at,created_at')
-    .eq('event_id', event.id)
-    .order('created_at', { ascending: false })
+  const [registrationsResult, configResult, summariesResult] = await Promise.all([
+    admin.from('community_event_rsvps')
+      .select('id,user_id,response,guest_name,guest_role,organization_name,guest_email,guest_phone,dietary_restrictions,accessibility_needs,arrival_notes,confirmed_at,created_at')
+      .eq('event_id', event.id)
+      .order('created_at', { ascending: false }),
+    admin.from('community_event_whatsapp_configs')
+      .select('enabled,summary_hour_local,time_zone,first_run_at,next_run_at,last_status,last_period_end,last_checked_at')
+      .eq('event_id', event.id)
+      .maybeSingle(),
+    admin.from('community_event_whatsapp_summaries')
+      .select('id,event_id,period_start,period_end,title,summary,key_points,source_message_count,source_participant_count,omitted_media_count,published_at,whatsapp_sent_at')
+      .eq('event_id', event.id)
+      .order('period_end', { ascending: false })
+      .limit(30),
+  ])
 
-  if (registrationsError) throw registrationsError
-  const rsvps = (rawRegistrations ?? []) as RsvpRow[]
+  if (registrationsResult.error) throw registrationsResult.error
+  if (configResult.error) throw configResult.error
+  if (summariesResult.error) throw summariesResult.error
+  const rsvps = (registrationsResult.data ?? []) as RsvpRow[]
   const emails = new Set(rsvps.map(row => row.guest_email.trim().toLowerCase()).filter(Boolean))
   const authUsersByEmail = await findAuthUsersByEmail(admin, emails)
   const linkedUserIds = Array.from(new Set(rsvps
@@ -116,6 +133,10 @@ export async function loadEventAdminOverview(slug: string): Promise<EventAdminOv
       declined: registrations.filter(row => row.response === 'declined').length,
       pending: registrations.filter(row => row.response === 'pending').length,
       clubLinked: registrations.filter(row => row.club).length,
+    },
+    whatsapp: {
+      config: configResult.data as EventWhatsAppSummaryConfig | null,
+      summaries: (summariesResult.data ?? []) as EventWhatsAppSummary[],
     },
   }
 }

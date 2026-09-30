@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { generateOpenRouterText } from '@/lib/openrouter'
 import { DAY_MS, parseWhatsAppDigest, validateWhatsAppInput, whatsAppDigestPrompt, WHATSAPP_SUMMARY_MODEL } from '@/lib/whatsapp-summary'
 import { BENCH_WHATSAPP_SOURCES, BENCH_WHATSAPP_SYNC_MODEL, benchSchedulePrompt, extractExplicitBenchSchedule, parseBenchScheduleDecision, validateBenchSyncInput } from '@/lib/bench-whatsapp-sync'
+import { EVENT_WHATSAPP_SUMMARY_MODEL, eventWhatsAppDigestPrompt, validateEventWhatsAppInput } from '@/lib/event-whatsapp-summary'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 const reply = (data: unknown, status = 200) => NextResponse.json(data, { status, headers: { 'Cache-Control': 'private, no-store' } })
@@ -62,6 +63,58 @@ export async function POST(request: Request) {
     if (typeof raw.id !== 'string' || !/^[0-9a-f-]{36}$/i.test(raw.id)) return reply({error:'Invalid delivery'},400)
     const { error } = await db.from('club_whatsapp_summaries').update({ whatsapp_sent_at: new Date().toISOString() }).eq('id', raw.id).is('whatsapp_sent_at', null)
     return error ? reply({ error: 'Delivery status unavailable' }, 503) : reply({ok:true})
+  }
+  if (raw?.action === 'delivered-event') {
+    if (typeof raw.id !== 'string' || !/^[0-9a-f-]{36}$/i.test(raw.id)) return reply({ error: 'Invalid delivery' }, 400)
+    const { error } = await db.from('community_event_whatsapp_summaries').update({ whatsapp_sent_at: new Date().toISOString() }).eq('id', raw.id).is('whatsapp_sent_at', null)
+    return error ? reply({ error: 'Delivery status unavailable' }, 503) : reply({ ok: true })
+  }
+
+  const eventInput = validateEventWhatsAppInput(raw)
+  if (eventInput) {
+    const { data: event, error: eventError } = await db.from('community_events').select('id,title').eq('slug', eventInput.eventSlug).eq('is_published', true).maybeSingle()
+    if (eventError || !event) return reply({ error: 'Event unavailable' }, 503)
+    const { data: schedule, error: scheduleError } = await db.from('community_event_whatsapp_configs').select('*').eq('event_id', event.id).single()
+    if (scheduleError || !schedule) return reply({ error: 'Event summary schedule unavailable' }, 503)
+    if (!schedule.enabled && !eventInput.preview) return reply({ error: 'Event summary paused' }, 409)
+    if (!eventInput.preview && new Date(eventInput.end) < new Date(schedule.first_run_at)) return reply({ error: 'Before first scheduled period' }, 409)
+    const { data: existing, error: readError } = await db.from('community_event_whatsapp_summaries').select('*').eq('event_id', event.id).eq('period_end', eventInput.end).maybeSingle()
+    if (readError) return reply({ error: 'Event summary unavailable' }, 503)
+    const status = async (last_status: string) => {
+      if (eventInput.preview) return
+      const done = last_status === 'published' || last_status === 'empty'
+      const { error } = await db.from('community_event_whatsapp_configs').update({ last_status, last_checked_at: new Date().toISOString(), last_period_end: eventInput.end, ...(done ? { next_run_at: new Date(new Date(eventInput.end).getTime() + DAY_MS).toISOString() } : {}) }).eq('event_id', event.id)
+      if (error) throw new Error('Event schedule update failed')
+    }
+    try {
+      if (existing && !eventInput.preview) { await status('published'); return reply({ ok: true, summary: existing, reused: true }) }
+      if (!eventInput.messages.length) { await status('empty'); return reply({ ok: true, empty: true }) }
+      await status('generating')
+      const generated = await generateOpenRouterText({
+        systemPrompt: 'Você edita uma síntese factual e anônima para participantes de um evento profissional. Nunca exponha nomes, empresas ou dados de contato.',
+        userPrompt: eventWhatsAppDigestPrompt(eventInput.messages, event.title),
+        model: EVENT_WHATSAPP_SUMMARY_MODEL,
+        maxTokens: 1800,
+        temperature: 0,
+        timeoutMs: 45_000,
+      })
+      const digest = parseWhatsAppDigest(generated)
+      if (!digest) throw new Error('Invalid generated event summary')
+      if (!digest.publish) { await status('empty'); return reply({ ok: true, empty: true, reason: 'no-substantive-content' }) }
+      const { publish: _publish, ...content } = digest
+      const record = { ...content, event_id: event.id, period_start: eventInput.start, period_end: eventInput.end, source_message_count: eventInput.messages.length, source_participant_count: new Set(eventInput.messages.map(item => item.author)).size, omitted_media_count: eventInput.omitted, model: EVENT_WHATSAPP_SUMMARY_MODEL }
+      if (eventInput.preview) return reply({ ok: true, preview: true, summary: record })
+      const { data: saved, error } = await db.from('community_event_whatsapp_summaries').upsert(record, { onConflict: 'event_id,period_end', ignoreDuplicates: true }).select('*').maybeSingle()
+      if (error) throw new Error('Event summary insert failed')
+      const committed = saved ?? (await db.from('community_event_whatsapp_summaries').select('*').eq('event_id', event.id).eq('period_end', eventInput.end).single()).data
+      if (!committed) throw new Error('Event summary lookup failed')
+      await status('published')
+      return reply({ ok: true, summary: committed })
+    } catch {
+      await status('error').catch(() => {})
+      console.error('[event-whatsapp-summary] Generation or persistence failed; scheduled retry required')
+      return reply({ error: 'Resumo em preparação. Uma nova tentativa será feita.' }, 503)
+    }
   }
   const input = validateWhatsAppInput(raw)
   if (!input) return reply({ error: 'Invalid source, period or messages' }, 400)

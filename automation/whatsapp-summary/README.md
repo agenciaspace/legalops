@@ -9,6 +9,11 @@ When new textual context appears, the protected endpoint conservatively extracts
 date/time decision and updates the published event. Proposals and poll votes do not change the
 event; the last processed local message id prevents repeated model calls.
 
+Event-specific summaries use `community_event_whatsapp_configs` and
+`community_event_whatsapp_summaries`. The NetLex Bench runs on its own fixed 24-hour window at
+18:00 Brasília, publishes an anonymized archive on the event landing and sends the same digest to
+its own group. Event summaries never reuse the general community destination or storage rows.
+
 Every day at 21:00 UTC (18:00 Brasília), publish the previous **fixed 24-hour period** to
 `club_whatsapp_summaries`, then send the same digest to the group. First window ends
 2026-09-18 at 21:00 UTC. Empty windows produce no WhatsApp notification. The 5-minute timer

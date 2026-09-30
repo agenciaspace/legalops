@@ -19,6 +19,14 @@ BENCH_GROUPS = {
     '120363412671923182@g.us': 'bench-honorarios-exito-2026',
     '120363432116359544@g.us': 'bench-netlex-2026',
 }
+EVENT_SUMMARY_GROUPS = {
+    '120363432116359544@g.us': {
+        'slug': 'bench-netlex-2026',
+        'title': 'Bench NetLex',
+        'prefix': '*Resumo diário · Bench NetLex*',
+        'first_run_at': '2026-09-30T21:00:00Z',
+    },
+}
 
 def clean_display_name(value):
     clean = ' '.join(''.join(char for char in (value or '') if char.isalpha() or char in " -',.").split()).strip(' ,.-')
@@ -53,16 +61,16 @@ def post(url, body, headers):
     with urllib.request.urlopen(req, timeout=75) as response:
         return json.load(response)
 
-def collect(db, end):
+def collect(db, end, group=GROUP, prefix=PREFIX):
     rows = db.execute('''select wm_id,ts,sender_jid,sender_name,from_me,text,msg_id from messages
       where chat_jid=? and owner=? and coalesce(deleted,0)=0 and ts>=? and ts<? order by ts,wm_id''',
-      (GROUP, OWNER, (end-DAY).timestamp(), end.timestamp())).fetchall()
+      (group, OWNER, (end-DAY).timestamp(), end.timestamp())).fetchall()
     messages, authors, seen, omitted = [], {}, set(), 0
     for row_id, timestamp, author, sender_name, from_me, text, message_id in rows:
         identity = message_id or str(row_id)
         if identity in seen: continue
         seen.add(identity)
-        if (text or '').startswith(PREFIX): continue
+        if (text or '').startswith(prefix): continue
         if not (text or '').strip():
             transcript = db.execute('select transcription from audio_transcriptions where webhook_msg_id=? and status=? order by id desc limit 1',(row_id,'done')).fetchone()
             text = transcript[0] if transcript else ''
@@ -115,11 +123,60 @@ def render(summary):
     points='\n'.join('• '+point for point in summary['key_points'])
     return f"{PREFIX}\n{start:%d/%m %H:%M} a {end:%d/%m %H:%M} (Brasília)\n\n*{summary['title']}*\n{summary['summary']}\n\n{points}\n\n{summary['source_message_count']} mensagens · Síntese por IA\nPróxima edição: amanhã, a partir das 18h, se houver novas mensagens.\nhttps://legalops.club/community/summaries"
 
+def render_event(summary, target):
+    end=dt.datetime.fromisoformat(summary['period_end'].replace('Z','+00:00')).astimezone(dt.timezone(dt.timedelta(hours=-3)))
+    start=end-DAY
+    points='\n'.join('• '+point for point in summary['key_points'])
+    url=f"https://legalops.club/community/events/{target['slug']}#resumos"
+    return f"{target['prefix']}\n{start:%d/%m %H:%M} a {end:%d/%m %H:%M} (Brasília)\n\n*{summary['title']}*\n{summary['summary']}\n\n{points}\n\n{summary['source_message_count']} mensagens · síntese anônima por IA\nHistórico e próxima edição: {url}"
+
 def save(path, state):
     temporary=path.with_suffix('.tmp')
     temporary.write_text(json.dumps(state,ensure_ascii=False))
     temporary.chmod(0o600)
     temporary.replace(path)
+
+def connected_instance(config):
+    hermes=read_env(config['INSTANCE_ENV'])
+    base=hermes['UAZAPI_BASE_URL'].rstrip('/')
+    if not base.startswith('https://'): raise ValueError('Instance URL must use HTTPS')
+    req=urllib.request.Request(base+'/instance/status',headers={'token':hermes['UAZAPI_TOKEN'],'User-Agent':'Mozilla/5.0'})
+    with urllib.request.urlopen(req,timeout=20) as response: connection=json.load(response)
+    if str(connection.get('instance',{}).get('owner')) != OWNER or not connection.get('status',{}).get('connected'):
+        raise RuntimeError('Expected personal instance is not connected')
+    return base, hermes['UAZAPI_TOKEN']
+
+def process_event_summaries(db, config, state_dir, headers, now, end):
+    endpoint=config['APP_URL'].rstrip('/')+'/api/cron/whatsapp-summary'
+    for group,target in EVENT_SUMMARY_GROUPS.items():
+        if end < dt.datetime.fromisoformat(target['first_run_at'].replace('Z','+00:00')): continue
+        state_path=state_dir/f"event-{target['slug']}-{end.strftime('%Y%m%dT%H%M%S')}.json"
+        state=json.loads(state_path.read_text()) if state_path.exists() else {}
+        if state.get('status') in ('done','empty'): continue
+        if state.get('status') == 'sending':
+            match=db.execute('select msg_id from messages where chat_jid=? and owner=? and from_me=1 and text=? and ts>=? limit 1',(group,OWNER,state['text'],end.timestamp())).fetchone()
+            if not match: raise RuntimeError('Event summary delivery outcome unknown; awaiting mirror confirmation')
+            state.update(status='sent',message_id=match[0]);save(state_path,state)
+        if state.get('status') == 'sent':
+            post(endpoint,{'action':'delivered-event','id':state['summary_id']},headers)
+            state['status']='done';save(state_path,state);continue
+        messages,omitted=collect(db,end,group,target['prefix'])
+        result=post(endpoint,{'source':'event:'+target['slug'],'event_slug':target['slug'],'action':'publish','period_start':iso(end-DAY),'period_end':iso(end),'messages':messages,'omitted_media_count':omitted},headers)
+        if not result.get('ok'): raise RuntimeError('Event summary service rejected request')
+        if result.get('empty'):
+            save(state_path,{'status':'empty'});continue
+        summary=result['summary']
+        if summary.get('whatsapp_sent_at'):
+            save(state_path,{'status':'done','summary_id':summary['id']});continue
+        text=render_event(summary,target)
+        base,token=connected_instance(config)
+        state={'status':'sending','summary_id':summary['id'],'text':text};save(state_path,state)
+        delivery=post(base+'/send/text',{'number':group,'text':text},{'token':token})
+        if not isinstance(delivery,dict) or delivery.get('error') or delivery.get('success') is False:
+            raise RuntimeError('Instance did not confirm event summary delivery')
+        state.update(status='sent',message_id=delivery.get('id') or delivery.get('messageid'));save(state_path,state)
+        post(endpoint,{'action':'delivered-event','id':summary['id']},headers)
+        state['status']='done';save(state_path,state)
 
 def run(config, preview=False):
     now=dt.datetime.now(UTC)
@@ -133,6 +190,7 @@ def run(config, preview=False):
         headers={'Authorization':'Bearer '+config['INGEST_SECRET']}
         endpoint=config['APP_URL'].rstrip('/')+'/api/cron/whatsapp-summary'
         if not preview: sync_bench_events(db,config,state_dir,headers,now)
+        if not preview: process_event_summaries(db,config,state_dir,headers,now,end)
         state_path=state_dir/(end.strftime('%Y%m%dT%H%M%S')+'.json')
         state=json.loads(state_path.read_text()) if state_path.exists() else {}
         if not preview and state.get('status') in ('done','empty'):
@@ -157,15 +215,9 @@ def run(config, preview=False):
         if summary.get('whatsapp_sent_at'):
             save(state_path,{'status':'done','summary_id':summary['id']});print('Delivery already recorded');return
         text=render(summary)
-        hermes=read_env(config['INSTANCE_ENV'])
-        base=hermes['UAZAPI_BASE_URL'].rstrip('/')
-        if not base.startswith('https://'): raise ValueError('Instance URL must use HTTPS')
-        req=urllib.request.Request(base+'/instance/status',headers={'token':hermes['UAZAPI_TOKEN'],'User-Agent':'Mozilla/5.0'})
-        with urllib.request.urlopen(req,timeout=20) as response: connection=json.load(response)
-        if str(connection.get('instance',{}).get('owner')) != OWNER or not connection.get('status',{}).get('connected'):
-            raise RuntimeError('Expected personal instance is not connected')
+        base,token=connected_instance(config)
         state={'status':'sending','summary_id':summary['id'],'text':text};save(state_path,state)
-        delivery=post(base+'/send/text',{'number':GROUP,'text':text},{'token':hermes['UAZAPI_TOKEN']})
+        delivery=post(base+'/send/text',{'number':GROUP,'text':text},{'token':token})
         if not isinstance(delivery,dict) or delivery.get('error') or delivery.get('success') is False:
             raise RuntimeError('Instance did not confirm delivery')
         state.update(status='sent',message_id=delivery.get('id') or delivery.get('messageid'));save(state_path,state)

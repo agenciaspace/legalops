@@ -35,7 +35,7 @@ export default async function EventRegistrationsAdminPage({ params }: { params: 
   const overview = await loadEventAdminOverview(params.slug)
   if (!overview) notFound()
 
-  const { event, registrations, counts } = overview
+  const { event, registrations, counts, whatsapp } = overview
   return <main className="mx-auto w-full max-w-6xl px-4 py-8 text-[#24231F] sm:px-6 lg:py-12">
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div>
@@ -54,6 +54,22 @@ export default async function EventRegistrationsAdminPage({ params }: { params: 
         ['Pendentes', String(counts.pending)],
         ['Desistências', String(counts.declined)],
       ].map(([label, value]) => <div key={label} className="rounded-xl border border-[#CEC8BD] bg-white p-4"><p className="text-[10px] font-black uppercase tracking-[.14em] text-[#817A73]">{label}</p><p className="mt-2 text-2xl font-semibold tracking-[-.035em]">{value}</p></div>)}
+    </section>
+
+    <section className="mt-10 rounded-xl border border-[#CEC8BD] bg-[#FAF7F1] p-5 sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div><h2 className="text-2xl font-bold tracking-[-.03em]">Resumos do WhatsApp</h2><p className="mt-2 text-sm text-[#716B65]">Configuração vinculada a este evento; o identificador privado do grupo não é exibido.</p></div>
+        <span className={`rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-[.1em] ${whatsapp.config?.enabled ? 'bg-[#E7F4E9] text-[#246338]' : 'bg-stone-200 text-stone-700'}`}>{whatsapp.config?.enabled ? 'Ativo' : 'Não configurado'}</span>
+      </div>
+      {whatsapp.config ? <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <div className="rounded-lg bg-white p-4"><p className="text-[10px] font-black uppercase tracking-[.12em] text-[#817A73]">Horário</p><p className="mt-1 font-semibold">Diariamente às {String(whatsapp.config.summary_hour_local).padStart(2, '0')}h</p></div>
+        <div className="rounded-lg bg-white p-4"><p className="text-[10px] font-black uppercase tracking-[.12em] text-[#817A73]">Próxima verificação</p><p className="mt-1 font-semibold">{registeredAt(whatsapp.config.next_run_at)}</p></div>
+        <div className="rounded-lg bg-white p-4"><p className="text-[10px] font-black uppercase tracking-[.12em] text-[#817A73]">Estado</p><p className="mt-1 font-semibold">{whatsapp.config.last_status}</p></div>
+      </div> : <p className="mt-4 text-sm">Este evento ainda não tem resumos automáticos.</p>}
+      <div className="mt-5 border-t border-[#DED6C9] pt-5">
+        <p className="text-xs font-bold">{singular(whatsapp.summaries.length, 'resumo publicado', 'resumos publicados')}</p>
+        {whatsapp.summaries.slice(0, 5).map(summary => <article key={summary.id} className="mt-3 rounded-lg border border-[#E6DED0] bg-white p-4"><div className="flex flex-wrap justify-between gap-2"><h3 className="font-bold">{summary.title}</h3><span className="text-xs text-[#817A73]">{registeredAt(summary.period_end)}</span></div><p className="mt-2 text-sm leading-6 text-[#625E59]">{summary.summary}</p></article>)}
+      </div>
     </section>
 
     <section className="mt-10">
