@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest'
 import { latestSummarySlot, validateWhatsAppInput, parseWhatsAppDigest, whatsAppDigestPrompt } from '@/lib/whatsapp-summary'
 import { summaryAvailability } from '@/components/community/WhatsAppSummaries'
 vi.mock('@/lib/supabase-admin',()=>({createAdminClient:vi.fn()}))
@@ -9,6 +9,7 @@ const now=new Date('2026-09-18T21:01:00Z')
 const payload={source:'legalops-community',action:'publish',period_start:'2026-09-17T21:00:00Z',period_end:'2026-09-18T21:00:00Z',omitted_media_count:0,messages:[{id:'1',at:'2026-09-18T20:00:00Z',author:'Participante 1',text:'Podemos discutir contratos amanhã.'}]}
 describe('community WhatsApp summary',()=>{
  beforeEach(()=>{vi.clearAllMocks();delete process.env.WHATSAPP_SUMMARY_INGEST_SECRET})
+ afterEach(()=>vi.useRealTimers())
  it('requires a configured secret before accessing storage',async()=>{
   for(const secret of [undefined,'expected']){
    if(secret)process.env.WHATSAPP_SUMMARY_INGEST_SECRET=secret
@@ -59,5 +60,27 @@ describe('community WhatsApp summary',()=>{
   expect(summaryAvailability(schedule,now.getTime())).toContain('em preparação')
   expect(summaryAvailability({...schedule,last_status:'error'},now.getTime())).toContain('atrasado')
   expect(summaryAvailability({...schedule,enabled:false},now.getTime())).toBe('Programação em preparação.')
+ })
+ it('confirms the NetLex date without inventing a remote format',async()=>{
+  vi.useFakeTimers();vi.setSystemTime(new Date('2026-09-30T12:00:00Z'))
+  process.env.WHATSAPP_SUMMARY_INGEST_SECRET='expected'
+  const update=vi.fn()
+  const admin={from:vi.fn(()=>{
+   const query:any={
+    select:()=>query,
+    eq:()=>query,
+    maybeSingle:async()=>({data:{id:'event',starts_at:'2026-11-01T15:00:00Z',ends_at:null,location_label:'Data a confirmar — formato a confirmar',participation_details:'A data, o formato e o local ainda serão definidos.'},error:null}),
+    update:(values:unknown)=>{update(values);return query},
+    then:(resolve:(value:unknown)=>unknown)=>resolve({error:null}),
+   }
+   return query
+  })}
+  vi.mocked(createAdminClient).mockReturnValue(admin as never)
+  const response=await POST(new Request('https://test/api/cron/whatsapp-summary',{method:'POST',headers:{authorization:'Bearer expected'},body:JSON.stringify({action:'sync-bench-event',group_id:'120363432116359544@g.us',messages:[{id:'decision',at:'2026-09-30T11:00:00Z',author:'Organização',text:'Fechamos 20/10 às 19h'}]})}))
+  expect(response.status, JSON.stringify(await response.clone().json())).toBe(200)
+  expect(update).toHaveBeenCalledWith(expect.objectContaining({
+   location_label:'Formato a confirmar',
+   participation_details:expect.stringContaining('formato e o local ainda serão confirmados'),
+  }))
  })
 })

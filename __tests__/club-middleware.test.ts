@@ -78,11 +78,13 @@ it('exposes only the exact Bench intake path and keeps moderation authenticated'
 })
 
 it('serves the reviewed public event snapshot without waiting for Supabase', async () => {
-  for (const cookie of [undefined, 'sb-project-auth-token=session']) {
-    const response = await request('/community/events/bench-honorarios-exito-2026', cookie)
-    expect(response.status).toBe(200)
-    expect(response.headers.get('x-middleware-request-x-public-event-fallback')).toBe('bench-honorarios-exito-2026')
-    expect(response.headers.get('x-middleware-request-x-club-timezone')).toBe('America/Sao_Paulo')
+  for (const slug of ['bench-honorarios-exito-2026', 'bench-netlex-2026']) {
+    for (const cookie of [undefined, 'sb-project-auth-token=session']) {
+      const response = await request(`/community/events/${slug}`, cookie)
+      expect(response.status).toBe(200)
+      expect(response.headers.get('x-middleware-request-x-public-event-fallback')).toBe(slug)
+      expect(response.headers.get('x-middleware-request-x-club-timezone')).toBe('America/Sao_Paulo')
+    }
   }
   expect(state.authReads).toBe(0)
 })

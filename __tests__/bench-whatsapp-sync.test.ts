@@ -8,6 +8,11 @@ const messages = [
 ]
 
 describe('Bench WhatsApp schedule sync', () => {
+  it('tracks schedule decisions from the NetLex Bench group separately', () => {
+    const input = validateBenchSyncInput({ action: 'sync-bench-event', group_id: '120363432116359544@g.us', messages }, now)
+    expect(input?.groupId).toBe('120363432116359544@g.us')
+  })
+
   it('accepts only the allowlisted group and recent source messages', () => {
     expect(validateBenchSyncInput({ action: 'sync-bench-event', group_id: '120363412671923182@g.us', messages }, now)?.messages).toHaveLength(2)
     expect(validateBenchSyncInput({ action: 'sync-bench-event', group_id: 'other-group', messages }, now)).toBeNull()

@@ -47,9 +47,10 @@ it.each([false, true])('invites a nonmember to join without reading private mate
 })
 
 it('keeps public registration open while the event date is still being confirmed', async () => {
-  state.location = 'Remoto — data a confirmar'
+  state.location = 'Data a confirmar — formato a confirmar'
   render(await EventPage({ params: { slug: 'bench-nubank' } }))
   expect(screen.getByText('Data a confirmar')).toBeInTheDocument()
+  expect(screen.getByText('A confirmar')).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: 'Reserve sua vaga' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: /Quero participar/ })).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: 'Sobre o encontro' })).toBeInTheDocument()

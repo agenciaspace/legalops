@@ -17,6 +17,7 @@ PREFIX = '*Resumo diário · legalops.club*'
 DAY = dt.timedelta(days=1)
 BENCH_GROUPS = {
     '120363412671923182@g.us': 'bench-honorarios-exito-2026',
+    '120363432116359544@g.us': 'bench-netlex-2026',
 }
 
 def clean_display_name(value):

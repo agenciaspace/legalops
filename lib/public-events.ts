@@ -15,6 +15,26 @@ export type PublicEvent = {
 }
 
 const events: Record<string, PublicEvent> = {
+  'bench-netlex-2026': {
+    id: '',
+    slug: 'bench-netlex-2026',
+    title: 'Bench: experiências com o NetLex',
+    description: 'Encontro entre profissionais que usam, implantaram ou avaliam o NetLex para trocar experiências práticas sobre o CLM. A proposta é comparar o que funciona, onde surgem dificuldades e como diferentes times lidam com configuração, adoção, relatórios, integrações e governança.',
+    host_name: 'legalops.club',
+    starts_at: '2026-11-01T15:00:00.000Z',
+    ends_at: null,
+    location_label: 'Data a confirmar — formato a confirmar',
+    event_type: 'encontro',
+    is_published: true,
+    participation_mode: 'hibrido',
+    participation_details: 'A data, o formato e o local ainda serão definidos no grupo do Bench NetLex. Cadastre-se para receber as informações oficiais quando forem confirmadas.',
+    pre_questions: [
+      'Como tem sido a experiência com o NetLex e quais resultados o time já percebeu?',
+      'Quais foram os principais desafios de implantação, configuração e adoção?',
+      'Como funcionam relatórios, integrações e a governança do CLM no dia a dia?',
+      'O que vocês recomendariam para quem está avaliando ou evoluindo o uso da plataforma?',
+    ],
+  },
   'bench-honorarios-exito-2026': {
     id: '',
     slug: 'bench-honorarios-exito-2026',

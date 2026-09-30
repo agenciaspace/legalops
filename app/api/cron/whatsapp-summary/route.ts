@@ -47,8 +47,8 @@ export async function POST(request: Request) {
         const { error: updateError } = await db.from('community_events').update({
           starts_at: decision.startsAt,
           ends_at: decision.endsAt,
-          location_label: 'Remoto — acesso enviado às pessoas inscritas',
-          participation_details: 'Encontro remoto. As informações de acesso serão enviadas às pessoas inscritas.',
+          location_label: source.locationLabelAfterSchedule,
+          participation_details: source.participationDetailsAfterSchedule,
         }).eq('id', event.id)
         if (updateError) return reply({ error: 'Bench event update failed' }, 503)
       }

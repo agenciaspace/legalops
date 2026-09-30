@@ -5,6 +5,14 @@ export const BENCH_WHATSAPP_SOURCES = {
   '120363412671923182@g.us': {
     eventSlug: 'bench-honorarios-exito-2026',
     timeZone: 'America/Sao_Paulo',
+    locationLabelAfterSchedule: 'Remoto — acesso enviado às pessoas inscritas',
+    participationDetailsAfterSchedule: 'Encontro remoto. As informações de acesso serão enviadas às pessoas inscritas.',
+  },
+  '120363432116359544@g.us': {
+    eventSlug: 'bench-netlex-2026',
+    timeZone: 'America/Sao_Paulo',
+    locationLabelAfterSchedule: 'Formato a confirmar',
+    participationDetailsAfterSchedule: 'A data e o horário foram definidos no grupo. O formato e o local ainda serão confirmados com as pessoas inscritas.',
   },
 } as const
 
@@ -38,10 +46,10 @@ function localDateTimeToIso(year: number, month: number, day: number, hour: numb
 }
 
 export function extractExplicitBenchSchedule(messages: WhatsAppSource[], timeZone: string): BenchScheduleDecision | null {
-  const confirmation = /\b(ficamos(?:\s+para)?|fechad[oa]s?|confirmad[oa]s?|vamos\s+de)\b/i
+  const confirmation = /\b(ficamos(?:\s+para)?|fechamos|fechad[oa]s?|confirmad[oa]s?|vamos\s+de)\b/i
   const fullDate = /\b([0-3]?\d)[/-]([01]?\d)(?:[/-](\d{2,4}))?\b/
   const dayOnly = /\bdia\s+([0-3]?\d)\b/i
-  const time = /(?:\bàs|\bas|\ba)\s+([0-2]?\d)(?:(?::|h)([0-5]\d))?\b/i
+  const time = /(?:às|\bas|\ba)\s+([0-2]?\d)(?:(?::|h)([0-5]\d))?h?\b/i
 
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     const message = messages[index]

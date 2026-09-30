@@ -51,7 +51,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
   const t = getClubTranslator()
   const locale = getClubLocale()
   const date = dateTbd ? t('Data a confirmar') : new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeStyle: 'short', timeZone: getClubTimezone() }).format(new Date(event.starts_at))
-  const mode = event.participation_mode === 'presencial' ? t('Presencial') : event.participation_mode === 'hibrido' ? t('Híbrido') : t('Remoto')
+  const mode = /formato a confirmar/i.test(event.location_label || '') ? t('A confirmar') : event.participation_mode === 'presencial' ? t('Presencial') : event.participation_mode === 'hibrido' ? t('Híbrido') : t('Remoto')
   const joinUrl = `/club/entrar?next=${encodeURIComponent(`/community/events/${event.slug}`)}`
   const source = translations.sources.get(`event:${event.id}`)
   const questions = event.pre_questions?.filter(Boolean) ?? []
@@ -169,7 +169,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   if (fallback && headers().get('x-public-event-fallback') === params.slug) {
     const liveEvent = await loadLivePublicEvent(params.slug)
     const publicEvent = liveEvent ?? fallback
-    const dateTbd = /data a confirmar/i.test(publicEvent.location_label || '')
+    const dateTbd = /data(?: e formato)? a confirmar/i.test(publicEvent.location_label || '')
     const past = !dateTbd && new Date(publicEvent.ends_at || publicEvent.starts_at) < new Date()
     const registrationCount = await loadConfirmedEventRegistrationCount(publicEvent.id)
     return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} registrationCount={registrationCount} />
@@ -196,7 +196,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   ])
   const authorIds = Array.from(new Set(resources?.map(item => item.uploader_id) ?? []))
   const { data: authors } = authorIds.length ? await supabase.from('community_members').select('user_id,display_name,avatar_path,current_role,organization_name').in('user_id', authorIds) : { data: [] }
-  const dateTbd = /data a confirmar/i.test(event.location_label || '')
+  const dateTbd = /data(?: e formato)? a confirmar/i.test(event.location_label || '')
   const past = !dateTbd && new Date(event.ends_at || event.starts_at) < new Date()
   const activeTab = searchParams?.tab === 'discussoes' ? 'discussoes' : searchParams?.tab === 'documentos' ? 'documentos' : 'fotos'
   const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
