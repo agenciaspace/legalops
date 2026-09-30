@@ -130,6 +130,13 @@ def render_event(summary, target):
     url=f"https://legalops.club/community/events/{target['slug']}#resumos"
     return f"{target['prefix']}\n{start:%d/%m %H:%M} a {end:%d/%m %H:%M} (Brasília)\n\n*{summary['title']}*\n{summary['summary']}\n\n{points}\n\n{summary['source_message_count']} mensagens · síntese anônima por IA\nHistórico e próxima edição: {url}"
 
+def render_event_comment(notification):
+    topic=sanitize_text(str(notification['topic']).strip())[:160]
+    author=clean_display_name(str(notification.get('author') or '')) or 'Participante'
+    body=sanitize_text(str(notification['body']).strip())[:3000]
+    url=f"https://legalops.club/community/events/{notification['event_slug']}?tab=discussoes#publicacoes"
+    return f"*Nova contribuição · Bench NetLex*\n*{topic}*\n\n{body}\n\n— {author}\nAcompanhar no Club: {url}"
+
 def save(path, state):
     temporary=path.with_suffix('.tmp')
     temporary.write_text(json.dumps(state,ensure_ascii=False))
@@ -145,6 +152,35 @@ def connected_instance(config):
     if str(connection.get('instance',{}).get('owner')) != OWNER or not connection.get('status',{}).get('connected'):
         raise RuntimeError('Expected personal instance is not connected')
     return base, hermes['UAZAPI_TOKEN']
+
+def process_event_comment_outbox(db, config, state_dir, headers):
+    endpoint=config['APP_URL'].rstrip('/')+'/api/cron/whatsapp-summary'
+    result=post(endpoint,{'action':'pull-event-comments'},headers)
+    if not result.get('ok'): raise RuntimeError('Event comment queue rejected request')
+    for notification in result.get('notifications',[]):
+        notification_id=notification.get('id','')
+        if not re.fullmatch(r'[0-9a-f-]{36}',notification_id,re.I): raise ValueError('Invalid event comment notification')
+        state_path=state_dir/f'event-comment-{notification_id}.json'
+        state=json.loads(state_path.read_text()) if state_path.exists() else {}
+        if state.get('status') == 'done': continue
+        text=render_event_comment(notification)
+        group=notification['group_id']
+        if group not in EVENT_SUMMARY_GROUPS: raise ValueError('Unexpected event comment destination')
+        if state.get('status') == 'sending':
+            match=db.execute('select msg_id from messages where chat_jid=? and owner=? and from_me=1 and text=? order by ts desc limit 1',(group,OWNER,state['text'])).fetchone()
+            if not match: raise RuntimeError('Event comment delivery outcome unknown; awaiting mirror confirmation')
+            state.update(status='sent',message_id=match[0]);save(state_path,state)
+        if state.get('status') == 'sent':
+            post(endpoint,{'action':'delivered-event-comment','id':notification_id,'message_id':state.get('message_id')},headers)
+            state['status']='done';save(state_path,state);continue
+        base,token=connected_instance(config)
+        state={'status':'sending','text':text};save(state_path,state)
+        delivery=post(base+'/send/text',{'number':group,'text':text},{'token':token})
+        if not isinstance(delivery,dict) or delivery.get('error') or delivery.get('success') is False:
+            raise RuntimeError('Instance did not confirm event comment delivery')
+        state.update(status='sent',message_id=delivery.get('id') or delivery.get('messageid'));save(state_path,state)
+        post(endpoint,{'action':'delivered-event-comment','id':notification_id,'message_id':state.get('message_id')},headers)
+        state['status']='done';save(state_path,state)
 
 def process_event_summaries(db, config, state_dir, headers, now, end):
     endpoint=config['APP_URL'].rstrip('/')+'/api/cron/whatsapp-summary'
@@ -189,6 +225,7 @@ def run(config, preview=False):
         db=sqlite3.connect(f"file:{config['DATABASE']}?mode=ro",uri=True)
         headers={'Authorization':'Bearer '+config['INGEST_SECRET']}
         endpoint=config['APP_URL'].rstrip('/')+'/api/cron/whatsapp-summary'
+        if not preview: process_event_comment_outbox(db,config,state_dir,headers)
         if not preview: sync_bench_events(db,config,state_dir,headers,now)
         if not preview: process_event_summaries(db,config,state_dir,headers,now,end)
         state_path=state_dir/(end.strftime('%Y%m%dT%H%M%S')+'.json')

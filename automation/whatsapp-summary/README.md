@@ -14,6 +14,11 @@ Event-specific summaries use `community_event_whatsapp_configs` and
 18:00 Brasília, publishes an anonymized archive on the event landing and sends the same digest to
 its own group. Event summaries never reuse the general community destination or storage rows.
 
+New comments posted inside an event conversation are added to a private database outbox. The same
+five-minute runner forwards each item to the event's allowlisted group and records delivery before
+processing it again. Ambiguous sends are reconciled against the read-only message mirror instead of
+being blindly repeated.
+
 Every day at 21:00 UTC (18:00 Brasília), publish the previous **fixed 24-hour period** to
 `club_whatsapp_summaries`, then send the same digest to the group. First window ends
 2026-09-18 at 21:00 UTC. Empty windows produce no WhatsApp notification. The 5-minute timer

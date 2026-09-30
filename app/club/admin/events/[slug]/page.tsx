@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { loadEventAdminOverview, type EventAdminRegistration } from '@/lib/event-admin'
-import { requireLegalOpsAdmin } from '@/lib/legalops-admin'
+import { requireEventAdminAccess } from '@/lib/event-admin-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,7 +31,7 @@ function singular(value: number, one: string, many: string) {
 
 export default async function EventRegistrationsAdminPage({ params }: { params: { slug: string } }) {
   const nextPath = `/club/admin/events/${params.slug}`
-  await requireLegalOpsAdmin(nextPath)
+  await requireEventAdminAccess(params.slug, nextPath)
   const overview = await loadEventAdminOverview(params.slug)
   if (!overview) notFound()
 

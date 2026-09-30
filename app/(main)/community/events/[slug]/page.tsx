@@ -56,8 +56,19 @@ function EventWhatsAppSummaryArchive({ summaries }: { summaries: EventWhatsAppSu
   </section>
 }
 
-function EventConversationTopicDirectory({ topics, eventSlug, linked = false }: { topics: EventConversationTopic[], eventSlug: string, linked?: boolean }) {
+function EventConversationTopicDirectory({ topics, eventSlug, linked = false, selectedTopicId, activity = new Map<string, number>() }: { topics: EventConversationTopic[], eventSlug: string, linked?: boolean, selectedTopicId?: string | null, activity?: Map<string, number> }) {
   if (!topics.length) return null
+  if (linked) return <nav aria-label="Tópicos desta conversa" className="self-start overflow-hidden rounded-xl border border-[#CEC8BD] bg-white lg:sticky lg:top-20">
+    <div className="border-b border-[#E6DED0] bg-[#F5F1E8] px-4 py-4"><p className="text-[10px] font-black uppercase tracking-[.14em] text-[#A94E38]">Conversas do evento</p><h2 className="mt-1 text-base font-bold">Escolha um tópico</h2></div>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-1">{topics.map((topic, index) => {
+      const active = topic.id === selectedTopicId
+      const replies = topic.id ? activity.get(topic.id) ?? 0 : 0
+      return topic.id ? <Link key={topic.id} href={`/community/events/${eventSlug}?tab=discussoes&topic=${topic.id}#publicacoes`} aria-current={active ? 'page' : undefined} className={`group grid min-h-16 grid-cols-[1.75rem_minmax(0,1fr)] gap-2 border-b border-[#E6DED0] px-4 py-3.5 last:border-b-0 sm:[&:nth-last-child(2):nth-child(odd)]:border-b-0 lg:border-b lg:last:border-b-0 ${active ? 'bg-[#24231F] text-white' : 'hover:bg-[#FAF7F1]'}`}>
+        <span className={`mt-0.5 text-[10px] font-black ${active ? 'text-[#F1AD93]' : 'text-[#A94E38]'}`}>{String(topic.display_order || index + 1).padStart(2, '0')}</span>
+        <span><span className="block text-sm font-bold leading-5">{topic.title}</span>{active ? <span className="mt-1 block text-xs leading-5 text-white/60">{topic.description}</span> : <span className="mt-1 block text-[10px] font-semibold text-[#817A73] group-hover:text-[#625E59]">{replies === 1 ? '1 resposta' : `${replies} respostas`}</span>}</span>
+      </Link> : null
+    })}</div>
+  </nav>
   return <section id="conversas" className="scroll-mt-20 rounded-2xl border border-[#CEC8BD] bg-[#F5F1E8] p-6 sm:p-8">
     <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#A94E38]">Conversas organizadas</p>
     <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Tópicos do Bench</h2>
@@ -128,7 +139,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
             <p className="text-xs font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Inscrição pendente')}</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em]">{t('Não foi possível registrar agora.')}</h2>
             <p className="mt-3 text-sm leading-6 text-[#625E59]">{t('Envie seus dados por email e a organização confirmará sua participação.')}</p>
-            <a href={`mailto:contato@legalops.club?subject=${encodeURIComponent(`Inscrição · ${event.title}`)}`} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#24231F] px-4 text-sm font-bold text-white">{t('Enviar por email')} <ArrowRight className="ml-2 h-4 w-4" /></a>
+            <a href={`mailto:hi@legalops.club?subject=${encodeURIComponent(`Inscrição · ${event.title}`)}`} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#24231F] px-4 text-sm font-bold text-white">{t('Enviar por email')} <ArrowRight className="ml-2 h-4 w-4" /></a>
           </div> : <form action={registerPublicEvent}>
             {event.id ? <input type="hidden" name="event_id" value={event.id} /> : null}
             <input type="hidden" name="event_slug" value={event.slug} />
@@ -239,6 +250,8 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   const activeTab = searchParams?.tab === 'discussoes' || searchParams?.topic ? 'discussoes' : searchParams?.tab === 'documentos' ? 'documentos' : 'fotos'
   const selectedTopic = conversationTopics.find(topic => topic.id && topic.id === searchParams?.topic) ?? null
   const selectedDiscussions = selectedTopic ? (discussions ?? []).filter(post => post.topic_id === selectedTopic.id) : []
+  const topicActivity = new Map<string, number>()
+  for (const post of discussions ?? []) if (post.topic_id) topicActivity.set(post.topic_id, (topicActivity.get(post.topic_id) ?? 0) + (post.community_comments?.length ?? 0))
   const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
   const translations = await loadClubTranslations(supabase, [event.id,...(discussions ?? []).flatMap(post => [post.id, ...(post.community_comments ?? []).map(comment => comment.id)]),...(resources ?? []).map(resource => resource.id),...authorIds])
   if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
@@ -254,11 +267,18 @@ export default async function EventPage({ params, searchParams }: { params: { sl
       <EventShare slug={event.slug} title={event.title} />
     </div>
   </div>
+  const attendanceCard = isMember && user && !past ? <section className="rounded-xl border border-[#CEC8BD] bg-[#F5F1E8] p-4 sm:p-5">
+    <p className="text-[10px] font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Minha participação')}</p>
+    <h2 className="mt-2 text-lg font-bold">{attendance?.response === 'confirmed' ? t('Presença confirmada') : t('Confirmar presença')}</h2>
+    <p className="mt-2 text-xs leading-5 text-[#716B65]">{attendance?.response === 'confirmed' ? t('Revise seus dados ou avise se não puder participar.') : t('Confirme seus dados para participar do encontro e das conversas.')}</p>
+    <details className="mt-3"><summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold underline underline-offset-4">{attendance?.response === 'confirmed' ? t('Revisar participação') : t('Confirmar agora')}</summary><div className="mt-3"><BenchClient eventId={event.id} initial={attendance} member={{ name: member?.display_name || '', role: member?.current_role || '', email: user.email || '' }} /></div></details>
+  </section> : null
   return <main className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 lg:py-6">
     <header className="mb-4 sm:mb-5">
-      <div className="flex min-h-11 items-center gap-3 text-xs">
+      <div className="flex min-h-11 flex-wrap items-center gap-3 text-xs">
         <Link href="/community/calendar" className="inline-flex min-h-11 items-center font-semibold text-[#A94E38]">{t('← Eventos')}</Link>
         <span className="text-[#817A73]">{past ? t('Evento realizado') : t('Próximo evento')}</span>
+        {eventAdmin ? <Link href={`/club/admin/events/${event.slug}`} className="ml-auto inline-flex min-h-11 items-center rounded-lg border border-[#CEC8BD] bg-white px-4 font-bold text-[#24231F]">Ver confirmados</Link> : null}
       </div>
       <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{title:event.title}} enabled={translations.enabled} serverLocale={getClubLocale()} titleAs="h1" titleClassName="text-2xl font-extrabold leading-tight tracking-[-.025em] text-[#252420] sm:text-3xl" />
     </header>
@@ -268,11 +288,11 @@ export default async function EventPage({ params, searchParams }: { params: { sl
           <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 text-sm font-semibold [&::-webkit-details-marker]:hidden">{t('Sobre o encontro')}<ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0" /></summary>
           <div className="border-t border-[#E6DED0] p-4">{overview}</div>
         </details>
+        {attendanceCard ? <div className="mb-4 xl:hidden">{attendanceCard}</div> : null}
         {isEventWhatsAppSummaryEnabled(event.slug) ? <div className="mb-4"><EventWhatsAppSummaryArchive summaries={whatsappSummaries} /></div> : null}
         {isMember && <nav id="publicacoes" aria-label={t('Conteúdo do evento')} className="mb-4 flex scroll-mt-20 gap-1 border-b border-[#CEC8BD]">
           {([{ key: 'fotos', label: t("Fotos") }, { key: 'documentos', label: t("Documentos") }, { key: 'discussoes', label: t("Conversas") }] as const).map(tab => <Link key={tab.key} href={`/community/events/${event.slug}?tab=${tab.key}#publicacoes`} aria-current={activeTab === tab.key ? 'page' : undefined} className={`inline-flex min-h-12 flex-1 items-center justify-center border-b-2 px-2 text-sm font-semibold sm:flex-none sm:px-5 ${activeTab === tab.key ? 'border-[#A94E38] text-[#A94E38]' : "border-transparent text-[#625E59] hover:text-[#24231F]"}`}>{t(tab.label)}</Link>)}
         </nav>}
-      {isMember && user && !past && <details className="mb-4 rounded-xl border border-[#CEC8BD] bg-[#F5F1E8] p-4"><summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">{attendance?.response === 'confirmed' ? t("Revisar minha participação") : t("Confirmar minha participação")}</summary><div className="mt-4"><BenchClient eventId={event.id} initial={attendance} member={{ name: member?.display_name || '', role: member?.current_role || '', email: user.email || '' }} /></div></details>}
       {isMember && !canContribute && activeTab !== 'discussoes' && past && <p className="mb-4 rounded-lg border border-[#CEC8BD] p-4 text-sm leading-6 text-[#625E59]">{t("As fotos e documentos são exclusivos de participantes confirmados e organizadores. Se você participou e não tem acesso, peça à organização para conferir sua inscrição.")}</p>}
 
         {canContribute && activeTab !== 'discussoes' && <section aria-label={t('Publicações do evento')}>
@@ -280,28 +300,33 @@ export default async function EventPage({ params, searchParams }: { params: { sl
           <EventPublications translations={translations} resources={visibleResources} authors={authors ?? []} />
         </section>}
       {isMember && activeTab === 'discussoes' ? <div className="space-y-4">
-        <EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} linked={canContribute} />
-        {!canContribute ? <p className="rounded-xl border border-[#CEC8BD] bg-white p-5 text-sm leading-6 text-[#625E59]">Confirme sua participação no Bench para entrar nas conversas específicas do evento.</p> : selectedTopic ? <section className="rounded-xl border border-[#CEC8BD] bg-white p-4 sm:p-6">
+        {!canContribute ? <><EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} /><p className="rounded-xl border border-[#CEC8BD] bg-white p-5 text-sm leading-6 text-[#625E59]">Confirme sua participação no Bench para entrar nas conversas específicas do evento.</p></> : <div className="grid items-start gap-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
+        <EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} linked selectedTopicId={selectedTopic?.id} activity={topicActivity} />
+        {selectedTopic ? <section className="min-w-0 rounded-xl border border-[#CEC8BD] bg-white p-4 sm:p-6">
           <Link href={`/community/events/${event.slug}?tab=discussoes#publicacoes`} className="inline-flex min-h-11 items-center text-xs font-bold text-[#A94E38]">← Todos os tópicos</Link>
+          <p className="text-[10px] font-black uppercase tracking-[.14em] text-[#A94E38]">Tópico em discussão</p>
           <h2 className="mt-2 text-2xl font-bold tracking-[-.03em]">{selectedTopic.title}</h2>
           <p className="mt-2 text-sm leading-6 text-[#625E59]">{selectedTopic.description}</p>
           {selectedDiscussions.length ? <div className="mt-6 space-y-5">{selectedDiscussions.map(post => <article key={post.id} className="rounded-xl bg-[#F8F5EF] p-4 sm:p-5">
+            <p className="mb-3 text-[10px] font-black uppercase tracking-[.12em] text-[#817A73]">Ponto de partida</p>
             <TranslatedContent source={translations.sources.get(`post:${post.id}`)} original={{title:post.title,body:post.body}} enabled={translations.enabled} serverLocale={getClubLocale()} />
-            {(post.community_comments ?? []).length ? <div className="mt-5 space-y-3 border-t border-[#DED6C9] pt-5">{[...(post.community_comments ?? [])].sort((a,b)=>a.created_at.localeCompare(b.created_at)).map(comment => <div key={comment.id} className="rounded-lg bg-white p-3 text-sm leading-6"><p className="text-xs font-bold text-[#817A73]">{comment.author_name}</p><TranslatedContent source={translations.sources.get(`comment:${comment.id}`)} original={{body:comment.body}} enabled={translations.enabled} serverLocale={getClubLocale()} compact /></div>)}</div> : null}
+            {(post.community_comments ?? []).length ? <div className="mt-5 space-y-3 border-t border-[#DED6C9] pt-5"><p className="text-[10px] font-black uppercase tracking-[.12em] text-[#817A73]">{post.community_comments.length === 1 ? '1 resposta' : `${post.community_comments.length} respostas`}</p>{[...(post.community_comments ?? [])].sort((a,b)=>a.created_at.localeCompare(b.created_at)).map(comment => <div key={comment.id} className="rounded-lg bg-white p-3 text-sm leading-6"><p className="text-xs font-bold text-[#817A73]">{comment.author_name}</p><TranslatedContent source={translations.sources.get(`comment:${comment.id}`)} original={{body:comment.body}} enabled={translations.enabled} serverLocale={getClubLocale()} compact /></div>)}</div> : null}
             <form action={createCommunityComment} className="mt-5 flex gap-2 border-t border-[#DED6C9] pt-5">
               <input type="hidden" name="post_id" value={post.id} />
               <input type="hidden" name="return_to" value={`/community/events/${event.slug}?tab=discussoes&topic=${selectedTopic.id}#publicacoes`} />
               <input name="body" required maxLength={3000} aria-label="Responder neste tópico" placeholder="Compartilhe sua experiência ou pergunta…" className="min-h-11 min-w-0 flex-1 rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" />
               <button aria-label="Enviar resposta" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-[#24231F] text-white"><Send className="h-4 w-4" /></button>
             </form>
+            <p className="mt-2 text-[11px] leading-5 text-[#817A73]">Novas perguntas e respostas também são encaminhadas ao grupo do Bench no WhatsApp.</p>
           </article>)}</div> : <p className="mt-5 rounded-lg bg-[#F5F1E8] p-4 text-sm">A conversa deste tópico será aberta pela organização.</p>}
-        </section> : <p className="rounded-xl border border-dashed border-[#CEC8BD] bg-white p-5 text-sm leading-6 text-[#625E59]"><MessageCircle className="mr-2 inline h-4 w-4" />Escolha um tópico acima para acompanhar e participar da conversa.</p>}
+        </section> : <section className="flex min-h-64 items-center justify-center rounded-xl border border-dashed border-[#CEC8BD] bg-white p-6 text-center"><div className="max-w-sm"><span className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-[#F5F1E8]"><MessageCircle className="h-5 w-5 text-[#A94E38]" /></span><h2 className="mt-4 text-lg font-bold">Escolha uma frente da conversa</h2><p className="mt-2 text-sm leading-6 text-[#625E59]">Abra um dos tópicos para ler as respostas e compartilhar sua experiência ou pergunta.</p></div></section>}
+        </div>}
       </div> : null}
 
       </div>
-      <aside aria-label={t('Sobre o encontro')} className="sticky top-20 hidden min-w-0 rounded-xl border border-[#CEC8BD] bg-white p-5 xl:block">
-        <h2 className="mb-4 text-sm font-semibold">{t('Sobre o encontro')}</h2>
-        {overview}
+      <aside aria-label={t('Sobre o encontro')} className="sticky top-20 hidden min-w-0 space-y-4 xl:block">
+        <section className="rounded-xl border border-[#CEC8BD] bg-white p-5"><h2 className="mb-4 text-sm font-semibold">{t('Sobre o encontro')}</h2>{overview}</section>
+        {attendanceCard}
       </aside>
     </div>
   </main>
