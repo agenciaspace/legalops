@@ -77,16 +77,28 @@ it('exposes only the exact Bench intake path and keeps moderation authenticated'
   expect((await request('/club/admin/bench')).headers.get('location')).toContain('/login?next=')
 })
 
-it('serves the reviewed public event snapshot without waiting for Supabase', async () => {
+it('serves the reviewed event fallback for guests but restores authenticated member navigation', async () => {
   for (const slug of ['bench-honorarios-exito-2026', 'bench-netlex-2026']) {
-    for (const cookie of [undefined, 'sb-project-auth-token=session']) {
-      const response = await request(`/community/events/${slug}`, cookie)
-      expect(response.status).toBe(200)
-      expect(response.headers.get('x-middleware-request-x-public-event-fallback')).toBe(slug)
-      expect(response.headers.get('x-middleware-request-x-club-timezone')).toBe('America/Sao_Paulo')
-    }
+    const guest = await request(`/community/events/${slug}`)
+    expect(guest.status).toBe(200)
+    expect(guest.headers.get('x-middleware-request-x-public-event-fallback')).toBe(slug)
+    expect(guest.headers.get('x-middleware-request-x-club-timezone')).toBe('America/Sao_Paulo')
   }
   expect(state.authReads).toBe(0)
+
+  state.user = { id: 'member' }
+  state.member = { club_access_status: 'active', club_pro_status: 'inactive' }
+  const member = await request('/community/events/bench-netlex-2026', 'sb-project-auth-token=session')
+  expect(member.status).toBe(200)
+  expect(member.headers.get('x-middleware-request-x-public-event-fallback')).toBeNull()
+  expect(state.authReads).toBe(1)
+})
+
+it('falls back safely when a stale event session cookie no longer resolves to a user', async () => {
+  const response = await request('/community/events/bench-netlex-2026', 'sb-project-auth-token=stale')
+  expect(response.status).toBe(200)
+  expect(response.headers.get('x-middleware-request-x-public-event-fallback')).toBe('bench-netlex-2026')
+  expect(state.authReads).toBe(1)
 })
 
 it('serves public PWA assets without exposing community data', async () => {

@@ -37,7 +37,9 @@ export async function middleware(request: NextRequest) {
   // A public URL cannot depend on session refresh: installed PWAs and signed-in
   // browsers carry Supabase cookies even when the visitor only wants the landing.
   const publicEventSlug = pathname.match(/^\/community\/events\/([^/]+)$/)?.[1]
-  if (publicEventSlug && getPublicEventFallback(publicEventSlug)) {
+  const publicEventFallback = publicEventSlug ? getPublicEventFallback(publicEventSlug) : null
+  const hasSupabaseSessionCookie = request.cookies.getAll().some(({ name }) => /^sb-.*-auth-token(?:\.\d+)?$/.test(name))
+  if (publicEventSlug && publicEventFallback && !hasSupabaseSessionCookie) {
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-public-event-fallback', publicEventSlug)
     requestHeaders.set('x-club-locale', request.cookies.has(CLUB_LOCALE_COOKIE)
@@ -106,6 +108,14 @@ export async function middleware(request: NextRequest) {
   const withSession = (response: NextResponse) => {
     supabaseResponse.cookies.getAll().forEach(cookie => response.cookies.set(cookie))
     return response
+  }
+
+  // A stale browser session should not take a reviewed event landing offline.
+  // Valid sessions continue below so members can reach the event conversations.
+  if (!user && publicEventSlug && publicEventFallback) {
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-public-event-fallback', publicEventSlug)
+    return withSession(NextResponse.next({ request: { headers: requestHeaders } }))
   }
 
   // Older installations may launch at / or /club. Resume the existing session
