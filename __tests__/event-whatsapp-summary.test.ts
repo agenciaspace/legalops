@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   eventWhatsAppDigestPrompt,
   eventWhatsAppSummarySource,
+  parseEventWhatsAppDigest,
   validateEventWhatsAppInput,
 } from '@/lib/event-whatsapp-summary'
 
@@ -30,5 +31,29 @@ describe('event WhatsApp summaries', () => {
     expect(prompt).toContain('fila de aprovação')
     expect(prompt).not.toContain('Ana Lima')
     expect(prompt).toContain('Não inclua nomes')
+    expect(prompt).toContain('2 a 3 destaques')
+    expect(prompt).toContain('até 320 caracteres')
+  })
+
+  it('accepts only compact event digests', () => {
+    const compact = JSON.stringify({
+      publish: true,
+      title: 'Workflows e integrações',
+      summary: 'O grupo trocou experiências sobre configuração e relatórios.',
+      highlights: [
+        { type: 'feedback', owner: null, text: 'Workflows exigem cuidado com condicionais.' },
+        { type: 'context', owner: null, text: 'A API foi usada em relatórios de BI.' },
+      ],
+    })
+    expect(parseEventWhatsAppDigest(compact)).not.toBeNull()
+    expect(parseEventWhatsAppDigest(JSON.stringify({
+      publish: true,
+      title: 'Workflows e integrações',
+      summary: 'A'.repeat(321),
+      highlights: [
+        { type: 'feedback', owner: null, text: 'Ponto um.' },
+        { type: 'context', owner: null, text: 'Ponto dois.' },
+      ],
+    }))).toBeNull()
   })
 })

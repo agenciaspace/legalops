@@ -23,7 +23,7 @@ EVENT_SUMMARY_GROUPS = {
     '120363432116359544@g.us': {
         'slug': 'bench-netlex-2026',
         'title': 'Bench NetLex',
-        'prefix': '*Resumo diário · Bench NetLex*',
+        'prefix': '*Resumo · Bench NetLex*',
         'first_run_at': '2026-09-30T21:00:00Z',
     },
 }
@@ -124,11 +124,9 @@ def render(summary):
     return f"{PREFIX}\n{start:%d/%m %H:%M} a {end:%d/%m %H:%M} (Brasília)\n\n*{summary['title']}*\n{summary['summary']}\n\n{points}\n\n{summary['source_message_count']} mensagens · Síntese por IA\nPróxima edição: amanhã, a partir das 18h, se houver novas mensagens.\nhttps://legalops.club/community/summaries"
 
 def render_event(summary, target):
-    end=dt.datetime.fromisoformat(summary['period_end'].replace('Z','+00:00')).astimezone(dt.timezone(dt.timedelta(hours=-3)))
-    start=end-DAY
-    points='\n'.join('• '+point for point in summary['key_points'])
-    url=f"https://legalops.club/community/events/{target['slug']}#resumos"
-    return f"{target['prefix']}\n{start:%d/%m %H:%M} a {end:%d/%m %H:%M} (Brasília)\n\n*{summary['title']}*\n{summary['summary']}\n\n{points}\n\n{summary['source_message_count']} mensagens · síntese anônima por IA\nHistórico e próxima edição: {url}"
+    points='\n'.join('• '+point for point in summary['key_points'][:3])
+    url=f"https://legalops.club/community/events/{target['slug']}?tab=discussoes#publicacoes"
+    return f"{target['prefix']}\n\n*{summary['title']}*\n{summary['summary']}\n\n{points}\n\nContinuar a conversa: {url}"
 
 def render_event_comment(notification):
     topic=sanitize_text(str(notification['topic']).strip())[:160]

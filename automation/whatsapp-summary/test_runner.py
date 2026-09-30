@@ -65,7 +65,22 @@ class SummaryTests(unittest.TestCase):
             delivery=next(call.args[1] for call in post.call_args_list if call.args[0].endswith('/send/text'))
             self.assertEqual(publish['source'],'event:bench-netlex-2026')
             self.assertEqual(delivery['number'],group)
-            self.assertIn('#resumos',delivery['text'])
+            self.assertIn('*Resumo · Bench NetLex*',delivery['text'])
+            self.assertIn('?tab=discussoes#publicacoes',delivery['text'])
+            self.assertNotIn('mensagens · síntese',delivery['text'])
+            self.assertNotIn('Brasília',delivery['text'])
+
+    def test_event_summary_limits_the_whatsapp_message_to_three_points(self):
+        summary={
+            'period_end':'2026-09-30T21:00:00Z',
+            'title':'Workflows, integrações e suporte',
+            'summary':'O grupo trocou experiências práticas sobre o NetLex.',
+            'key_points':['Ponto um.','Ponto dois.','Ponto três.','Ponto quatro.'],
+            'source_message_count':189,
+        }
+        text=runner.render_event(summary,runner.EVENT_SUMMARY_GROUPS['120363432116359544@g.us'])
+        self.assertEqual(text.count('\n• '),3)
+        self.assertNotIn('Ponto quatro.',text)
     def test_event_comment_is_forwarded_once_and_acknowledged(self):
         db=sqlite3.connect(':memory:')
         db.execute('create table messages(msg_id,text,chat_jid,owner,from_me,ts)')

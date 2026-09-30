@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { generateOpenRouterText } from '@/lib/openrouter'
 import { DAY_MS, parseWhatsAppDigest, validateWhatsAppInput, whatsAppDigestPrompt, WHATSAPP_SUMMARY_MODEL } from '@/lib/whatsapp-summary'
 import { BENCH_WHATSAPP_SOURCES, BENCH_WHATSAPP_SYNC_MODEL, benchSchedulePrompt, extractExplicitBenchSchedule, parseBenchScheduleDecision, validateBenchSyncInput } from '@/lib/bench-whatsapp-sync'
-import { EVENT_WHATSAPP_SUMMARY_MODEL, eventWhatsAppDigestPrompt, validateEventWhatsAppInput } from '@/lib/event-whatsapp-summary'
+import { EVENT_WHATSAPP_SUMMARY_MODEL, eventWhatsAppDigestPrompt, parseEventWhatsAppDigest, validateEventWhatsAppInput } from '@/lib/event-whatsapp-summary'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 const reply = (data: unknown, status = 200) => NextResponse.json(data, { status, headers: { 'Cache-Control': 'private, no-store' } })
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
         temperature: 0,
         timeoutMs: 45_000,
       })
-      const digest = parseWhatsAppDigest(generated)
+      const digest = parseEventWhatsAppDigest(generated)
       if (!digest) throw new Error('Invalid generated event summary')
       if (!digest.publish) { await status('empty'); return reply({ ok: true, empty: true, reason: 'no-substantive-content' }) }
       const { publish: _publish, ...content } = digest
