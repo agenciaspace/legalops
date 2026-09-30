@@ -14,6 +14,7 @@ import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { getPublicEventFallback, type PublicEvent } from '@/lib/public-events'
 import { loadLivePublicEvent } from '@/lib/public-event-live'
+import { loadConfirmedEventRegistrationCount } from '@/lib/event-registration-count'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-function PublicEventLanding({ event, translations, user, registered, registrationError, dateTbd, past }: {
+function PublicEventLanding({ event, translations, user, registered, registrationError, dateTbd, past, registrationCount }: {
   event: PublicEvent
   translations: Awaited<ReturnType<typeof loadClubTranslations>>
   user: { id: string } | null
@@ -45,6 +46,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
   registrationError: boolean
   dateTbd: boolean
   past: boolean
+  registrationCount: number | null
 }) {
   const t = getClubTranslator()
   const locale = getClubLocale()
@@ -64,6 +66,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="rounded-full border border-[#E88A6A]/45 bg-[#E88A6A]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.16em] text-[#F1AD93]">{t('Bench entre pares')}</span>
             <span className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-white/65">{past ? t('Evento realizado') : t('Inscrições abertas')}</span>
+            {registrationCount !== null ? <span className="rounded-full border border-white/15 bg-white/[.04] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-white/80">{registrationCount === 1 ? t('{count} pessoa inscrita', { count: registrationCount }) : t('{count} pessoas inscritas', { count: registrationCount })}</span> : null}
           </div>
           <div className="mt-6">
             <TranslatedContent source={source} original={{title:event.title}} enabled={translations.enabled} serverLocale={locale} titleAs="h1" titleClassName="max-w-3xl text-[38px] font-semibold leading-[1.04] tracking-[-.045em] text-[#F8F4EC] sm:text-[54px] lg:text-[64px]" />
@@ -168,14 +171,19 @@ export default async function EventPage({ params, searchParams }: { params: { sl
     const publicEvent = liveEvent ?? fallback
     const dateTbd = /data a confirmar/i.test(publicEvent.location_label || '')
     const past = !dateTbd && new Date(publicEvent.ends_at || publicEvent.starts_at) < new Date()
-    return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} />
+    const registrationCount = await loadConfirmedEventRegistrationCount(publicEvent.id)
+    return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} registrationCount={registrationCount} />
   }
 
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   const { data: event } = await supabase.from('community_events').select('id,slug,title,description,host_name,starts_at,ends_at,location_label,event_type,is_published,participation_mode,participation_details,pre_questions').eq('slug', params.slug).eq('is_published', true).maybeSingle()
   if (!event) return <div className="mx-auto max-w-2xl px-5 py-16"><h1 className="text-2xl font-bold">{t("Evento não encontrado")}</h1><Link className="mt-4 inline-flex underline" href="/community/calendar">{t("Voltar para eventos")}</Link></div>
-  const { data: member } = user ? await supabase.from('community_members').select('display_name,current_role,club_access_status,club_access_expires_at').eq('user_id', user.id).maybeSingle() : {data:null}
+  const [registrationCount, memberResult] = await Promise.all([
+    loadConfirmedEventRegistrationCount(event.id),
+    user ? supabase.from('community_members').select('display_name,current_role,club_access_status,club_access_expires_at').eq('user_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
+  ])
+  const { data: member } = memberResult
   const isMember = hasActiveClubAccess(member)
   const [{ data: attendance }, { data: eventAdmin }] = user && isMember ? await Promise.all([
     supabase.from('community_event_rsvps').select('id,response,guest_name,guest_role,organization_name,guest_email,guest_phone,dietary_restrictions,accessibility_needs,arrival_notes').eq('event_id', event.id).eq('user_id', user.id).maybeSingle(),
@@ -193,7 +201,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   const activeTab = searchParams?.tab === 'discussoes' ? 'discussoes' : searchParams?.tab === 'documentos' ? 'documentos' : 'fotos'
   const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
   const translations = await loadClubTranslations(supabase, [event.id,...(discussions ?? []).map(post => post.id),...(resources ?? []).map(resource => resource.id),...authorIds])
-  if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} />
+  if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} registrationCount={registrationCount} />
 
   const overview = <div className="space-y-5">
     <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{description:event.description,location_label:event.location_label}} enabled={translations.enabled} serverLocale={getClubLocale()} />

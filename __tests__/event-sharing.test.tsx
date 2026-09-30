@@ -3,9 +3,19 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { clubReturnPath } from '@/lib/club-return-path'
 
-const state = vi.hoisted(() => ({ user: null as null | { id: string }, member: null as any, tables: [] as string[], location: '' }))
+const state = vi.hoisted(() => ({ user: null as null | { id: string }, member: null as any, tables: [] as string[], location: '', registrationCount: 8 }))
 vi.mock('@/app/(main)/community/actions', () => ({ registerPublicEvent: vi.fn() }))
 vi.mock('@/components/community/EventUpload', () => ({ EventUpload: () => <p>Private upload</p> }))
+vi.mock('@/lib/supabase-admin', () => ({ createAdminClient: () => ({
+  from: () => {
+    const query: any = {
+      select: () => query,
+      eq: () => query,
+      then: (resolve: (value: unknown) => unknown) => resolve({ count: state.registrationCount, error: null }),
+    }
+    return query
+  },
+}) }))
 vi.mock('@/lib/supabase-server', () => ({ createServerSupabaseClient: async () => ({
   auth: { getUser: async () => ({ data: { user: state.user } }) },
   from: (table: string) => {
@@ -17,7 +27,7 @@ vi.mock('@/lib/supabase-server', () => ({ createServerSupabaseClient: async () =
 }) }))
 import EventPage, { generateMetadata } from '@/app/(main)/community/events/[slug]/page'
 
-beforeEach(() => { state.user = null; state.member = null; state.tables = []; state.location = '' })
+beforeEach(() => { state.user = null; state.member = null; state.tables = []; state.location = ''; state.registrationCount = 8 })
 afterEach(cleanup)
 
 it.each([false, true])('invites a nonmember to join without reading private materials (signed in: %s)', async signedIn => {
@@ -44,6 +54,11 @@ it('keeps public registration open while the event date is still being confirmed
   expect(screen.getByRole('button', { name: /Quero participar/ })).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: 'Sobre o encontro' })).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: 'O que vamos discutir?' })).toBeInTheDocument()
+})
+
+it('shows the confirmed registration count in the public event header', async () => {
+  render(await EventPage({ params: { slug: 'bench-nubank' } }))
+  expect(screen.getByText('8 pessoas inscritas')).toBeInTheDocument()
 })
 
 it('turns the post-registration page into a clear confirmation state', async () => {
