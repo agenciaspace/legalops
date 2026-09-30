@@ -15,6 +15,37 @@ export async function POST(request: Request) {
   let raw
   try { raw = JSON.parse(text) } catch { return reply({ error: 'Invalid JSON' }, 400) }
   const db = createAdminClient()
+  if (raw?.action === 'pull-event-comments') {
+    const { data: pending, error } = await db
+      .from('community_event_whatsapp_outbox')
+      .select('id,event_id,comment_id,attempt_count,created_at')
+      .is('delivered_at', null)
+      .order('created_at', { ascending: true })
+      .limit(10)
+    if (error) return reply({ error: 'Event comment queue unavailable' }, 503)
+
+    const notifications = []
+    for (const item of pending ?? []) {
+      const { data: comment } = await db.from('community_comments').select('post_id,author_name,body,created_at').eq('id', item.comment_id).maybeSingle()
+      if (!comment) continue
+      const { data: post } = await db.from('community_posts').select('event_id,topic_id').eq('id', comment.post_id).maybeSingle()
+      if (!post?.event_id || post.event_id !== item.event_id) continue
+      const [{ data: event }, { data: topic }, { data: config }] = await Promise.all([
+        db.from('community_events').select('slug').eq('id', post.event_id).eq('is_published', true).maybeSingle(),
+        post.topic_id ? db.from('community_forum_topics').select('title').eq('id', post.topic_id).maybeSingle() : Promise.resolve({ data: null }),
+        db.from('community_event_whatsapp_configs').select('group_jid,enabled').eq('event_id', post.event_id).eq('enabled', true).maybeSingle(),
+      ])
+      if (!event || !topic || !config) continue
+      notifications.push({ id: item.id, group_id: config.group_jid, event_slug: event.slug, topic: topic.title, author: comment.author_name, body: comment.body, created_at: comment.created_at })
+      await db.from('community_event_whatsapp_outbox').update({ attempt_count: item.attempt_count + 1, last_attempt_at: new Date().toISOString() }).eq('id', item.id).is('delivered_at', null)
+    }
+    return reply({ ok: true, notifications })
+  }
+  if (raw?.action === 'delivered-event-comment') {
+    if (typeof raw.id !== 'string' || !/^[0-9a-f-]{36}$/i.test(raw.id) || (raw.message_id != null && typeof raw.message_id !== 'string')) return reply({ error: 'Invalid delivery' }, 400)
+    const { error } = await db.from('community_event_whatsapp_outbox').update({ delivered_at: new Date().toISOString(), provider_message_id: raw.message_id?.slice(0, 300) || null }).eq('id', raw.id).is('delivered_at', null)
+    return error ? reply({ error: 'Delivery status unavailable' }, 503) : reply({ ok: true })
+  }
   if (raw?.action === 'sync-bench-event') {
     const input = validateBenchSyncInput(raw)
     if (!input) return reply({ error: 'Invalid Bench source or messages' }, 400)

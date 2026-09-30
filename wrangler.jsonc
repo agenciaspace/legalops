@@ -5,7 +5,7 @@
   "compatibility_date": "2026-08-19",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
   "vars": {
     "CLOUDFLARE_ACCOUNT_ID": "3d40d7797b3fd6d1cd2644eefea9e907",
@@ -16,17 +16,20 @@
     "OPENROUTER_MODEL": "openrouter/auto",
     "OPENROUTER_SITE_URL": "https://legalops.work",
     "OPENROUTER_APP_NAME": "legalops",
-    "LEGALOPS_ADMIN_EMAILS": "leonhatori@gmail.com"
+    "LEGALOPS_ADMIN_EMAILS": "leonhatori@gmail.com",
+    "GOOGLE_CALENDAR_ID": "hi@legalops.club",
+    "GOOGLE_CALENDAR_ORGANIZER_EMAIL": "hi@legalops.club",
+    "RESEND_SENDER_EMAIL": "hi@legalops.club",
   },
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
   },
   "routes": [
     { "pattern": "legalops.work/*", "zone_name": "legalops.work" },
     { "pattern": "www.legalops.work/*", "zone_name": "legalops.work" },
     { "pattern": "legalops.club", "custom_domain": true },
     { "pattern": "www.legalops.club", "custom_domain": true },
-    { "pattern": "legalops.legalops.club", "custom_domain": true }
-  ]
+    { "pattern": "legalops.legalops.club", "custom_domain": true },
+  ],
 }

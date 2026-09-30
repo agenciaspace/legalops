@@ -4,7 +4,7 @@ Implementation, database migrations, generation and reading are enabled. Product
 
 - SQL transaction: anonymous private-cache read 0; public read 1; active free member read 1; revoked member read 0. Translated Unicode search matched. Edit cleared cache and incremented revision; stale completion applied 0 rows; deletion left 0 source rows. A USD 0.10 test budget permitted one lease and rejected the second. Fixtures rolled back.
 - Unit coverage includes protected values, malformed results, provider failure, empty text, source revision/locale transitions, required cron secret and owner-only preferences.
-- Branded Supabase SMTP subjects and bodies applied in pt-BR/en/es. Sender remains contato@legalops.club. Resend inbox delivery is not asserted from a sending-only key.
+- Branded Supabase SMTP subjects and bodies applied in pt-BR/en/es. Sender is hi@legalops.club. Resend inbox delivery is not asserted from a sending-only key.
 - Existing security advisor warnings were reviewed. Translation run ledger intentionally has RLS with no client policies and no client grants. Existing trigger/RPC warnings are unrelated to these migrations; see [Supabase linter](https://supabase.com/docs/guides/database/database-linter).
 
 ## Production pilot
@@ -19,7 +19,6 @@ Implementation, database migrations, generation and reading are enabled. Product
 - Supabase subjects and HTML bodies use user language metadata. Application welcomes use saved preference with signup metadata fallback. Localized email tests check all three languages and the official PNG logo. Sending-only Resend credentials cannot verify inbox receipt.
 - During the pilot, 22 completed translation runs reported USD 0.004738536. This is a measured snapshot, not a monthly estimate; later runs and separate synthetic/catalog generation are additional. Daily runtime budget is USD 1.
 - All three test users, their posts/comments, sessions and cached translations were deleted after verification; scoped cleanup returned zero remaining fixture rows. Temporary evaluator previews were disabled and their credentials removed. No real community original was overwritten.
-
 
 ## Deployment
 

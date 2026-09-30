@@ -66,13 +66,31 @@ class SummaryTests(unittest.TestCase):
             self.assertEqual(publish['source'],'event:bench-netlex-2026')
             self.assertEqual(delivery['number'],group)
             self.assertIn('#resumos',delivery['text'])
+    def test_event_comment_is_forwarded_once_and_acknowledged(self):
+        db=sqlite3.connect(':memory:')
+        db.execute('create table messages(msg_id,text,chat_jid,owner,from_me,ts)')
+        notification={'id':'11111111-1111-4111-8111-111111111111','group_id':'120363432116359544@g.us','event_slug':'bench-netlex-2026','topic':'Integrações e dados','author':'Ana Lima','body':'Como vocês trataram a integração com o ERP?'}
+        calls=[]
+        def response(url,body,headers):
+            calls.append((url,body))
+            if body.get('action') == 'pull-event-comments': return {'ok':True,'notifications':[notification]}
+            if url.endswith('/send/text'): return {'success':True,'id':'message-id'}
+            return {'ok':True}
+        with tempfile.TemporaryDirectory() as temp, patch.object(runner,'post',side_effect=response), patch.object(runner,'connected_instance',return_value=('https://instance.test','token')):
+            runner.process_event_comment_outbox(db,{'APP_URL':'https://example.test'},Path(temp),{'Authorization':'Bearer secret'})
+            delivery=next(body for url,body in calls if url.endswith('/send/text'))
+            acknowledgement=next(body for _,body in calls if body.get('action') == 'delivered-event-comment')
+            self.assertEqual(delivery['number'],notification['group_id'])
+            self.assertIn(notification['body'],delivery['text'])
+            self.assertIn(notification['topic'],delivery['text'])
+            self.assertEqual(acknowledgement['id'],notification['id'])
     def test_confirmed_send_only_retries_receipt(self):
         with tempfile.TemporaryDirectory() as temp:
             end=runner.slot(dt.datetime.now(runner.UTC))
             state=Path(temp)/(end.strftime('%Y%m%dT%H%M%S')+'.json')
             runner.save(state,{'status':'sent','summary_id':'saved-id'})
             config={'STATE_DIR':temp,'FIRST_RUN_AT':'2026-01-01T21:00:00Z','DATABASE':':memory:','APP_URL':'https://example.test','INGEST_SECRET':'secret'}
-            with patch.object(runner.sqlite3,'connect') as connect, patch.object(runner,'sync_bench_events'), patch.object(runner,'process_event_summaries'), patch.object(runner,'post',return_value={'ok':True}) as post:
+            with patch.object(runner.sqlite3,'connect') as connect, patch.object(runner,'process_event_comment_outbox'), patch.object(runner,'sync_bench_events'), patch.object(runner,'process_event_summaries'), patch.object(runner,'post',return_value={'ok':True}) as post:
                 runner.run(config)
             self.assertEqual(post.call_count,1)
             self.assertEqual(post.call_args.args[1],{'action':'delivered','id':'saved-id'})
@@ -83,7 +101,7 @@ class SummaryTests(unittest.TestCase):
             state=Path(temp)/(end.strftime('%Y%m%dT%H%M%S')+'.json')
             runner.save(state,{'status':'sending','summary_id':'saved-id','text':'summary'})
             config={'STATE_DIR':temp,'FIRST_RUN_AT':'2026-01-01T21:00:00Z','DATABASE':':memory:','APP_URL':'https://example.test','INGEST_SECRET':'secret'}
-            with patch.object(runner.sqlite3,'connect') as connect, patch.object(runner,'sync_bench_events'), patch.object(runner,'process_event_summaries'), patch.object(runner,'post') as post:
+            with patch.object(runner.sqlite3,'connect') as connect, patch.object(runner,'process_event_comment_outbox'), patch.object(runner,'sync_bench_events'), patch.object(runner,'process_event_summaries'), patch.object(runner,'post') as post:
                 connect.return_value.execute.return_value.fetchone.return_value=None
                 with self.assertRaises(RuntimeError):runner.run(config)
                 post.assert_not_called()

@@ -2,11 +2,11 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 
 const state = vi.hoisted(() => ({
-  requireAdmin: vi.fn(),
+  requireEventAdmin: vi.fn(),
   loadOverview: vi.fn(),
 }))
 
-vi.mock('@/lib/legalops-admin', () => ({ requireLegalOpsAdmin: state.requireAdmin }))
+vi.mock('@/lib/event-admin-access', () => ({ requireEventAdminAccess: state.requireEventAdmin }))
 vi.mock('@/lib/event-admin', () => ({ loadEventAdminOverview: state.loadOverview }))
 
 import EventRegistrationsAdminPage from '@/app/club/admin/events/[slug]/page'
@@ -17,7 +17,7 @@ afterEach(() => {
 })
 
 it('shows event registration details and Club linkage only after admin authorization', async () => {
-  state.requireAdmin.mockResolvedValue({ user: { id: 'admin' } })
+  state.requireEventAdmin.mockResolvedValue({ user: { id: 'admin' } })
   state.loadOverview.mockResolvedValue({
     event: { id: 'event', slug: 'bench-netlex-2026', title: 'Bench: experiências com o NetLex' },
     registrations: [
@@ -44,7 +44,7 @@ it('shows event registration details and Club linkage only after admin authoriza
 
   render(await EventRegistrationsAdminPage({ params: { slug: 'bench-netlex-2026' } }))
 
-  expect(state.requireAdmin).toHaveBeenCalledWith('/club/admin/events/bench-netlex-2026')
+  expect(state.requireEventAdmin).toHaveBeenCalledWith('bench-netlex-2026', '/club/admin/events/bench-netlex-2026')
   expect(screen.getByRole('heading', { name: 'Inscrições · Bench: experiências com o NetLex' })).toBeInTheDocument()
   expect(screen.getByText('1 confirmada')).toBeInTheDocument()
   expect(screen.getByText('1 no Club')).toBeInTheDocument()

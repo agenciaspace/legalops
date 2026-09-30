@@ -1,7 +1,7 @@
 import { TranslatedContent } from '@/components/community/TranslatedContent'
 import { loadClubTranslations } from '@/lib/club-translations'
 import { getClubLocale, getClubTranslator, getClubTimezone } from '@/lib/club-locale-server'
-import { CalendarDays, Clock3, MapPin, Plus, Video } from 'lucide-react'
+import { ArrowRight, CalendarDays, CalendarPlus, Clock3, MapPin, Settings2, Video } from 'lucide-react'
 import BenchSection from './BenchSection'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import Link from 'next/link'
@@ -55,23 +55,32 @@ export default async function CalendarPage() {
 
   const translations = await loadClubTranslations(supabase, events.map(event => event.id))
   return (
-    <div className="mx-auto w-full max-w-[1000px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-[22px] font-extrabold tracking-[-0.025em] text-[#24231F]">{t("Eventos")}</h1>
-          <p className="mt-1 text-xs text-[#77746E]">{t("Eventos")} · {getClubTimezone()}</p>
+    <main className="mx-auto w-full max-w-[1100px] px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
+      <header className="overflow-hidden rounded-xl border border-[#2B2925] bg-[#171715] text-[#F8F4EC]">
+        <div className="grid gap-8 px-5 py-7 sm:px-8 sm:py-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="max-w-2xl">
+            <p className="text-[10px] font-black uppercase tracking-[.18em] text-[#E8A58D]">{t('Agenda da comunidade')}</p>
+            <h1 className="mt-3 text-3xl font-extrabold tracking-[-.045em] sm:text-4xl">{t('Eventos')}</h1>
+            <p className="mt-3 max-w-xl text-sm leading-7 text-white/65">{t('Encontros para comparar experiências, conhecer outras pessoas e manter as conversas organizadas depois de cada encontro.')}</p>
+          </div>
+          <Link href="/community/events/manage" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 text-xs font-bold text-white hover:border-[#E88A6A] hover:text-[#F1AD93]"><Settings2 className="h-4 w-4" />{t('Gerenciar eventos')}</Link>
         </div>
-        <Link href="/community/events/manage" className="inline-flex min-h-11 items-center rounded-lg border border-[#CEC8BD] bg-white px-3 text-xs font-bold">{t("Gerenciar eventos")}</Link>
-
+        <nav aria-label={t('Seções da agenda')} className="flex gap-6 border-t border-white/10 px-5 sm:px-8">
+          <a href="#bench" className="inline-flex min-h-12 items-center border-b-2 border-[#E88A6A] text-xs font-bold">{t('Bench')}</a>
+          <a href="#outros-eventos" className="inline-flex min-h-12 items-center border-b-2 border-transparent text-xs font-bold text-white/60 hover:text-white">{t('Outros encontros')}</a>
+        </nav>
       </header>
 
-      <section id="outros-eventos" className="scroll-mt-24 mt-8 overflow-hidden rounded-xl border border-[#E1E1DD] bg-white">
-        <div className="flex items-center justify-between border-b border-[#ECECE8] px-4 py-3.5 sm:px-5">
-          <h2 className="text-xs font-extrabold text-[#34332F]">{t("Outros encontros")}</h2>
+      <BenchSection />
 
+      <section id="outros-eventos" className="mt-12 scroll-mt-24 border-t border-[#CEC8BD] pt-8 sm:mt-16 sm:pt-10">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#A94E38]">{t('Agenda aberta')}</p><h2 className="mt-2 text-2xl font-bold tracking-[-.035em] text-[#24231F]">{t('Outros encontros')}</h2><p className="mt-2 text-sm leading-6 text-[#69635E]">{t('Lives, encontros da comunidade e conversas com convidados.')}</p></div>
+          <p className="text-xs font-semibold text-[#817A73]">{getClubTimezone()}</p>
         </div>
 
-        <div className="divide-y divide-[#ECECE8]">
+        <div className="mt-6 overflow-hidden rounded-xl border border-[#CEC8BD] bg-white">
+          <div className="divide-y divide-[#E6DED0]">
           {events.map((event, index) => {
             const date = new Date(event.starts_at)
             const weekday = new Intl.DateTimeFormat(getClubLocale(), { timeZone: getClubTimezone(), weekday: 'short' }).format(date).replace('.', '')
@@ -79,8 +88,8 @@ export default async function CalendarPage() {
             const month = new Intl.DateTimeFormat(getClubLocale(), { timeZone: getClubTimezone(), month: 'short' }).format(date).replace('.', '')
             const time = new Intl.DateTimeFormat(getClubLocale(), { timeZone: getClubTimezone(), hour: '2-digit', minute: '2-digit' }).format(date)
             return (
-              <article key={event.id} className="group grid gap-4 px-4 py-5 transition hover:bg-[#FAFAF8] sm:grid-cols-[64px_minmax(0,1fr)_auto] sm:items-center sm:px-5">
-                <div className={`flex h-16 w-16 flex-col items-center justify-center rounded-lg ${index === 0 ? 'bg-[#FFF0E9] text-[#D9470F]' : 'bg-[#F1F1EE] text-[#4C4A45]'}`}>
+              <article key={event.id} className="group grid gap-5 p-5 transition hover:bg-[#FAF7F1] sm:grid-cols-[68px_minmax(0,1fr)] sm:p-6 lg:grid-cols-[68px_minmax(0,1fr)_auto] lg:items-center">
+                <div className={`flex h-[68px] w-[68px] flex-col items-center justify-center rounded-lg border ${index === 0 ? 'border-[#E8B4A1] bg-[#FFF0E9] text-[#A94E38]' : 'border-[#DED6C9] bg-[#F5F1E8] text-[#4C4A45]'}`}>
                   <span className="text-[8px] font-black uppercase tracking-wider">{weekday}</span>
                   <span className="mt-0.5 text-xl font-black leading-none">{day}</span>
                   <span className="mt-0.5 text-[8px] font-bold uppercase">{month}</span>
@@ -90,32 +99,32 @@ export default async function CalendarPage() {
                     <span className="text-[8px] font-black uppercase tracking-[0.1em] text-[#D9470F]">{t(eventLabels[event.event_type] ?? t("Encontro"))}</span>
                     {index === 0 ? <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wide text-emerald-700">{t("Próximo")}</span> : null}
                   </div>
-                  <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{title:event.title,description:event.description,location_label:event.location_label}} enabled={translations.enabled} serverLocale={getClubLocale()} />
-                  <div className="mt-2.5 flex flex-wrap gap-3 text-xs font-semibold text-[#94918B]">
+                  <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{title:event.title,description:event.description}} enabled={translations.enabled} serverLocale={getClubLocale()} titleAs="h3" titleClassName="text-lg font-extrabold leading-6 text-[#252420]" bodyClassName="mt-2 line-clamp-2 text-sm leading-6 text-[#69635E]" />
+                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold text-[#817A73]">
                     <span className="flex items-center gap-1"><Clock3 className="h-3 w-3" /> {time}</span>
-
+                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location_label}</span>
                     <span>{event.host_name}</span>
                   </div>
                 </div>
-                <div className="flex flex-col gap-2">
-                <Link href={`/community/events/${event.slug}`} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#24231F] px-3 text-xs font-semibold text-white">{t("Ver evento")}</Link>
-                <EventShare slug={event.slug} title={event.title} />
-                <a href={event.location_url ?? googleCalendarUrl(event)} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-lg border border-[#DFDFDB] bg-white px-3 text-[10px] font-extrabold text-[#34332F] transition hover:border-[#FFB99E] hover:text-[#D9470F]">
-                  {event.location_url ? <Video className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />} {event.location_url ? t("Participar") : t("Adicionar")}
-                </a>
+                <div className="flex flex-wrap gap-2 sm:col-start-2 lg:col-start-auto lg:max-w-56 lg:justify-end">
+                  <Link href={`/community/events/${event.slug}`} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-[#24231F] px-4 text-xs font-semibold text-white">{t('Ver evento')}<ArrowRight className="h-3.5 w-3.5" /></Link>
+                  {event.location_url ? <a href={event.location_url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#CEC8BD] bg-white px-3 text-xs font-bold"><Video className="h-3.5 w-3.5" />{t('Participar')}</a> : null}
+                  <a href={googleCalendarUrl(event)} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[#CEC8BD] bg-white px-3 text-xs font-bold"><CalendarPlus className="h-3.5 w-3.5" />{t('Adicionar')}</a>
+                  <EventShare slug={event.slug} title={event.title} variant="invitation" />
                 </div>
               </article>
             )
           })}
           {events.length === 0 ? (
-            <div className="p-12 text-center">
-              <CalendarDays className="mx-auto h-7 w-7 text-[#FF5C1A]" />
-              <p className="mt-3 text-xs font-bold text-[#68655F]">{t("A próxima agenda será publicada em breve.")}</p>
+            <div className="p-8 text-center sm:p-12">
+              <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-[#F5F1E8]"><CalendarDays className="h-5 w-5 text-[#A94E38]" /></span>
+              <p className="mt-4 text-sm font-bold text-[#34332F]">{t('A próxima agenda será publicada em breve.')}</p>
+              <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-[#817A73]">{t('Enquanto isso, veja os encontros de Bench e continue as conversas já abertas.')}</p>
             </div>
           ) : null}
+          </div>
         </div>
       </section>
-      <BenchSection />
-    </div>
+    </main>
   )
 }
