@@ -18,6 +18,7 @@ import {
   isGoogleCalendarConfigured,
   removeGoogleEventAttendee,
 } from "@/lib/google-calendar";
+import { requestEventClubSignup } from "@/lib/event-club-signup";
 
 const PROFESSIONAL_TYPES = new Set([
   "law_firm",
@@ -206,6 +207,12 @@ export async function registerPublicEvent(formData: FormData) {
   const organization = String(formData.get("organization") ?? "")
     .trim()
     .slice(0, 120);
+  const clubOptIn = formData.get("join_club") === "on";
+  const locale = CLUB_LOCALES.includes(
+    String(formData.get("source_locale")) as ClubLocale,
+  )
+    ? String(formData.get("source_locale"))
+    : "pt-BR";
   const staticEvent = getPublicEventFallback(eventSlug);
   const validEventId = /^[0-9a-f-]{36}$/i.test(eventId);
   if (
@@ -220,7 +227,7 @@ export async function registerPublicEvent(formData: FormData) {
   const admin = createAdminClient();
   const eventQuery = admin
     .from("community_events")
-    .select("id,slug,google_event_id")
+    .select("id,slug,title,google_event_id")
     .eq("is_published", true);
   const { data: event } = await (
     validEventId
@@ -231,6 +238,7 @@ export async function registerPublicEvent(formData: FormData) {
     .maybeSingle();
 
   let saved = false;
+  let rsvpId: string | null = null;
   if (event) {
     const { data: rsvp, error } = await admin
       .from("community_event_rsvps")
@@ -246,11 +254,14 @@ export async function registerPublicEvent(formData: FormData) {
         calendar_invite_status: event.google_event_id
           ? "pending"
           : "not_required",
+        club_opt_in_at: clubOptIn ? new Date().toISOString() : null,
+        club_signup_status: clubOptIn ? "pending" : "not_requested",
       })
       .select("id")
       .abortSignal(AbortSignal.timeout(3500))
       .maybeSingle();
     saved = !error;
+    rsvpId = rsvp?.id ?? null;
     if (saved && event.google_event_id)
       await inviteEventAttendee({
         admin,
@@ -263,6 +274,7 @@ export async function registerPublicEvent(formData: FormData) {
 
   const slug = event?.slug || staticEvent?.slug;
   if (!slug) return;
+  let clubStatus = "";
   if (!saved) {
     const organizerEmail = process.env.LEGALOPS_ADMIN_EMAILS?.split(",")
       .map((value) => value.trim())
@@ -275,6 +287,7 @@ export async function registerPublicEvent(formData: FormData) {
       `Email: ${email}`,
       `Cargo: ${role}`,
       `Organização: ${organization}`,
+      `Opt-in LegalOps Club: ${clubOptIn ? "sim" : "não"}`,
       "",
       "Registro enviado por email porque o banco estava indisponível.",
     ].join("\n");
@@ -290,8 +303,40 @@ export async function registerPublicEvent(formData: FormData) {
     } catch {
       redirect(`/community/events/${slug}?registration=error`);
     }
+    if (clubOptIn) clubStatus = "error";
   }
-  redirect(`/community/events/${slug}?registered=1`);
+
+  if (saved && clubOptIn && event && rsvpId) {
+    const supabase = await createServerSupabaseClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const result = user
+      ? { status: "existing_account" as const, userId: user.id }
+      : await requestEventClubSignup({
+          email,
+          name,
+          role,
+          organization,
+          eventSlug: slug,
+          eventTitle: event.title,
+          locale,
+        });
+    clubStatus = result.status;
+    await admin
+      .from("community_event_rsvps")
+      .update({
+        club_signup_status: result.status,
+        club_signup_user_id: result.userId ?? null,
+        club_signup_email_sent_at:
+          result.status === "confirmation_sent" ? new Date().toISOString() : null,
+        club_signup_error: result.error ?? null,
+      })
+      .eq("id", rsvpId);
+  }
+  redirect(
+    `/community/events/${slug}?registered=1${clubStatus ? `&club=${encodeURIComponent(clubStatus)}` : ""}`,
+  );
 }
 
 export async function confirmBenchAttendance(formData: FormData) {

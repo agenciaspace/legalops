@@ -40,6 +40,34 @@ export async function sendClubInvitationEmail({ email, actionLink, locale = 'pt-
   })
 }
 
+export async function sendEventClubSignupEmail({ email, actionLink, eventTitle, userId }: { email: string; actionLink: string; eventTitle: string; userId: string }) {
+  const textBody = [
+    'Sua inscrição no evento está confirmada.',
+    '',
+    `No formulário de “${eventTitle}”, você também pediu para entrar no LegalOps Club.`,
+    'A inscrição no evento é independente da comunidade.',
+    '',
+    'Ative sua conta e complete o perfil para acompanhar as conversas, materiais e próximos encontros:',
+    actionLink,
+    '',
+    'Se você não pediu acesso ao Club, ignore esta mensagem. Sua inscrição no evento continua válida.',
+  ].join('\n')
+  const htmlBody = buildClubEmail({
+    title: 'Ative sua conta no LegalOps Club',
+    preview: 'Sua vaga no evento está confirmada. Ative o Club para acompanhar as conversas.',
+    contentHtml: `<p>Sua inscrição em <strong>${escapeEmailHtml(eventTitle)}</strong> está confirmada.</p><p>Você também pediu para entrar no LegalOps Club. A inscrição no evento é independente da comunidade.</p><p>Ative sua conta e complete o perfil para acompanhar as conversas, materiais e próximos encontros.</p><p style="font-size:13px">Se você não pediu acesso ao Club, ignore este email. Sua inscrição no evento continua válida.</p>`,
+    actionLabel: 'Ativar minha conta',
+    actionUrl: actionLink,
+  })
+  return sendClubTransactionalEmail({
+    idempotencyKey: `event-club-signup/${userId}`,
+    to: [email],
+    subject: 'Ative sua conta no LegalOps Club',
+    textBody,
+    htmlBody,
+  })
+}
+
 export async function sendSignupConfirmationEmail({ email, confirmationLink, locale = 'pt-BR' }: { email: string; confirmationLink: string; locale?: ClubLocale }) {
   const copy = clubEmailCopy[locale]
   const textBody = [

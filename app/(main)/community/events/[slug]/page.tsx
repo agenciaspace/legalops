@@ -80,12 +80,13 @@ function EventConversationTopicDirectory({ topics, eventSlug, linked = false, se
   </section>
 }
 
-function PublicEventLanding({ event, translations, user, registered, registrationError, dateTbd, past, registrationCount, whatsappSummaries, conversationTopics }: {
+function PublicEventLanding({ event, translations, user, registered, registrationError, clubStatus, dateTbd, past, registrationCount, whatsappSummaries, conversationTopics }: {
   event: PublicEvent
   translations: Awaited<ReturnType<typeof loadClubTranslations>>
   user: { id: string } | null
   registered: boolean
   registrationError: boolean
+  clubStatus?: string
   dateTbd: boolean
   past: boolean
   registrationCount: number | null
@@ -134,7 +135,10 @@ function PublicEventLanding({ event, translations, user, registered, registratio
             <p className="mt-4 text-xs font-black uppercase tracking-[.14em] text-emerald-700">{t('Cadastro recebido')}</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em]">{t('Seu interesse está confirmado.')}</h2>
             <p className="mt-3 text-sm leading-6 text-[#625E59]">{t('Você receberá as informações quando a data e o acesso forem definidos.')}</p>
-            <Link href={joinUrl} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[#24231F] px-4 text-sm font-bold">{user ? t('Completar meu cadastro') : t('Conhecer a comunidade')} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            {clubStatus === 'confirmation_sent' ? <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-sm font-bold text-emerald-900">{t('Confira seu email para ativar o Club.')}</p><p className="mt-1 text-xs leading-5 text-emerald-800">{t('Depois de criar sua senha e completar o perfil, você poderá acompanhar as conversas e materiais.')}</p></div> : null}
+            {clubStatus === 'existing_account' ? <div className="mt-5 rounded-xl border border-[#CEC8BD] bg-white p-4"><p className="text-sm font-bold">{t('Você já tem uma conta LegalOps.')}</p><p className="mt-1 text-xs leading-5 text-[#625E59]">{t('Entre para completar seu perfil e acompanhar as conversas do evento.')}</p></div> : null}
+            {clubStatus === 'error' ? <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4"><p className="text-sm font-bold text-amber-900">{t('A vaga no evento está confirmada.')}</p><p className="mt-1 text-xs leading-5 text-amber-800">{t('Não conseguimos iniciar sua conta do Club agora. Você pode criá-la separadamente.')}</p></div> : null}
+            {clubStatus !== 'confirmation_sent' ? <Link href={clubStatus === 'existing_account' ? `/login?next=${encodeURIComponent(joinUrl)}` : joinUrl} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[#24231F] px-4 text-sm font-bold">{clubStatus === 'existing_account' ? t('Entrar na minha conta') : user ? t('Completar meu cadastro') : t('Conhecer a comunidade')} <ArrowRight className="ml-2 h-4 w-4" /></Link> : null}
           </div> : registrationError ? <div role="alert">
             <p className="text-xs font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Inscrição pendente')}</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em]">{t('Não foi possível registrar agora.')}</h2>
@@ -143,6 +147,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
           </div> : <form action={registerPublicEvent}>
             {event.id ? <input type="hidden" name="event_id" value={event.id} /> : null}
             <input type="hidden" name="event_slug" value={event.slug} />
+            <input type="hidden" name="source_locale" value={locale} />
             <p className="text-xs font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Inscrição gratuita')}</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em]">{t('Reserve sua vaga')}</h2>
             <p className="mt-2 text-sm leading-6 text-[#625E59]">{t('Você não precisa criar uma conta para registrar seu interesse.')}</p>
@@ -153,6 +158,14 @@ function PublicEventLanding({ event, translations, user, registered, registratio
                 <label className="block text-xs font-bold">{t('Cargo')}<input name="role" autoComplete="organization-title" required minLength={2} className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
                 <label className="block text-xs font-bold">{t('Onde trabalha')}<input name="organization" autoComplete="organization" required minLength={2} className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
               </div>
+            </div>
+            <div className="mt-4 rounded-xl border border-[#D9D0C4] bg-white p-4">
+              <p className="text-[10px] font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Opcional')}</p>
+              <label className="mt-2 flex cursor-pointer items-start gap-3 text-sm">
+                <input type="checkbox" name="join_club" className="mt-1 h-4 w-4 shrink-0 accent-[#24231F]" />
+                <span><strong className="block">{t('Também quero entrar no LegalOps Club')}</strong><span className="mt-1 block text-xs leading-5 text-[#625E59]">{t('Receba um email para ativar sua conta e acompanhar as conversas, materiais e próximos encontros.')}</span></span>
+              </label>
+              <p className="mt-3 border-t border-[#E6DED0] pt-3 text-[11px] leading-5 text-[#716B65]">{t('A inscrição no evento é independente do Club.')}</p>
             </div>
             <button className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#24231F] px-5 text-sm font-bold text-white hover:bg-[#3A3834]">{t('Quero participar')} <ArrowRight className="ml-2 h-4 w-4" /></button>
             <p className="mt-4 flex gap-2 text-[11px] leading-5 text-[#716B65]"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />{t('Seus dados serão usados para organizar o encontro e enviar as informações de acesso.')}</p>
@@ -209,7 +222,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
   </main>
 }
 
-export default async function EventPage({ params, searchParams }: { params: { slug: string }, searchParams?: { registered?: string, registration?: string, shared?: string, tab?: string, topic?: string } }) {
+export default async function EventPage({ params, searchParams }: { params: { slug: string }, searchParams?: { registered?: string, registration?: string, club?: string, shared?: string, tab?: string, topic?: string } }) {
  const t = getClubTranslator()
 
   const fallback = getPublicEventFallback(params.slug)
@@ -219,7 +232,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
     const dateTbd = /data(?: e formato)? a confirmar/i.test(publicEvent.location_label || '')
     const past = !dateTbd && new Date(publicEvent.ends_at || publicEvent.starts_at) < new Date()
     const [registrationCount, whatsappSummaries, conversationTopics] = await Promise.all([loadConfirmedEventRegistrationCount(publicEvent.id), loadPublicEventWhatsAppSummaries(publicEvent.id), loadPublicEventConversationTopics(publicEvent.id, publicEvent.slug)])
-    return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
+    return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} clubStatus={searchParams?.club} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
   }
 
   const supabase = await createServerSupabaseClient()
@@ -254,7 +267,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   for (const post of discussions ?? []) if (post.topic_id) topicActivity.set(post.topic_id, (topicActivity.get(post.topic_id) ?? 0) + (post.community_comments?.length ?? 0))
   const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
   const translations = await loadClubTranslations(supabase, [event.id,...(discussions ?? []).flatMap(post => [post.id, ...(post.community_comments ?? []).map(comment => comment.id)]),...(resources ?? []).map(resource => resource.id),...authorIds])
-  if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
+  if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} clubStatus={searchParams?.club} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
 
   const overview = <div className="space-y-5">
     <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{description:event.description,location_label:event.location_label}} enabled={translations.enabled} serverLocale={getClubLocale()} />

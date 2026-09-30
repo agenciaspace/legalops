@@ -57,6 +57,13 @@ it('keeps public registration open while the event date is still being confirmed
   expect(screen.getByRole('heading', { name: 'O que vamos discutir?' })).toBeInTheDocument()
 })
 
+it('keeps event registration independent and offers an explicit Club opt-in', async () => {
+  render(await EventPage({ params: { slug: 'bench-nubank' } }))
+  expect(screen.getByText('A inscrição no evento é independente do Club.')).toBeInTheDocument()
+  expect(screen.getByRole('checkbox', { name: /Também quero entrar no LegalOps Club/ })).not.toBeChecked()
+  expect(screen.getByText(/acompanhar as conversas, materiais e próximos encontros/)).toBeInTheDocument()
+})
+
 it('shows the confirmed registration count in the public event header', async () => {
   render(await EventPage({ params: { slug: 'bench-nubank' } }))
   expect(screen.getByText('8 pessoas inscritas')).toBeInTheDocument()
@@ -67,6 +74,13 @@ it('turns the post-registration page into a clear confirmation state', async () 
   render(await EventPage({ params: { slug: 'bench-nubank' }, searchParams: { registered: '1' } }))
   expect(screen.getByRole('heading', { name: 'Seu interesse está confirmado.' })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: /Quero participar/ })).not.toBeInTheDocument()
+})
+
+it('confirms the event separately while guiding a Club opt-in through email activation', async () => {
+  render(await EventPage({ params: { slug: 'bench-nubank' }, searchParams: { registered: '1', club: 'confirmation_sent' } }))
+  expect(screen.getByRole('heading', { name: 'Seu interesse está confirmado.' })).toBeInTheDocument()
+  expect(screen.getByText('Confira seu email para ativar o Club.')).toBeInTheDocument()
+  expect(screen.getByText(/Depois de criar sua senha e completar o perfil/)).toBeInTheDocument()
 })
 
 it('publishes event-specific metadata for links and search results', async () => {
