@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { BrandLogo } from '@/components/BrandLogo'
 import { createClient } from '@/lib/supabase'
+import { authNextPath } from '@/lib/auth-login'
 
 export default function SetPasswordPage() {
   const { t, locale } = useClubLanguage()
@@ -29,7 +30,7 @@ export default function SetPasswordPage() {
       return
     }
     const requested = new URLSearchParams(window.location.search).get('next')
-    router.push(requested?.startsWith('/') && !requested.startsWith('//') ? requested : '/onboard')
+    router.push(authNextPath(requested, '/onboard'))
     router.refresh()
   }
 

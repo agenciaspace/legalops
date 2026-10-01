@@ -33,8 +33,10 @@ fs.mkdirSync('supabase/templates', { recursive: true })
 for (const [name, type, next, pt, en, es] of templates) {
   const render = (locale, [title, description, actionLabel]) => context.exports.buildClubEmail({
     locale, title, preview: description, contentHtml: `<p>${description}</p>`, actionLabel,
-    actionUrl: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=${type}&next=${encodeURIComponent(next)}`,
+    actionUrl: ['recovery', 'magic_link'].includes(name)
+      ? `{{ if and .RedirectTo (ne .RedirectTo .SiteURL) }}{{ .RedirectTo }}{{ else }}{{ .SiteURL }}/auth/confirm?next=${encodeURIComponent(next)}{{ end }}&token_hash={{ .TokenHash }}&type=${type}`
+      : `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=${type}&next=${encodeURIComponent(next)}`,
   })
   const html = `{{ if eq .Data.locale "en" }}${render('en', en)}{{ else if eq .Data.locale "es" }}${render('es', es)}{{ else }}${render('pt-BR', pt)}{{ end }}`
-  fs.writeFileSync(`supabase/templates/${name}.html`, html + '\n')
+  fs.writeFileSync(`supabase/templates/${name}.html`, html.replace(/>(resources|recursos)<\/a>/g, '>open source</a>') + '\n')
 }
