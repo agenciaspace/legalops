@@ -11,7 +11,7 @@ const fields = [
   {key:'email',label:'Email',type:'email',autocomplete:'email',required:true,max:240},
   {key:'role',label:'Cargo / atuação',type:'text',autocomplete:'organization-title',required:true,max:120},
   {key:'organization',label:'Empresa / organização',type:'text',autocomplete:'organization',required:true,max:120},
-  {key:'phone',label:'Celular para contato',type:'tel',autocomplete:'tel',required:false,max:40},
+  {key:'phone',label:'WhatsApp com DDI e DDD',type:'tel',autocomplete:'tel',required:true,max:40},
 ] as const
 export default function BenchClient({ eventId, initial, member }: Props) {
  const { t } = useClubLanguage()
@@ -40,6 +40,7 @@ export default function BenchClient({ eventId, initial, member }: Props) {
       <details><summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">{t("Acessibilidade, alimentação e chegada")}</summary><div className="mt-2 space-y-4">{([['dietary',t("Restrições alimentares"),500],['accessibility',t("Necessidades de acessibilidade"),500],['notes',t("Observações para chegada"),1000]] as const).map(([key,label,max]) => <label key={key} className="block text-sm font-medium">{t(label)}<textarea name={key} value={form[key]} onChange={event => update(key,event.target.value)} rows={2} maxLength={max} className="mt-2 w-full min-w-0 rounded-xl border border-[#CEC8BD] bg-white px-3 py-3 text-base font-normal" /></label>)}</div></details>
     </fieldset>
     <p className="text-xs text-[#625E59]">{t("* Campos obrigatórios")}</p>
+    <p className="text-xs leading-5 text-[#625E59]">{t('Informe o mesmo número que você usa no grupo do Bench, começando com + e o código do país. Esse dado não será exibido publicamente.')}</p>
     {message ? <p role={failed ? 'alert' : 'status'} className={`rounded-xl px-4 py-3 text-sm leading-6 ${failed ? 'bg-red-50 text-red-800' : 'bg-emerald-50 text-emerald-800'}`}>{t(message)}</p> : null}
     <div className="grid gap-2"><button disabled={busy} className="min-h-12 rounded-xl bg-[#24231F] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50">{busy ? t("Salvando…") : response === 'confirmed' ? t("Atualizar confirmação") : t("Confirmar presença")}</button>{response === 'confirmed' ? <button type="button" disabled={busy} onClick={() => void save(true)} className="min-h-12 rounded-xl border border-[#CEC8BD] px-4 py-3 text-sm font-semibold disabled:opacity-50">{t("Não poderei ir")}</button> : null}</div>
   </form>

@@ -80,12 +80,13 @@ function EventConversationTopicDirectory({ topics, eventSlug, linked = false, se
   </section>
 }
 
-function PublicEventLanding({ event, translations, user, registered, registrationError, clubStatus, dateTbd, past, registrationCount, whatsappSummaries, conversationTopics }: {
+function PublicEventLanding({ event, translations, user, registered, registrationError, phoneError, clubStatus, dateTbd, past, registrationCount, whatsappSummaries, conversationTopics }: {
   event: PublicEvent
   translations: Awaited<ReturnType<typeof loadClubTranslations>>
   user: { id: string } | null
   registered: boolean
   registrationError: boolean
+  phoneError?: boolean
   clubStatus?: string
   dateTbd: boolean
   past: boolean
@@ -145,6 +146,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
             <p className="mt-3 text-sm leading-6 text-[#625E59]">{t('Envie seus dados por email e a organização confirmará sua participação.')}</p>
             <a href={`mailto:hi@legalops.club?subject=${encodeURIComponent(`Inscrição · ${event.title}`)}`} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#24231F] px-4 text-sm font-bold text-white">{t('Enviar por email')} <ArrowRight className="ml-2 h-4 w-4" /></a>
           </div> : <form action={registerPublicEvent}>
+            {phoneError ? <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">{t('Informe seu WhatsApp com +DDI e DDD, usando o mesmo número do grupo do Bench.')}</p> : null}
             {event.id ? <input type="hidden" name="event_id" value={event.id} /> : null}
             <input type="hidden" name="event_slug" value={event.slug} />
             <input type="hidden" name="source_locale" value={locale} />
@@ -154,6 +156,8 @@ function PublicEventLanding({ event, translations, user, registered, registratio
             <div className="mt-5 space-y-3">
               <label className="block text-xs font-bold">{t('Nome')}<input name="name" autoComplete="name" required minLength={2} className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
               <label className="block text-xs font-bold">{t('E-mail')}<input name="email" autoComplete="email" required type="email" className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
+              <label className="block text-xs font-bold">{t('WhatsApp com DDI e DDD')}<input name="phone" autoComplete="tel" required type="tel" maxLength={40} placeholder="+55 11 99999-9999" aria-describedby="bench-phone-help" className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
+              <p id="bench-phone-help" className="text-xs leading-5 text-[#625E59]">{t('Informe o mesmo número que você usa no grupo do Bench, começando com + e o código do país. Esse dado não será exibido publicamente.')}</p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 <label className="block text-xs font-bold">{t('Cargo')}<input name="role" autoComplete="organization-title" required minLength={2} className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
                 <label className="block text-xs font-bold">{t('Onde trabalha')}<input name="organization" autoComplete="organization" required minLength={2} className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
@@ -232,7 +236,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
     const dateTbd = /data(?: e formato)? a confirmar/i.test(publicEvent.location_label || '')
     const past = !dateTbd && new Date(publicEvent.ends_at || publicEvent.starts_at) < new Date()
     const [registrationCount, whatsappSummaries, conversationTopics] = await Promise.all([loadConfirmedEventRegistrationCount(publicEvent.id), loadPublicEventWhatsAppSummaries(publicEvent.id), loadPublicEventConversationTopics(publicEvent.id, publicEvent.slug)])
-    return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} clubStatus={searchParams?.club} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
+    return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} phoneError={searchParams?.registration === 'phone'} clubStatus={searchParams?.club} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
   }
 
   const supabase = await createServerSupabaseClient()
@@ -267,7 +271,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   for (const post of discussions ?? []) if (post.topic_id) topicActivity.set(post.topic_id, (topicActivity.get(post.topic_id) ?? 0) + (post.community_comments?.length ?? 0))
   const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
   const translations = await loadClubTranslations(supabase, [event.id,...(discussions ?? []).flatMap(post => [post.id, ...(post.community_comments ?? []).map(comment => comment.id)]),...(resources ?? []).map(resource => resource.id),...authorIds])
-  if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} clubStatus={searchParams?.club} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
+  if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} phoneError={searchParams?.registration === 'phone'} clubStatus={searchParams?.club} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
 
   const overview = <div className="space-y-5">
     <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{description:event.description,location_label:event.location_label}} enabled={translations.enabled} serverLocale={getClubLocale()} />

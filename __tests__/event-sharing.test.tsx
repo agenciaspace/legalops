@@ -64,6 +64,18 @@ it('keeps event registration independent and offers an explicit Club opt-in', as
   expect(screen.getByText(/acompanhar as conversas, materiais e próximos encontros/)).toBeInTheDocument()
 })
 
+it('requires the same WhatsApp number used in the Bench group', async () => {
+  render(await EventPage({ params: { slug: 'bench-nubank' } }))
+  expect(screen.getByRole('textbox', { name: 'WhatsApp com DDI e DDD' })).toBeRequired()
+  expect(screen.getByText(/Informe o mesmo número que você usa no grupo do Bench/)).toBeInTheDocument()
+})
+
+it('explains an invalid WhatsApp number without claiming registration succeeded', async () => {
+  render(await EventPage({ params: { slug: 'bench-nubank' }, searchParams: { registration: 'phone' } }))
+  expect(screen.getByRole('alert')).toHaveTextContent('Informe seu WhatsApp com +DDI e DDD')
+  expect(screen.getByRole('button', { name: /Quero participar/ })).toBeInTheDocument()
+})
+
 it('shows the confirmed registration count in the public event header', async () => {
   render(await EventPage({ params: { slug: 'bench-nubank' } }))
   expect(screen.getByText('8 pessoas inscritas')).toBeInTheDocument()

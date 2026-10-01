@@ -19,6 +19,7 @@ import {
   removeGoogleEventAttendee,
 } from "@/lib/google-calendar";
 import { requestEventClubSignup } from "@/lib/event-club-signup";
+import { normalizeBenchPhone } from "@/lib/bench-phone";
 
 const PROFESSIONAL_TYPES = new Set([
   "law_firm",
@@ -190,6 +191,7 @@ export async function createCommunitySubtopic(formData: FormData) {
 }
 
 export async function registerPublicEvent(formData: FormData) {
+  const phone = normalizeBenchPhone(formData.get("phone"));
   const eventId = String(formData.get("event_id") ?? "").trim();
   const eventSlug = String(formData.get("event_slug") ?? "")
     .trim()
@@ -215,6 +217,11 @@ export async function registerPublicEvent(formData: FormData) {
     : "pt-BR";
   const staticEvent = getPublicEventFallback(eventSlug);
   const validEventId = /^[0-9a-f-]{36}$/i.test(eventId);
+  if (!phone) {
+    if (/^[a-z0-9-]+$/.test(eventSlug))
+      redirect(`/community/events/${eventSlug}?registration=phone`);
+    return;
+  }
   if (
     (!validEventId && !staticEvent) ||
     name.length < 2 ||
@@ -248,6 +255,7 @@ export async function registerPublicEvent(formData: FormData) {
         response: "confirmed",
         guest_name: name,
         guest_email: email,
+        guest_phone: phone,
         guest_role: role,
         organization_name: organization,
         confirmed_at: new Date().toISOString(),
@@ -285,6 +293,7 @@ export async function registerPublicEvent(formData: FormData) {
       `Nova inscrição no ${staticEvent.title}`,
       `Nome: ${name}`,
       `Email: ${email}`,
+      `WhatsApp: ${phone}`,
       `Cargo: ${role}`,
       `Organização: ${organization}`,
       `Opt-in LegalOps Club: ${clubOptIn ? "sim" : "não"}`,
@@ -341,6 +350,8 @@ export async function registerPublicEvent(formData: FormData) {
 
 export async function confirmBenchAttendance(formData: FormData) {
   const { supabase, user } = await getAuthenticatedMember();
+  const phone = normalizeBenchPhone(formData.get("phone"));
+  if (!phone) return { ok: false, message: "Informe seu WhatsApp com +DDI e DDD, usando o mesmo número do grupo do Bench." };
   const eventId = String(formData.get("event_id") ?? "");
   const values = {
     event_id: eventId,
@@ -358,10 +369,7 @@ export async function confirmBenchAttendance(formData: FormData) {
     organization_name: String(formData.get("organization") ?? "")
       .trim()
       .slice(0, 120),
-    guest_phone:
-      String(formData.get("phone") ?? "")
-        .trim()
-        .slice(0, 40) || null,
+    guest_phone: phone,
     dietary_restrictions:
       String(formData.get("dietary") ?? "")
         .trim()
