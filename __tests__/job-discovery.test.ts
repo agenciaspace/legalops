@@ -299,7 +299,7 @@ describe('multi-source job discovery parsers', () => {
             "@type": "JobPosting",
             "title": "Legal Operations Specialist",
             "datePosted": "2026-08-18",
-            "validThrough": "2026-09-30T23:59:59Z",
+            "validThrough": "${new Date(Date.now() + 86_400_000).toISOString()}",
             "hiringOrganization": {
               "@type": "Organization",
               "name": "Acme",
