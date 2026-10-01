@@ -1,0 +1,5 @@
+project_id = "legalops"
+
+[auth.email.template.magic_link]
+subject = "{{ if eq .Data.locale \"en\" }}Your access to legalops.club{{ else if eq .Data.locale \"es\" }}Tu acceso a legalops.club{{ else }}Seu acesso ao legalops.club{{ end }} — legalops.club"
+content_path = "./supabase/templates/magic_link.html"
