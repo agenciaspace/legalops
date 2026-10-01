@@ -19,6 +19,7 @@
     "LEGALOPS_ADMIN_EMAILS": "leonhatori@gmail.com",
     "GOOGLE_CALENDAR_ID": "hi@legalops.club",
     "GOOGLE_CALENDAR_ORGANIZER_EMAIL": "hi@legalops.club",
+    "GOOGLE_WORKSPACE_SENDER_EMAIL": "hi@legalops.club",
     "RESEND_SENDER_EMAIL": "hi@legalops.club",
   },
   "assets": {

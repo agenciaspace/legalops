@@ -41,6 +41,26 @@ it("sends HTML and plain text with the Club identity and stable retry key", asyn
   });
   expect(fallback).not.toHaveBeenCalled();
 });
+it("prefers the authenticated Google Workspace mailbox when configured", async () => {
+  vi.stubEnv("GOOGLE_WORKSPACE_CLIENT_ID", "client-id");
+  vi.stubEnv("GOOGLE_WORKSPACE_CLIENT_SECRET", "client-secret");
+  vi.stubEnv("GOOGLE_WORKSPACE_REFRESH_TOKEN", "refresh-token");
+  vi.stubEnv("GOOGLE_WORKSPACE_SENDER_EMAIL", "hi@legalops.club");
+  vi.stubEnv("RESEND_API_KEY", "resend-key");
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce(Response.json({ access_token: "access-token" }))
+    .mockResolvedValueOnce(Response.json({ id: "gmail-message-id" }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  await expect(sendClubTransactionalEmail(message)).resolves.toMatchObject({
+    messageId: "gmail-message-id",
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  expect(fetchMock.mock.calls[1][0]).toBe(
+    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+  );
+});
 it("uses the existing transport when the Resend secret is absent", async () => {
   vi.stubEnv("RESEND_API_KEY", "");
   await sendClubTransactionalEmail(message);

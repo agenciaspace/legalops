@@ -18,6 +18,7 @@ import { loadConfirmedEventRegistrationCount } from '@/lib/event-registration-co
 import { loadPublicEventWhatsAppSummaries } from '@/lib/public-event-whatsapp-summaries'
 import { isEventWhatsAppSummaryEnabled, type EventWhatsAppSummary } from '@/lib/event-whatsapp-summary'
 import { loadPublicEventConversationTopics, type EventConversationTopic } from '@/lib/event-conversation-topics'
+import { googleCalendarEventLink } from '@/lib/google-calendar'
 
 export const dynamic = 'force-dynamic'
 
@@ -101,6 +102,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
   const joinUrl = `/club/entrar?next=${encodeURIComponent(`/community/events/${event.slug}`)}`
   const source = translations.sources.get(`event:${event.id}`)
   const questions = event.pre_questions?.filter(Boolean) ?? []
+  const calendarLink = !dateTbd && googleCalendarEventLink(event.google_event_id)
 
   return <main className="bg-[#F5F1E8]">
     <section className="relative overflow-hidden border-b border-[#2B2925] bg-[#171715] text-[#F8F4EC]">
@@ -123,6 +125,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
             <div className="rounded-xl border border-white/10 bg-white/[.04] p-4"><dt className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.14em] text-white/45"><MapPin className="h-4 w-4 text-[#E88A6A]" />{t('Formato')}</dt><dd className="mt-2 text-sm font-semibold text-white/90">{mode}</dd></div>
             <div className="rounded-xl border border-white/10 bg-white/[.04] p-4"><dt className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.14em] text-white/45"><UserRound className="h-4 w-4 text-[#E88A6A]" />{t('Organização')}</dt><dd className="mt-2 text-sm font-semibold leading-5 text-white/90">{event.host_name}</dd></div>
           </dl>
+          {calendarLink ? <a href={calendarLink} target="_blank" rel="noreferrer" className="mt-5 inline-flex min-h-11 items-center rounded-lg border border-white/25 px-4 text-xs font-bold text-white">Abrir no Google Calendar <ArrowRight className="ml-2 h-4 w-4" /></a> : null}
         </div>
 
         <aside aria-label={t('Inscrição no evento')} className="self-start rounded-2xl border border-white/10 bg-[#F8F4EC] p-5 text-[#24231F] shadow-[0_24px_70px_rgba(0,0,0,.28)] sm:p-6 lg:sticky lg:top-5">
@@ -241,7 +244,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
 
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: event } = await supabase.from('community_events').select('id,slug,title,description,host_name,starts_at,ends_at,location_label,event_type,is_published,participation_mode,participation_details,pre_questions').eq('slug', params.slug).eq('is_published', true).maybeSingle()
+  const { data: event } = await supabase.from('community_events').select('id,slug,title,description,host_name,starts_at,ends_at,location_label,event_type,is_published,participation_mode,participation_details,pre_questions,google_event_id,google_meet_url').eq('slug', params.slug).eq('is_published', true).maybeSingle()
   if (!event) return <div className="mx-auto max-w-2xl px-5 py-16"><h1 className="text-2xl font-bold">{t("Evento não encontrado")}</h1><Link className="mt-4 inline-flex underline" href="/community/calendar">{t("Voltar para eventos")}</Link></div>
   const [registrationCount, memberResult, whatsappSummaries, conversationTopics] = await Promise.all([
     loadConfirmedEventRegistrationCount(event.id),
@@ -282,6 +285,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
     </dl>
     <div className="space-y-2 border-t border-[#E6DED0] pt-4">
       <EventShare slug={event.slug} title={event.title} />
+      {googleCalendarEventLink(event.google_event_id) && !dateTbd ? <a href={googleCalendarEventLink(event.google_event_id) ?? '#'} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-xs font-bold text-[#A94E38] underline underline-offset-4">Abrir no Google Calendar</a> : null}
     </div>
   </div>
   const attendanceCard = isMember && user && !past ? <section className="rounded-xl border border-[#CEC8BD] bg-[#F5F1E8] p-4 sm:p-5">

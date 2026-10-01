@@ -1,5 +1,6 @@
 import { afterEach, expect, it, vi } from "vitest";
 import {
+  googleCalendarEventLink,
   googleCalendarOrganizerEmail,
   upsertGoogleMeetEvent,
 } from "@/lib/google-calendar";
@@ -79,4 +80,11 @@ it("creates one deterministic Calendar event with a unique Meet link", async () 
 
 it("defaults the organizer identity to hi@legalops.club", () => {
   expect(googleCalendarOrganizerEmail()).toBe("hi@legalops.club");
+});
+
+it("derives a final Calendar link from a stored Google event id", () => {
+  vi.stubEnv("GOOGLE_CALENDAR_ID", "hi@legalops.club");
+  expect(googleCalendarEventLink("legalops12345678")).toMatch(
+    /^https:\/\/www\.google\.com\/calendar\/event\?eid=/,
+  );
 });

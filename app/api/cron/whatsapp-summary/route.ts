@@ -4,6 +4,7 @@ import { generateOpenRouterText } from '@/lib/openrouter'
 import { DAY_MS, parseWhatsAppDigest, validateWhatsAppInput, whatsAppDigestPrompt, WHATSAPP_SUMMARY_MODEL } from '@/lib/whatsapp-summary'
 import { BENCH_WHATSAPP_SOURCES, BENCH_WHATSAPP_SYNC_MODEL, benchSchedulePrompt, extractExplicitBenchSchedule, parseBenchScheduleDecision, validateBenchSyncInput } from '@/lib/bench-whatsapp-sync'
 import { EVENT_WHATSAPP_SUMMARY_MODEL, eventWhatsAppDigestPrompt, parseEventWhatsAppDigest, validateEventWhatsAppInput } from '@/lib/event-whatsapp-summary'
+import { syncCommunityEventCalendar } from '@/lib/community-event-calendar'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 const reply = (data: unknown, status = 200) => NextResponse.json(data, { status, headers: { 'Cache-Control': 'private, no-store' } })
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
 
       const { data: event, error: readError } = await db
         .from('community_events')
-        .select('id,starts_at,ends_at,location_label,participation_details')
+        .select('id,slug,title,description,starts_at,ends_at,location_label,location_url,participation_mode,participation_details,google_event_id')
         .eq('slug', source.eventSlug)
         .eq('is_published', true)
         .maybeSingle()
@@ -84,7 +85,34 @@ export async function POST(request: Request) {
         }).eq('id', event.id)
         if (updateError) return reply({ error: 'Bench event update failed' }, 503)
       }
-      return reply({ ok: true, confirmed: true, updated: changed, event_slug: source.eventSlug, starts_at: decision.startsAt })
+      const calendar = await syncCommunityEventCalendar(db, {
+        id: event.id,
+        slug: event.slug,
+        title: event.title,
+        description: event.description,
+        startsAt: decision.startsAt,
+        endsAt: decision.endsAt,
+        participationMode: event.participation_mode,
+        googleEventId: event.google_event_id,
+        locationLabel: source.locationLabelAfterSchedule,
+        locationUrl: event.location_url,
+      })
+      const { error: calendarUpdateError } = await db.from('community_events').update({
+        ...calendar.fields,
+        ...(calendar.ok && calendar.meetingUrl && event.participation_mode === 'remoto'
+          ? { location_label: 'Google Meet', location_url: calendar.meetingUrl }
+          : {}),
+      }).eq('id', event.id)
+      if (calendarUpdateError) return reply({ error: 'Bench calendar status update failed' }, 503)
+      return reply({
+        ok: true,
+        confirmed: true,
+        updated: changed,
+        event_slug: source.eventSlug,
+        event_url: `https://legalops.club/community/events/${source.eventSlug}`,
+        starts_at: decision.startsAt,
+        calendar_synced: calendar.ok,
+      })
     } catch {
       console.error('[bench-whatsapp-sync] Schedule extraction or update failed')
       return reply({ error: 'Bench schedule sync will retry' }, 503)

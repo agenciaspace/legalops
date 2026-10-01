@@ -6,11 +6,7 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { hasActiveClubAccess } from "@/lib/community";
 import { isLegalOpsAdminEmail } from "@/lib/legalops-admin";
-import {
-  googleCalendarOrganizerEmail,
-  isGoogleCalendarConfigured,
-  upsertGoogleMeetEvent,
-} from "@/lib/google-calendar";
+import { syncCommunityEventCalendar } from "@/lib/community-event-calendar";
 
 function value(form: FormData, key: string, max: number) {
   return String(form.get(key) ?? "")
@@ -110,66 +106,33 @@ export async function updateEventConfiguration(formData: FormData) {
     .select("google_event_id")
     .eq("id", eventId)
     .maybeSingle();
-  const shouldCreateMeet =
-    !dateTbd && Boolean(startsAt) && mode !== "presencial";
-  let calendarFields: Record<string, unknown> = {
-    organizer_email: googleCalendarOrganizerEmail(),
-  };
+  const shouldSyncCalendar = !dateTbd && Boolean(startsAt);
+  let calendarFields: Record<string, unknown> = {};
   let resolvedLocation = locationUrl || null;
   let resolvedLabel = locationLabel;
   let calendarState = "";
-  if (shouldCreateMeet && startsAt) {
-    if (!isGoogleCalendarConfigured()) {
-      calendarFields = {
-        ...calendarFields,
-        calendar_sync_status: "not_configured",
-        calendar_sync_error: "Google Calendar credentials are not configured.",
-      };
-      calendarState = "not-configured";
-    } else {
-      const { data: registrations } = await admin
-        .from("community_event_rsvps")
-        .select("guest_email,guest_name")
-        .eq("event_id", eventId)
-        .eq("response", "confirmed");
-      try {
-        const calendar = await upsertGoogleMeetEvent({
-          summary: `${title} · legalops.club`,
-          description,
-          startsAt,
-          endsAt:
-            endsAt ||
-            new Date(new Date(startsAt).getTime() + 60 * 60_000).toISOString(),
-          timeZone: "America/Sao_Paulo",
-          googleEventId: currentEvent?.google_event_id,
-          localEventId: eventId,
-          createConference: true,
-          attendees: (registrations ?? []).map((registration) => ({
-            email: registration.guest_email,
-            displayName: registration.guest_name,
-          })),
-        });
-        resolvedLocation = calendar.meetingUrl;
-        resolvedLabel = mode === "remoto" ? "Google Meet" : locationLabel;
-        calendarFields = {
-          ...calendarFields,
-          google_event_id: calendar.eventId,
-          google_meet_url: calendar.meetingUrl,
-          calendar_sync_status: "synced",
-          calendar_sync_error: null,
-          calendar_synced_at: new Date().toISOString(),
-        };
-      } catch (error) {
-        calendarFields = {
-          ...calendarFields,
-          calendar_sync_status: "error",
-          calendar_sync_error:
-            error instanceof Error
-              ? error.message.slice(0, 500)
-              : "Google Calendar sync failed.",
-        };
-        calendarState = "error";
-      }
+  if (shouldSyncCalendar && startsAt) {
+    const calendar = await syncCommunityEventCalendar(admin, {
+      id: eventId,
+      slug: value(formData, "slug", 180),
+      title,
+      description,
+      startsAt,
+      endsAt,
+      participationMode: mode as "remoto" | "presencial" | "hibrido",
+      googleEventId: currentEvent?.google_event_id,
+      locationLabel,
+      locationUrl: locationUrl || null,
+    });
+    calendarFields = calendar.fields;
+    if (calendar.ok && calendar.meetingUrl) {
+      resolvedLocation = calendar.meetingUrl;
+      resolvedLabel = mode === "remoto" ? "Google Meet" : locationLabel;
+    } else if (!calendar.ok) {
+      calendarState =
+        calendar.fields.calendar_sync_status === "not_configured"
+          ? "not-configured"
+          : "error";
     }
   }
   await admin

@@ -12,6 +12,8 @@ export type PublicEvent = {
   participation_mode: 'remoto' | 'presencial' | 'hibrido'
   participation_details: string
   pre_questions: string[] | null
+  google_event_id?: string | null
+  google_meet_url?: string | null
 }
 
 const events: Record<string, PublicEvent> = {

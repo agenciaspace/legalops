@@ -1,4 +1,8 @@
 import { sendCloudflareTransactionalEmail } from "./cloudflare-email";
+import {
+  isGoogleWorkspaceEmailConfigured,
+  sendGoogleWorkspaceEmail,
+} from "./google-workspace-email";
 
 type Message = Parameters<typeof sendCloudflareTransactionalEmail>[0] & {
   idempotencyKey?: string;
@@ -8,6 +12,9 @@ export async function sendClubTransactionalEmail({
   idempotencyKey,
   ...message
 }: Message) {
+  if (isGoogleWorkspaceEmailConfigured()) {
+    return sendGoogleWorkspaceEmail(message);
+  }
   const key = process.env.RESEND_API_KEY?.trim();
   // Keep the existing transport available while the new secret is rolled out.
   if (!key) return sendCloudflareTransactionalEmail(message);

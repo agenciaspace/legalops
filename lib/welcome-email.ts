@@ -3,7 +3,6 @@ import { normalizeClubLocale, type ClubLocale } from '@/lib/club-locale'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { buildClubEmail, escapeEmailHtml } from '@/lib/club-email'
 import { sendClubTransactionalEmail } from '@/lib/club-email-delivery'
-import { sendCloudflareTransactionalEmail } from '@/lib/cloudflare-email'
 import { hasActiveClubAccess } from '@/lib/community'
 
 const ACCOUNT_WELCOME_SUBJECT = 'Sua conta LegalOps está pronta'
@@ -83,7 +82,7 @@ export async function sendSignupConfirmationEmail({ email, confirmationLink, loc
     actionLabel: copy.confirmAction, actionUrl: confirmationLink,
   })
 
-  return sendCloudflareTransactionalEmail({
+  return sendClubTransactionalEmail({
     to: [email],
     subject: locale === 'pt-BR' ? SIGNUP_CONFIRMATION_SUBJECT : `${copy.confirmTitle} — legalops.club`,
     textBody: locale === 'pt-BR' ? textBody : `${copy.confirmBody}\n\n${confirmationLink}`,

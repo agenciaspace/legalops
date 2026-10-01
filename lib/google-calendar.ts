@@ -1,3 +1,8 @@
+import {
+  getGoogleWorkspaceAccessToken,
+  isGoogleWorkspaceConfigured,
+} from "@/lib/google-workspace";
+
 type CalendarAttendee = {
   email: string;
   displayName?: string | null;
@@ -13,6 +18,7 @@ type CalendarEventInput = {
   googleEventId?: string | null;
   localEventId?: string;
   createConference?: boolean;
+  location?: string | null;
 };
 
 type GoogleCalendarEvent = {
@@ -27,58 +33,33 @@ type GoogleCalendarEvent = {
 
 function calendarConfig() {
   return {
-    clientId: process.env.GOOGLE_CALENDAR_CLIENT_ID?.trim(),
-    clientSecret: process.env.GOOGLE_CALENDAR_CLIENT_SECRET?.trim(),
-    refreshToken: process.env.GOOGLE_CALENDAR_REFRESH_TOKEN?.trim(),
     calendarId: process.env.GOOGLE_CALENDAR_ID?.trim() || "primary",
   };
 }
 
+export function googleCalendarEventLink(eventId?: string | null) {
+  if (!eventId) return null;
+  const { calendarId } = calendarConfig();
+  const value = `${eventId} ${calendarId}`;
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  for (const byte of Array.from(bytes)) binary += String.fromCharCode(byte);
+  const eid = btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+  return `https://www.google.com/calendar/event?eid=${eid}`;
+}
+
 export function isGoogleCalendarConfigured() {
   const config = calendarConfig();
-  return Boolean(
-    config.clientId &&
-    config.clientSecret &&
-    config.refreshToken &&
-    config.calendarId,
-  );
+  return Boolean(isGoogleWorkspaceConfigured() && config.calendarId);
 }
 
 export function googleCalendarOrganizerEmail() {
   return (
     process.env.GOOGLE_CALENDAR_ORGANIZER_EMAIL?.trim() || "hi@legalops.club"
   );
-}
-
-async function getAccessToken() {
-  const config = calendarConfig();
-  if (!config.clientId || !config.clientSecret || !config.refreshToken) {
-    throw new Error("Google Calendar is not configured.");
-  }
-
-  const body = new URLSearchParams({
-    client_id: config.clientId,
-    client_secret: config.clientSecret,
-    refresh_token: config.refreshToken,
-    grant_type: "refresh_token",
-  });
-
-  const response = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
-    body,
-    cache: "no-store",
-  });
-  const payload = (await response.json().catch(() => ({}))) as {
-    access_token?: string;
-    error_description?: string;
-  };
-  if (!response.ok || !payload.access_token) {
-    throw new Error(
-      payload.error_description || `Google OAuth failed (${response.status}).`,
-    );
-  }
-  return payload.access_token;
 }
 
 function eventUrl(eventId?: string) {
@@ -138,7 +119,7 @@ function deterministicGoogleEventId(localEventId?: string) {
 export async function createGoogleMeetEvent(input: CalendarEventInput) {
   if (!isGoogleCalendarConfigured())
     throw new Error("Google Calendar is not configured.");
-  const accessToken = await getAccessToken();
+  const accessToken = await getGoogleWorkspaceAccessToken();
   const requestId = `legalops-bench-${crypto.randomUUID()}`;
 
   const response = await fetch(
@@ -160,6 +141,7 @@ export async function createGoogleMeetEvent(input: CalendarEventInput) {
             ? { displayName: attendee.displayName }
             : {}),
         })),
+        ...(input.location ? { location: input.location } : {}),
         conferenceData: {
           createRequest: {
             requestId,
@@ -189,14 +171,14 @@ export async function createGoogleMeetEvent(input: CalendarEventInput) {
   return {
     eventId: payload.id,
     meetingUrl: meetUrl(payload),
-    htmlLink: payload.htmlLink ?? null,
+    htmlLink: payload.htmlLink ?? googleCalendarEventLink(payload.id),
   };
 }
 
 export async function upsertGoogleMeetEvent(input: CalendarEventInput) {
   if (!isGoogleCalendarConfigured())
     throw new Error("Google Calendar is not configured.");
-  const accessToken = await getAccessToken();
+  const accessToken = await getGoogleWorkspaceAccessToken();
   const deterministicId = deterministicGoogleEventId(input.localEventId);
   let eventId = input.googleEventId || deterministicId;
   let existing = eventId ? await readGoogleEvent(accessToken, eventId) : null;
@@ -215,6 +197,7 @@ export async function upsertGoogleMeetEvent(input: CalendarEventInput) {
       email: attendee.email,
       ...(attendee.displayName ? { displayName: attendee.displayName } : {}),
     })),
+    ...(input.location ? { location: input.location } : {}),
     ...(needsConference
       ? {
           conferenceData: {
@@ -262,7 +245,7 @@ export async function upsertGoogleMeetEvent(input: CalendarEventInput) {
   return {
     eventId: completed.id,
     meetingUrl,
-    htmlLink: completed.htmlLink ?? null,
+    htmlLink: completed.htmlLink ?? googleCalendarEventLink(completed.id),
   };
 }
 
@@ -272,7 +255,7 @@ export async function addGoogleEventAttendee(
 ) {
   if (!isGoogleCalendarConfigured())
     throw new Error("Google Calendar is not configured.");
-  const accessToken = await getAccessToken();
+  const accessToken = await getGoogleWorkspaceAccessToken();
 
   const currentResponse = await fetch(eventUrl(eventId), {
     headers: { authorization: `Bearer ${accessToken}` },
@@ -335,7 +318,7 @@ export async function removeGoogleEventAttendee(
   email: string,
 ) {
   if (!isGoogleCalendarConfigured()) return;
-  const accessToken = await getAccessToken();
+  const accessToken = await getGoogleWorkspaceAccessToken();
   const current = await readGoogleEvent(accessToken, eventId);
   if (!current) return;
   const normalizedEmail = email.trim().toLowerCase();

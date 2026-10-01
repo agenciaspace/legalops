@@ -6,6 +6,8 @@ import { hasActiveClubAccess } from "@/lib/community";
 import { isDirectoryMember } from "@/lib/community-directory";
 import { isLegalOpsAdminEmail } from "@/lib/legalops-admin";
 import { addEventOrganizer, updateEventConfiguration } from "./actions";
+import { communityEventUrl } from "@/lib/community-event-links";
+import { googleCalendarEventLink } from "@/lib/google-calendar";
 
 function fieldDate(value?: string | null, pending?: boolean) {
   if (!value || pending) return "";
@@ -31,6 +33,7 @@ export default async function EventManagePage({
     saved?: string;
     error?: string;
     calendar?: string;
+    created?: string;
   };
 }) {
   const supabase = await createServerSupabaseClient();
@@ -133,7 +136,9 @@ export default async function EventManagePage({
               role="status"
               className="mt-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800"
             >
-              Configuração salva.
+              {searchParams?.created
+                ? "Evento criado com link permanente."
+                : "Configuração salva."}
             </p>
           ) : null}
           {searchParams?.calendar === "not-configured" ? (
@@ -365,7 +370,7 @@ export default async function EventManagePage({
               </section>
               <section className="rounded-xl border border-[#CEC8BD] bg-white p-5">
                 <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-lg font-bold">Google Meet</h2>
+                  <h2 className="text-lg font-bold">Google Calendar</h2>
                   <span
                     className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${
                       selected.calendar_sync_status === "synced"
@@ -400,6 +405,16 @@ export default async function EventManagePage({
                     data e horário.
                   </p>
                 )}
+                {googleCalendarEventLink(selected.google_event_id) ? (
+                  <a
+                    href={googleCalendarEventLink(selected.google_event_id) ?? "#"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[#24231F] px-4 text-xs font-bold text-white"
+                  >
+                    Abrir no Google Calendar
+                  </a>
+                ) : null}
                 {selected.calendar_sync_error ? (
                   <p className="mt-3 text-xs leading-5 text-red-700">
                     {selected.calendar_sync_error}
@@ -414,7 +429,7 @@ export default async function EventManagePage({
                   href={`/community/events/${selected.slug}`}
                   className="mt-2 block break-all text-xs font-bold underline"
                 >
-                  /community/events/{selected.slug}
+                  {communityEventUrl(selected.slug)}
                 </Link>
                 <Link
                   href={`/club/admin/events/${selected.slug}`}
