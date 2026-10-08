@@ -857,6 +857,18 @@ const CLOSED_JOB_PAGE_SIGNALS = [
  * Network failures remain unknown so a temporary provider outage is not
  * mistaken for a closed role.
  */
+function extractGupyPageJob(html: string, pageUrl: string): Record<string, any> | null {
+  try {
+    const url = new URL(pageUrl)
+    if (!(url.hostname === 'gupy.io' || url.hostname.endsWith('.gupy.io'))) return null
+    const id = url.pathname.match(/^\/jobs\/(\d+)\/?$/)?.[1]
+    const script = html.match(/<script\b[^>]*id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i)
+    if (!id || !script) return null
+    const job = JSON.parse(script[1])?.props?.pageProps?.job
+    return job && String(job.id) === id && typeof job.name === 'string' && typeof job.description === 'string' ? job : null
+  } catch { return null }
+}
+
 export function classifyJobUrlStatus(
   httpStatus: number | null,
   pageHtml = '',
@@ -884,6 +896,20 @@ export function classifyJobUrlStatus(
     } catch {
       return 'unknown'
     }
+  }
+
+  // Gupy postings excluded from Google may have no JobPosting JSON-LD.
+  // Their matching Next.js job payload still carries the authoritative state.
+  const gupyJob = isGupyJobPage ? extractGupyPageJob(pageHtml, responseUrl) : null
+  if (gupyJob) {
+    if (gupyJob.status !== 'published') return 'dead'
+    for (const deadline of [gupyJob.registerEndDate, gupyJob.expiresAt]) {
+      if (typeof deadline !== 'string') continue
+      const expires = Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(deadline) ? `${deadline}T23:59:59.999-03:00` : deadline)
+      if (Number.isFinite(expires) && expires < now.getTime()) return 'dead'
+    }
+    if (gupyJob.publicationType === 'external' && gupyJob.isInternalMobility !== true) return 'live'
+    return 'unknown'
   }
 
   const decodedPage = pageHtml
@@ -1015,16 +1041,25 @@ export async function fetchJobDescription(url: string): Promise<FetchJobResult> 
     const meta = extractJobMetaFromHtml(page.html)
     const metaBlock = buildMetadataBlock(meta)
     const pageText = stripHtml(page.html)
-    const description = metaBlock
+    const gupyJob = extractGupyPageJob(page.html, finalUrl)
+    const gupyDescription = gupyJob ? [
+      `TITLE: ${gupyJob.name}`,
+      `COMPANY: ${gupyJob.careerPage?.name || ''}`,
+      `LOCATION: ${[gupyJob.addressCity, gupyJob.addressState, gupyJob.addressCountry].filter(Boolean).join(', ')}`,
+      `POSTED DATE: ${gupyJob.publishedAt || ''}`,
+      ...['description', 'responsibilities', 'prerequisites', 'additionalInformation'].map(key => typeof gupyJob[key] === 'string' ? stripHtml(gupyJob[key]) : ''),
+    ].filter(Boolean).join('\n\n').slice(0, 8000) : null
+    const description = gupyDescription || (metaBlock
       ? `${metaBlock}\n\n${pageText}`.slice(0, 8_000)
-      : pageText.slice(0, 8_000)
+      : pageText.slice(0, 8_000))
 
     return {
       description,
       extractedSalary: meta.salary,
       httpStatus: page.status,
       urlStatus,
-      companyLogoUrl: await extractLogoWithCompanyFallback(page.html, finalUrl),
+      companyLogoUrl: typeof gupyJob?.careerPage?.urlLogo === 'string' && gupyJob.careerPage.urlLogo.startsWith('https://')
+        ? gupyJob.careerPage.urlLogo : await extractLogoWithCompanyFallback(page.html, finalUrl),
       finalUrl,
     }
   } catch {

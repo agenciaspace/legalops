@@ -89,6 +89,17 @@ describe('classifyJobUrlStatus', () => {
     expect(classifyJobUrlStatus(503)).toBe('unknown')
   })
 
+  it('reads Gupy state without Google JSON-LD and ignores translation closure labels', () => {
+    const html = (changes = {}) => `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify({props:{pageProps:{job:{id:123,name:'Legal Operations',description:'Role details',status:'published',publicationType:'external',registerEndDate:'2026-10-23',...changes},dictionary:{closedApplications:'Inscrições encerradas'}}}})}</script>`
+    const url = 'https://example.gupy.io/jobs/123'
+    const now = new Date('2026-10-08T12:00:00Z')
+    expect(classifyJobUrlStatus(200,html(),url,now)).toBe('live')
+    expect(classifyJobUrlStatus(200,html({status:'closed'}),url,now)).toBe('dead')
+    expect(classifyJobUrlStatus(200,html({registerEndDate:'2026-10-07'}),url,now)).toBe('dead')
+    expect(classifyJobUrlStatus(200,html({isInternalMobility:true}),url,now)).toBe('unknown')
+    expect(classifyJobUrlStatus(200,html({id:999}),url,now)).not.toBe('live')
+  })
+
   it('never treats a successful social-wall response as a live application page', () => {
     expect(classifyJobUrlStatus(
       200,
