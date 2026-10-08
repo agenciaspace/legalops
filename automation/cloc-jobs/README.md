@@ -59,3 +59,17 @@ npx vitest run __tests__/whatsapp-jobs.test.ts
 Tests cover duplicate forwards, scope/owner/deleted-message filters, late
 arrivals, URL-only posts, no-link retention, retry recovery, unauthorized
 requests, unsafe hosts and evidence-backed publication.
+
+## Production verification — 2026-10-08
+
+- Cloudflare application deployed at `cf964d5`; authentication checks returned
+  401 for missing/invalid credentials and successful responses for the VPS.
+- Initial 30-day scan: 13 configured groups, 36 unique candidate URLs; three
+  verified jobs published, two closed, nine requiring review, 22 retryable.
+  Another 111 local candidates were media/no-link references, not confirmed jobs.
+- Reposting a published URL returned `duplicate` and the same stored job UUID.
+- Gupy job 12611433 (Inspira) was verified live from its public Next.js payload;
+  closure translations no longer cause false expiration.
+- Build, deployment and public smoke steps succeeded in GitHub run 37790310289.
+  Only the final status-file commit conflicted with the preceding run; the
+  deployment status file was reconciled separately from the verified results.
