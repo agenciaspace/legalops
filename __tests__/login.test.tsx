@@ -33,7 +33,7 @@ it('recovery does not require the forgotten password and preserves the destinati
 it('keeps password sign-in available', async () => {
   render(<LoginPage />); email(); fireEvent.click(screen.getByRole('button', { name: 'Usar senha' }))
   fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'test-only-password' } })
-  fireEvent.click(screen.getByRole('button', { name: 'Entrar', exact: true }))
+  fireEvent.click(screen.getByRole('button', { name: /^Entrar$/ }))
   await waitFor(() => expect(mocks.push).toHaveBeenCalledWith('/community/calendar'))
   expect(mocks.password).toHaveBeenCalledWith({ email: 'member@example.com', password: 'test-only-password' })
 })

@@ -1,0 +1,16 @@
+[Unit]
+Description=Import CLOC job postings into legalops.work
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/legalops-cloc-jobs/runner.py
+TimeoutStartSec=40min
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/legalops-cloc-jobs
+StandardOutput=journal
+StandardError=journal

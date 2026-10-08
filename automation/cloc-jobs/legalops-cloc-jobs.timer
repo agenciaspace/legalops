@@ -1,0 +1,11 @@
+[Unit]
+Description=Scan CLOC groups for job postings every five minutes
+
+[Timer]
+OnCalendar=*:0/5
+Persistent=true
+RandomizedDelaySec=15
+Unit=legalops-cloc-jobs.service
+
+[Install]
+WantedBy=timers.target
