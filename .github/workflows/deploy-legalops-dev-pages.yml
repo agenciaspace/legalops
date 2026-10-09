@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths:
+      - 'design/**'
+      - 'scripts/sync-design-system.mjs'
       - 'cloudflare-landing/**'
       - '.github/workflows/deploy-legalops-dev-pages.yml'
   workflow_dispatch:
@@ -18,6 +20,9 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: 3d40d7797b3fd6d1cd2644eefea9e907
     steps:
       - uses: actions/checkout@v6
+
+      - name: Check shared design system
+        run: node scripts/sync-design-system.mjs --check
 
       - name: Find the Pages project for legalops.dev
         id: project

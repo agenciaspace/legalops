@@ -49,7 +49,7 @@ export default async function CommunityLayout({children}:{children:React.ReactNo
 
   if (!isMember) return <div className="min-h-[calc(100dvh-4rem)] bg-[#F5F1E8] text-[#24231F]">{children}</div>
 
-  return <div className="club-shell min-h-[calc(100dvh-4rem)] bg-[#F3F0E8] text-[#24231F]">
+  return <div className="club-shell min-h-[calc(100dvh-4rem)] brand-surface">
     <div className="flex min-h-[calc(100dvh-4rem)]">
       <CommunityTabs/>
       <div className="club-content min-w-0 flex-1">
