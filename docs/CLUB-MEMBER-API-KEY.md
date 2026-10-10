@@ -47,3 +47,23 @@ Official contracts:
 - https://developers.openai.com/api/docs/guides/text
 - https://developers.openai.com/api/docs/models/gpt-4.1-mini
 - https://supabase.com/docs/guides/api/securing-your-api
+
+## Production verification — 2026-10-10
+
+- Release `25aa138`, GitHub Actions run `38090862715`: tests, OpenNext build,
+  application deployment and public routing checks succeeded.
+- A disposable member signed in through the production browser form. Submitting
+  an invalid OpenAI key returned the expected provider rejection, cleared the
+  password field, and did not save the credential.
+- Checked 320, 390, 768 and 1280 px viewports: no horizontal overflow.
+- A synthetic credential encrypted for that disposable owner exercised the
+  production metadata API, agent decryption/provider selection, provider rejection
+  and visible removal control. The endpoint exposed neither plaintext nor
+  ciphertext; no platform billing fallback occurred. The database showed zero
+  stored keys and zero used daily questions after removal and failure refund.
+- SQL checks verified anonymous/authenticated credential access is denied.
+  The disposable user's sessions, account and local test password were removed.
+- No paid inference was performed. Successful text generation is covered with
+  mocked Responses payloads; real generation still requires a member's valid key.
+- Runtime regression covered: Cloudflare Workers require `redirect:'manual'`;
+  reject all 3xx responses rather than forwarding the Authorization header.
