@@ -55,3 +55,8 @@ covers server routing, generation failures, admin boundaries and UI behavior.
 - Removing the key and submitting another question returned 402 before generation.
 - Personal API monetary usage is not inferred from the ledger: it records the funding
   source, and members consult OpenAI for any provider charge.
+- The real credit receipt form rejected an invalid PDF before storage. Canceling the
+  unpaid fixture order succeeded, and the wallet remained unchanged. No real payment
+  or valid personal API key was used; temporary accounts and their data were removed.
+- Final deployment: `f01cf73`, Worker `3766db47-a476-4cc6-9c0b-19d74deaaf85`,
+  [successful CI](https://github.com/agenciaspace/legalops/actions/runs/38092410460).
