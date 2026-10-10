@@ -25,7 +25,7 @@ it('encrypts with random IVs and binds ciphertext to the owning member', async (
 it('validates without text generation and stores only encrypted credentials', async () => {
   fetchMock.mockResolvedValue(new Response('{}'))
   const status = await saveMemberKey('owner', key)
-  expect(fetchMock).toHaveBeenCalledWith('https://api.openai.com/v1/models/gpt-4.1-mini', expect.objectContaining({ method: 'GET', redirect: 'error' }))
+  expect(fetchMock).toHaveBeenCalledWith('https://api.openai.com/v1/models/gpt-4.1-mini', expect.objectContaining({ method: 'GET', redirect: 'manual' }))
   const saved = state.calls.find(call => call[1] === 'upsert')![2] as any
   expect(saved.user_id).toBe('owner'); expect(saved.encrypted_key).not.toContain(key)
   expect(await decryptMemberKey('owner', saved.encrypted_key)).toBe(key)
@@ -65,6 +65,13 @@ it('reports limits without retrying, logging keys, or returning provider text', 
   fetchMock.mockResolvedValue(new Response(key, { status: 429 }))
   await expect(generateMemberOpenAIText(key, { systemPrompt: '', userPrompt: 'Question' })).rejects.toMatchObject({ code: 'provider_limit', message: 'provider_limit' })
   expect(fetchMock).toHaveBeenCalledTimes(1)
+})
+it('rejects redirects without forwarding the member credential to another origin', async () => {
+  fetchMock.mockResolvedValue(new Response(null, { status: 302, headers: { location: 'https://untrusted.example/' } }))
+  await expect(saveMemberKey('owner', key)).rejects.toMatchObject({ code: 'provider_unavailable' })
+  expect(fetchMock).toHaveBeenCalledTimes(1)
+  expect(fetchMock.mock.calls[0][1].redirect).toBe('manual')
+  expect(state.calls).toEqual([])
 })
 it('rejects incomplete provider answers and oversized bodies', async () => {
   fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ status: 'incomplete', output: [] })))

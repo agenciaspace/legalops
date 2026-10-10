@@ -59,7 +59,9 @@ async function openAIRequest(apiKey: string, path: string, body?: object) {
       method: body ? 'POST' : 'GET',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       ...(body ? { body: JSON.stringify(body) } : {}),
-      cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(body ? 24000 : 10000),
+      // Workers do not support redirect:'error'. Manual mode keeps credentials
+      // on this fixed origin; every 3xx is rejected by the !response.ok check.
+      cache: 'no-store', redirect: 'manual', signal: AbortSignal.timeout(body ? 24000 : 10000),
     })
   } catch {
     throw new MemberKeyError('provider_unavailable')
