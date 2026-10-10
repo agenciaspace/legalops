@@ -5,14 +5,16 @@ cover letters, interview preparation and profile insights. Reading saved content
 community posts, deterministic CV drafts and shared scheduled digests does not generate
 a personal charge. Agent summaries have an explicit action selector and tariff.
 
-Initial configuration preserves 30 included credits per UTC day, and starts with one
-credit per completed generation for each action. All six tariffs, allowance and daily
-or calendar-month renewal are configurable at `/club/admin/credits`. The member sees
+Approved launch configuration (2026-10-10): 300 included credits per calendar month
+(renewal on day 1 at 00:00 UTC). Tariffs per completed generation: agent question 1;
+agent summary 2; cover letter and profile insights 3 each; interview preparation and
+personalized CV 5 each. All six tariffs, allowance and daily or calendar-month renewal
+are configurable at `/club/admin/credits`. The member sees
 balance, costs and recent transactions at `/community/credits`. Included credits do
 not accumulate. Purchased balances persist across allowance renewal and require Pro.
 
-Credit pack quantity and price start unset; sales start closed. Admins configure a pack
-and explicitly open sales. PIX uses the existing account and private receipt bucket.
+Approved credit pack: 100 credits for BRL 19.90. Sales enabled on 2026-10-10 following
+explicit owner approval. PIX uses the existing account and private receipt bucket.
 Orders snapshot price/quantity, accept owner-only uploads, and require authenticated
 allowlisted administrators to confirm receipt in the bank. Approval grants credits
 atomically once. Credit purchases do not activate or extend Pro.
@@ -60,3 +62,7 @@ covers server routing, generation failures, admin boundaries and UI behavior.
   or valid personal API key was used; temporary accounts and their data were removed.
 - Final deployment: `f01cf73`, Worker `3766db47-a476-4cc6-9c0b-19d74deaaf85`,
   [successful CI](https://github.com/agenciaspace/legalops/actions/runs/38092410460).
+
+Launch settings were applied atomically with `configure_club_credits` and read back
+from production to verify all six tariffs, monthly allowance and enabled pack sales.
+Earlier production verification below/above refers to the pre-launch closed-sales state.
