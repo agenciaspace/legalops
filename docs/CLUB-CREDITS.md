@@ -41,3 +41,17 @@ Verification: `supabase/tests/club_credits.sql` runs rollback-only fixtures for 
 entitlement, included/purchased/API ordering, shared concurrent generation exclusion,
 once-only refunds, fixed purchase quotes, closed sales and repeated approval. Vitest
 covers server routing, generation failures, admin boundaries and UI behavior.
+
+## Production verification — 2026-10-10
+
+- 559 application tests passed; TypeScript, Bend, OpenNext build and GitHub deploy passed.
+- Rollback-only SQL assertions passed against the linked Supabase project, including
+  abandoned reservations and duplicate payment approval.
+- Authenticated browser: wallet and six tariffs loaded; sales stayed closed without a
+  configured pack; no horizontal overflow at 320, 390, 768 and 1280 pixels.
+- One real platform-funded answer consumed one included credit while a deliberately
+  invalid personal key was connected. The following summary selected API funding,
+  failed with the expected invalid-key response, and consumed zero Club credits.
+- Removing the key and submitting another question returned 402 before generation.
+- Personal API monetary usage is not inferred from the ledger: it records the funding
+  source, and members consult OpenAI for any provider charge.
