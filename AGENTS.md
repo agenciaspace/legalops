@@ -124,7 +124,7 @@ The middleware public allowlist currently includes:
 - `/community/calendar#bench`: Bench section within Events, linking the public open-source CLM assessment. `/community/bench` redirects here.
 - `/community/pro`: Pro hub; separate from community posts and Bench.
 - `/community/assistant`, `/community/agents`, `/community/jobs`, `/community/summaries`: Pro features.
-- `/api/club/agent`: private preferences/history and source-backed personal agent; 30 questions per UTC day.
+- `/api/club/agent`: private preferences/history and source-backed personal agent; shared Pro credit wallet, configurable tariffs and personal API overflow; see `docs/CLUB-CREDITS.md`.
 
 Community access uses `club_access_status`; Pro separately uses
 `club_pro_status` and `club_pro_expires_at`. Admission uses authenticated

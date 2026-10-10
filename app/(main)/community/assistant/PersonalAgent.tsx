@@ -7,11 +7,13 @@ import { ArrowDown, ArrowUp, Settings2, X, PanelLeft, Plus } from 'lucide-react'
 import { AgentConversations, type AgentConversation } from '@/components/community/AgentConversations'
 import { AgentAnswer } from '@/components/community/AgentAnswer'
 import { COMMUNITY_CATEGORIES } from '@/lib/community'
-import { PRO_DAILY_QUESTIONS } from '@/lib/club-pro'
+import type { CreditStatus } from '@/lib/club-credits'
+import { creditCopy } from '@/lib/club-credit-copy'
 import type { AgentTurn } from '@/lib/club-personal-agent'
 
 export function PersonalAgent({embedded=false}:{embedded?:boolean}) {
- const { t } = useClubLanguage()
+ const { t, locale } = useClubLanguage()
+ const creditText=creditCopy(locale)
 
   const [conversations,setConversations]=useState<AgentConversation[]>([])
   const [conversationId,setConversationId]=useState<string|null>(null)
@@ -29,7 +31,9 @@ export function PersonalAgent({embedded=false}:{embedded?:boolean}) {
   const [pendingQuestion,setPendingQuestion]=useState('')
   const [focus,setFocus]=useState('')
   const [topics,setTopics]=useState<string[]>([])
-  const [used,setUsed]=useState(0)
+  const [credits,setCredits]=useState<CreditStatus|null>(null)
+  const [action,setAction]=useState<'agent_question'|'agent_summary'>('agent_question')
+  async function refreshCredits(){try{const response=await fetch('/api/club/credits',{cache:'no-store'});if(response.ok)setCredits(await response.json())}catch{}}
   const [loading,setLoading]=useState(true)
   const [loaded,setLoaded]=useState(false)
   const [sending,setSending]=useState(false)
@@ -55,7 +59,7 @@ export function PersonalAgent({embedded=false}:{embedded?:boolean}) {
       if(version!==loadVersion.current)return
       const selected=data.conversation_id??null
       setConversationId(selected);setTurns(data.turns);setQuestion(drafts.current[selected??'new']??'')
-      setFocus(data.preferences.focus);setTopics(data.preferences.topics);setUsed(data.used);setPage(0);setHasMore(Boolean(data.has_more));setLoaded(true)
+      setFocus(data.preferences.focus);setTopics(data.preferences.topics);setCredits(data.credits??null);setPage(0);setHasMore(Boolean(data.has_more));setLoaded(true)
       if(replaceList||!id){setConversations(data.conversations??[]);setHasMoreConversations(Boolean(data.has_more_conversations));setConversationPage(0)}
       nearBottom.current=true
     }catch(error){if(version===loadVersion.current)setError(error instanceof Error?error.message:t("Não conseguimos carregar o agente."))}
@@ -125,15 +129,15 @@ export function PersonalAgent({embedded=false}:{embedded?:boolean}) {
   async function ask(event?:React.FormEvent, suggested?:string) {
     event?.preventDefault()
     const text=(suggested??question).trim()
-    if(sendingRef.current||managementRef.current||blocked||!loaded||text.length<3||used>=PRO_DAILY_QUESTIONS)return
+    if(sendingRef.current||managementRef.current||blocked||!loaded||text.length<3)return
     sendingRef.current=true;setSending(true);setPendingQuestion(text);setQuestion('');setError('');setNotice('')
     let selected=conversationId
     try {
-      const response=await fetch('/api/club/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:text,page:window.location.pathname,conversation_id:conversationId})})
+      const response=await fetch('/api/club/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:text,page:window.location.pathname,conversation_id:conversationId,action})})
       const data=await response.json()
       if(data.conversation_id){selected=data.conversation_id;setConversationId(selected);setConversations(current=>current.some(item=>item.id===selected)?current:[{id:selected!,title:text.slice(0,80),created_at:new Date().toISOString(),updated_at:new Date().toISOString()},...current])}
       if(!response.ok)throw new Error(data.error)
-      setTurns(current=>[...current,data.turn]);setUsed(current=>current+1)
+      setTurns(current=>[...current,data.turn])
       drafts.current[selected??'new']=''
       if(!conversationId)delete drafts.current.new
       const now=new Date().toISOString()
@@ -142,11 +146,11 @@ export function PersonalAgent({embedded=false}:{embedded?:boolean}) {
         return [{id:selected!,title:existing?.title==='Nova conversa'||!existing?text.slice(0,80):existing.title,created_at:existing?.created_at??now,updated_at:now},...current.filter(item=>item.id!==selected)]
       })
     }catch(error){drafts.current[selected??'new']=text;setQuestion(text);setError(error instanceof Error?error.message:t("Não conseguimos conectar. Tente novamente."))}
-    finally{sendingRef.current=false;setSending(false);setPendingQuestion('');input.current?.focus()}
+    finally{sendingRef.current=false;setSending(false);setPendingQuestion('');void refreshCredits();input.current?.focus()}
   }
   return <section className={`personal-agent ${embedded?'agent-embedded':''} mx-auto flex w-full max-w-5xl flex-col px-4 sm:px-6`} aria-label={t("Seu agente pessoal")}>
     <header className="flex shrink-0 items-center justify-between gap-2 py-2">
-      <div className="flex min-w-0 items-center gap-1"><button type="button" aria-expanded={historyOpen} aria-controls="agent-conversations" onClick={()=>setHistoryOpen(value=>!value)} className="flex min-h-11 min-w-11 items-center justify-center rounded-lg hover:bg-[#F5F1E8]" aria-label={t('Suas conversas')}><PanelLeft className="h-4 w-4"/></button><div className="min-w-0"><p className="truncate text-sm font-semibold">{t(conversations.find(item=>item.id===conversationId)?.title??'Nova conversa')}</p><p className="text-[11px] text-[#817A73]">{t('Conversa privada · {used}/{limit} perguntas hoje', { used, limit: PRO_DAILY_QUESTIONS })}</p></div></div>
+      <div className="flex min-w-0 items-center gap-1"><button type="button" aria-expanded={historyOpen} aria-controls="agent-conversations" onClick={()=>setHistoryOpen(value=>!value)} className="flex min-h-11 min-w-11 items-center justify-center rounded-lg hover:bg-[#F5F1E8]" aria-label={t('Suas conversas')}><PanelLeft className="h-4 w-4"/></button><div className="min-w-0"><p className="truncate text-sm font-semibold">{t(conversations.find(item=>item.id===conversationId)?.title??'Nova conversa')}</p><p className="text-[11px] text-[#817A73]">{credits?`${credits.included_remaining + credits.purchased} ${creditText.title.toLowerCase()}`:creditText.loading}</p></div></div>
       <div className="flex shrink-0 items-center"><button type="button" disabled={blocked} onClick={()=>void newConversation()} className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg px-2 text-sm hover:bg-[#F5F1E8] disabled:opacity-40" aria-label={t('Nova conversa')}><Plus className="h-4 w-4"/><span className="hidden sm:inline">{t('Nova conversa')}</span></button><button type="button" aria-expanded={settings} aria-controls="agent-settings" onClick={()=>setSettings(value=>!value)} className="flex min-h-11 min-w-11 items-center justify-center rounded-lg hover:bg-[#F5F1E8]" aria-label={settings?t("Fechar contexto e preferências"):t("Contexto e preferências")}>{settings?<X className="h-4 w-4"/>:<Settings2 className="h-4 w-4"/>}</button></div>
     </header>
     <MemberApiKeyIndicator />
@@ -154,7 +158,7 @@ export function PersonalAgent({embedded=false}:{embedded?:boolean}) {
     <div className="relative flex min-h-0 flex-1">
     {historyOpen?<AgentConversations conversations={conversations} selected={conversationId} disabled={blocked} hasMore={hasMoreConversations} loadingMore={loadingConversations} onSelect={selectConversation} onDelete={item=>{setDeleteCandidate(item);setHistoryOpen(false)}} onMore={()=>void moreConversations()} onClose={()=>setHistoryOpen(false)}/>:null}
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-    {settings?<section id="agent-settings" className="max-h-[45dvh] shrink-0 overflow-y-auto border-b border-[#CEC8BD] bg-white p-4"><form onSubmit={async event=>{event.preventDefault();setSaving(true);setNotice('');setError('');try{const response=await fetch('/api/club/agent',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({focus,topics})});if(!response.ok)throw new Error();setNotice(t("Contexto salvo."));setSettings(false)}catch{setError(t("Não conseguimos salvar seu contexto."))}finally{setSaving(false)}}}><label className="block text-sm font-semibold">{t("Seu foco atual")}<textarea value={focus} onChange={event=>setFocus(event.target.value)} rows={3} maxLength={2000} placeholder={t("O que está tentando resolver no trabalho?")} className="mt-2 w-full rounded-xl border border-[#CEC8BD] p-3 text-base"/></label><fieldset className="mt-4"><legend className="text-sm font-semibold">{t("Assuntos de interesse")}</legend><div className="mt-2 grid gap-2 sm:grid-cols-2">{Object.entries(COMMUNITY_CATEGORIES).map(([key,category])=><label key={key} className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={topics.includes(key)} onChange={event=>setTopics(current=>event.target.checked?[...current,key].slice(0,12):current.filter(value=>value!==key))}/>{t(category.label)}</label>)}</div></fieldset><button disabled={saving||loading} className="mt-4 min-h-12 rounded-xl bg-[#24231F] px-4 text-sm font-semibold text-white disabled:opacity-50">{saving?t("Salvando…"):t("Salvar contexto")}</button></form><p className="mt-4 text-xs leading-6 text-[#625E59]">{t("Cada conversa tem seu próprio histórico. Seu contexto salvo vale para todas. O limite diário é compartilhado e renova às 21h de Brasília.")}</p></section>:null}
+    {settings?<section id="agent-settings" className="max-h-[45dvh] shrink-0 overflow-y-auto border-b border-[#CEC8BD] bg-white p-4"><form onSubmit={async event=>{event.preventDefault();setSaving(true);setNotice('');setError('');try{const response=await fetch('/api/club/agent',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({focus,topics})});if(!response.ok)throw new Error();setNotice(t("Contexto salvo."));setSettings(false)}catch{setError(t("Não conseguimos salvar seu contexto."))}finally{setSaving(false)}}}><label className="block text-sm font-semibold">{t("Seu foco atual")}<textarea value={focus} onChange={event=>setFocus(event.target.value)} rows={3} maxLength={2000} placeholder={t("O que está tentando resolver no trabalho?")} className="mt-2 w-full rounded-xl border border-[#CEC8BD] p-3 text-base"/></label><fieldset className="mt-4"><legend className="text-sm font-semibold">{t("Assuntos de interesse")}</legend><div className="mt-2 grid gap-2 sm:grid-cols-2">{Object.entries(COMMUNITY_CATEGORIES).map(([key,category])=><label key={key} className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={topics.includes(key)} onChange={event=>setTopics(current=>event.target.checked?[...current,key].slice(0,12):current.filter(value=>value!==key))}/>{t(category.label)}</label>)}</div></fieldset><button disabled={saving||loading} className="mt-4 min-h-12 rounded-xl bg-[#24231F] px-4 text-sm font-semibold text-white disabled:opacity-50">{saving?t("Salvando…"):t("Salvar contexto")}</button></form><p className="mt-4 text-xs leading-6 text-[#625E59]">{creditText.rules}</p></section>:null}
     <div ref={scroll} onScroll={()=>{const el=scroll.current;if(el){nearBottom.current=el.scrollHeight-el.scrollTop-el.clientHeight<80;setShowLatest(!nearBottom.current)}}} className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-4" aria-label={t("Histórico da conversa")} role="log" aria-live="polite" tabIndex={0}>
       {loading?<p role="status" className="text-sm text-[#625E59]">{t("Carregando sua conversa…")}</p>:<>
         {hasMore?<div className="mb-6 text-center"><button disabled={loadingOlder||sending} onClick={()=>void older()} className="min-h-11 rounded-xl border border-[#CEC8BD] bg-white px-4 text-sm disabled:opacity-50">{loadingOlder?t("Carregando…"):t("Carregar mensagens anteriores")}</button></div>:null}
@@ -167,7 +171,7 @@ export function PersonalAgent({embedded=false}:{embedded?:boolean}) {
       {showLatest&&<button type="button" aria-label={t("Ir à última mensagem")} onClick={()=>{if(scroll.current)scroll.current.scrollTop=scroll.current.scrollHeight;nearBottom.current=true;setShowLatest(false)}} className="absolute -top-12 left-1/2 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border border-[#CEC8BD] bg-white shadow-sm"><ArrowDown className="h-4 w-4"/></button>}
       {notice?<p role="status" className="mb-2 text-sm text-green-800">{notice}</p>:null}
       {error?<div role="alert" className="mb-3 flex flex-wrap items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-800"><p>{error}</p>{!loaded?<button onClick={()=>void load(conversationId??undefined)} className="min-h-11 underline">{t("Tentar carregar novamente")}</button>:null}</div>:null}
-      <form onSubmit={ask} className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-[#CEC8BD] bg-[#FAF7F1] p-2 focus-within:border-[#817A73]"><label htmlFor="agent-question" className="sr-only">{t("Mensagem para seu agente")}</label><textarea ref={input} id="agent-question" value={question} onChange={event=>setQuestion(event.target.value)} onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();void ask()}}} disabled={blocked||!loaded} required minLength={3} maxLength={2000} rows={1} placeholder={t("Pergunte ao seu agente")} className="max-h-40 w-full resize-none border-0 bg-transparent px-1 py-2 text-base leading-6 outline-none disabled:opacity-70"/><div className="shrink-0"><button disabled={blocked||!loaded||question.trim().length<3||used>=PRO_DAILY_QUESTIONS} className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full bg-[#24231F] text-white disabled:opacity-40" aria-label={t("Enviar mensagem")}><ArrowUp className="h-5 w-5"/></button></div></form><p className="mx-auto mt-2 max-w-3xl text-center text-[11px] leading-5 text-[#817A73]">{used>=PRO_DAILY_QUESTIONS?t("Limite de hoje atingido."):t("Confira as fontes. Enter envia · Shift + Enter quebra linha.")}</p>
+      <div className="mx-auto mb-2 flex max-w-3xl flex-wrap items-center gap-2 text-xs"><label>{creditText.choose} <select aria-label={creditText.choose} disabled={blocked} value={action} onChange={event=>setAction(event.target.value as typeof action)} className="min-h-11 rounded border bg-white px-2"><option value="agent_question">{creditText.question}</option><option value="agent_summary">{creditText.summary}</option></select></label><a href="/community/credits" className="underline">{credits?`${credits.costs[action]} ${creditText.cost}`:creditText.manage}</a>{credits&&credits.included_remaining+credits.purchased<credits.costs[action]&&credits.api_connected&&<p>{creditText.nextApi}</p>}</div><form onSubmit={ask} className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-[#CEC8BD] bg-[#FAF7F1] p-2 focus-within:border-[#817A73]"><label htmlFor="agent-question" className="sr-only">{t("Mensagem para seu agente")}</label><textarea ref={input} id="agent-question" value={question} onChange={event=>setQuestion(event.target.value)} onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();void ask()}}} disabled={blocked||!loaded} required minLength={3} maxLength={2000} rows={1} placeholder={t("Pergunte ao seu agente")} className="max-h-40 w-full resize-none border-0 bg-transparent px-1 py-2 text-base leading-6 outline-none disabled:opacity-70"/><div className="shrink-0"><button disabled={blocked||!loaded||question.trim().length<3} className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full bg-[#24231F] text-white disabled:opacity-40" aria-label={t("Enviar mensagem")}><ArrowUp className="h-5 w-5"/></button></div></form><p className="mx-auto mt-2 max-w-3xl text-center text-[11px] leading-5 text-[#817A73]">{t("Confira as fontes. Enter envia · Shift + Enter quebra linha.")}</p>
     </div>
     </div>
     </div>

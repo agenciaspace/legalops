@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { MEMBER_OPENAI_MODEL } from '@/lib/club-api-key'
+import { withCreditAction } from '@/lib/club-credits'
+import { creditFailureResponse, validCreditOrigin } from '@/lib/club-credit-response'
 import { createPersonalizedCvForEntry } from '@/lib/personalized-cv'
 
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ entryId: string }> },
 ) {
+  if(!validCreditOrigin(_request))return NextResponse.json({error:'Invalid origin'},{status:403})
   const { entryId } = await params
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -19,14 +23,14 @@ export async function POST(
   if (!entry) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   try {
-    const cv = await createPersonalizedCvForEntry({
+    const cv = await withCreditAction(user.id,'personalized_cv',(generate,reservation)=>createPersonalizedCvForEntry({
+      generate, model:reservation.funding==='api'?MEMBER_OPENAI_MODEL:undefined,
       userId: user.id,
       jobId: entry.job_id,
       pipelineEntryId: entry.id,
-    })
+    }))
     return NextResponse.json({ cv })
   } catch (error) {
-    console.error('[pipeline/cv] generation failed:', error)
-    return NextResponse.json({ error: 'Could not generate CV' }, { status: 503 })
+    return creditFailureResponse(error,_request)
   }
 }

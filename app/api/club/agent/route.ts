@@ -7,6 +7,8 @@ import { generateOpenRouterText } from '@/lib/openrouter'
 import { AgentSource, AgentTurn, OPENCLM_AGENT_SOURCE, personalAgentPrompt, rankAgentSources } from '@/lib/club-personal-agent'
 import { isPublishableJobRecord } from '@/lib/job-publication'
 import { loadMemberKey, generateMemberOpenAIText, MemberKeyError } from '@/lib/club-api-key'
+import { getCreditStatus, creditError } from '@/lib/club-credits'
+import { creditErrorMessage } from '@/lib/club-credit-copy'
 import { memberKeyErrorMessage } from '@/lib/club-api-key-copy'
 export const maxDuration=60
 
@@ -43,7 +45,9 @@ export async function GET(request:NextRequest) {
     supabase.from('club_agent_usage').select('used').eq('user_id',user.id).eq('day',new Date().toISOString().slice(0,10)).maybeSingle(),
   ])
   if(turns.error||preferences.error||usage.error)return NextResponse.json({error:'Não conseguimos carregar seu agente.'},{status:503})
-  return NextResponse.json({conversation_id:conversationId,conversations:(conversations.data??[]).slice(0,30),has_more_conversations:(conversations.data?.length??0)>30,turns:(turns.data??[]).slice(0,30).reverse(),has_more:(turns.data?.length??0)>30,page,preferences:preferences.data??{focus:'',topics:[]},used:usage.data?.used??0})
+  let credits
+  try { credits=await getCreditStatus(user.id) } catch { return NextResponse.json({error:'Não conseguimos carregar os créditos.'},{status:503}) }
+  return NextResponse.json({credits,conversation_id:conversationId,conversations:(conversations.data??[]).slice(0,30),has_more_conversations:(conversations.data?.length??0)>30,turns:(turns.data??[]).slice(0,30).reverse(),has_more:(turns.data?.length??0)>30,page,preferences:preferences.data??{focus:'',topics:[]},used:usage.data?.used??0})
 }
 
 export async function PATCH(request:NextRequest) {
@@ -71,16 +75,21 @@ export async function POST(request:NextRequest) {
   if(conversationId!==null&&!isConversationId(conversationId))return NextResponse.json({error:'Conversa inválida.'},{status:400})
   const {supabase,user}=access
   const admin=createAdminClient()
-  const {data:reservation,error:reservationError}=await admin.rpc('reserve_club_agent_conversation_turn',{member_id:user.id,question_text:question,conversation_uuid:conversationId})
+  const action=body?.action??'agent_question'
+  if(!['agent_question','agent_summary'].includes(action))return NextResponse.json({error:'Ação inválida.'},{status:400})
+  const {data:reservation,error:reservationError}=await admin.rpc('reserve_club_credit_agent_turn',{member_id:user.id,question_text:question,conversation_uuid:conversationId,action_name:action})
   const turnId=reservation?.turn_id
   const selectedConversation=reservation?.conversation_id
   if(reservationError||!turnId||!selectedConversation) {
     const message=reservationError?.message??''
     if(message.includes('CONVERSATION_NOT_FOUND'))return NextResponse.json({error:'Conversa não encontrada.'},{status:404})
-    return NextResponse.json({error:message.includes('DAILY_LIMIT')?'Você chegou às 30 perguntas de hoje. O limite renova às 21h de Brasília (00h UTC).':message.includes('QUESTION_IN_PROGRESS')?'Aguarde a resposta anterior antes de perguntar novamente.':'Não conseguimos iniciar a conversa. Confira seu acesso Pro.'},{status:message.includes('DAILY_LIMIT')||message.includes('QUESTION_IN_PROGRESS')?429:503})
+    const failure=creditError(reservationError)
+    return NextResponse.json({error:creditErrorMessage(failure.code,normalizeClubLocale(request.headers.get('x-club-locale'))),code:failure.code},{status:failure.status})
   }
   try {
-    const memberApiKey=await loadMemberKey(user.id)
+    if(!['club','api'].includes(reservation.funding))throw new Error('Invalid credit funding')
+    const memberApiKey=reservation.funding==='api'?await loadMemberKey(user.id):null
+    if(reservation.funding==='api'&&!memberApiKey)throw new MemberKeyError('invalid_api_key',422)
     const results=await Promise.all([
       supabase.from('account_profiles').select('full_name,current_role,organization_name,organization_description,public_bio,areas_of_expertise,desired_roles').eq('user_id',user.id).maybeSingle(),
       supabase.from('club_agent_preferences').select('focus,topics').eq('user_id',user.id).maybeSingle(),
@@ -108,12 +117,13 @@ export async function POST(request:NextRequest) {
     ]
     const selected=rankAgentSources(sources,question,[...(profile.data?.areas_of_expertise??[]),profile.data?.current_role??'',profile.data?.organization_description??'',prefs.focus,...prefs.topics.map((topic:string)=>COMMUNITY_CATEGORIES[topic]?.label??topic)])
     const prompt=personalAgentPrompt({locale:normalizeClubLocale(request.headers.get('x-club-locale') ?? request.cookies.get(CLUB_LOCALE_COOKIE)?.value),profile:profile.data,focus:prefs.focus,topics:prefs.topics,history:[...(history.data??[])].reverse() as AgentTurn[],sources:selected,question,activity,currentPage:typeof body.page==='string'&&/^\/community(?:\/[^?#]*)?$/.test(body.page)?body.page.slice(0,150):'/community'})
+    if(action==='agent_summary')prompt.userPrompt='Produza um resumo estruturado e factual do assunto solicitado, com fontes e próximos passos.\n'+prompt.userPrompt
     const answer=memberApiKey?await generateMemberOpenAIText(memberApiKey,prompt):await generatePersonalAgentAnswer(prompt)
     if(!answer.trim())throw new Error('Empty agent response')
     const sourceLinks=selected.map(({title,url,kind})=>({title,url,kind}))
     const {error:saveError}=await admin.rpc('finish_club_agent_turn',{turn_id:turnId,answer_text:answer,source_links:sourceLinks,failed:false})
     if(saveError)throw new Error('Could not save agent response')
-    return NextResponse.json({conversation_id:selectedConversation,turn:{id:turnId,question,answer,sources:sourceLinks,status:'completed',created_at:new Date().toISOString()}})
+    return NextResponse.json({funding:reservation.funding,cost:reservation.cost,conversation_id:selectedConversation,turn:{id:turnId,question,answer,sources:sourceLinks,status:'completed',created_at:new Date().toISOString()}})
   } catch(error) {
     if(!(error instanceof MemberKeyError))console.error('[club/agent] request failed:',error)
     await admin.rpc('finish_club_agent_turn',{turn_id:turnId,answer_text:null,source_links:[],failed:true})

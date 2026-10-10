@@ -6,19 +6,19 @@ afterEach(()=>{cleanup();vi.unstubAllGlobals()})
 const conversation={id:'11111111-1111-4111-8111-111111111111',title:'Primeiro assunto',created_at:'2026-09-17T12:00:00Z',updated_at:'2026-09-17T12:00:00Z'}
 const turn={id:'old',question:'Pergunta anterior',answer:'Resposta anterior',sources:[],status:'completed',created_at:'2026-09-17T12:00:00Z'}
 it('keeps the selected conversation and appends question and answer in sequence',async()=>{
- const fetch=vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[turn],preferences:{focus:'',topics:[]},used:1,has_more:false})}).mockResolvedValueOnce({ok:true,json:async()=>({turn:{...turn,id:'new',question:'E como aplicar?',answer:'Próximo passo'}})})
+ const fetch=vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[turn],preferences:{focus:'',topics:[]},used:1,credits:{included_remaining:29,purchased:0,costs:{agent_question:1,agent_summary:2}},has_more:false})}).mockResolvedValueOnce({ok:true,json:async()=>({turn:{...turn,id:'new',question:'E como aplicar?',answer:'Próximo passo'}})})
  vi.stubGlobal('fetch',fetch);render(<PersonalAgent />)
  await screen.findByText('Resposta anterior')
  const input=screen.getByRole('textbox',{name:'Mensagem para seu agente'});fireEvent.change(input,{target:{value:'E como aplicar?'}});fireEvent.keyDown(input,{key:'Enter',shiftKey:false})
  await screen.findByText('Próximo passo')
  expect(screen.getByText('Resposta anterior')).toBeInTheDocument()
  expect(screen.getAllByRole('article',{name:'Sua mensagem'})).toHaveLength(2)
- expect(fetch.mock.calls[1][1].body).toBe(JSON.stringify({question:'E como aplicar?',page:'/',conversation_id:conversation.id}))
- expect(screen.getByText(/2\/30 perguntas/)).toBeInTheDocument()
+ expect(fetch.mock.calls[1][1].body).toBe(JSON.stringify({question:'E como aplicar?',page:'/',conversation_id:conversation.id,action:'agent_question'}))
+ expect(screen.getByText(/29 créditos do pro/)).toBeInTheDocument()
 })
 it('preserves the draft on a failed send and prevents duplicate submissions while waiting',async()=>{
  let fail:(value:unknown)=>void=()=>{}
- const fetch=vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[],preferences:{focus:'',topics:[]},used:0})}).mockImplementationOnce(()=>new Promise(resolve=>{fail=resolve}))
+ const fetch=vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[],preferences:{focus:'',topics:[]},used:0,credits:{included_remaining:30,purchased:0,costs:{agent_question:1,agent_summary:2}}})}).mockImplementationOnce(()=>new Promise(resolve=>{fail=resolve}))
  vi.stubGlobal('fetch',fetch);render(<PersonalAgent />);await screen.findByText('Como posso ajudar hoje?')
  const input=screen.getByRole('textbox',{name:'Mensagem para seu agente'});fireEvent.change(input,{target:{value:'Uma pergunta importante'}})
  fireEvent.keyDown(input,{key:'Enter'});fireEvent.keyDown(input,{key:'Enter'})
@@ -28,13 +28,13 @@ it('preserves the draft on a failed send and prevents duplicate submissions whil
  expect(input).toHaveValue('Uma pergunta importante');expect(input).toBeEnabled()
 })
 it('loads older messages in the same conversation without duplicating turns',async()=>{
- vi.stubGlobal('fetch',vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[turn],preferences:{focus:'',topics:[]},used:1,has_more:true})}).mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[{...turn,id:'older',question:'Primeira pergunta',answer:'Primeira resposta'},turn],has_more:false})}))
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[turn],preferences:{focus:'',topics:[]},used:1,credits:{included_remaining:29,purchased:0,costs:{agent_question:1,agent_summary:2}},has_more:true})}).mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[{...turn,id:'older',question:'Primeira pergunta',answer:'Primeira resposta'},turn],has_more:false})}))
  render(<PersonalAgent />);fireEvent.click(await screen.findByRole('button',{name:'Carregar mensagens anteriores'}));await screen.findByText('Primeira resposta')
  expect(screen.getAllByText('Resposta anterior')).toHaveLength(1)
 })
 it('formats agent responses and copies the complete answer',async()=>{
  const answer='## Próximos passos\n\n**Prioridade:** revisar contratos.\n\n- Primeiro item\n- Segundo item\n\n[Comunidade](https://legalops.club/community)'
- vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[{...turn,answer}],preferences:{focus:'',topics:[]},used:1})}))
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[{...turn,answer}],preferences:{focus:'',topics:[]},used:1,credits:{included_remaining:29,purchased:0,costs:{agent_question:1,agent_summary:2}}})}))
  const writeText=vi.fn().mockResolvedValue(undefined)
  Object.defineProperty(navigator,'clipboard',{value:{writeText},configurable:true})
  render(<PersonalAgent/>)
@@ -47,7 +47,7 @@ it('formats agent responses and copies the complete answer',async()=>{
 })
 it('creates a separate conversation and restores the original draft when switching back',async()=>{
  const other={...conversation,id:'22222222-2222-4222-8222-222222222222',title:'Nova conversa'}
- const payload=(selected:typeof conversation,turns:unknown[])=>({conversation_id:selected.id,conversations:[other,conversation],turns,preferences:{focus:'',topics:[]},used:1})
+ const payload=(selected:typeof conversation,turns:unknown[])=>({conversation_id:selected.id,conversations:[other,conversation],turns,preferences:{focus:'',topics:[]},used:1,credits:{included_remaining:29,purchased:0,costs:{agent_question:1,agent_summary:2}}})
  const fetch=vi.fn().mockResolvedValueOnce({ok:true,json:async()=>payload(conversation,[turn])})
   .mockResolvedValueOnce({ok:true,json:async()=>({conversation:other})})
   .mockResolvedValueOnce({ok:true,json:async()=>payload(other,[])})
@@ -68,9 +68,9 @@ it('creates a separate conversation and restores the original draft when switchi
 })
 it('confirms deletion of one conversation and preserves the other conversation and daily usage',async()=>{
  const other={...conversation,id:'22222222-2222-4222-8222-222222222222',title:'Outro assunto'}
- const fetch=vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation,other],turns:[turn],preferences:{focus:'',topics:[]},used:8})})
+ const fetch=vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation,other],turns:[turn],preferences:{focus:'',topics:[]},used:8,credits:{included_remaining:22,purchased:0,costs:{agent_question:1,agent_summary:2}}})})
   .mockResolvedValueOnce({ok:true,json:async()=>({ok:true})})
-  .mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:other.id,conversations:[other],turns:[{...turn,id:'other-turn',answer:'Resposta de outro assunto'}],preferences:{focus:'',topics:[]},used:8})})
+  .mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:other.id,conversations:[other],turns:[{...turn,id:'other-turn',answer:'Resposta de outro assunto'}],preferences:{focus:'',topics:[]},used:8,credits:{included_remaining:22,purchased:0,costs:{agent_question:1,agent_summary:2}}})})
  vi.stubGlobal('fetch',fetch);render(<PersonalAgent />);await screen.findByText('Resposta anterior')
  fireEvent.click(screen.getByRole('button',{name:'Suas conversas'}))
  fireEvent.click(screen.getByRole('button',{name:'Apagar conversa: Primeiro assunto'}))
@@ -79,10 +79,10 @@ it('confirms deletion of one conversation and preserves the other conversation a
  await screen.findByText('Resposta de outro assunto')
  expect(screen.queryByText('Resposta anterior')).not.toBeInTheDocument()
  expect(fetch.mock.calls[1]).toEqual([`/api/club/agent?conversation_id=${conversation.id}`,{method:'DELETE'}])
- expect(screen.getByText(/8\/30 perguntas/)).toBeInTheDocument()
+ expect(screen.getByText(/22 créditos do pro/)).toBeInTheDocument()
 })
 it('retains the conversation when deletion fails',async()=>{
- vi.stubGlobal('fetch',vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[turn],preferences:{focus:'',topics:[]},used:1})}).mockResolvedValueOnce({ok:false,json:async()=>({error:'Aguarde a resposta antes de apagar esta conversa.'})}))
+ vi.stubGlobal('fetch',vi.fn().mockResolvedValueOnce({ok:true,json:async()=>({conversation_id:conversation.id,conversations:[conversation],turns:[turn],preferences:{focus:'',topics:[]},used:1,credits:{included_remaining:29,purchased:0,costs:{agent_question:1,agent_summary:2}}})}).mockResolvedValueOnce({ok:false,json:async()=>({error:'Aguarde a resposta antes de apagar esta conversa.'})}))
  render(<PersonalAgent />);await screen.findByText('Resposta anterior')
  fireEvent.click(screen.getByRole('button',{name:'Suas conversas'}));fireEvent.click(screen.getByRole('button',{name:'Apagar conversa: Primeiro assunto'}));fireEvent.click(screen.getByRole('button',{name:'Apagar conversa'}))
  await screen.findByRole('alert')

@@ -1,4 +1,5 @@
 import { COUNTRY_CODES } from '@/lib/club-countries'
+import { creditCopy } from '@/lib/club-credit-copy'
 import { MemberApiKey } from '@/components/community/MemberApiKey'
 import { verificationState, verificationMissing } from '@/lib/member-verification'
 import { ClubRegionPreferences } from '@/components/community/ClubRegionPreferences'
@@ -211,7 +212,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
           </section>
         </aside>
       </div>
-      <MemberApiKey />
+      <a href="/community/credits" className="mt-5 inline-flex min-h-11 items-center underline">{creditCopy(getClubLocale()).title}</a><MemberApiKey />
     </div>
   )
 }

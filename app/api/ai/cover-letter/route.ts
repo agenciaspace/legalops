@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { generateOpenRouterText } from '@/lib/openrouter'
+import { withCreditAction } from '@/lib/club-credits'
+import { creditFailureResponse, validCreditOrigin } from '@/lib/club-credit-response'
 
 export async function POST(req: NextRequest) {
+  if(!validCreditOrigin(req))return NextResponse.json({error:'Invalid origin'},{status:403})
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -26,7 +28,7 @@ export async function POST(req: NextRequest) {
     : ''
 
   try {
-    const text = await generateOpenRouterText({
+    const text = await withCreditAction(user.id,'cover_letter',generate=>generate({
       systemPrompt: 'You are an expert career coach. Write polished Portuguese (BR) application materials with no extra commentary.',
       userPrompt: `Write a professional cover letter in Portuguese (BR) for this Legal Operations job.
 
@@ -45,20 +47,10 @@ Write a compelling cover letter that:
 Only output the cover letter text, no extra commentary.`,
       maxTokens: 2000,
       temperature: 0.4,
-    })
+    }))
 
     return NextResponse.json({ letter: text })
   } catch (error) {
-    console.error('[ai/cover-letter] OpenRouter request failed:', error)
-
-    const status =
-      error instanceof Error && error.message.includes('OPENROUTER_API_KEY')
-        ? 503
-        : 502
-
-    return NextResponse.json(
-      { error: 'Failed to generate cover letter.' },
-      { status }
-    )
+    return creditFailureResponse(error,req)
   }
 }

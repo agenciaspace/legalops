@@ -2,12 +2,13 @@ import Link from 'next/link'
 import { ArrowRight, Bot, BriefcaseBusiness, MessagesSquare, Sparkles } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { hasClubProAccess } from '@/lib/club-membership'
-import { isProOfferOpen, PRO_DAILY_QUESTIONS } from '@/lib/club-pro'
+import { isProOfferOpen } from '@/lib/club-pro'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Pro | legalops.club' }
 const resources = [
-  {href:'/community/assistant',title:'Meu agente',description:`Converse com contexto e histórico privado. Até ${PRO_DAILY_QUESTIONS} perguntas por dia.`,icon:Bot},
+  {href:'/community/credits',title:'Créditos do Pro',description:'Consulte saldo, custo por ação, extrato e créditos extras.',icon:Sparkles},
+  {href:'/community/assistant',title:'Meu agente',description:`Converse com contexto e histórico privado. Créditos compartilhados com os outros recursos Pro.`,icon:Bot},
   {href:'/community/summaries',title:'Resumos da comunidade',description:'Retome os assuntos discutidos a partir das publicações e comentários disponíveis.',icon:Sparkles},
   {href:'/community/jobs',title:'Oportunidades para seu perfil',description:'Acompanhe vagas relacionadas ao seu contexto profissional.',icon:BriefcaseBusiness},
 ]

@@ -1,5 +1,6 @@
 'use client'
 
+import { CreditCost } from '@/components/community/CreditCost'
 import { useState } from 'react'
 import type { PersonalizedCv } from '@/lib/types'
 
@@ -14,16 +15,16 @@ export function PersonalizedCvSection({ entryId, initialCv }: { entryId: string;
   const [cv, setCv] = useState(initialCv)
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [error, setError] = useState(false)
+  const [error, setError] = useState('')
 
   async function regenerate() {
     setLoading(true)
-    setError(false)
+    setError('')
     const response = await fetch(`/api/pipeline/${entryId}/cv`, { method: 'POST' })
     const data = await response.json().catch(() => ({}))
     setLoading(false)
     if (!response.ok || !data.cv) {
-      setError(true)
+      setError(data.error || 'Não foi possível gerar agora.')
       return
     }
     setCv(data.cv)
@@ -52,14 +53,14 @@ export function PersonalizedCvSection({ entryId, initialCv }: { entryId: string;
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-[#FF6A00]">CV personalizado para esta vaga</p>
-          <h2 className="mt-1 text-base font-bold text-[#1A1A1A]">{cv?.headline ?? 'Preparar currículo'}</h2>
+          <CreditCost action="personalized_cv"/><h2 className="mt-1 text-base font-bold text-[#1A1A1A]">{cv?.headline ?? 'Preparar currículo'}</h2>
           {cv ? <p className="mt-1 text-xs text-[#1A1A1A]/60">Ênfase {trackLabels[cv.job_track].toLowerCase()} · sem inventar experiências</p> : null}
         </div>
         <button onClick={regenerate} disabled={loading} className="rounded-xl border border-[#1A1A1A]/15 px-3 py-2 text-xs font-semibold text-[#1A1A1A]/70 disabled:opacity-50">
           {loading ? 'Gerando...' : cv ? 'Gerar nova versão' : 'Gerar CV'}
         </button>
       </div>
-      {error ? <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700">Não foi possível gerar agora.</p> : null}
+      {error ? <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p> : null}
       {cv?.markdown ? (
         <>
           <div className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl bg-[#F7F6F2] p-4 text-xs leading-5 text-[#34322F]">{cv.markdown}</div>

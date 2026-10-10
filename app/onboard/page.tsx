@@ -1,4 +1,5 @@
 'use client'
+import { CreditCost } from '@/components/community/CreditCost'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -545,7 +546,7 @@ export default function OnboardPage() {
         {step === 'linkedin' && (
           <div className="bg-white rounded-2xl border border-[#1A1A1A]/10 p-6 shadow-sm space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-[#1A1A1A]">Perfil LinkedIn</h2>
+              <h2 className="text-lg font-semibold text-[#1A1A1A]">Perfil LinkedIn</h2><CreditCost action="linkedin_insights"/>
               <p className="text-sm text-[#1A1A1A]/60 mt-0.5">
                 Informe o link do seu LinkedIn. Vamos analisar seu perfil e sugerir <strong>quick wins</strong> para você conquistar mais vagas na área jurídica.
               </p>

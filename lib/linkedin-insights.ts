@@ -121,6 +121,7 @@ export function parseInsightsResponse(text: string): LinkedInInsight[] {
 }
 
 export async function generateLinkedInInsights(params: {
+  generate?: typeof generateOpenRouterText
   linkedinUrl: string
   currentRole: string | null
   professionalType: ProfessionalType | null
@@ -135,11 +136,11 @@ export async function generateLinkedInInsights(params: {
   })
 
   const apiKey = process.env.OPENROUTER_API_KEY
-  if (!apiKey) {
+  if (!apiKey && !params.generate) {
     return { insights: [], rawText: profileText }
   }
 
-  const text = await generateOpenRouterText({
+  const text = await (params.generate ?? generateOpenRouterText)({
     systemPrompt:
       'Você é um especialista em carreira jurídica. Retorne apenas JSON válido.',
     userPrompt: prompt,
@@ -148,5 +149,6 @@ export async function generateLinkedInInsights(params: {
   })
 
   const insights = parseInsightsResponse(text)
+  if(params.generate&&!insights.length)throw new Error('Invalid generated profile insights')
   return { insights, rawText: profileText }
 }

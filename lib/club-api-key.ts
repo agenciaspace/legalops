@@ -113,11 +113,11 @@ export async function loadMemberKey(userId: string): Promise<string | null> {
   return data ? decryptMemberKey(userId, data.encrypted_key) : null
 }
 
-export async function generateMemberOpenAIText(apiKey: string, prompt: { systemPrompt: string; userPrompt: string }) {
+export async function generateMemberOpenAIText(apiKey: string, prompt: { systemPrompt: string; userPrompt: string; maxTokens?: number }) {
   const response = await openAIRequest(apiKey, 'responses', {
     model: MEMBER_OPENAI_MODEL, instructions: prompt.systemPrompt,
     input: [{ role: 'user', content: prompt.userPrompt }],
-    store: false, max_output_tokens: 1400,
+    store: false, max_output_tokens: Math.min(prompt.maxTokens ?? 1400, 4000),
   })
   // Bound response parsing even if the upstream response violates its token cap.
   const reader = response.body?.getReader()

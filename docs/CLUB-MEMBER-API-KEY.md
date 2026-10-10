@@ -1,3 +1,7 @@
+# Current billing model
+
+See [shared Pro credits](CLUB-CREDITS.md). Included and purchased credits now precede API overflow. The verification notes below describe the original BYOK release.
+
 # Member-provided OpenAI API keys
 
 Members connect an OpenAI API key at `/community/profile#api-key`. The personal

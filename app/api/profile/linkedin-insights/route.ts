@@ -1,11 +1,14 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
+import { withCreditAction } from '@/lib/club-credits'
+import { creditFailureResponse, validCreditOrigin } from '@/lib/club-credit-response'
 import { generateLinkedInInsights } from '@/lib/linkedin-insights'
 import type { ProfessionalType } from '@/lib/types'
 
 export const maxDuration = 30
 
 export async function POST(req: NextRequest) {
+  if(!validCreditOrigin(req))return NextResponse.json({error:'Invalid origin'},{status:403})
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -23,7 +26,10 @@ export async function POST(req: NextRequest) {
     .eq('user_id', user.id)
     .single()
 
+  try {
+  return await withCreditAction(user.id,'linkedin_insights',async generate=>{
   const { insights, rawText } = await generateLinkedInInsights({
+    generate,
     linkedinUrl,
     currentRole: profile?.current_role ?? null,
     professionalType: (profile?.professional_type as ProfessionalType) ?? null,
@@ -37,10 +43,13 @@ export async function POST(req: NextRequest) {
     insights,
   }
 
-  await supabase
+  const {error:saveError}=await supabase
     .from('account_profiles')
     .update({ linkedin_url: linkedinUrl, linkedin_data: linkedinData })
     .eq('user_id', user.id)
 
+  if(saveError)throw new Error('Could not save profile insights')
   return NextResponse.json({ insights, scraped: !!rawText })
+  })
+  } catch(error){return creditFailureResponse(error,req)}
 }
