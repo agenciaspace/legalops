@@ -6,6 +6,8 @@ import { COMMUNITY_CATEGORIES } from '@/lib/community'
 import { generateOpenRouterText } from '@/lib/openrouter'
 import { AgentSource, AgentTurn, OPENCLM_AGENT_SOURCE, personalAgentPrompt, rankAgentSources } from '@/lib/club-personal-agent'
 import { isPublishableJobRecord } from '@/lib/job-publication'
+import { loadMemberKey, generateMemberOpenAIText, MemberKeyError } from '@/lib/club-api-key'
+import { memberKeyErrorMessage } from '@/lib/club-api-key-copy'
 export const maxDuration=60
 
 async function generatePersonalAgentAnswer(prompt:ReturnType<typeof personalAgentPrompt>) {
@@ -60,6 +62,7 @@ export async function DELETE(request:NextRequest) {
   return data?NextResponse.json({ok:true}):NextResponse.json({error:'Conversa não encontrada.'},{status:404})
 }
 export async function POST(request:NextRequest) {
+  if(request.headers.get('origin')!==request.nextUrl.origin||request.headers.get('sec-fetch-site')==='cross-site')return NextResponse.json({error:'Atualize a página e tente novamente.'},{status:403})
   const access=await session();if(access.error)return access.error
   const body=await request.json().catch(()=>null)
   const question=typeof body?.question==='string'?body.question.trim():''
@@ -77,6 +80,7 @@ export async function POST(request:NextRequest) {
     return NextResponse.json({error:message.includes('DAILY_LIMIT')?'Você chegou às 30 perguntas de hoje. O limite renova às 21h de Brasília (00h UTC).':message.includes('QUESTION_IN_PROGRESS')?'Aguarde a resposta anterior antes de perguntar novamente.':'Não conseguimos iniciar a conversa. Confira seu acesso Pro.'},{status:message.includes('DAILY_LIMIT')||message.includes('QUESTION_IN_PROGRESS')?429:503})
   }
   try {
+    const memberApiKey=await loadMemberKey(user.id)
     const results=await Promise.all([
       supabase.from('account_profiles').select('full_name,current_role,organization_name,organization_description,public_bio,areas_of_expertise,desired_roles').eq('user_id',user.id).maybeSingle(),
       supabase.from('club_agent_preferences').select('focus,topics').eq('user_id',user.id).maybeSingle(),
@@ -104,15 +108,16 @@ export async function POST(request:NextRequest) {
     ]
     const selected=rankAgentSources(sources,question,[...(profile.data?.areas_of_expertise??[]),profile.data?.current_role??'',profile.data?.organization_description??'',prefs.focus,...prefs.topics.map((topic:string)=>COMMUNITY_CATEGORIES[topic]?.label??topic)])
     const prompt=personalAgentPrompt({locale:normalizeClubLocale(request.headers.get('x-club-locale') ?? request.cookies.get(CLUB_LOCALE_COOKIE)?.value),profile:profile.data,focus:prefs.focus,topics:prefs.topics,history:[...(history.data??[])].reverse() as AgentTurn[],sources:selected,question,activity,currentPage:typeof body.page==='string'&&/^\/community(?:\/[^?#]*)?$/.test(body.page)?body.page.slice(0,150):'/community'})
-    const answer=await generatePersonalAgentAnswer(prompt)
+    const answer=memberApiKey?await generateMemberOpenAIText(memberApiKey,prompt):await generatePersonalAgentAnswer(prompt)
     if(!answer.trim())throw new Error('Empty agent response')
     const sourceLinks=selected.map(({title,url,kind})=>({title,url,kind}))
     const {error:saveError}=await admin.rpc('finish_club_agent_turn',{turn_id:turnId,answer_text:answer,source_links:sourceLinks,failed:false})
     if(saveError)throw new Error('Could not save agent response')
     return NextResponse.json({conversation_id:selectedConversation,turn:{id:turnId,question,answer,sources:sourceLinks,status:'completed',created_at:new Date().toISOString()}})
   } catch(error) {
-    console.error('[club/agent] request failed:',error)
+    if(!(error instanceof MemberKeyError))console.error('[club/agent] request failed:',error)
     await admin.rpc('finish_club_agent_turn',{turn_id:turnId,answer_text:null,source_links:[],failed:true})
+    if(error instanceof MemberKeyError)return NextResponse.json({conversation_id:selectedConversation,error:memberKeyErrorMessage(error.code,normalizeClubLocale(request.headers.get('x-club-locale')??request.cookies.get(CLUB_LOCALE_COOKIE)?.value))},{status:error.status,headers:{'Cache-Control':'private, no-store'}})
     return NextResponse.json({conversation_id:selectedConversation,error:'O agente não conseguiu responder agora. Tente novamente em alguns instantes.'},{status:503})
   }
 }

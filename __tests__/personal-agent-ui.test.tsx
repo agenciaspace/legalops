@@ -1,6 +1,7 @@
 import {afterEach,expect,it,vi} from 'vitest'
 import {cleanup,fireEvent,render,screen,waitFor} from '@testing-library/react'
 import {PersonalAgent} from '@/app/(main)/community/assistant/PersonalAgent'
+vi.mock('@/components/community/MemberApiKey',()=>({MemberApiKeyIndicator:()=>null}))
 afterEach(()=>{cleanup();vi.unstubAllGlobals()})
 const conversation={id:'11111111-1111-4111-8111-111111111111',title:'Primeiro assunto',created_at:'2026-09-17T12:00:00Z',updated_at:'2026-09-17T12:00:00Z'}
 const turn={id:'old',question:'Pergunta anterior',answer:'Resposta anterior',sources:[],status:'completed',created_at:'2026-09-17T12:00:00Z'}

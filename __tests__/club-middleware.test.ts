@@ -13,6 +13,13 @@ vi.mock('@supabase/ssr', () => ({ createServerClient: (_url: string, _key: strin
 import { middleware } from '../middleware'
 const request = (path: string, cookie?: string) => middleware(new NextRequest(`https://legalops.club${path}`, { headers: { host: 'legalops.club', ...(cookie ? { cookie } : {}) } }))
 beforeEach(() => { state.user = null; state.member = {}; state.authReads = 0; state.profileReads = 0; state.refresh = false })
+it('keeps key management authenticated while allowing owners to remove credentials after Club expiry',async()=>{
+  expect((await request('/api/club/api-key')).status).toBe(401)
+  state.user={id:'expired'};state.member={club_access_status:'inactive'}
+  expect((await request('/api/club/api-key')).status).toBe(200)
+  expect((await request('/api/club/api-key/other')).status).toBe(403)
+  expect((await request('/api/club/agent')).status).toBe(403)
+})
 it('keeps the public root available without waiting for session refresh',async()=>{
   state.user={id:'member'};state.member={club_access_status:'active',avatar_path:'member/photo.jpg'};state.refresh=true
   const root=await request('/')

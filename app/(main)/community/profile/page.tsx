@@ -1,4 +1,5 @@
 import { COUNTRY_CODES } from '@/lib/club-countries'
+import { MemberApiKey } from '@/components/community/MemberApiKey'
 import { verificationState, verificationMissing } from '@/lib/member-verification'
 import { ClubRegionPreferences } from '@/components/community/ClubRegionPreferences'
 import { getClubTranslator, getClubLocale } from '@/lib/club-locale-server'
@@ -210,6 +211,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
           </section>
         </aside>
       </div>
+      <MemberApiKey />
     </div>
   )
 }

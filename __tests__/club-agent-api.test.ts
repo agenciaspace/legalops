@@ -1,7 +1,7 @@
 // @vitest-environment node
 import {beforeEach,expect,it,vi} from 'vitest'
 import {NextRequest} from 'next/server'
-const state=vi.hoisted(()=>({user:{id:'owner'} as {id:string}|null,pro:true,rpc:vi.fn(),generate:vi.fn(),admin:vi.fn(),filters:[] as string[][]}))
+const state=vi.hoisted(()=>({user:{id:'owner'} as {id:string}|null,pro:true,rpc:vi.fn(),generate:vi.fn(),loadKey:vi.fn(),generateOwn:vi.fn(),admin:vi.fn(),filters:[] as string[][]}))
 vi.mock('@/lib/supabase-server',()=>({createServerSupabaseClient:async()=>({
  auth:{getUser:async()=>({data:{user:state.user}})},
  from:(table:string)=>{
@@ -12,9 +12,11 @@ vi.mock('@/lib/supabase-server',()=>({createServerSupabaseClient:async()=>({
 })}))
 vi.mock('@/lib/supabase-admin',()=>({createAdminClient:()=>{state.admin();return {rpc:state.rpc}}}))
 vi.mock('@/lib/openrouter',()=>({generateOpenRouterText:state.generate}))
+vi.mock('@/lib/club-api-key',async importOriginal=>({...await importOriginal<typeof import('@/lib/club-api-key')>(),loadMemberKey:state.loadKey,generateMemberOpenAIText:state.generateOwn}))
+import { MemberKeyError } from '@/lib/club-api-key'
 import {POST} from '@/app/api/club/agent/route'
-const request=(body:unknown)=>new NextRequest('https://legalops.club/api/club/agent',{method:'POST',body:JSON.stringify(body)})
-beforeEach(()=>{vi.clearAllMocks();state.user={id:'owner'};state.pro=true;state.filters=[];state.rpc.mockImplementation(async(name:string)=>name==='reserve_club_agent_conversation_turn'?{data:{turn_id:'turn',conversation_id:'11111111-1111-4111-8111-111111111111'},error:null}:{error:null});state.generate.mockResolvedValue('Veja o OpenCLM [1].')})
+const request=(body:unknown)=>new NextRequest('https://legalops.club/api/club/agent',{method:'POST',headers:{origin:'https://legalops.club'},body:JSON.stringify(body)})
+beforeEach(()=>{vi.resetAllMocks();state.loadKey.mockResolvedValue(null);state.user={id:'owner'};state.pro=true;state.filters=[];state.rpc.mockImplementation(async(name:string)=>name==='reserve_club_agent_conversation_turn'?{data:{turn_id:'turn',conversation_id:'11111111-1111-4111-8111-111111111111'},error:null}:{error:null});state.generate.mockResolvedValue('Veja o OpenCLM [1].')})
 it('blocks anonymous and free accounts before service-role or model calls',async()=>{
  state.user=null;expect((await POST(request({question:'OpenCLM?'}))).status).toBe(401)
  state.user={id:'owner'};state.pro=false;expect((await POST(request({question:'OpenCLM?'}))).status).toBe(403)
@@ -33,7 +35,7 @@ it('enforces daily allowance before invoking the model',async()=>{
  expect(state.generate).not.toHaveBeenCalled()
 })
 it('uses the saved language preference for the agent response',async()=>{
- const req=new NextRequest('https://legalops.club/api/club/agent',{method:'POST',headers:{cookie:'club-locale=en'},body:JSON.stringify({question:'What should I follow?'})})
+ const req=new NextRequest('https://legalops.club/api/club/agent',{method:'POST',headers:{origin:'https://legalops.club',cookie:'club-locale=en'},body:JSON.stringify({question:'What should I follow?'})})
  expect((await POST(req)).status).toBe(200)
  expect(state.generate.mock.calls[0][0].systemPrompt).toContain('Respond in English.')
 })
@@ -80,4 +82,27 @@ it('rejects another owner conversation before any model call',async()=>{
 it('rejects malformed conversation ids before the reservation',async()=>{
  expect((await POST(request({question:'Leia esta conversa',conversation_id:'not-an-id'}))).status).toBe(400)
  expect(state.rpc).not.toHaveBeenCalled()
+})
+it('uses only the authenticated member key and never the platform key when connected',async()=>{
+ state.loadKey.mockResolvedValue('member-secret');state.generateOwn.mockResolvedValue('Resposta com a API do membro.')
+ expect((await POST(request({question:'Como usar o OpenCLM?',user_id:'intruder'}))).status).toBe(200)
+ expect(state.loadKey).toHaveBeenCalledWith('owner')
+ expect(state.generateOwn).toHaveBeenCalledWith('member-secret',expect.objectContaining({userPrompt:expect.any(String)}))
+ expect(state.generate).not.toHaveBeenCalled()
+})
+it('refunds the daily reservation and does not retry or switch billing on a member provider limit',async()=>{
+ state.loadKey.mockResolvedValue('member-secret');state.generateOwn.mockRejectedValue(new MemberKeyError('provider_limit',429))
+ const response=await POST(request({question:'Como usar o OpenCLM?'}))
+ expect(response.status).toBe(429);expect((await response.json()).error).toContain('créditos')
+ expect(state.generateOwn).toHaveBeenCalledTimes(1);expect(state.generate).not.toHaveBeenCalled()
+ expect(state.rpc).toHaveBeenCalledWith('finish_club_agent_turn',{turn_id:'turn',answer_text:null,source_links:[],failed:true})
+})
+it('does not fall back to platform billing when member key storage fails',async()=>{
+ state.loadKey.mockRejectedValue(new MemberKeyError('key_storage_unavailable'))
+ expect((await POST(request({question:'Como usar o OpenCLM?'}))).status).toBe(503)
+ expect(state.generate).not.toHaveBeenCalled();expect(state.generateOwn).not.toHaveBeenCalled()
+})
+it('rejects cross-origin billable requests before reserving a turn',async()=>{
+ const req=new NextRequest('https://legalops.club/api/club/agent',{method:'POST',headers:{origin:'https://elsewhere.example'},body:JSON.stringify({question:'Pague esta pergunta'})})
+ expect((await POST(req)).status).toBe(403);expect(state.rpc).not.toHaveBeenCalled();expect(state.loadKey).not.toHaveBeenCalled()
 })
