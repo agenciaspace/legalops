@@ -22,6 +22,23 @@ describe('community WhatsApp summary',()=>{
   expect(latestSummarySlot(now).toISOString()).toBe('2026-09-18T21:00:00.000Z')
   expect(validateWhatsAppInput(payload,now)).not.toBeNull()
  })
+ it('recovers an existing historical event edition without moving the live schedule backwards', async () => {
+  vi.useFakeTimers(); vi.setSystemTime(new Date('2026-10-11T18:00:00Z'))
+  process.env.WHATSAPP_SUMMARY_INGEST_SECRET='expected'
+  const update=vi.fn()
+  const saved={id:'saved-summary',event_id:'event',period_end:'2026-10-08T21:00:00Z'}
+  const admin={from:(table:string)=>{
+   const data=table==='community_events' ? {id:'event',title:'Bench'} : table==='community_event_whatsapp_configs' ? {enabled:true,first_run_at:'2026-09-30T21:00:00Z'} : saved
+   const query:any={select:()=>query,eq:()=>query,single:async()=>({data,error:null}),maybeSingle:async()=>({data,error:null}),update}
+   return query
+  }}
+  vi.mocked(createAdminClient).mockReturnValue(admin as never)
+  const body={source:'event:bench-netlex-2026',event_slug:'bench-netlex-2026',action:'backfill',period_start:'2026-10-07T21:00:00Z',period_end:'2026-10-08T21:00:00Z',messages:[],omitted_media_count:0}
+  const response=await POST(new Request('https://test/api/cron/whatsapp-summary',{method:'POST',headers:{authorization:'Bearer expected'},body:JSON.stringify(body)}))
+  expect(response.status).toBe(200)
+  expect(await response.json()).toEqual({ok:true,summary:saved,reused:true})
+  expect(update).not.toHaveBeenCalled()
+ })
  it('rejects other sources, duplicate messages and out-of-window messages',()=>{
   expect(validateWhatsAppInput({...payload,source:'other'},now)).toBeNull()
   expect(validateWhatsAppInput({...payload,messages:[...payload.messages,...payload.messages]},now)).toBeNull()

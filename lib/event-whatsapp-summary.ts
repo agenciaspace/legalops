@@ -50,10 +50,12 @@ export function validateEventWhatsAppInput(input: unknown, now = new Date()) {
   if (!input || typeof input !== 'object') return null
   const body = input as Record<string, unknown>
   if (typeof body.event_slug !== 'string' || !/^[a-z0-9-]{3,100}$/.test(body.event_slug)) return null
-  if (body.source !== eventWhatsAppSummarySource(body.event_slug) || !['publish', 'preview'].includes(String(body.action))) return null
+  if (body.source !== eventWhatsAppSummarySource(body.event_slug) || !['publish', 'preview', 'backfill'].includes(String(body.action))) return null
   const start = new Date(String(body.period_start)), end = new Date(String(body.period_end))
-  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end.getTime() - start.getTime() !== DAY_MS || end > now || end.getTime() < now.getTime() - 2 * DAY_MS) return null
+  const backfill = body.action === 'backfill'
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end.getTime() - start.getTime() !== DAY_MS || end > now || end.getTime() < now.getTime() - (backfill ? 31 : 2) * DAY_MS) return null
   if (body.action === 'publish' && end.getTime() !== latestSummarySlot(now).getTime()) return null
+  if (backfill && (end.getTime() >= latestSummarySlot(now).getTime() || end.getTime() !== latestSummarySlot(end).getTime())) return null
   if (!Array.isArray(body.messages) || body.messages.length > 2000 || !Number.isInteger(body.omitted_media_count) || Number(body.omitted_media_count) < 0) return null
   const ids = new Set<string>()
   const messages: WhatsAppSource[] = []
@@ -66,7 +68,7 @@ export function validateEventWhatsAppInput(input: unknown, now = new Date()) {
     ids.add(message.id)
     messages.push({ id: message.id, at: at.toISOString(), author: message.author, text: message.text })
   }
-  return { eventSlug: body.event_slug, messages, start: start.toISOString(), end: end.toISOString(), omitted: Number(body.omitted_media_count), preview: body.action === 'preview' }
+  return { eventSlug: body.event_slug, messages, start: start.toISOString(), end: end.toISOString(), omitted: Number(body.omitted_media_count), preview: body.action === 'preview', backfill }
 }
 
 function redactSourceText(value: string) {

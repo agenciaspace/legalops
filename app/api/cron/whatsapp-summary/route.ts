@@ -140,7 +140,8 @@ export async function POST(request: Request) {
     const { data: existing, error: readError } = await db.from('community_event_whatsapp_summaries').select('*').eq('event_id', event.id).eq('period_end', eventInput.end).maybeSingle()
     if (readError) return reply({ error: 'Event summary unavailable' }, 503)
     const status = async (last_status: string) => {
-      if (eventInput.preview) return
+      // Recover historical editions without moving the live schedule backwards.
+      if (eventInput.preview || eventInput.backfill) return
       const done = last_status === 'published' || last_status === 'empty'
       const { error } = await db.from('community_event_whatsapp_configs').update({ last_status, last_checked_at: new Date().toISOString(), last_period_end: eventInput.end, ...(done ? { next_run_at: new Date(new Date(eventInput.end).getTime() + DAY_MS).toISOString() } : {}) }).eq('event_id', event.id)
       if (error) throw new Error('Event schedule update failed')

@@ -19,6 +19,15 @@ five-minute runner forwards each item to the event's allowlisted group and recor
 processing it again. Ambiguous sends are reconciled against the read-only message mirror instead of
 being blindly repeated.
 
+Comment delivery, agenda synchronization, event summaries and the community summary run as
+independent stages. A failed stage logs only its name and exception/HTTP status; the others
+still run, and the failed stage retries on the next timer tick.
+
+For recovery after an outage, the protected endpoint accepts `action: backfill` for event
+summaries within the previous 31 days, on fixed 18:00 Brasília windows and after the event's
+first scheduled edition. It reuses existing editions, never rewinds the live schedule and
+does not send WhatsApp messages. Use this only to restore missing archive editions.
+
 Every day at 21:00 UTC (18:00 Brasília), publish the previous **fixed 24-hour period** to
 `club_whatsapp_summaries`, then send the same digest to the group. First window ends
 2026-09-18 at 21:00 UTC. Empty windows produce no WhatsApp notification. The 5-minute timer

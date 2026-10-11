@@ -18,6 +18,14 @@ const payload = {
 }
 
 describe('event WhatsApp summaries', () => {
+  it('bounds historical recovery to previous fixed windows without allowing arbitrary rolling periods', () => {
+    const later = new Date('2026-10-05T22:00:00Z')
+    const input = { ...payload, action: 'backfill' }
+    expect(validateEventWhatsAppInput(input, later)).toMatchObject({ backfill: true, preview: false })
+    expect(validateEventWhatsAppInput(input, now)).toBeNull()
+    expect(validateEventWhatsAppInput(input, new Date('2026-11-05T22:00:00Z'))).toBeNull()
+    expect(validateEventWhatsAppInput({ ...input, period_start: '2026-09-29T22:00:00Z', period_end: '2026-09-30T22:00:00Z' }, later)).toBeNull()
+  })
   it('accepts only the source that belongs to the requested event', () => {
     expect(eventWhatsAppSummarySource('bench-netlex-2026')).toBe('event:bench-netlex-2026')
     expect(validateEventWhatsAppInput(payload, now)).not.toBeNull()
