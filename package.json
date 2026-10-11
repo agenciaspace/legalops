@@ -3,6 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
+    "design:sync": "node scripts/sync-design-system.mjs",
+    "design:check": "node scripts/sync-design-system.mjs --check",
+    "prebuild": "npm run design:check",
+    "pretest": "npm run design:check",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

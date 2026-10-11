@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
     paths:
+      - 'design/**'
+      - 'scripts/sync-design-system.mjs'
       - 'app/**'
       - 'components/**'
       - 'public/**'
@@ -36,6 +38,9 @@ jobs:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_Cc0Bp-tFHkL0EH2htwJ3gA_trJ-UU8Q
     steps:
       - uses: actions/checkout@v6
+
+      - name: Check shared design system
+        run: node scripts/sync-design-system.mjs --check
 
       - name: Set up Node
         uses: actions/setup-node@v4

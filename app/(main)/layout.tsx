@@ -58,7 +58,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="min-h-screen bg-[#F5F1E8]">
-      <Nav member={clubAccess} discoverCount={count ?? 0} jobAlertCount={jobAlertCount ?? 0} hasClubAccess={hasClubAccess} isClubAdmin={isLegalOpsAdminEmail(user.email)} />
+      <Nav member={clubAccess} discoverCount={count ?? 0} jobAlertCount={jobAlertCount ?? 0} hasClubAccess={hasClubAccess} isClubMember={hasActiveClubAccess(clubAccess)} isClubAdmin={isLegalOpsAdminEmail(user.email)} />
       <AppMain>{hasActiveClubAccess(clubAccess) && !hasClubAccess && <ProNotice userId={user.id} />}{children}</AppMain>
     </div>
   )

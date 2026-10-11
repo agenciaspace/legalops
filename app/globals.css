@@ -1,3 +1,5 @@
+@import '../design/legalops.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -29,8 +31,7 @@
 .club-content:has(.personal-agent) { padding-bottom: 0; }
 @media (min-width: 1024px) { .personal-agent { height: calc(100dvh - 4rem); } }
 
-.agent-bubble{bottom:calc(5rem + env(safe-area-inset-bottom,0px))}.agent-overlay[hidden]{display:none}.agent-dialog .agent-embedded{height:auto;min-height:0;flex:1;padding-bottom:env(safe-area-inset-bottom,0px)}.club-content{padding-bottom:calc(10rem + env(safe-area-inset-bottom,0px))}
-@media(min-width:1024px){.agent-bubble{bottom:1.5rem}.club-content{padding-bottom:6rem}}
+.agent-overlay[hidden]{display:none}.agent-dialog .agent-embedded{height:auto;min-height:0;flex:1;padding-bottom:env(safe-area-inset-bottom,0px)}
 .agent-answer { overflow-wrap: anywhere; }
 .agent-answer > :first-child { margin-top: 0; }
 .agent-answer p, .agent-answer ul, .agent-answer ol, .agent-answer blockquote, .agent-answer pre { margin: .75rem 0; }

@@ -7,7 +7,7 @@ export function AppMain({ children }: { children: React.ReactNode }) {
   const isCommunity = pathname.startsWith('/community')
 
   return (
-    <main className={isCommunity ? 'w-full' : 'mx-auto w-full max-w-7xl'}>
+    <main className={isCommunity ? 'w-full' : 'work-shell brand-surface mx-auto w-full max-w-7xl'}>
       {children}
     </main>
   )

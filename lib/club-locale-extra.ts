@@ -1,5 +1,8 @@
 // Reviewed static catalogs. Runtime UI labels do not call a model.
 export const spanish: Record<string, string> = {
+  'Compartilhar': 'Compartir', 'Perfil público': 'Perfil público', 'Preferências': 'Preferencias', 'Mais assuntos': 'Más temas',
+  'Nenhum encontro realizado.': 'Todavía no hay encuentros anteriores.',
+  'Compartilhe uma pergunta ou experiência para começar.': 'Comparte una pregunta o experiencia para empezar una conversación.',
   "Redefinir senha": "Restablecer contraseña",
   "Entre na sua conta": "Entra en tu cuenta",
   "Como entrar": "Cómo entrar",

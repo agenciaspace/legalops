@@ -1,149 +1,90 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { BrandWordmark } from '@/components/BrandLogo'
+import { ClubHeader } from '@/components/ClubHeader'
 import { LegalOpsEcosystem } from '@/components/LegalOpsEcosystem'
 import { ResumeClubSession } from '@/components/community/ResumeClubSession'
-import { createAdminClient } from '@/lib/supabase-admin'
-
+import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { isEventDatePending, upcomingCommunityEvents } from '@/lib/community-event-display'
 
 export const metadata: Metadata = {
   title: 'legalops.club | comunidade para profissionais do jurídico',
-  description: 'Comunidade gratuita para perfis ligados ao jurídico, com LinkedIn e apresentação profissional. O Pro reúne agente pessoal, vagas e recursos práticos.',
-  openGraph: {
-    title: 'legalops.club | vamos falar de trabalho no jurídico',
-    description: 'Cadastre-se na comunidade com seu perfil profissional. Conheça também o Pro e seu agente pessoal.',
-    url: 'https://legalops.club',
-    siteName: 'legalops.club',
-    type: 'website',
-  },
+  description: 'Converse com profissionais de Legal Ops, contratos e tecnologia jurídica. Participe de encontros e encontre referências para o seu trabalho.',
+  openGraph: { title: 'legalops.club | comunidade para o trabalho jurídico', description: 'Troque experiências, conheça membros e participe dos encontros da comunidade.', url: 'https://legalops.club', siteName: 'legalops.club', type: 'website' },
 }
 export const dynamic = 'force-dynamic'
-const headingFont = { fontFamily: 'var(--font-quicksand), ui-rounded, sans-serif' }
-const plannedFeatures = [
-  {
-    title: 'seu agente',
-    description: 'Seu agente guarda o histórico das suas conversas e o contexto que você escolher compartilhar. Peça um resumo das discussões recentes do site, procure uma referência ou organize os próximos passos do seu trabalho.',
-  },
-  {
-    title: 'conexão com o Work',
-    description: 'Consulte vagas verificadas do Work na mesma conversa. O agente usa seu perfil para contextualizar as oportunidades e explicar o que merece atenção.',
-  },
-  {
-    title: 'recursos para contratos',
-    description: 'Leve uma dúvida sobre contratos para a conversa e encontre guias, ferramentas e referências do OpenCLM para apoiar seus próximos passos.',
-  },
-  {
-    title: 'assuntos que você quer seguir',
-    description: 'Escolha os assuntos e descreva seu foco atual. Essas preferências ficam salvas e ajudam o agente a priorizar as referências consultadas em cada resposta.',
-  },
-]
-
-function SignupLink() {
-  return <Link href="/cadastro" className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#111111] px-6 py-3 text-sm font-semibold text-white hover:bg-[#2A2927] sm:w-auto">Criar meu perfil gratuito →</Link>
-}
-
-async function getActiveMemberCount() {
-  const now = new Date().toISOString()
-  const { count, error } = await createAdminClient()
-    .from('community_members')
-    .select('user_id', { count: 'exact', head: true })
-    .in('club_access_status', ['active', 'complimentary'])
-    .or(`club_access_expires_at.is.null,club_access_expires_at.gt.${now}`)
+type PublicEvent = { id: string; slug: string; title: string; description: string; starts_at: string; ends_at: string | null; location_label: string | null }
+async function loadEvents(): Promise<PublicEvent[]> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return []
+  const db = await createServerSupabaseClient()
+  const { data } = await db.from('community_events')
+    .select('id,slug,title,description,starts_at,ends_at,location_label')
+    .eq('is_published', true).order('starts_at', { ascending: false }).limit(50)
     .abortSignal(AbortSignal.timeout(1500))
-  return error ? null : count
+  return upcomingCommunityEvents((data ?? []) as PublicEvent[]).slice(0, 3)
 }
-
+function SignupLink() {
+  return <Link href="/cadastro" className="brand-action">Criar meu perfil gratuito <span aria-hidden="true">↗</span></Link>
+}
+function eventDate(event: PublicEvent) {
+  return isEventDatePending(event) ? 'Data e formato a confirmar' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'long', timeStyle: 'short' }).format(new Date(event.starts_at))
+}
+const principles = [
+  ['01 / conversas', 'pergunte a quem faz', 'Leve uma dúvida para os fóruns de contratos, dados, processos ou tecnologia. Conte também o que funcionou no seu time.'],
+  ['02 / pessoas', 'encontre seus pares', 'Conheça membros por atuação e experiência. Participe dos encontros para comparar como vocês trabalham.'],
+  ['03 / referências', 'leve algo para usar', 'Consulte o playbook de contratos, a jornada de migração de CLM e os recursos que a comunidade desenvolve.'],
+]
+const faq = [
+  ['Quem pode participar?', 'Profissionais, estudantes, consultores e quem desenvolve soluções para o jurídico podem participar com um perfil compatível.'],
+  ['Como eu entro na comunidade?', 'Crie sua conta, confirme o email e complete seu perfil com foto, LinkedIn pessoal, atuação, contexto profissional, cidade e interesses.'],
+  ['O que eu encontro na comunidade gratuita?', 'Você pode conversar nos fóruns, acessar encontros, conhecer membros e consultar recursos da comunidade.'],
+  ['O que faz parte do Pro?', 'No Pro, você conversa com um agente pessoal com histórico privado, contexto salvo e consulta a publicações, vagas e referências. Estamos preparando a leitura automática do WhatsApp e um aplicativo próprio.'],
+]
 export default async function ClubLandingPage() {
-  const memberCount = await getActiveMemberCount()
-  return (
-    <div className="min-h-screen bg-[#F5F1E8] text-[#111111]" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
-      <ResumeClubSession />
-      <header className="mx-auto flex max-w-[1180px] items-center justify-between gap-4 border-b border-[#CEC8BD] px-5 py-6 sm:px-8">
-        <BrandWordmark suffix="club" className="inline-flex items-baseline text-[25px] leading-none sm:text-[30px]" />
-        <div className="flex items-center gap-3 sm:gap-5">
-          {memberCount !== null ? <span className="text-xs font-semibold text-[#625E59] sm:text-sm">{memberCount} {memberCount === 1 ? 'pessoa' : 'pessoas'} na comunidade</span> : null}
-          <Link href="/login?next=/community" className="shrink-0 text-sm font-semibold underline underline-offset-4">Entrar</Link>
+  const events = await loadEvents()
+  const featured = events[0]
+  return <div className="brand-surface min-h-screen">
+    <ResumeClubSession /><ClubHeader product="club" />
+    <main>
+      <section className="brand-container brand-hero">
+        <div>
+          <p className="brand-kicker">legalops.club / comunidade</p>
+          <h1 className="brand-headline">troque com quem vive o trabalho jurídico<span className="text-[#E88A6A]">.</span></h1>
+          <p className="brand-copy mt-6">Converse com profissionais de Legal Ops, contratos e tecnologia jurídica. Compartilhe experiências e encontre referências para o seu trabalho.</p>
+          <div className="brand-actions"><SignupLink /><a href="#comunidade" className="brand-text-link">Conhecer a comunidade ↓</a></div>
+          <p className="mt-5 text-xs leading-6 text-[#625E59]">Participe com seu LinkedIn e contexto profissional.</p>
         </div>
-      </header>
-      <main>
-        <section className="mx-auto grid max-w-[1180px] gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[1.2fr_.8fr] lg:items-center lg:gap-16 lg:py-24">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[.15em] text-[#A24D36]">legalops.club / comunidade</p>
-            <h1 className="mt-5 text-[44px] font-semibold leading-[1.03] tracking-[-.055em] sm:text-[64px] lg:text-[76px]" style={headingFont}>
-              troque ideia com quem também trabalha no jurídico<span className="text-[#E88A6A]">.</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-[#625E59] sm:text-lg sm:leading-8">
-              Aqui você vai poder perguntar como outros profissionais estão resolvendo um problema parecido com o seu. Ou compartilhar algo que funcionou no seu time.
-            </p>
-            <p className="mt-4 max-w-xl text-sm leading-6 text-[#625E59]">A participação na comunidade é gratuita para perfis ligados ao jurídico. Cadastre seu LinkedIn, conte com o que você trabalha e escolha os assuntos que quer acompanhar.</p>
-            <div className="mt-8"><SignupLink /></div>
-            <a href="#pro" className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold underline decoration-[#C9684F] underline-offset-4">Conheça a proposta do Pro ↓</a>
+        <aside className="brand-card overflow-hidden" aria-label="Em pauta na comunidade">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#CEC8BD] px-6 py-3 text-xs"><span>Em pauta no club</span><Link href="/community/calendar" className="text-[#A24D36]">encontros ↗</Link></div>
+          <div className="p-6 sm:p-8">
+            <p className="brand-kicker">{featured ? eventDate(featured) : 'troca entre pares'}</p>
+            <h2 className="mt-4 font-[var(--font-quicksand)] text-2xl font-semibold leading-tight tracking-[-.04em]">{featured?.title ?? 'Como vocês trabalham no jurídico?'}</h2>
+            <p className="mt-4 line-clamp-4 text-sm leading-7 text-[#625E59]">{featured?.description ?? 'Leve uma dúvida para os fóruns. Compare critérios, ferramentas e processos com quem também cuida da operação jurídica.'}</p>
+            <div className="mt-6 border-t border-[#CEC8BD] pt-5"><p className="brand-kicker">para começar a conversa</p><p className="mt-3 text-sm leading-7">Conte o que você faz hoje, o que funcionou e onde precisa de outra perspectiva.</p></div>
+            <Link className="brand-text-link mt-4" href={featured ? `/community/events/${featured.slug}` : '/community'}>{featured ? 'Conhecer o encontro' : 'Conhecer os fóruns'} →</Link>
           </div>
-          <aside className="rounded-lg border border-[#CEC8BD] bg-[#EDE5D8] p-7 sm:p-9" aria-label="Exemplo ilustrativo das funcionalidades previstas">
-            <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#716B65]">Pro · agente pessoal</p>
-            <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-[-.04em]" style={headingFont}>o que eu perdi essa semana?</h2>
-            <p className="mt-4 text-sm leading-6 text-[#625E59]">Peça ao seu agente para consultar as discussões recentes do site. A resposta traz referências para você conferir o contexto e continuar a leitura.</p>
-            <div className="mt-7 space-y-5 border-t border-[#C9C0B1] pt-6">
-              {[
-                ['Sobre contratos, por exemplo', 'Peça referências das discussões e compare com os recursos do OpenCLM.'],
-                ['E os encontros?', 'Os encontros estão no calendário da comunidade. A organização por lideranças regionais continua em preparação.'],
-              ].map(([title, description]) => (
-                <div key={title}><h3 className="text-sm font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-[#625E59]">{description}</p></div>
-              ))}
-            </div>
-          </aside>
-        </section>
-        <LegalOpsEcosystem active="club" descriptions={{
-          club: 'Trocas entre profissionais do jurídico.',
-          work: 'Vagas e acompanhamento de candidaturas.',
-          dev: 'Guias e ferramentas para o trabalho jurídico.',
-        }} />
-        <section id="como-funciona" className="border-y border-[#CEC8BD] bg-[#FAF7F1]">
-          <div className="mx-auto grid max-w-[1180px] gap-6 px-5 py-10 sm:px-8 sm:py-12 md:grid-cols-[.6fr_1.4fr] md:items-center">
-            <h2 className="text-2xl font-semibold tracking-[-.035em]" style={headingFont}>quem pode participar?</h2>
-            <p className="text-sm leading-7 text-[#625E59] sm:text-base">Quem trabalha, estuda ou desenvolve soluções para o jurídico: departamentos, escritórios, Legal Ops, Legal Tech, consultoria e pesquisa. O cadastro pede LinkedIn pessoal, atuação, organização ou contexto profissional, cidade, apresentação e interesses.</p>
-          </div>
-        </section>
-        <section aria-label="Comunidade e Pro" className="mx-auto max-w-[1180px] px-5 pt-14 sm:px-8">
-          <div className="grid border-y border-[#CEC8BD] md:grid-cols-2">
-            <div className="py-8 md:pr-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Comunidade · gratuita</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>pessoas e conversas</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Perfil profissional, troca de experiências, encontros e contato com outros membros. A entrada depende do seu perfil e das regras da comunidade.</p></div>
-            <div className="border-t border-[#CEC8BD] py-8 md:border-l md:border-t-0 md:pl-10"><p className="text-xs font-semibold uppercase tracking-widest text-[#A24D36]">Club Pro</p><h2 className="mt-3 text-2xl font-semibold" style={headingFont}>agente e referências</h2><p className="mt-4 text-sm leading-7 text-[#625E59]">Agente privado com histórico e preferências, discussões do Club, vagas selecionadas e recursos para o trabalho jurídico.</p></div>
-          </div>
-        </section>
-        <section id="pro" className="mx-auto max-w-[1180px] scroll-mt-8 px-5 py-14 sm:px-8 sm:py-20">
-          <p className="text-xs font-semibold uppercase tracking-[.15em] text-[#A24D36]">Club Pro · primeira versão</p>
-          <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-[-.045em] sm:text-5xl" style={headingFont}>um agente para acompanhar seu contexto<span className="text-[#E88A6A]">.</span></h2>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#625E59] sm:text-base">Converse com seu agente, salve o contexto e consulte discussões, vagas e materiais de apoio em uma só conversa. A primeira versão inclui até 30 perguntas por dia. A leitura automática do WhatsApp e o aplicativo próprio ainda estão em preparação.</p>
-          <Link href="/club/checkout" className="mt-6 inline-flex min-h-12 items-center rounded-lg bg-[#111] px-6 py-3 text-sm font-semibold text-white">Ver plano Pro e pagamento por PIX →</Link>
-          <div className="mt-10 border-t border-[#CEC8BD]">
-            {plannedFeatures.map((feature, index) => (
-              <article key={feature.title} className="grid gap-4 border-b border-[#CEC8BD] py-8 md:grid-cols-[.8fr_1.2fr] md:gap-12">
-                <div className="flex items-baseline gap-4">
-                  <span className="text-xs font-semibold text-[#A24D36]">0{index + 1}</span>
-                  <h3 className="text-2xl font-semibold tracking-[-.035em]" style={headingFont}>{feature.title}</h3>
-                </div>
-                <div><p className="text-sm leading-7 text-[#625E59] sm:text-base">{feature.description}</p></div>
-              </article>
-            ))}
-          </div>
-        </section>
-        <section className="bg-[#111111] text-[#F5F1E8]">
-          <div className="mx-auto max-w-[1180px] px-5 py-14 sm:px-8 sm:py-20">
-            <h2 className="max-w-3xl text-3xl font-semibold tracking-[-.045em] sm:text-5xl" style={headingFont}>pra quando você ficar uns dias fora.</h2>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-[#CEC8BD]">Peça um resumo das discussões recentes do site e consulte os links usados na resposta. Seu histórico fica salvo para retomar a conversa quando precisar.</p>
-          </div>
-        </section>
-        <section className="mx-auto max-w-[1180px] px-5 py-14 sm:px-8 sm:py-20">
-          <h2 className="max-w-2xl text-3xl font-semibold tracking-[-.045em] sm:text-5xl" style={headingFont}>venha pro club<span className="text-[#E88A6A]">.</span></h2>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-[#625E59]">Crie sua conta, confirme o email e complete o perfil. As conversas, os encontros e o diretório fazem parte da comunidade gratuita. O app e as lideranças regionais seguem em preparação; o agente pessoal faz parte do Pro.</p>
-          <div className="mt-7"><SignupLink /></div>
-        </section>
-      </main>
-      <footer className="border-t border-[#CEC8BD] px-5 py-6 sm:px-8">
-        <div className="mx-auto flex max-w-[1116px] flex-col justify-between gap-3 text-xs text-[#716B65] sm:flex-row">
-          <span>legalops.club · comunidade em formação</span><span>Para quem trabalha no jurídico.</span>
-        </div>
-      </footer>
-    </div>
-  )
+          {events[1] ? <Link className="flex flex-wrap items-center justify-between gap-3 bg-[#EDE5D8] px-6 py-4 text-xs" href={`/community/events/${events[1].slug}`}><span>{events[1].title}</span><span className="text-[#625E59]">{eventDate(events[1])}</span></Link> : null}
+        </aside>
+      </section>
+      <LegalOpsEcosystem active="club" />
+      <section id="comunidade" className="brand-container brand-section scroll-mt-24">
+        <p className="brand-kicker">gente que conhece o seu trabalho</p><h2 className="brand-section-title mt-4 max-w-2xl">pergunte, compartilhe, encontre outras perspectivas<span className="text-[#E88A6A]">.</span></h2>
+        <div className="brand-principles">{principles.map(([label, title, description]) => <article key={label}><p className="brand-kicker">{label}</p><h3>{title}</h3><p>{description}</p></article>)}</div>
+      </section>
+      <section className="border-t border-[#CEC8BD]"><div className="brand-container brand-section">
+        <p className="brand-kicker">encontros da comunidade</p><h2 className="brand-section-title mt-4 max-w-2xl">continue a conversa com quem também faz<span className="text-[#E88A6A]">.</span></h2>
+        {events.length ? <div className="brand-event-list">{events.map(event => <article className="brand-event-row" key={event.id}>
+          <div className="brand-date">{isEventDatePending(event) ? '?' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit' }).format(new Date(event.starts_at))}<small>{isEventDatePending(event) ? 'em pauta' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', month: 'long' }).format(new Date(event.starts_at))}</small></div>
+          <div><h3>{event.title}</h3><p>{eventDate(event)}{!isEventDatePending(event) && event.location_label ? ` · ${event.location_label}` : ''}</p></div><Link className="brand-action secondary" href={`/community/events/${event.slug}`}>Ver encontro ↗</Link>
+        </article>)}</div> : <p className="brand-copy mt-6">Acompanhe a agenda e as conversas dos encontros anteriores.</p>}
+        <Link href="/community/calendar" className="brand-text-link mt-5">Explorar a agenda →</Link>
+      </div></section>
+      <section id="pro" className="brand-pro brand-section"><div className="brand-container brand-pro-grid">
+        <div><p className="brand-kicker">club pro / agente pessoal</p><h2 className="brand-section-title mt-4">um agente para acompanhar seu contexto<span className="text-[#E88A6A]">.</span></h2><p className="mt-6 text-sm leading-7">Retome suas conversas, consulte publicações do Club e peça referências de vagas e contratos com o contexto que você compartilhar.</p><Link href="/club/checkout" className="brand-action mt-7">Conhecer o Pro ↗</Link></div>
+        <div><ul>{['Converse com seu agente em um histórico privado.', 'Escolha assuntos e salve seu contexto profissional.', 'Consulte vagas do Work e referências do OpenCLM.', 'Faça até 30 perguntas por dia.'].map(feature => <li key={feature}>{feature}</li>)}</ul><p className="mt-5 text-xs leading-6">Estamos preparando a leitura automática do WhatsApp e um aplicativo próprio.</p></div>
+      </div></section>
+      <section className="brand-container brand-section brand-join"><div><p className="brand-kicker">comunidade gratuita</p><h2 className="brand-section-title mt-4">crie seu perfil.<br />entre na conversa<span className="text-[#E88A6A]">.</span></h2><p className="brand-copy mt-6">Se você trabalha, estuda ou desenvolve soluções para o jurídico, apresente seu contexto e escolha os assuntos que quer acompanhar.</p><div className="brand-actions"><SignupLink /></div></div><div className="brand-faq">{faq.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></section>
+    </main>
+    <footer className="brand-footer"><div className="brand-container brand-footer-inner"><BrandWordmark suffix="club" /><span>Para quem trabalha, estuda e desenvolve soluções para o jurídico.</span></div></footer>
+  </div>
 }

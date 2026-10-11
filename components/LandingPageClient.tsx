@@ -56,7 +56,7 @@ const content = {
   pt: {
     eyebrow: 'LEGALOPS.WORK / VAGAS',
     title: 'encontre sua próxima oportunidade no jurídico.',
-    subtitle: 'Vagas verificadas em Legal Ops, Legal Tech, contratos, CLM, dados, operações e gestão jurídica — com informação suficiente para decidir onde vale aplicar.',
+    subtitle: 'Vagas verificadas em Legal Ops, Legal Tech, contratos, CLM, dados, operações e gestão jurídica, com informação suficiente para decidir onde vale aplicar.',
     heroPrimary: 'Ver vagas',
     heroSecondary: 'Publicar uma vaga',
     recent: 'vagas verificadas recentemente',
@@ -87,7 +87,7 @@ const content = {
   en: {
     eyebrow: 'LEGALOPS.WORK / JOBS',
     title: 'find your next opportunity in legal.',
-    subtitle: 'Verified roles across Legal Operations, Legal Tech, contracts, CLM, data, operations and legal management — with enough context to decide where to apply.',
+    subtitle: 'Verified roles across Legal Operations, Legal Tech, contracts, CLM, data, operations and legal management, with enough context to decide where to apply.',
     heroPrimary: 'View jobs',
     heroSecondary: 'Post a role',
     recent: 'recently verified jobs',
@@ -198,32 +198,32 @@ export function LandingPageClient({
   return (
     <div
       lang={locale === 'pt' ? 'pt-BR' : 'en'}
-      className="min-h-screen bg-[#F5F1E8] text-[#111111] selection:bg-[#E88A6A] selection:text-white"
+      className="brand-surface min-h-screen selection:bg-[#E88A6A] selection:text-[#111111]"
     >
       <ClubHeader active="jobs" locale={locale} product="work" />
 
       <main>
         <section className="border-b border-[#CEC8BD]">
-          <div className="mx-auto grid max-w-[1180px] gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.02fr_.98fr] lg:items-center lg:gap-16 lg:py-28">
+          <div className="brand-container brand-hero">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#C9684F]">{copy.eyebrow}</p>
-              <h1 className="mt-5 max-w-[700px] font-[var(--font-quicksand)] text-[42px] font-semibold leading-[.98] tracking-[-0.065em] sm:text-[62px] lg:text-[72px]">
-                {copy.title}
+              <p className="brand-kicker">{copy.eyebrow}</p>
+              <h1 className="brand-headline">
+                {copy.title.slice(0, -1)}<span className="text-[#E88A6A]">.</span>
               </h1>
-              <p className="mt-6 max-w-[660px] text-base leading-7 text-[#625E59] sm:text-lg sm:leading-8">
+              <p className="brand-copy mt-6">
                 {copy.subtitle}
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a href="#vagas" className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#111111] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#2A2927]">
+              <div className="brand-actions">
+                <a href="#vagas" className="brand-action">
                   {copy.heroPrimary} <ArrowRight className="h-4 w-4" />
                 </a>
-                <Link href="/for-employers" className="inline-flex items-center justify-center rounded-lg border border-[#BEB7AA] px-5 py-3 text-sm font-bold text-[#111111] transition hover:bg-[#FAF7F1]">
+                <Link href="/for-employers" className="brand-action secondary">
                   {copy.heroSecondary}
                 </Link>
               </div>
             </div>
 
-            <div className="border border-[#BEB7AA] bg-[#FAF7F1]">
+            <div className="brand-card overflow-hidden">
               <div className="flex items-center justify-between border-b border-[#CEC8BD] px-4 py-3">
                 <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#C9684F]">{copy.recent}</span>
                 <span className="text-[10px] font-semibold text-[#817A73]">{copy.count(jobCount)}</span>
@@ -282,6 +282,7 @@ export function LandingPageClient({
                   key={filter}
                   type="button"
                   onClick={() => setActiveFilter(filter)}
+                  aria-pressed={activeFilter === filter}
                   className={`shrink-0 border-b-2 py-4 text-xs font-semibold transition ${activeFilter === filter ? 'border-[#E88A6A] text-[#111111]' : 'border-transparent text-[#716B65] hover:border-[#CEC8BD] hover:text-[#111111]'}`}
                 >
                   {copy.filters[filter]}

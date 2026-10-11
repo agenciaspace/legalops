@@ -8,13 +8,13 @@ const labels = {
   pt: {
     club: 'comunidade',
     work: 'vagas',
-    dev: 'recursos',
+    dev: 'open source',
     login: 'Entrar',
   },
   en: {
     club: 'community',
     work: 'jobs',
-    dev: 'resources',
+    dev: 'open source',
     login: 'Sign in',
   },
 } as const
@@ -39,8 +39,8 @@ export function ClubHeader({
   ] as const
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#CEC8BD] bg-[#F5F1E8]/95 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-[72px] max-w-[1180px] flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3 sm:flex-nowrap sm:px-8 sm:py-0">
+    <header className="sticky top-0 z-50 border-b border-[#CEC8BD] bg-[#F5F1E8]">
+      <div className="brand-container flex min-h-[72px] items-center justify-between gap-4">
         <Link
           href={isWork ? '/' : '/club'}
           className="min-w-0 shrink-0"
@@ -52,7 +52,7 @@ export function ClubHeader({
           />
         </Link>
 
-        <nav className="flex w-full min-w-0 items-center justify-between gap-1 font-[var(--font-inter)] sm:w-auto" aria-label={locale === 'pt' ? 'Ecossistema LegalOps' : 'LegalOps ecosystem'}>
+        <nav className="flex min-w-0 items-center gap-2" aria-label={locale === 'pt' ? 'Ecossistema LegalOps' : 'LegalOps ecosystem'}>
           {items.map(item => {
             const selected = item.key === currentProduct
             return (
@@ -60,17 +60,17 @@ export function ClubHeader({
                 key={item.key}
                 href={item.href}
                 aria-current={selected ? 'page' : undefined}
-                className={`border-b-2 px-2 py-2 text-[11px] font-semibold transition sm:px-3 sm:text-xs ${selected ? 'border-[#E88A6A] text-[#111111]' : 'border-transparent text-[#716B65] hover:border-[#CEC8BD] hover:text-[#111111]'}`}
+                className={`hidden min-h-11 items-center border-b-2 px-3 text-xs font-medium transition sm:inline-flex ${selected ? 'border-[#E88A6A] text-[#111111]' : 'border-transparent text-[#716B65] hover:border-[#CEC8BD] hover:text-[#111111]'}`}
               >
-                <span className="hidden lg:inline">{item.key} / </span>{item.label}
+                {item.label}
               </Link>
             )
           })}
           <Link
             href={isWork ? '/login' : '/login?next=/community'}
-            className="ml-1 rounded-lg bg-[#111111] px-3.5 py-2 text-[11px] font-semibold text-white transition hover:bg-[#2A2927] sm:px-4 sm:text-xs"
+            className="ml-2 inline-flex min-h-11 items-center text-sm font-medium hover:underline"
           >
-            {copy.login}
+            {copy.login} <span className="ml-2" aria-hidden="true">↗</span>
           </Link>
         </nav>
       </div>
