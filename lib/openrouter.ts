@@ -90,7 +90,7 @@ export async function generateOpenRouterText({
     // Status is enough for operational diagnosis; do not log provider bodies or prompts.
     console.error('[openrouter] Request failed', { status: response.status })
     const errorBody = await response.text().catch(() => '')
-    throw new Error(`OpenRouter request failed with ${response.status}: ${errorBody.slice(0, 500)}`)
+    throw Object.assign(new Error(`OpenRouter request failed with ${response.status}: ${errorBody.slice(0, 500)}`), { status: response.status })
   }
 
   const data = (await response.json()) as OpenRouterChatResponse

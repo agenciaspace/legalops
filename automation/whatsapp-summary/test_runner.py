@@ -1,13 +1,46 @@
 import datetime as dt
 import json
+import io
 from pathlib import Path
 import sqlite3
 import tempfile
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
+import urllib.error
 import runner
 
 class SummaryTests(unittest.TestCase):
+    def test_credit_fallback_retries_once_through_the_same_protected_endpoint(self):
+        url='https://example.test/api/cron/whatsapp-summary'
+        failure=urllib.error.HTTPError(url,503,'unavailable',{},io.BytesIO(json.dumps({'local_fallback':{'system':'privacy','prompt':'context'}}).encode()))
+        response=io.BytesIO(b'{"ok":true}')
+        generated={'model':'claude-cli/sonnet','text':'{"publish":false}'}
+        with patch.object(runner.urllib.request,'urlopen',side_effect=[failure,response]) as request, patch.object(runner,'generate_locally',return_value=generated) as local:
+            self.assertEqual(runner.post(url,{'action':'preview'},{'Authorization':'Bearer test'}),{'ok':True})
+            local.assert_called_once_with({'system':'privacy','prompt':'context'})
+            retried=json.loads(request.call_args.args[0].data)
+            self.assertEqual(retried['local_generation'],generated)
+            self.assertEqual(retried['action'],'preview')
+
+    def test_local_generator_has_no_tools_and_does_not_persist_sessions(self):
+        output=SimpleNamespace(returncode=0,stdout=json.dumps({'result':'{"publish":false}','is_error':False}))
+        with patch.object(runner.subprocess,'run',return_value=output) as run:
+            self.assertEqual(runner.generate_locally({'system':'privacy','prompt':'source'}),{'model':'claude-cli/sonnet','text':'{"publish":false}'})
+            args=run.call_args.args[0]
+            self.assertEqual(args[args.index('--tools')+1],'')
+            self.assertIn('--strict-mcp-config',args)
+            self.assertIn('--no-session-persistence',args)
+            self.assertEqual(run.call_args.kwargs['input'],'source')
+            self.assertEqual(run.call_args.kwargs['timeout'],60)
+
+    def test_database_errors_do_not_trigger_local_generation(self):
+        url='https://example.test/api/cron/whatsapp-summary'
+        failure=urllib.error.HTTPError(url,503,'unavailable',{},io.BytesIO(b'{"error":"Database unavailable"}'))
+        with patch.object(runner.urllib.request,'urlopen',side_effect=failure), patch.object(runner,'generate_locally') as local:
+            with self.assertRaises(urllib.error.HTTPError): runner.post(url,{}, {})
+            local.assert_not_called()
+
     def test_schedule_failure_does_not_block_either_summary(self):
         with tempfile.TemporaryDirectory() as temp:
             config={'STATE_DIR':temp,'FIRST_RUN_AT':'2026-01-01T21:00:00Z','DATABASE':':memory:','APP_URL':'https://example.test','INGEST_SECRET':'secret'}

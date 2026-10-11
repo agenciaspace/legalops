@@ -28,6 +28,14 @@ summaries within the previous 31 days, on fixed 18:00 Brasília windows and afte
 first scheduled edition. It reuses existing editions, never rewinds the live schedule and
 does not send WhatsApp messages. Use this only to restore missing archive editions.
 
+If OpenRouter returns HTTP 402, the protected endpoint gives the runner the same generation
+prompt for the existing Claude CLI (`/root/.local/bin/claude`, Sonnet subscription). The CLI
+runs without tools, MCP, hooks, project settings or session persistence. The runner submits
+the generated JSON back once; the server still validates the original source, period and
+digest before saving, and records `claude-cli/sonnet` as the model. Other API/database errors
+remain errors and retry normally. The fallback uses Claude subscription limits rather than
+OpenRouter credits; it does not inherit OpenRouter's ZDR routing setting.
+
 Every day at 21:00 UTC (18:00 Brasília), publish the previous **fixed 24-hour period** to
 `club_whatsapp_summaries`, then send the same digest to the group. First window ends
 2026-09-18 at 21:00 UTC. Empty windows produce no WhatsApp notification. The 5-minute timer
