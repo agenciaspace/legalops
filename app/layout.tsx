@@ -25,8 +25,8 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1, view
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={getClubLocale()}>
-      <body className={`${inter.variable} ${quicksand.variable} bg-[#F5F4F0] text-[#1A1A1A] antialiased selection:bg-[#E88A6A] selection:text-white`}>
+    <html lang={getClubLocale()} className={`${inter.variable} ${quicksand.variable}`}>
+      <body className="brand-surface antialiased selection:bg-[#E88A6A] selection:text-[#111111]">
         <ClubLanguageProvider initialLocale={getClubLocale()}>{children}</ClubLanguageProvider>
       </body>
     </html>
