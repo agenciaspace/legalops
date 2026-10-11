@@ -3,7 +3,10 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { clubReturnPath } from '@/lib/club-return-path'
 
-const state = vi.hoisted(() => ({ user: null as null | { id: string }, member: null as any, tables: [] as string[], location: '', registrationCount: 8 }))
+const state = vi.hoisted(() => ({ user: null as null | { id: string }, member: null as any, tables: [] as string[], location: '', registrationCount: 8, slug: 'bench-nubank', fallback: false, summaryError: false }))
+vi.mock('next/headers', () => ({ cookies: () => ({ get: () => undefined }), headers: () => new Headers(state.fallback ? { 'x-public-event-fallback': 'bench-netlex-2026' } : {}) }))
+vi.mock('@/lib/public-event-live', () => ({ loadLivePublicEvent: async () => null }))
+vi.mock('@/lib/event-conversation-topics', () => ({ loadPublicEventConversationTopics: async () => [] }))
 vi.mock('@/app/(main)/community/actions', () => ({ registerPublicEvent: vi.fn() }))
 vi.mock('@/components/community/EventUpload', () => ({ EventUpload: () => <p>Private upload</p> }))
 vi.mock('@/lib/supabase-admin', () => ({ createAdminClient: () => ({
@@ -20,14 +23,14 @@ vi.mock('@/lib/supabase-server', () => ({ createServerSupabaseClient: async () =
   auth: { getUser: async () => ({ data: { user: state.user } }) },
   from: (table: string) => {
     state.tables.push(table)
-    const data = table === 'community_events' ? { id: 'event', slug: 'bench-nubank', title: 'Bench & contratos', description: 'Conversa prática sobre contratos.', host_name: 'LegalOps Club', starts_at: '2026-12-17T12:00:00Z', ends_at: null, location_label: state.location, event_type: 'encontro', is_published: true, participation_mode: 'remoto', participation_details: 'Os detalhes serão enviados às pessoas inscritas.', pre_questions: ['Como funciona hoje?'] } : table === 'community_members' ? state.member : null
-    const query: any = { select: () => query, eq: () => query, maybeSingle: async () => ({ data }) }
+    const data = table === 'community_events' ? { id: 'event', slug: state.slug, title: 'Bench & contratos', description: 'Conversa prática sobre contratos.', host_name: 'LegalOps Club', starts_at: '2026-12-17T12:00:00Z', ends_at: null, location_label: state.location, event_type: 'encontro', is_published: true, participation_mode: 'remoto', participation_details: 'Os detalhes serão enviados às pessoas inscritas.', pre_questions: ['Como funciona hoje?'] } : table === 'community_members' ? state.member : table === 'community_event_whatsapp_summaries' ? [{ id: 'summary', title: 'Private group title', summary: 'Private group discussion', key_points: ['Private detail'], period_end: '2026-10-07T21:00:00Z', source_message_count: 10 }] : null
+    const query: any = { select: () => query, eq: () => query, order: () => query, limit: async () => ({ data, error: state.summaryError ? { code: '503' } : null }), maybeSingle: async () => ({ data }) }
     return query
   },
 }) }))
 import EventPage, { generateMetadata } from '@/app/(main)/community/events/[slug]/page'
 
-beforeEach(() => { state.user = null; state.member = null; state.tables = []; state.location = ''; state.registrationCount = 8 })
+beforeEach(() => { state.user = null; state.member = null; state.tables = []; state.location = ''; state.registrationCount = 8; state.slug = 'bench-nubank'; state.fallback = false; state.summaryError = false })
 afterEach(cleanup)
 
 it.each([false, true])('invites a nonmember to join without reading private materials (signed in: %s)', async signedIn => {
@@ -104,4 +107,28 @@ it('publishes event-specific metadata for links and search results', async () =>
 it('accepts event destinations and rejects external, management and encoded redirect paths', () => {
   expect(clubReturnPath('/community/events/bench-nubank')).toBe('/community/events/bench-nubank')
   for (const value of ['https://evil.test', '//evil.test', '/community/events/manage', '/community/events/../manage', '/community/events/%2f%2fevil.test', '/community/events/x?next=//evil.test']) expect(clubReturnPath(value)).toBeNull()
+})
+
+
+it.each([false, true])('keeps anonymous HTML free of summary content (fallback: %s)', async fallback => {
+  state.slug = 'bench-netlex-2026'; state.fallback = fallback
+  const { container } = render(await EventPage({ params: { slug: state.slug } }))
+  expect(screen.getByRole('link', { name: /Entrar para ler os resumos/ })).toHaveAttribute('href', '/login?next=%2Fcommunity%2Fevents%2Fbench-netlex-2026')
+  expect(container.innerHTML).not.toContain('Private group')
+  expect(state.tables).not.toContain('community_event_whatsapp_summaries')
+})
+
+it.each([null, { club_access_status: 'active', display_name: 'Member' }])('shows summaries to signed-in users, including those without Club membership: %j', async member => {
+  state.slug = 'bench-netlex-2026'; state.user = { id: 'signed-in' }; state.member = member
+  render(await EventPage({ params: { slug: state.slug } }))
+  expect(screen.getByText('Private group discussion')).toBeInTheDocument()
+  expect(screen.queryByRole('link', { name: /Entrar para ler os resumos/ })).not.toBeInTheDocument()
+})
+
+it('shows an archive error without pretending the first summary has not been published', async () => {
+  state.slug = 'bench-netlex-2026'; state.user = { id: 'signed-in' }; state.summaryError = true
+  render(await EventPage({ params: { slug: state.slug } }))
+  expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível carregar os resumos')
+  expect(screen.queryByText('Private group discussion')).not.toBeInTheDocument()
+  expect(screen.queryByText(/primeiro resumo/)).not.toBeInTheDocument()
 })
