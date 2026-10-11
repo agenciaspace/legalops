@@ -18,7 +18,7 @@ it('opens one conversation from the header and preserves its draft when closed a
 })
 it('shows availability only on opening the header agent for a member without Pro',()=>{
  render(<><Nav isClubMember discoverCount={0} jobAlertCount={0} hasClubAccess={false}/><AgentBubble hasPro={false}/></>);expect(screen.queryByText(/faz parte do Pro/)).not.toBeInTheDocument()
- fireEvent.click(screen.getByRole('button',{name:'Abrir meu agente'}));expect(screen.getByRole('link',{name:'Consultar disponibilidade'})).toHaveAttribute('href','/club/checkout')
+ fireEvent.click(screen.getByRole('button',{name:'Abrir meu agente'}));expect(screen.getByRole('link',{name:'Consultar disponibilidade'})).toHaveAttribute('href','/community/pro')
  expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
 })
 

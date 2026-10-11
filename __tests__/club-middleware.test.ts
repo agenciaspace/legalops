@@ -65,7 +65,7 @@ describe('Club admission and Pro routing', () => {
   })
   it('blocks free users from Pro pages and AI APIs', async () => {
     state.user = { id: 'free' }; state.member = { club_access_status: 'active', club_pro_status: 'inactive', avatar_path:'free/photo.jpg' }
-    expect((await request('/community/jobs')).headers.get('location')).toBe('https://legalops.club/club#pro')
+    expect((await request('/community/jobs')).headers.get('location')).toBe('https://legalops.club/community/pro')
     expect((await request('/api/ai/cover-letter')).status).toBe(403)
     expect((await request('/api/pipeline/job/cv')).status).toBe(403)
   })
@@ -114,5 +114,22 @@ it('serves public PWA assets without exposing community data', async () => {
   expect((await request('/community/bench')).headers.get('location')).toContain('/login')
   state.user={id:'free'};state.member={club_access_status:'active',club_pro_status:'inactive',avatar_path:'free/photo.jpg'}
   expect((await request('/community/pro')).status).toBe(200)
-  expect((await request('/community/assistant')).status).toBe(200)
+  expect((await request('/community/assistant')).headers.get('location')).toBe('https://legalops.club/community/pro')
+})
+
+it('blocks all paid generation routes for inactive, expired and canceled Pro accounts',async()=>{
+ state.user={id:'free'}
+ for(const pro of [{club_pro_status:'inactive'},{club_pro_status:'canceled'},{club_pro_status:'active',club_pro_expires_at:'2000-01-01'}]){
+  state.member={club_access_status:'active',...pro}
+  for(const path of ['/api/club/agent','/api/club/agent/conversations','/api/club/credits','/api/ai/cover-letter','/api/ai/interview-prep','/api/profile/linkedin-insights','/api/pipeline/entry/cv'])expect((await request(path)).status).toBe(403)
+  for(const path of ['/community/assistant','/community/agents','/community/credits','/community/jobs'])expect((await request(path)).headers.get('location')).toBe('https://legalops.club/community/pro')
+  for(const path of ['/community','/community/profile','/community/pro','/community/calendar','/community/summaries'])expect((await request(path)).status).toBe(200)
+ }
+})
+it('preserves active paid and explicitly granted complimentary Pro access',async()=>{
+ state.user={id:'pro'}
+ for(const status of ['active','complimentary']){
+  state.member={club_access_status:'active',club_pro_status:status}
+  for(const path of ['/community/assistant','/community/agents','/api/club/agent','/api/club/credits'])expect((await request(path)).status).toBe(200)
+ }
 })

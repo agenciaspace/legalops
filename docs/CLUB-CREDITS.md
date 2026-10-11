@@ -66,3 +66,21 @@ covers server routing, generation failures, admin boundaries and UI behavior.
 Launch settings were applied atomically with `configure_club_credits` and read back
 from production to verify all six tariffs, monthly allowance and enabled pack sales.
 Earlier production verification below/above refers to the pre-launch closed-sales state.
+
+## Pro access and notice verification — 2026-10-10
+
+Release `2526c71` blocks direct agent pages for free and expired members, routing
+them to `/community/pro`. Existing API and credit authorization remains enforced;
+active subscriptions and valid complimentary grants retain access. Free shared
+community summaries remain accessible.
+
+A subtle notice in the authenticated app links to Pro benefits. Dismissal is scoped
+to the member and persisted in this browser; active Pro members do not see it.
+
+- 564 tests, TypeScript and Bend checks passed.
+- [Deployment and OpenNext build passed](https://github.com/agenciaspace/legalops/actions/runs/38099824108).
+- Production browser checks passed at 320, 390, 768 and 1280 pixels.
+- Free pages/API calls remained blocked after notice dismissal; reload and navigation
+  preserved dismissal. Active Pro had agent access without the notice; expired Pro
+  displayed the notice and received 403 from the agent API.
+- Temporary authentication fixture and sessions were removed after verification.
