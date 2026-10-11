@@ -5,6 +5,7 @@ const state=vi.hoisted(()=>({user:{id:'owner'} as any,calls:[] as any[],rows:Arr
 vi.mock('@/lib/supabase-server',()=>({createServerSupabaseClient:async()=>({auth:{getUser:async()=>({data:{user:state.user}})},from:(table:string)=>{const data=()=>table==='community_members'?{club_access_status:'active',club_pro_status:'active'}:table==='club_agent_turns'?state.rows:table==='club_agent_conversations'?[{id:'11111111-1111-4111-8111-111111111111',title:'Conversa'}]:null;const q:any={};for(const m of ['select','eq','order','range'])q[m]=(...args:any[])=>{state.calls.push([table,m,...args]);return q};q.maybeSingle=async()=>({data:data()});q.then=(resolve:any)=>resolve({data:data()});return q}})}))
 vi.mock('@/lib/supabase-admin',()=>({createAdminClient:vi.fn()}))
 vi.mock('@/lib/openrouter',()=>({generateOpenRouterText:vi.fn()}))
+vi.mock('@/lib/club-credits',()=>({getCreditStatus:async()=>({included_remaining:30,purchased:0})}))
 import {GET} from '@/app/api/club/agent/route'
 beforeEach(()=>{state.user={id:'owner'};state.calls=[]})
 it('paginates only the authenticated owner history in chronological display order',async()=>{

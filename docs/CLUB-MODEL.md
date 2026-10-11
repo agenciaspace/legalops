@@ -32,7 +32,7 @@ Exemplos de direção do produto:
 
 A primeira versão do agente pessoal tem histórico privado, contexto e assuntos
 salvos, consulta às publicações do site, vagas verificadas do Work e referências
-do OpenCLM. Limite: 30 perguntas por dia (reinício às 00h UTC). Leitura automática
+do OpenCLM. Franquia inicial: 30 créditos por dia (reinício às 00h UTC), compartilhados entre as gerações Pro. Custos por ação, franquia e pacotes extras são configuráveis; ver `CLUB-CREDITS.md`. Leitura automática
 do WhatsApp e aplicativo próprio continuam planejados; não fazem parte da oferta.
 
 Consultar vagas públicas no Work e acessar projetos open source do Dev não

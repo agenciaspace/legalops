@@ -1,5 +1,7 @@
 import { ProfileSections } from '@/components/community/ProfileSections'
 import { COUNTRY_CODES } from '@/lib/club-countries'
+import { creditCopy } from '@/lib/club-credit-copy'
+import { MemberApiKey } from '@/components/community/MemberApiKey'
 import { verificationState, verificationMissing } from '@/lib/member-verification'
 import { ClubRegionPreferences } from '@/components/community/ClubRegionPreferences'
 import { getClubTranslator, getClubLocale } from '@/lib/club-locale-server'
@@ -217,6 +219,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
           <details className="border-t border-[#CEC8BD] pt-4"><summary className="min-h-11 cursor-pointer text-sm font-medium">{t("Preferências")}</summary><ClubRegionPreferences country={profile?.country_code} timezone={profile?.timezone} /></details>
         </aside>
       </div>
+      <a href="/community/credits" className="mt-5 inline-flex min-h-11 items-center underline">{creditCopy(getClubLocale()).title}</a><MemberApiKey />
     </div>
   )
 }

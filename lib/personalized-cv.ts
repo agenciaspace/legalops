@@ -124,6 +124,8 @@ export async function createPersonalizedCvForEntry(params: {
   jobId: string
   pipelineEntryId: string
   useAi?: boolean
+  generate?: typeof generateOpenRouterText
+  model?: string
 }) {
   const admin = createAdminClient()
   const [{ data: profile, error: profileError }, { data: job, error: jobError }] = await Promise.all([
@@ -161,12 +163,14 @@ export async function createPersonalizedCvForEntry(params: {
       maxTokens: 3000,
       temperature: 0.1,
     }
-    const response = await generateOpenRouterText(request)
+    const response = await (params.generate ?? generateOpenRouterText)(request)
     content = parsePersonalizedCvResponse(response) ?? fallback
+    if(params.generate && (content===fallback || !content.markdown.trim()))throw new Error('Invalid generated CV')
     if (content !== fallback) {
-      model = getOpenRouterModel()
+      model = params.model ?? getOpenRouterModel()
     }
   } catch (error) {
+    if(params.generate)throw error
     console.error('[personalized-cv] AI generation failed, using factual fallback:', error)
   }
 

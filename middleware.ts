@@ -160,9 +160,12 @@ export async function middleware(request: NextRequest) {
   }
 
   const isAvatarApi = pathname === '/api/club/avatar' || pathname.startsWith('/api/club/avatar/')
+  // Auth is still required. Owners must be able to inspect/remove stored keys
+  // after membership expiry; PUT enforces active membership in its handler.
+  const isOwnApiKeyManagement = pathname === '/api/club/api-key'
   const requiresClub = pathname === '/onboard'
     || ['/dashboard', '/discover', '/pipeline', '/jobs', '/settings', '/professionals'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
-    || (!isAvatarApi && ['/api/club', '/api/profile', '/api/pipeline', '/api/jobs', '/api/ai'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`)))
+    || (!isAvatarApi && !isOwnApiKeyManagement && ['/api/club', '/api/profile', '/api/pipeline', '/api/jobs', '/api/ai'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`)))
     || pathname === '/community' || pathname.startsWith('/community/') && !isPublicEventPage
 
   let clubAccess: { club_access_status: string | null; club_access_expires_at: string | null; club_pro_status: string | null; club_pro_expires_at: string | null } | null = null

@@ -1,5 +1,6 @@
 'use client'
 
+import { CreditCost } from '@/components/community/CreditCost'
 import { useState } from 'react'
 
 interface CoverLetterSectionProps {
@@ -30,7 +31,7 @@ export function CoverLetterSection({ entryId }: CoverLetterSectionProps) {
       setLetter(data.letter)
       setShowBackground(false)
     } else {
-      setError('Erro ao gerar carta. Tente novamente.')
+      const failure=await res.json().catch(()=>({}));setError(failure.error || 'Não foi possível gerar agora.')
     }
     setLoading(false)
   }
@@ -50,7 +51,7 @@ export function CoverLetterSection({ entryId }: CoverLetterSectionProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
-        <p className="text-sm text-[#1A1A1A]/70 font-medium mb-1">Cover Letter com IA</p>
+        <CreditCost action="cover_letter"/><p className="text-sm text-[#1A1A1A]/70 font-medium mb-1">Cover Letter com IA</p>
         <p className="text-xs text-[#1A1A1A]/50 mb-3">
           Gere uma carta de apresentacao personalizada para esta vaga.
         </p>

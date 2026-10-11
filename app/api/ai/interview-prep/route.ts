@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { generateOpenRouterText } from '@/lib/openrouter'
+import { withCreditAction } from '@/lib/club-credits'
+import { creditFailureResponse, validCreditOrigin } from '@/lib/club-credit-response'
 
 export async function POST(req: NextRequest) {
+  if(!validCreditOrigin(req))return NextResponse.json({error:'Invalid origin'},{status:403})
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -22,7 +24,7 @@ export async function POST(req: NextRequest) {
   const job = entry.job as { title: string; company: string; raw_description: string; benefits: string[] }
 
   try {
-    const text = await generateOpenRouterText({
+    const text = await withCreditAction(user.id,'interview_prep',generate=>generate({
       systemPrompt: 'You are an expert career coach specializing in Legal Operations roles. Return practical Portuguese (BR) interview preparation in clean markdown.',
       userPrompt: `Based on this job posting, generate interview preparation materials in Portuguese (BR).
 
@@ -40,20 +42,10 @@ Please provide:
 Format your response in clean markdown.`,
       maxTokens: 2000,
       temperature: 0.4,
-    })
+    }))
 
     return NextResponse.json({ prep: text })
   } catch (error) {
-    console.error('[ai/interview-prep] OpenRouter request failed:', error)
-
-    const status =
-      error instanceof Error && error.message.includes('OPENROUTER_API_KEY')
-        ? 503
-        : 502
-
-    return NextResponse.json(
-      { error: 'Failed to generate interview preparation.' },
-      { status }
-    )
+    return creditFailureResponse(error,req)
   }
 }
