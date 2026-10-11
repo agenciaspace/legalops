@@ -1,6 +1,7 @@
 import { isLegalOpsAdminEmail } from '@/lib/legalops-admin'
 import { hasClubProAccess } from '@/lib/club-membership'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { ProNotice } from '@/components/community/ProNotice'
 import { Nav } from '@/components/Nav'
 import { AppMain } from '@/components/AppMain'
 import { redirect } from 'next/navigation'
@@ -58,7 +59,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen bg-[#F5F1E8]">
       <Nav member={clubAccess} discoverCount={count ?? 0} jobAlertCount={jobAlertCount ?? 0} hasClubAccess={hasClubAccess} isClubAdmin={isLegalOpsAdminEmail(user.email)} />
-      <AppMain>{children}</AppMain>
+      <AppMain>{hasActiveClubAccess(clubAccess) && !hasClubAccess && <ProNotice userId={user.id} />}{children}</AppMain>
     </div>
   )
 }

@@ -15,6 +15,6 @@ it('opens one conversation on demand and preserves its draft when closed and reo
 })
 it('shows availability only on opening the bubble for a member without Pro',()=>{
  render(<AgentBubble hasPro={false}/>);expect(screen.queryByText(/faz parte do Pro/)).not.toBeInTheDocument()
- fireEvent.click(screen.getByRole('button',{name:'Abrir meu agente'}));expect(screen.getByRole('link',{name:'Consultar disponibilidade'})).toHaveAttribute('href','/club/checkout')
+ fireEvent.click(screen.getByRole('button',{name:'Abrir meu agente'}));expect(screen.getByRole('link',{name:'Consultar disponibilidade'})).toHaveAttribute('href','/community/pro')
  expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
 })

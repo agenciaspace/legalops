@@ -189,7 +189,7 @@ export async function middleware(request: NextRequest) {
 
   if (isClubProPath(pathname) && !hasClubProAccess(clubAccess)) {
     if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Este recurso faz parte do Club Pro.' }, { status: 403 })
-    return withSession(NextResponse.redirect(new URL('/club#pro', request.url)))
+    return withSession(NextResponse.redirect(new URL('/community/pro', request.url)))
   }
 
   // Check onboarding completion for non-onboarding, non-API routes
