@@ -15,8 +15,8 @@ import { headers } from 'next/headers'
 import { getPublicEventFallback, type PublicEvent } from '@/lib/public-events'
 import { loadLivePublicEvent } from '@/lib/public-event-live'
 import { loadConfirmedEventRegistrationCount } from '@/lib/event-registration-count'
-import { loadPublicEventWhatsAppSummaries } from '@/lib/public-event-whatsapp-summaries'
-import { isEventWhatsAppSummaryEnabled, type EventWhatsAppSummary } from '@/lib/event-whatsapp-summary'
+import { loadEventWhatsAppSummaries, type EventSummaryArchive } from '@/lib/event-whatsapp-summaries'
+import { isEventWhatsAppSummaryEnabled } from '@/lib/event-whatsapp-summary'
 import { loadPublicEventConversationTopics, type EventConversationTopic } from '@/lib/event-conversation-topics'
 import { googleCalendarEventLink } from '@/lib/google-calendar'
 
@@ -42,18 +42,19 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-function EventWhatsAppSummaryArchive({ summaries }: { summaries: EventWhatsAppSummary[] }) {
+function EventWhatsAppSummaryArchive({ archive, eventSlug }: { archive: EventSummaryArchive, eventSlug: string }) {
+  const { summaries, status } = archive
   const format = (value: string) => new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(value))
   return <section id="resumos" className="scroll-mt-20 rounded-2xl border border-[#CEC8BD] bg-white p-6 sm:p-8">
     <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#A94E38]">Acompanhe sem perder contexto</p>
     <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Resumos do grupo</h2>
-    <p className="mt-3 max-w-3xl text-sm leading-7 text-[#625E59]">Todos os dias, às 18h, as discussões substantivas do WhatsApp são reunidas aqui de forma anônima, sem nomes ou dados de contato.</p>
-    {summaries.length ? <div className="mt-6 space-y-4">{summaries.map(item => <article key={item.id} className="rounded-xl border border-[#E6DED0] bg-[#FAF7F1] p-5">
+    <p className="mt-3 max-w-3xl text-sm leading-7 text-[#625E59]">Os resumos das discussões do WhatsApp ficam disponíveis para pessoas logadas. Novas edições são preparadas às 18h, quando há conversa relevante no período, sem nomes ou dados de contato.</p>
+    {status === 'signed-out' ? <Link href={`/login?next=${encodeURIComponent(`/community/events/${eventSlug}`)}`} className="mt-5 inline-flex min-h-11 items-center rounded-lg bg-[#24231F] px-4 text-sm font-bold text-white">Entrar para ler os resumos <ArrowRight className="ml-2 h-4 w-4" /></Link> : status === 'error' ? <p role="alert" className="mt-5 rounded-xl bg-[#F5F1E8] p-4 text-sm leading-6 text-[#625E59]">Não foi possível carregar os resumos agora. Recarregue a página para tentar novamente.</p> : summaries.length ? <div className="mt-6 space-y-4">{summaries.map(item => <article key={item.id} className="rounded-xl border border-[#E6DED0] bg-[#FAF7F1] p-5">
       <div className="flex flex-wrap items-start justify-between gap-2"><h3 className="text-lg font-bold">{item.title}</h3><time className="text-xs text-[#817A73]" dateTime={item.period_end}>{format(item.period_end)}</time></div>
       <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[#55514B]">{item.summary}</p>
       {item.key_points.length ? <ul className="mt-4 space-y-2 border-t border-[#DED6C9] pt-4 text-sm leading-6 text-[#625E59]">{item.key_points.map(point => <li key={point} className="flex gap-2"><span aria-hidden="true" className="text-[#A94E38]">•</span><span>{point}</span></li>)}</ul> : null}
       <p className="mt-4 text-[11px] text-[#817A73]">{item.source_message_count} mensagens sintetizadas · sem identificação dos participantes</p>
-    </article>)}</div> : <p className="mt-5 rounded-xl bg-[#F5F1E8] p-4 text-sm leading-6 text-[#625E59]">O primeiro resumo será publicado após as 18h, se houver discussão relevante no período.</p>}
+    </article>)}</div> : <p className="mt-5 rounded-xl bg-[#F5F1E8] p-4 text-sm leading-6 text-[#625E59]">Ainda não há resumos publicados. Novas edições aparecem após as 18h quando há discussão relevante no período.</p>}
   </section>
 }
 
@@ -92,7 +93,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
   dateTbd: boolean
   past: boolean
   registrationCount: number | null
-  whatsappSummaries: EventWhatsAppSummary[]
+  whatsappSummaries: EventSummaryArchive
   conversationTopics: EventConversationTopic[]
 }) {
   const t = getClubTranslator()
@@ -204,7 +205,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
         </article> : null}
 
         <EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} />
-        {isEventWhatsAppSummaryEnabled(event.slug) ? <EventWhatsAppSummaryArchive summaries={whatsappSummaries} /> : null}
+        {isEventWhatsAppSummaryEnabled(event.slug) ? <EventWhatsAppSummaryArchive archive={whatsappSummaries} eventSlug={event.slug} /> : null}
       </div>
 
       <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">
@@ -238,7 +239,8 @@ export default async function EventPage({ params, searchParams }: { params: { sl
     const publicEvent = liveEvent ?? fallback
     const dateTbd = /data(?: e formato)? a confirmar/i.test(publicEvent.location_label || '')
     const past = !dateTbd && new Date(publicEvent.ends_at || publicEvent.starts_at) < new Date()
-    const [registrationCount, whatsappSummaries, conversationTopics] = await Promise.all([loadConfirmedEventRegistrationCount(publicEvent.id), loadPublicEventWhatsAppSummaries(publicEvent.id), loadPublicEventConversationTopics(publicEvent.id, publicEvent.slug)])
+    const [registrationCount, conversationTopics] = await Promise.all([loadConfirmedEventRegistrationCount(publicEvent.id), loadPublicEventConversationTopics(publicEvent.id, publicEvent.slug)])
+    const whatsappSummaries: EventSummaryArchive = { summaries: [], status: 'signed-out' }
     return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} phoneError={searchParams?.registration === 'phone'} clubStatus={searchParams?.club} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
   }
 
@@ -249,7 +251,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   const [registrationCount, memberResult, whatsappSummaries, conversationTopics] = await Promise.all([
     loadConfirmedEventRegistrationCount(event.id),
     user ? supabase.from('community_members').select('display_name,current_role,club_access_status,club_access_expires_at').eq('user_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
-    loadPublicEventWhatsAppSummaries(event.id),
+    user && !user.is_anonymous && isEventWhatsAppSummaryEnabled(event.slug) ? loadEventWhatsAppSummaries(supabase, event.id) : Promise.resolve<EventSummaryArchive>({ summaries: [], status: 'signed-out' }),
     loadPublicEventConversationTopics(event.id, event.slug),
   ])
   const { data: member } = memberResult
@@ -310,7 +312,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
           <div className="border-t border-[#E6DED0] p-4">{overview}</div>
         </details>
         {attendanceCard ? <div className="mb-4 xl:hidden">{attendanceCard}</div> : null}
-        {isEventWhatsAppSummaryEnabled(event.slug) ? <div className="mb-4"><EventWhatsAppSummaryArchive summaries={whatsappSummaries} /></div> : null}
+        {isEventWhatsAppSummaryEnabled(event.slug) ? <div className="mb-4"><EventWhatsAppSummaryArchive archive={whatsappSummaries} eventSlug={event.slug} /></div> : null}
         {isMember && <nav id="publicacoes" aria-label={t('Conteúdo do evento')} className="mb-4 flex scroll-mt-20 gap-1 border-b border-[#CEC8BD]">
           {([{ key: 'fotos', label: t("Fotos") }, { key: 'documentos', label: t("Documentos") }, { key: 'discussoes', label: t("Conversas") }] as const).map(tab => <Link key={tab.key} href={`/community/events/${event.slug}?tab=${tab.key}#publicacoes`} aria-current={activeTab === tab.key ? 'page' : undefined} className={`inline-flex min-h-12 flex-1 items-center justify-center border-b-2 px-2 text-sm font-semibold sm:flex-none sm:px-5 ${activeTab === tab.key ? 'border-[#A94E38] text-[#A94E38]' : "border-transparent text-[#625E59] hover:text-[#24231F]"}`}>{t(tab.label)}</Link>)}
         </nav>}

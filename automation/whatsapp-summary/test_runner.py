@@ -8,6 +8,24 @@ from unittest.mock import patch
 import runner
 
 class SummaryTests(unittest.TestCase):
+    def test_schedule_failure_does_not_block_either_summary(self):
+        with tempfile.TemporaryDirectory() as temp:
+            config={'STATE_DIR':temp,'FIRST_RUN_AT':'2026-01-01T21:00:00Z','DATABASE':':memory:','APP_URL':'https://example.test','INGEST_SECRET':'secret'}
+            with patch.object(runner.sqlite3,'connect'), patch.object(runner,'process_event_comment_outbox'), patch.object(runner,'sync_bench_events',side_effect=RuntimeError('provider failed')), patch.object(runner,'process_event_summaries') as events, patch.object(runner,'process_community_summary') as community:
+                with self.assertRaisesRegex(RuntimeError, 'bench-schedule'):
+                    runner.run(config)
+                events.assert_called_once()
+                community.assert_called_once()
+
+    def test_comment_failure_and_event_failure_leave_community_independent(self):
+        with tempfile.TemporaryDirectory() as temp:
+            config={'STATE_DIR':temp,'FIRST_RUN_AT':'2026-01-01T21:00:00Z','DATABASE':':memory:','APP_URL':'https://example.test','INGEST_SECRET':'secret'}
+            with patch.object(runner.sqlite3,'connect'), patch.object(runner,'process_event_comment_outbox',side_effect=RuntimeError('queue failed')), patch.object(runner,'sync_bench_events') as schedule, patch.object(runner,'process_event_summaries',side_effect=RuntimeError('event failed')), patch.object(runner,'process_community_summary') as community:
+                with self.assertRaisesRegex(RuntimeError, 'event-comments, event-summaries'):
+                    runner.run(config)
+                schedule.assert_called_once()
+                community.assert_called_once()
+
     def test_window(self):
         before=dt.datetime(2026,9,18,20,59,tzinfo=runner.UTC)
         self.assertEqual(runner.iso(runner.slot(before)), '2026-09-17T21:00:00Z')

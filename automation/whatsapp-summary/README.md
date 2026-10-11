@@ -11,7 +11,7 @@ event; the last processed local message id prevents repeated model calls.
 
 Event-specific summaries use `community_event_whatsapp_configs` and
 `community_event_whatsapp_summaries`. The NetLex Bench runs on its own fixed 24-hour window at
-18:00 Brasília, publishes an anonymized archive on the event landing and sends the same digest to
+18:00 Brasília, publishes an anonymized archive for signed-in users on the event page and sends the same digest to
 its own group. Event summaries never reuse the general community destination or storage rows.
 
 New comments posted inside an event conversation are added to a private database outbox. The same

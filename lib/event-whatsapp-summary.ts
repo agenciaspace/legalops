@@ -1,7 +1,7 @@
 import { DAY_MS, latestSummarySlot, parseWhatsAppDigest, type WhatsAppSource } from '@/lib/whatsapp-summary'
 
 export const EVENT_WHATSAPP_SUMMARY_MODEL = 'anthropic/claude-sonnet-4.6'
-const PUBLIC_EVENT_SUMMARY_SLUGS = new Set(['bench-netlex-2026'])
+const EVENT_SUMMARY_SLUGS = new Set(['bench-netlex-2026'])
 
 export type EventWhatsAppSummary = {
   id: string
@@ -34,7 +34,7 @@ export function eventWhatsAppSummarySource(slug: string) {
 }
 
 export function isEventWhatsAppSummaryEnabled(slug: string) {
-  return PUBLIC_EVENT_SUMMARY_SLUGS.has(slug)
+  return EVENT_SUMMARY_SLUGS.has(slug)
 }
 
 export function parseEventWhatsAppDigest(raw: string) {

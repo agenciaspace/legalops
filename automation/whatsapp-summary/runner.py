@@ -223,41 +223,59 @@ def run(config, preview=False):
         db=sqlite3.connect(f"file:{config['DATABASE']}?mode=ro",uri=True)
         headers={'Authorization':'Bearer '+config['INGEST_SECRET']}
         endpoint=config['APP_URL'].rstrip('/')+'/api/cron/whatsapp-summary'
-        if not preview: process_event_comment_outbox(db,config,state_dir,headers)
-        if not preview: sync_bench_events(db,config,state_dir,headers,now)
-        if not preview: process_event_summaries(db,config,state_dir,headers,now,end)
-        state_path=state_dir/(end.strftime('%Y%m%dT%H%M%S')+'.json')
-        state=json.loads(state_path.read_text()) if state_path.exists() else {}
-        if not preview and state.get('status') in ('done','empty'):
-            print('Period already completed');return
-        # A timeout after sending is ambiguous. Reconcile with the existing inbound mirror;
-        # never blindly resend a message whose outcome is unknown.
-        if not preview and state.get('status') == 'sending':
-            match=db.execute('select msg_id from messages where chat_jid=? and owner=? and from_me=1 and text=? and ts>=? limit 1', (GROUP,OWNER,state['text'],end.timestamp())).fetchone()
-            if not match: raise RuntimeError('Delivery outcome unknown; awaiting mirror confirmation')
-            state.update(status='sent',message_id=match[0]);save(state_path,state)
-        if not preview and state.get('status') == 'sent':
-            post(endpoint,{'action':'delivered','id':state['summary_id']},headers)
-            state['status']='done';save(state_path,state);print('Delivery recorded');return
-        messages,omitted=collect(db,end)
-        result=post(endpoint,{'source':'legalops-community','action':'preview' if preview else 'publish','period_start':iso(end-DAY),'period_end':iso(end),'messages':messages,'omitted_media_count':omitted},headers)
-        if not result.get('ok'): raise RuntimeError('Summary service rejected request')
-        if preview:
-            print(json.dumps({'preview':True,'messages':len(messages),'omitted_media':omitted,'generated':bool(result.get('summary')),'empty':result.get('empty',False)},ensure_ascii=False));return
-        if result.get('empty'):
-            save(state_path,{'status':'empty'});print('Empty period; no group message');return
-        summary=result['summary']
-        if summary.get('whatsapp_sent_at'):
-            save(state_path,{'status':'done','summary_id':summary['id']});print('Delivery already recorded');return
-        text=render(summary)
-        base,token=connected_instance(config)
-        state={'status':'sending','summary_id':summary['id'],'text':text};save(state_path,state)
-        delivery=post(base+'/send/text',{'number':GROUP,'text':text},{'token':token})
-        if not isinstance(delivery,dict) or delivery.get('error') or delivery.get('success') is False:
-            raise RuntimeError('Instance did not confirm delivery')
-        state.update(status='sent',message_id=delivery.get('id') or delivery.get('messageid'));save(state_path,state)
-        post(endpoint,{'action':'delivered','id':summary['id']},headers)
-        state['status']='done';save(state_path,state);print('Summary published and delivered')
+        failures = []
+        def stage(name, action):
+            try:
+                action()
+            except Exception as error:
+                # Log only stage and exception/status, never source text or provider bodies.
+                code = getattr(error, 'code', None)
+                print(f'{name} failed: {type(error).__name__}' + (f' HTTP {code}' if code else ''), flush=True)
+                failures.append(name)
+        if not preview:
+            stage('event-comments', lambda: process_event_comment_outbox(db,config,state_dir,headers))
+            stage('bench-schedule', lambda: sync_bench_events(db,config,state_dir,headers,now))
+            stage('event-summaries', lambda: process_event_summaries(db,config,state_dir,headers,now,end))
+        stage('community-summary', lambda: process_community_summary(db,config,state_dir,headers,end,preview))
+        db.close()
+        if failures:
+            raise RuntimeError('Independent stages will retry: ' + ', '.join(failures))
+
+
+def process_community_summary(db, config, state_dir, headers, end, preview=False):
+    endpoint=config['APP_URL'].rstrip('/')+'/api/cron/whatsapp-summary'
+    state_path=state_dir/(end.strftime('%Y%m%dT%H%M%S')+'.json')
+    state=json.loads(state_path.read_text()) if state_path.exists() else {}
+    if not preview and state.get('status') in ('done','empty'):
+        print('Period already completed');return
+    # A timeout after sending is ambiguous. Reconcile with the existing inbound mirror;
+    # never blindly resend a message whose outcome is unknown.
+    if not preview and state.get('status') == 'sending':
+        match=db.execute('select msg_id from messages where chat_jid=? and owner=? and from_me=1 and text=? and ts>=? limit 1', (GROUP,OWNER,state['text'],end.timestamp())).fetchone()
+        if not match: raise RuntimeError('Delivery outcome unknown; awaiting mirror confirmation')
+        state.update(status='sent',message_id=match[0]);save(state_path,state)
+    if not preview and state.get('status') == 'sent':
+        post(endpoint,{'action':'delivered','id':state['summary_id']},headers)
+        state['status']='done';save(state_path,state);print('Delivery recorded');return
+    messages,omitted=collect(db,end)
+    result=post(endpoint,{'source':'legalops-community','action':'preview' if preview else 'publish','period_start':iso(end-DAY),'period_end':iso(end),'messages':messages,'omitted_media_count':omitted},headers)
+    if not result.get('ok'): raise RuntimeError('Summary service rejected request')
+    if preview:
+        print(json.dumps({'preview':True,'messages':len(messages),'omitted_media':omitted,'generated':bool(result.get('summary')),'empty':result.get('empty',False)},ensure_ascii=False));return
+    if result.get('empty'):
+        save(state_path,{'status':'empty'});print('Empty period; no group message');return
+    summary=result['summary']
+    if summary.get('whatsapp_sent_at'):
+        save(state_path,{'status':'done','summary_id':summary['id']});print('Delivery already recorded');return
+    text=render(summary)
+    base,token=connected_instance(config)
+    state={'status':'sending','summary_id':summary['id'],'text':text};save(state_path,state)
+    delivery=post(base+'/send/text',{'number':GROUP,'text':text},{'token':token})
+    if not isinstance(delivery,dict) or delivery.get('error') or delivery.get('success') is False:
+        raise RuntimeError('Instance did not confirm delivery')
+    state.update(status='sent',message_id=delivery.get('id') or delivery.get('messageid'));save(state_path,state)
+    post(endpoint,{'action':'delivered','id':summary['id']},headers)
+    state['status']='done';save(state_path,state);print('Summary published and delivered')
 
 if __name__ == '__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--config',default='/root/.config/legalops-whatsapp-summary.env');parser.add_argument('--preview',action='store_true');args=parser.parse_args()
