@@ -3,6 +3,7 @@ import {cleanup,fireEvent,render,screen,waitFor,within} from '@testing-library/r
 const state=vi.hoisted(()=>({path:'/community/calendar',search:new URLSearchParams(),confirm:vi.fn(),decline:vi.fn()}))
 vi.mock('next/navigation',()=>({usePathname:()=>state.path,useSearchParams:()=>state.search}))
 vi.mock('@/app/(main)/community/actions',()=>({confirmBenchAttendance:state.confirm,declineBenchAttendance:state.decline}))
+vi.mock('react-dom', async importOriginal => ({ ...await importOriginal<typeof import('react-dom')>(), useFormStatus: () => ({ pending: false }) }))
 import {CommunityTabs} from '@/components/community/CommunityTabs'
 import BenchClient from '@/app/(main)/community/bench/BenchClient'
 import {ClubPwa} from '@/components/community/ClubPwa'
@@ -24,6 +25,8 @@ it('preserves confirmed attendance and form values after a failed cancellation',
   render(<BenchClient eventId="event" initial={{response:'confirmed',organization_name:'Example'}} member={{name:'Synthetic',role:'Legal Ops',email:'test@example.invalid'}} />)
   fireEvent.click(screen.getByRole('button',{name:'Não poderei ir'}))
   await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível salvar'))
+  fireEvent.change(screen.getByRole('textbox',{name:/WhatsApp/}),{target:{value:'+5511999999999'}})
+  fireEvent.click(screen.getByRole('button',{name:'Continuar'}))
   expect(screen.getByRole('button',{name:'Atualizar confirmação'})).toBeEnabled()
   expect(screen.getByRole('textbox',{name:/Empresa/})).toHaveValue('Example')
 })
@@ -32,6 +35,8 @@ it('does not claim cancellation succeeded when the server denies it',async()=>{
   render(<BenchClient eventId="event" initial={{response:'confirmed'}} member={{name:'Synthetic',role:'Legal Ops',email:'test@example.invalid'}} />)
   fireEvent.click(screen.getByRole('button',{name:'Não poderei ir'}))
   await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível atualizar'))
+  fireEvent.change(screen.getByRole('textbox',{name:/WhatsApp/}),{target:{value:'+5511999999999'}})
+  fireEvent.click(screen.getByRole('button',{name:'Continuar'}))
   expect(screen.getByRole('button',{name:'Atualizar confirmação'})).toBeInTheDocument()
 })
 it('offers installation instructions when no native prompt is available',()=>{

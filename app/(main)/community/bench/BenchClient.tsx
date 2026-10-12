@@ -3,6 +3,7 @@ import { useClubLanguage } from '@/components/community/ClubLanguage'
 
 
 import { useState } from 'react'
+import { EventRegistrationForm } from '@/components/community/EventRegistrationForm'
 import { confirmBenchAttendance, declineBenchAttendance } from '../actions'
 
 type Props = { eventId: string; initial: Record<string, string | null> | null; member: { name: string; role: string; email: string } }
@@ -34,14 +35,15 @@ export default function BenchClient({ eventId, initial, member }: Props) {
     } catch { setFailed(true); setMessage('Não foi possível salvar. Seus dados continuam no formulário; tente novamente.') }
     finally { setBusy(false) }
   }
-  return <form onSubmit={event => {event.preventDefault(); void save()}} className="space-y-5" aria-busy={busy}>
-    <fieldset disabled={busy} className="space-y-4"><legend className="sr-only">{t("Dados de participação")}</legend>
-      {fields.map(field => <label key={field.key} className="block text-sm font-medium text-[#4C4A45]">{t(field.label)}{field.required ? ' *' : ''}<input name={field.key} required={field.required} type={field.type} autoComplete={field.autocomplete} maxLength={field.max} value={form[field.key]} onChange={event => update(field.key,event.target.value)} className="mt-2 min-h-12 w-full min-w-0 rounded-xl border border-[#CEC8BD] bg-white px-3 py-3 text-base font-normal focus:border-[#A94E38]" /></label>)}
+  const renderFields = (contact: boolean) => <fieldset disabled={busy} className="event-registration-fields">{fields.filter(field => (['name', 'email', 'phone'].includes(field.key)) === contact).map(field => <label key={field.key} className="block text-sm font-medium text-[#4C4A45]">{t(field.label)}{field.required ? ' *' : ''}<input name={field.key} required={field.required} type={field.type} autoComplete={field.autocomplete} maxLength={field.max} value={form[field.key]} onChange={event => update(field.key,event.target.value)} className="mt-2 min-h-12 w-full min-w-0 rounded-xl border border-[#CEC8BD] bg-white px-3 py-3 text-base font-normal focus:border-[#A94E38]" /></label>)}</fieldset>
+  return <EventRegistrationForm action={async () => { await save() }}
+    submitLabel={response === 'confirmed' ? t('Atualizar confirmação') : t('Confirmar presença')}
+    intro={null}
+    contact={<>{renderFields(true)}<p className="mt-3 text-xs leading-5 text-[#625E59]">{t('Informe o mesmo número que você usa no grupo do Bench, começando com + e o código do país. Esse dado não será exibido publicamente.')}</p></>}
+    professional={<>{renderFields(false)}
       <details><summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">{t("Acessibilidade, alimentação e chegada")}</summary><div className="mt-2 space-y-4">{([['dietary',t("Restrições alimentares"),500],['accessibility',t("Necessidades de acessibilidade"),500],['notes',t("Observações para chegada"),1000]] as const).map(([key,label,max]) => <label key={key} className="block text-sm font-medium">{t(label)}<textarea name={key} value={form[key]} onChange={event => update(key,event.target.value)} rows={2} maxLength={max} className="mt-2 w-full min-w-0 rounded-xl border border-[#CEC8BD] bg-white px-3 py-3 text-base font-normal" /></label>)}</div></details>
-    </fieldset>
-    <p className="text-xs text-[#625E59]">{t("* Campos obrigatórios")}</p>
-    <p className="text-xs leading-5 text-[#625E59]">{t('Informe o mesmo número que você usa no grupo do Bench, começando com + e o código do país. Esse dado não será exibido publicamente.')}</p>
+    </>} footer={<>
     {message ? <p role={failed ? 'alert' : 'status'} className={`rounded-xl px-4 py-3 text-sm leading-6 ${failed ? 'bg-red-50 text-red-800' : 'bg-emerald-50 text-emerald-800'}`}>{t(message)}</p> : null}
-    <div className="grid gap-2"><button disabled={busy} className="min-h-12 rounded-xl bg-[#24231F] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50">{busy ? t("Salvando…") : response === 'confirmed' ? t("Atualizar confirmação") : t("Confirmar presença")}</button>{response === 'confirmed' ? <button type="button" disabled={busy} onClick={() => void save(true)} className="min-h-12 rounded-xl border border-[#CEC8BD] px-4 py-3 text-sm font-semibold disabled:opacity-50">{t("Não poderei ir")}</button> : null}</div>
-  </form>
+{response === 'confirmed' ? <button type="button" disabled={busy} onClick={() => void save(true)} className="min-h-12 rounded-xl border border-[#CEC8BD] px-4 py-3 text-sm font-semibold disabled:opacity-50">{t("Não poderei ir")}</button> : null}
+    </>} />
 }

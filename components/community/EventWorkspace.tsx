@@ -49,7 +49,8 @@ export function EventWorkspace({ header, sections, initialSection = 'sobre' }: {
       const viewportHeight = viewport && viewport.scale === 1 ? viewport.height : window.innerHeight
       document.documentElement.style.setProperty('--event-viewport-height', `${viewportHeight}px`)
       const height = viewportHeight - top - bottomNav
-      element.style.setProperty('--event-height', `${Math.max(160, height)}px`)
+      element.dataset.compact = String(height < 360)
+      element.style.setProperty('--event-height', `${Math.max(0, height)}px`)
     }
     resize()
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(resize)

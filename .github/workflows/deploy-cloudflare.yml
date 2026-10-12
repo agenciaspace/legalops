@@ -7,6 +7,8 @@ on:
       - 'scripts/sync-design-system.mjs'
       - 'app/**'
       - 'components/**'
+      - 'e2e/**'
+      - 'playwright.events.config.ts'
       - 'public/**'
       - 'lib/**'
       - 'bend/**'
@@ -56,6 +58,12 @@ jobs:
 
       - name: Test application
         run: npm test
+
+      - name: Install browser engines
+        run: npx playwright install --with-deps chromium webkit firefox
+
+      - name: Verify event layouts and registration across browsers
+        run: npm run test:events:browser
 
       - name: Build OpenNext worker
         id: build

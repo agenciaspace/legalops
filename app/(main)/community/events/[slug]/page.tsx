@@ -21,6 +21,7 @@ import { loadPublicEventConversationTopics, type EventConversationTopic } from '
 import { googleCalendarEventLink } from '@/lib/google-calendar'
 import { EventWorkspace, EventSectionButton } from '@/components/community/EventWorkspace'
 import '../event-workspace.css'
+import { EventRegistrationForm } from '@/components/community/EventRegistrationForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -128,23 +129,20 @@ function PublicEventLanding({ initialSection, event, translations, user, registe
             <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em]">{t('Não foi possível registrar agora.')}</h2>
             <p className="mt-3 text-sm leading-6 text-[#625E59]">{t('Envie seus dados por email e a organização confirmará sua participação.')}</p>
             <a href={`mailto:hi@legalops.club?subject=${encodeURIComponent(`Inscrição · ${event.title}`)}`} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#24231F] px-4 text-sm font-bold text-white">{t('Enviar por email')} <ArrowRight className="ml-2 h-4 w-4" /></a>
-          </div> : <form action={registerPublicEvent}>
+          </div> : <EventRegistrationForm action={registerPublicEvent} intro={<>
             {phoneError ? <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">{t('Informe seu WhatsApp com +DDI e DDD, usando o mesmo número do grupo do Bench.')}</p> : null}
             {event.id ? <input type="hidden" name="event_id" value={event.id} /> : null}
             <input type="hidden" name="event_slug" value={event.slug} />
             <input type="hidden" name="source_locale" value={locale} />
-            <p className="text-xs font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Inscrição gratuita')}</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em]">{t('Reserve sua vaga')}</h2>
-            <p className="mt-2 text-sm leading-6 text-[#625E59]">{t('Você não precisa criar uma conta para registrar seu interesse.')}</p>
-            <div className="event-registration-fields">
+            </>} contact={<div className="event-registration-fields">
               <label className="block text-xs font-bold">{t('Nome')}<input name="name" autoComplete="name" required minLength={2} className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
               <label className="block text-xs font-bold">{t('E-mail')}<input name="email" autoComplete="email" required type="email" className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
               <label className="block text-xs font-bold">{t('WhatsApp com DDI e DDD')}<input name="phone" autoComplete="tel" required type="tel" maxLength={40} placeholder="+55 11 99999-9999" aria-describedby="bench-phone-help" className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
               <p id="bench-phone-help" className="text-xs leading-5 text-[#625E59]">{t('Informe o mesmo número que você usa no grupo do Bench, começando com + e o código do país. Esse dado não será exibido publicamente.')}</p>
-              <div className="grid gap-3 sm:grid-cols-2">
+              </div>} professional={<><div className="event-registration-fields">
                 <label className="block text-xs font-bold">{t('Cargo')}<input name="role" autoComplete="organization-title" required minLength={2} className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
                 <label className="block text-xs font-bold">{t('Onde trabalha')}<input name="organization" autoComplete="organization" required minLength={2} className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
-              </div>
             </div>
             <div className="mt-4 rounded-xl border border-[#D9D0C4] bg-[#FAF7F1] p-3">
               <p className="text-[10px] font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Opcional')}</p>
@@ -154,9 +152,8 @@ function PublicEventLanding({ initialSection, event, translations, user, registe
               </label>
               <p className="mt-2 border-t border-[#E6DED0] pt-2 text-[11px] leading-5 text-[#716B65]">{t('A inscrição no evento é independente do Club.')}</p>
             </div>
-            <button className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#24231F] px-5 text-sm font-bold text-white hover:bg-[#3A3834]">{t('Quero participar')} <ArrowRight className="ml-2 h-4 w-4" /></button>
-            <p className="mt-4 flex gap-2 text-[11px] leading-5 text-[#716B65]"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />{t('Seus dados serão usados para organizar o encontro e enviar as informações de acesso.')}</p>
-          </form>}
+            </>} footer={            <p className="mt-4 flex gap-2 text-[11px] leading-5 text-[#716B65]"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />{t('Seus dados serão usados para organizar o encontro e enviar as informações de acesso.')}</p>
+          } />}
   </div>
   const overview = <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(15rem,.7fr)]">
     <div className="min-w-0 space-y-5">
@@ -194,7 +191,7 @@ function PublicEventLanding({ initialSection, event, translations, user, registe
   </>
   return <EventWorkspace header={header} initialSection={initialSection || (registered || registrationError || phoneError ? 'inscricao' : user && isEventWhatsAppSummaryEnabled(event.slug) ? 'resumos' : 'sobre')} sections={[
     { id: 'sobre', label: t('Sobre'), content: overview },
-    { id: 'inscricao', label: registered ? t('Inscrição') : t('Participar'), content: registration },
+    { id: 'inscricao', label: past ? t('Comunidade') : registered ? t('Inscrição') : t('Participar'), content: registration },
     ...(isEventWhatsAppSummaryEnabled(event.slug) ? [{ id: 'resumos', label: t('Resumos'), locked: whatsappSummaries.status === 'signed-out', content: <EventWhatsAppSummaryArchive archive={whatsappSummaries} eventSlug={event.slug} /> }] : []),
     ...(conversationTopics.length ? [{ id: 'discussoes', label: t('Conversas'), content: <EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} /> }] : []),
   ]} />

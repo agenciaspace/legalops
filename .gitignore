@@ -19,3 +19,6 @@ android/*.keystore
 dist/*.apk
 dist/*.aab
 .codeiumignore
+
+playwright-report/
+test-results/

@@ -1,4 +1,5 @@
 vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
+vi.mock('react-dom', async importOriginal => ({ ...await importOriginal<typeof import('react-dom')>(), useFormStatus: () => ({ pending: false }) }))
 import { cleanup, render, screen, fireEvent } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { clubReturnPath } from '@/lib/club-return-path'
@@ -58,7 +59,7 @@ it('keeps public registration open while the event date is still being confirmed
   expect(screen.getByText('A confirmar')).toBeInTheDocument()
   fireEvent.click(screen.getByRole('tab', { name: 'Participar' }))
   expect(screen.getByRole('heading', { name: 'Reserve sua vaga' })).toBeVisible()
-  expect(screen.getByRole('button', { name: /Quero participar/ })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Continuar' })).toBeInTheDocument()
   fireEvent.click(screen.getByRole('tab', { name: 'Sobre' }))
   expect(screen.getByRole('heading', { name: 'Sobre o encontro' })).toBeVisible()
   expect(screen.getByRole('heading', { name: 'O que vamos discutir?' })).toBeInTheDocument()
@@ -68,7 +69,7 @@ it('keeps event registration independent and offers an explicit Club opt-in', as
   render(await EventPage({ params: { slug: 'bench-nubank' } }))
   fireEvent.click(screen.getByRole('tab', { name: 'Participar' }))
   expect(screen.getByText('A inscrição no evento é independente do Club.')).toBeInTheDocument()
-  expect(screen.getByRole('checkbox', { name: /Também quero entrar no LegalOps Club/ })).not.toBeChecked()
+  expect(screen.getByRole('checkbox', { name: /Também quero entrar no LegalOps Club/, hidden: true })).not.toBeChecked()
   expect(screen.getByText(/acompanhar as conversas, materiais e próximos encontros/)).toBeInTheDocument()
 })
 
@@ -82,7 +83,7 @@ it('requires the same WhatsApp number used in the Bench group', async () => {
 it('explains an invalid WhatsApp number without claiming registration succeeded', async () => {
   render(await EventPage({ params: { slug: 'bench-nubank' }, searchParams: { registration: 'phone' } }))
   expect(screen.getByRole('alert')).toHaveTextContent('Informe seu WhatsApp com +DDI e DDD')
-  expect(screen.getByRole('button', { name: /Quero participar/ })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Continuar' })).toBeInTheDocument()
 })
 
 it('shows the confirmed registration count in the public event header', async () => {

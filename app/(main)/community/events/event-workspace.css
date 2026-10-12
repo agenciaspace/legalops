@@ -35,8 +35,18 @@ body :where(div, main):has(.event-workspace) { min-height: 0; }
 .event-workspace .event-section-title { font-size: 20px; font-weight: 600; letter-spacing: -.025em; }
 .event-workspace .event-form input:not([type="hidden"]):not([type="checkbox"]) { margin-top: 4px; min-height: 44px; }
 .event-workspace .event-form { max-width: 760px; margin-inline: auto; }
-.event-workspace .event-registration-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
-.event-workspace .event-registration-fields > :nth-child(3), .event-workspace .event-registration-fields > :nth-child(4), .event-workspace .event-registration-fields > :nth-child(5) { grid-column: 1 / -1; }
+/* A single reading column keeps each registration stage predictable. */
+.event-registration { max-width: 520px; margin-inline: auto; }
+.event-registration-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 16px; }
+.event-registration-progress { display: flex; gap: 16px; margin-block: 20px; padding-bottom: 12px; border-bottom: 1px solid #e6ded0; }
+.event-registration-progress li { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #625e59; }
+.event-registration-progress li[aria-current] { color: #a94e38; font-weight: 700; }
+.event-registration-progress span { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid currentColor; border-radius: 50%; flex-shrink: 0; }
+.event-registration-actions { display: flex; gap: 12px; margin-top: 20px; }
+.event-registration-actions button { min-height: 48px; border-radius: 8px; padding: 12px 20px; font-size: 14px; font-weight: 600; }
+.event-registration-primary { flex: 1; background: #24231f; color: white; }
+.event-registration-primary:disabled { opacity: .6; cursor: wait; }
+.event-registration-back { border: 1px solid #cec8bd; }
 /* Keep the surrounding application shell from adding a second scrolling page. */
 .club-content:has(.event-workspace) { padding-bottom: 0; }
 .club-shell:has(.event-workspace), .club-shell:has(.event-workspace) > div { min-height: 0; }
@@ -59,6 +69,10 @@ main:has(.event-workspace) > aside > div > div { padding-block: 0; }
   .event-workspace-header .event-meta { display: none; }
   .event-workspace-tabs-many { grid-template-columns: repeat(var(--event-tabs), minmax(0, 1fr)); }
 }
+.event-workspace[data-compact="true"] { overflow-y: auto; gap: 4px; padding-block: 4px; }
+.event-workspace[data-compact="true"] .event-meta { display: none; }
+.event-workspace[data-compact="true"] .event-workspace-header h1 { font-size: 18px; }
+.event-workspace[data-compact="true"] .event-workspace-panel { min-height: 120px; flex-shrink: 0; }
 @media print {
   html:has(.event-workspace), body:has(.event-workspace) { height: auto; overflow: visible; }
   .event-workspace { height: auto; overflow: visible; }
