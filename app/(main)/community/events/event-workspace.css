@@ -1,0 +1,56 @@
+.event-workspace {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: var(--event-height, calc(100dvh - 65px));
+  min-width: 0;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: 16px 24px 16px;
+  gap: 12px;
+  overflow: hidden;
+  color: #24231f;
+}
+.event-workspace-header { flex: 0 0 auto; min-width: 0; }
+.event-workspace-header h1 { font-size: clamp(1.25rem, 2.4vw, 2rem); line-height: 1.15; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.event-workspace-tabs { display: grid; grid-template-columns: repeat(var(--event-tabs), minmax(0, 1fr)); flex: 0 0 auto; gap: 4px; padding: 4px; border: 1px solid #cec8bd; border-radius: 12px; background: #ede8df; }
+.event-workspace-tabs button { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; min-height: 44px; border-radius: 8px; padding: 8px; font-size: 13px; font-weight: 600; color: #625e59; }
+.event-workspace-tabs button span { min-width: 0; overflow-wrap: anywhere; }
+.event-workspace-tabs [aria-selected="true"] { color: #fff; background: #24231f; }
+.event-workspace-tabs button:hover:not([aria-selected="true"]) { background: #faf7f1; }
+.event-workspace-panel { flex: 1 1 0; min-height: 0; min-width: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; border: 1px solid #cec8bd; border-radius: 12px; background: #fff; padding: 20px; scroll-padding: 20px; }
+.event-workspace-panel[hidden] { display: none; }
+.event-workspace :where(a, button, summary, input, select, textarea):focus-visible { outline: 2px solid #a94e38; outline-offset: 2px; }
+.event-workspace :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) { font-size: 16px; }
+.event-workspace :where(p, h2, h3, a, dd) { overflow-wrap: anywhere; }
+.event-workspace .event-section-title { font-size: 20px; font-weight: 600; letter-spacing: -.025em; }
+.event-workspace .event-form input:not([type="hidden"]):not([type="checkbox"]) { margin-top: 4px; min-height: 44px; }
+.event-workspace .event-form { max-width: 760px; margin-inline: auto; }
+.event-workspace .event-registration-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.event-workspace .event-registration-fields > :nth-child(3), .event-workspace .event-registration-fields > :nth-child(4), .event-workspace .event-registration-fields > :nth-child(5) { grid-column: 1 / -1; }
+/* Keep the surrounding application shell from adding a second scrolling page. */
+.club-content:has(.event-workspace) { padding-bottom: 0; }
+.club-shell:has(.event-workspace), .club-shell:has(.event-workspace) > div { min-height: 0; }
+.club-shell:has(.event-workspace) > div > aside { height: auto; max-height: calc(100dvh - 8rem); }
+.club-content:has(.event-workspace) > aside[role="status"] { margin: 8px 12px 0; padding: 4px 12px; flex-direction: row; align-items: center; gap: 8px; }
+.club-content:has(.event-workspace) > aside[role="status"] p + p { display: none; }
+main:has(.event-workspace) > aside > div > div { padding-block: 0; }
+@media (max-width: 639px) {
+  .event-workspace { padding: 10px 12px; gap: 8px; }
+  .event-workspace-header h1 { font-size: 22px; }
+  .event-workspace-tabs button { font-size: 12px; padding-inline: 4px; gap: 4px; }
+  .event-workspace-tabs-many { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .event-workspace-panel { padding: 16px; scroll-padding: 16px; }
+  .event-workspace .event-registration-fields { grid-template-columns: 1fr; }
+  .event-workspace .event-registration-fields > * { grid-column: 1; }
+}
+@media (max-height: 500px) {
+  .event-workspace { padding-block: 6px; gap: 6px; }
+  .event-workspace-header h1 { font-size: 20px; }
+  .event-workspace-header .event-meta { display: none; }
+  .event-workspace-tabs-many { grid-template-columns: repeat(var(--event-tabs), minmax(0, 1fr)); }
+}
+@media print {
+  .event-workspace { height: auto; overflow: visible; }
+  .event-workspace-panel { overflow: visible; }
+}

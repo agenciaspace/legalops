@@ -2,7 +2,7 @@ import { TranslatedContent } from '@/components/community/TranslatedContent'
 import { loadClubTranslations } from '@/lib/club-translations'
 import { getClubLocale, getClubTranslator, getClubTimezone } from '@/lib/club-locale-server'
 import Link from 'next/link'
-import { ArrowRight, CalendarDays, CheckCircle2, ChevronDown, MapPin, MessageCircle, Send, ShieldCheck, UserRound } from 'lucide-react'
+import { ArrowRight, CalendarDays, CheckCircle2, MapPin, MessageCircle, Send, ShieldCheck, UserRound } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { hasActiveClubAccess } from '@/lib/community'
 import { createCommunityComment, registerPublicEvent } from '../../actions'
@@ -19,6 +19,8 @@ import { loadEventWhatsAppSummaries, type EventSummaryArchive } from '@/lib/even
 import { isEventWhatsAppSummaryEnabled } from '@/lib/event-whatsapp-summary'
 import { loadPublicEventConversationTopics, type EventConversationTopic } from '@/lib/event-conversation-topics'
 import { googleCalendarEventLink } from '@/lib/google-calendar'
+import { EventWorkspace, EventSectionButton } from '@/components/community/EventWorkspace'
+import '../event-workspace.css'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,16 +47,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 function EventWhatsAppSummaryArchive({ archive, eventSlug }: { archive: EventSummaryArchive, eventSlug: string }) {
   const { summaries, status } = archive
   const format = (value: string) => new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(value))
-  return <section id="resumos" className="scroll-mt-20 rounded-2xl border border-[#CEC8BD] bg-white p-6 sm:p-8">
+  return <section id="resumos" className="min-w-0">
     <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#A94E38]">Acompanhe sem perder contexto</p>
-    <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Resumos do grupo</h2>
-    <p className="mt-3 max-w-3xl text-sm leading-7 text-[#625E59]">Os resumos das discussões do WhatsApp ficam disponíveis para pessoas logadas. Novas edições são preparadas às 18h, quando há conversa relevante no período, sem nomes ou dados de contato.</p>
-    {status === 'signed-out' ? <Link href={`/login?next=${encodeURIComponent(`/community/events/${eventSlug}`)}`} className="mt-5 inline-flex min-h-11 items-center rounded-lg bg-[#24231F] px-4 text-sm font-bold text-white">Entrar para ler os resumos <ArrowRight className="ml-2 h-4 w-4" /></Link> : status === 'error' ? <p role="alert" className="mt-5 rounded-xl bg-[#F5F1E8] p-4 text-sm leading-6 text-[#625E59]">Não foi possível carregar os resumos agora. Recarregue a página para tentar novamente.</p> : summaries.length ? <div className="mt-6 space-y-4">{summaries.map(item => <article key={item.id} className="rounded-xl border border-[#E6DED0] bg-[#FAF7F1] p-5">
-      <div className="flex flex-wrap items-start justify-between gap-2"><h3 className="text-lg font-bold">{item.title}</h3><time className="text-xs text-[#817A73]" dateTime={item.period_end}>{format(item.period_end)}</time></div>
+    <h2 className="event-section-title mt-1">Resumos do grupo</h2>
+    <p className="mt-2 max-w-3xl text-sm leading-6 text-[#625E59]">Os resumos das discussões do WhatsApp ficam disponíveis para pessoas logadas. Novas edições são preparadas às 18h, quando há conversa relevante no período, sem nomes ou dados de contato.</p>
+    {status === 'signed-out' ? <Link href={`/login?next=${encodeURIComponent(`/community/events/${eventSlug}`)}`} className="mt-5 inline-flex min-h-11 items-center rounded-lg bg-[#24231F] px-4 text-sm font-bold text-white">Entrar para ler os resumos <ArrowRight className="ml-2 h-4 w-4" /></Link> : status === 'error' ? <p role="alert" className="mt-5 rounded-xl bg-[#F5F1E8] p-4 text-sm leading-6 text-[#625E59]">Não foi possível carregar os resumos agora. Recarregue a página para tentar novamente.</p> : summaries.length ? <div className="mt-4 space-y-2">{summaries.map((item, index) => <details key={item.id} name="event-summary-editions" open={index === 0} className="rounded-xl border border-[#E6DED0] bg-[#FAF7F1] px-4">
+      <summary className="min-h-11 cursor-pointer py-3"><span className="text-sm font-bold">{item.title}</span><time className="mt-1 block text-[11px] text-[#817A73]" dateTime={item.period_end}>{format(item.period_end)}</time></summary>
       <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[#55514B]">{item.summary}</p>
       {item.key_points.length ? <ul className="mt-4 space-y-2 border-t border-[#DED6C9] pt-4 text-sm leading-6 text-[#625E59]">{item.key_points.map(point => <li key={point} className="flex gap-2"><span aria-hidden="true" className="text-[#A94E38]">•</span><span>{point}</span></li>)}</ul> : null}
-      <p className="mt-4 text-[11px] text-[#817A73]">{item.source_message_count} mensagens sintetizadas · sem identificação dos participantes</p>
-    </article>)}</div> : <p className="mt-5 rounded-xl bg-[#F5F1E8] p-4 text-sm leading-6 text-[#625E59]">Ainda não há resumos publicados. Novas edições aparecem após as 18h quando há discussão relevante no período.</p>}
+      <p className="my-4 text-[11px] text-[#817A73]">{item.source_message_count} mensagens sintetizadas · sem identificação dos participantes</p>
+    </details>)}</div> : <p className="mt-5 rounded-xl bg-[#F5F1E8] p-4 text-sm leading-6 text-[#625E59]">Ainda não há resumos publicados. Novas edições aparecem após as 18h quando há discussão relevante no período.</p>}
   </section>
 }
 
@@ -71,9 +73,9 @@ function EventConversationTopicDirectory({ topics, eventSlug, linked = false, se
       </Link> : null
     })}</div>
   </nav>
-  return <section id="conversas" className="scroll-mt-20 rounded-2xl border border-[#CEC8BD] bg-[#F5F1E8] p-6 sm:p-8">
+  return <section id="conversas" className="min-w-0">
     <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#A94E38]">Conversas organizadas</p>
-    <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">Tópicos do Bench</h2>
+    <h2 className="event-section-title mt-1">Tópicos do Bench</h2>
     <p className="mt-3 max-w-3xl text-sm leading-7 text-[#625E59]">O grupo de WhatsApp continua aberto para a conversa geral. No legalops.club, cada frente tem um espaço próprio para registrar experiências e respostas.</p>
     <div className="mt-6 grid gap-3 sm:grid-cols-2">{topics.map((topic, index) => {
       const content = <><span className="text-[10px] font-black text-[#A94E38]">0{topic.display_order || index + 1}</span><h3 className="mt-2 font-bold">{topic.title}</h3><p className="mt-2 text-sm leading-6 text-[#625E59]">{topic.description}</p>{linked && topic.id ? <span className="mt-3 inline-flex items-center text-xs font-bold text-[#A94E38]">Abrir conversa <ArrowRight className="ml-1 h-3.5 w-3.5" /></span> : null}</>
@@ -82,7 +84,8 @@ function EventConversationTopicDirectory({ topics, eventSlug, linked = false, se
   </section>
 }
 
-function PublicEventLanding({ event, translations, user, registered, registrationError, phoneError, clubStatus, dateTbd, past, registrationCount, whatsappSummaries, conversationTopics }: {
+function PublicEventLanding({ initialSection, event, translations, user, registered, registrationError, phoneError, clubStatus, dateTbd, past, registrationCount, whatsappSummaries, conversationTopics }: {
+  initialSection?: string
   event: PublicEvent
   translations: Awaited<ReturnType<typeof loadClubTranslations>>
   user: { id: string } | null
@@ -105,31 +108,7 @@ function PublicEventLanding({ event, translations, user, registered, registratio
   const questions = event.pre_questions?.filter(Boolean) ?? []
   const calendarLink = !dateTbd && googleCalendarEventLink(event.google_event_id)
 
-  return <main className="bg-[#F5F1E8]">
-    <section className="relative overflow-hidden border-b border-[#2B2925] bg-[#171715] text-[#F8F4EC]">
-      <div aria-hidden="true" className="absolute -right-24 -top-32 h-80 w-80 rounded-full border border-[#E88A6A]/25" />
-      <div aria-hidden="true" className="absolute -right-8 -top-16 h-52 w-52 rounded-full border border-[#E88A6A]/20" />
-      <div className="relative mx-auto grid max-w-[1180px] gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-16 lg:py-20">
-        <div className="max-w-3xl">
-          <Link href="/club" className="inline-flex min-h-11 items-center text-xs font-bold text-[#E8B4A1] underline decoration-[#E88A6A]/60 underline-offset-4">← legalops.club</Link>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full border border-[#E88A6A]/45 bg-[#E88A6A]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.16em] text-[#F1AD93]">{t('Bench entre pares')}</span>
-            <span className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-white/65">{past ? t('Evento realizado') : t('Inscrições abertas')}</span>
-            {registrationCount !== null ? <span className="rounded-full border border-white/15 bg-white/[.04] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-white/80">{registrationCount === 1 ? t('{count} pessoa inscrita', { count: registrationCount }) : t('{count} pessoas inscritas', { count: registrationCount })}</span> : null}
-          </div>
-          <div className="mt-6">
-            <TranslatedContent source={source} original={{title:event.title}} enabled={translations.enabled} serverLocale={locale} titleAs="h1" titleClassName="max-w-3xl text-[38px] font-semibold leading-[1.04] tracking-[-.045em] text-[#F8F4EC] sm:text-[54px] lg:text-[64px]" />
-          </div>
-          <p className="mt-6 max-w-2xl text-base leading-7 text-white/65 sm:text-lg sm:leading-8">{t('Uma conversa prática para comparar como outros jurídicos estão resolvendo o mesmo desafio.')}</p>
-          <dl className="mt-9 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-white/10 bg-white/[.04] p-4"><dt className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.14em] text-white/45"><CalendarDays className="h-4 w-4 text-[#E88A6A]" />{t('Quando')}</dt><dd className="mt-2 text-sm font-semibold leading-5 text-white/90">{date}</dd></div>
-            <div className="rounded-xl border border-white/10 bg-white/[.04] p-4"><dt className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.14em] text-white/45"><MapPin className="h-4 w-4 text-[#E88A6A]" />{t('Formato')}</dt><dd className="mt-2 text-sm font-semibold text-white/90">{mode}</dd></div>
-            <div className="rounded-xl border border-white/10 bg-white/[.04] p-4"><dt className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.14em] text-white/45"><UserRound className="h-4 w-4 text-[#E88A6A]" />{t('Organização')}</dt><dd className="mt-2 text-sm font-semibold leading-5 text-white/90">{event.host_name}</dd></div>
-          </dl>
-          {calendarLink ? <a href={calendarLink} target="_blank" rel="noreferrer" className="mt-5 inline-flex min-h-11 items-center rounded-lg border border-white/25 px-4 text-xs font-bold text-white">Abrir no Google Calendar <ArrowRight className="ml-2 h-4 w-4" /></a> : null}
-        </div>
-
-        <aside aria-label={t('Inscrição no evento')} className="self-start rounded-2xl border border-white/10 bg-[#F8F4EC] p-5 text-[#24231F] shadow-[0_24px_70px_rgba(0,0,0,.28)] sm:p-6 lg:sticky lg:top-5">
+  const registration = <div className="event-form">
           {past ? <div>
             <p className="text-xs font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Evento realizado')}</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-[-.035em]">{t('Continue pela comunidade')}</h2>
@@ -157,77 +136,68 @@ function PublicEventLanding({ event, translations, user, registered, registratio
             <p className="text-xs font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Inscrição gratuita')}</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-[-.035em]">{t('Reserve sua vaga')}</h2>
             <p className="mt-2 text-sm leading-6 text-[#625E59]">{t('Você não precisa criar uma conta para registrar seu interesse.')}</p>
-            <div className="mt-5 space-y-3">
+            <div className="event-registration-fields">
               <label className="block text-xs font-bold">{t('Nome')}<input name="name" autoComplete="name" required minLength={2} className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
               <label className="block text-xs font-bold">{t('E-mail')}<input name="email" autoComplete="email" required type="email" className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
               <label className="block text-xs font-bold">{t('WhatsApp com DDI e DDD')}<input name="phone" autoComplete="tel" required type="tel" maxLength={40} placeholder="+55 11 99999-9999" aria-describedby="bench-phone-help" className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
               <p id="bench-phone-help" className="text-xs leading-5 text-[#625E59]">{t('Informe o mesmo número que você usa no grupo do Bench, começando com + e o código do país. Esse dado não será exibido publicamente.')}</p>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block text-xs font-bold">{t('Cargo')}<input name="role" autoComplete="organization-title" required minLength={2} className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
                 <label className="block text-xs font-bold">{t('Onde trabalha')}<input name="organization" autoComplete="organization" required minLength={2} className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CEC8BD] bg-white px-3 text-base" /></label>
               </div>
             </div>
-            <div className="mt-4 rounded-xl border border-[#D9D0C4] bg-white p-4">
+            <div className="mt-4 rounded-xl border border-[#D9D0C4] bg-[#FAF7F1] p-3">
               <p className="text-[10px] font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Opcional')}</p>
               <label className="mt-2 flex cursor-pointer items-start gap-3 text-sm">
                 <input type="checkbox" name="join_club" className="mt-1 h-4 w-4 shrink-0 accent-[#24231F]" />
                 <span><strong className="block">{t('Também quero entrar no LegalOps Club')}</strong><span className="mt-1 block text-xs leading-5 text-[#625E59]">{t('Receba um email para ativar sua conta e acompanhar as conversas, materiais e próximos encontros.')}</span></span>
               </label>
-              <p className="mt-3 border-t border-[#E6DED0] pt-3 text-[11px] leading-5 text-[#716B65]">{t('A inscrição no evento é independente do Club.')}</p>
+              <p className="mt-2 border-t border-[#E6DED0] pt-2 text-[11px] leading-5 text-[#716B65]">{t('A inscrição no evento é independente do Club.')}</p>
             </div>
             <button className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#24231F] px-5 text-sm font-bold text-white hover:bg-[#3A3834]">{t('Quero participar')} <ArrowRight className="ml-2 h-4 w-4" /></button>
             <p className="mt-4 flex gap-2 text-[11px] leading-5 text-[#716B65]"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />{t('Seus dados serão usados para organizar o encontro e enviar as informações de acesso.')}</p>
           </form>}
-        </aside>
-      </div>
-    </section>
-
-    <section className="mx-auto grid max-w-[1180px] gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1fr)_19rem] lg:gap-16">
-      <div className="space-y-12">
-        <article>
-          <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#A94E38]">{t('Bench LegalOps')}</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">{t('Sobre o encontro')}</h2>
-          <div className="mt-5 max-w-3xl border-l-2 border-[#E88A6A] pl-5 sm:pl-7">
-            <TranslatedContent source={source} original={{description:event.description}} enabled={translations.enabled} serverLocale={locale} bodyClassName="whitespace-pre-wrap text-[15px] leading-8 text-[#55514B]" />
-          </div>
-        </article>
-
-        {questions.length ? <article>
-          <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#A94E38]">{t('Pauta')}</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em]">{t('O que vamos discutir?')}</h2>
-          <ol className="mt-6 grid gap-3 sm:grid-cols-2">{questions.map((question,index)=><li key={question} className="flex gap-4 rounded-xl border border-[#CEC8BD] bg-[#FAF7F1] p-4 text-sm leading-6"><span className="font-black text-[#A94E38]">0{index+1}</span><span>{question}</span></li>)}</ol>
-        </article> : null}
-
-        {event.participation_details ? <article className="rounded-2xl bg-[#EDE5D8] p-6 sm:p-8">
-          <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#A94E38]">{t('Participação')}</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-[-.035em]">{t('Como vai funcionar')}</h2>
-          <div className="mt-3 max-w-3xl"><TranslatedContent source={source} original={{participation_details:event.participation_details}} enabled={translations.enabled} serverLocale={locale} bodyClassName="whitespace-pre-wrap text-sm leading-7 text-[#5D574F]" /></div>
-        </article> : null}
-
-        <EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} />
-        {isEventWhatsAppSummaryEnabled(event.slug) ? <EventWhatsAppSummaryArchive archive={whatsappSummaries} eventSlug={event.slug} /> : null}
-      </div>
-
-      <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">
-        <section className="border-t-2 border-[#24231F] py-5">
-          <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#817A73]">{t('Quem organiza')}</p>
-          <p className="mt-3 text-lg font-semibold">{event.host_name}</p>
-          <p className="mt-2 text-sm leading-6 text-[#625E59]">{t('A organização confirmará data, horário e acesso com as pessoas inscritas.')}</p>
-        </section>
-        <section className="border-t border-[#CEC8BD] py-5">
-          <p className="mb-3 text-[10px] font-black uppercase tracking-[.16em] text-[#817A73]">{t('Convide alguém')}</p>
-          <EventShare slug={event.slug} title={event.title} variant="invitation" />
-        </section>
-      </aside>
-    </section>
-
-    <section className="border-t border-[#CEC8BD] bg-[#FAF7F1]">
-      <div className="mx-auto flex max-w-[1180px] flex-col gap-5 px-5 py-10 sm:px-8 md:flex-row md:items-center md:justify-between">
-        <div><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#A94E38]">legalops.club</p><h2 className="mt-2 text-2xl font-semibold tracking-[-.035em]">{t('Materiais e conversas depois do encontro')}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#625E59]">{t('Membros acessam fotos, documentos e discussões e podem continuar a troca depois do Bench.')}</p></div>
-        <Link href={joinUrl} className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-lg border border-[#24231F] px-5 text-sm font-bold">{user ? t('Completar meu cadastro') : t('Conhecer a comunidade')} <ArrowRight className="ml-2 h-4 w-4" /></Link>
-      </div>
-    </section>
-  </main>
+  </div>
+  const overview = <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(15rem,.7fr)]">
+    <div className="min-w-0 space-y-5">
+      <article>
+        <h2 className="event-section-title">{t('Sobre o encontro')}</h2>
+        <div className="mt-3"><TranslatedContent source={source} original={{description:event.description}} enabled={translations.enabled} serverLocale={locale} bodyClassName="whitespace-pre-wrap text-sm leading-6 text-[#625E59]" /></div>
+      </article>
+      {questions.length ? <article>
+        <h2 className="text-sm font-bold">{t('O que vamos discutir?')}</h2>
+        <ol className="mt-3 space-y-3">{questions.map((question,index)=><li key={question} className="flex gap-3 text-sm leading-6 text-[#625E59]"><span className="font-bold text-[#A94E38]">{String(index+1).padStart(2,'0')}</span><span>{question}</span></li>)}</ol>
+      </article> : null}
+    </div>
+    <aside className="self-start rounded-xl border border-[#E6DED0] bg-[#F8F5EF] p-4">
+      <p className="text-[10px] font-bold uppercase tracking-[.12em] text-[#A94E38]">{past ? t('Evento realizado') : t('Inscrição gratuita')}</p>
+      <h2 className="mt-2 text-lg font-semibold">{past ? t('Continue pela comunidade') : t('Participe da conversa')}</h2>
+      {event.participation_details ? <div className="mt-2"><TranslatedContent source={source} original={{participation_details:event.participation_details}} enabled={translations.enabled} serverLocale={locale} bodyClassName="text-sm leading-6 text-[#625E59]" /></div> : null}
+      {!past ? <EventSectionButton section="inscricao" className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[#24231F] px-4 text-sm font-bold text-white">{t('Reserve sua vaga')} <ArrowRight className="ml-2 h-4 w-4" /></EventSectionButton> : null}
+      <Link href={joinUrl} className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-[#A94E38] underline underline-offset-4">{user ? t('Completar meu cadastro') : t('Conhecer a comunidade')}</Link>
+      <div className="mt-3 border-t border-[#DED6C9] pt-3"><EventShare slug={event.slug} title={event.title} variant="invitation" /></div>
+      {calendarLink ? <a href={calendarLink} target="_blank" rel="noreferrer" className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold underline">Abrir no Google Calendar</a> : null}
+    </aside>
+  </div>
+  const header = <>
+    <div className="mb-2 flex min-h-8 flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+      <Link href="/community/calendar" className="inline-flex min-h-11 items-center font-semibold text-[#A94E38]">{t('← Eventos')}</Link>
+      <span className="text-[#817A73]">{past ? t('Evento realizado') : t('Inscrições abertas')}</span>
+      {registrationCount !== null ? <span className="ml-auto rounded-full border border-[#CEC8BD] px-2 py-1 text-[11px] text-[#625E59]">{registrationCount === 1 ? t('{count} pessoa inscrita', { count: registrationCount }) : t('{count} pessoas inscritas', { count: registrationCount })}</span> : null}
+    </div>
+    <TranslatedContent source={source} original={{title:event.title}} enabled={translations.enabled} serverLocale={locale} titleAs="h1" titleClassName="font-semibold" />
+    <dl className="event-meta mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#625E59]">
+      <div className="flex items-center gap-1.5"><dt><CalendarDays className="h-3.5 w-3.5" aria-label={t('Quando')} /></dt><dd>{date}</dd></div>
+      <div className="flex items-center gap-1.5"><dt><MapPin className="h-3.5 w-3.5" aria-label={t('Formato')} /></dt><dd>{mode}</dd></div>
+      <div className="flex items-center gap-1.5"><dt><UserRound className="h-3.5 w-3.5" aria-label={t('Organização')} /></dt><dd>{event.host_name}</dd></div>
+    </dl>
+  </>
+  return <EventWorkspace header={header} initialSection={initialSection || (registered || registrationError || phoneError ? 'inscricao' : user && isEventWhatsAppSummaryEnabled(event.slug) ? 'resumos' : 'sobre')} sections={[
+    { id: 'sobre', label: t('Sobre'), content: overview },
+    { id: 'inscricao', label: registered ? t('Inscrição') : t('Participar'), content: registration },
+    ...(isEventWhatsAppSummaryEnabled(event.slug) ? [{ id: 'resumos', label: t('Resumos'), locked: whatsappSummaries.status === 'signed-out', content: <EventWhatsAppSummaryArchive archive={whatsappSummaries} eventSlug={event.slug} /> }] : []),
+    ...(conversationTopics.length ? [{ id: 'discussoes', label: t('Conversas'), content: <EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} /> }] : []),
+  ]} />
 }
 
 export default async function EventPage({ params, searchParams }: { params: { slug: string }, searchParams?: { registered?: string, registration?: string, club?: string, shared?: string, tab?: string, topic?: string } }) {
@@ -241,7 +211,7 @@ export default async function EventPage({ params, searchParams }: { params: { sl
     const past = !dateTbd && new Date(publicEvent.ends_at || publicEvent.starts_at) < new Date()
     const [registrationCount, conversationTopics] = await Promise.all([loadConfirmedEventRegistrationCount(publicEvent.id), loadPublicEventConversationTopics(publicEvent.id, publicEvent.slug)])
     const whatsappSummaries: EventSummaryArchive = { summaries: [], status: 'signed-out' }
-    return <PublicEventLanding event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} phoneError={searchParams?.registration === 'phone'} clubStatus={searchParams?.club} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
+    return <PublicEventLanding initialSection={searchParams?.tab} event={publicEvent} translations={{ enabled: false, sources: new Map() }} user={null} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} phoneError={searchParams?.registration === 'phone'} clubStatus={searchParams?.club} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
   }
 
   const supabase = await createServerSupabaseClient()
@@ -269,14 +239,13 @@ export default async function EventPage({ params, searchParams }: { params: { sl
   const { data: authors } = authorIds.length ? await supabase.from('community_members').select('user_id,display_name,avatar_path,current_role,organization_name').in('user_id', authorIds) : { data: [] }
   const dateTbd = /data(?: e formato)? a confirmar/i.test(event.location_label || '')
   const past = !dateTbd && new Date(event.ends_at || event.starts_at) < new Date()
-  const activeTab = searchParams?.tab === 'discussoes' || searchParams?.topic ? 'discussoes' : searchParams?.tab === 'documentos' ? 'documentos' : 'fotos'
+  const initialSection = searchParams?.topic ? 'discussoes' : searchParams?.tab || (isEventWhatsAppSummaryEnabled(event.slug) ? 'resumos' : 'sobre')
   const selectedTopic = conversationTopics.find(topic => topic.id && topic.id === searchParams?.topic) ?? null
   const selectedDiscussions = selectedTopic ? (discussions ?? []).filter(post => post.topic_id === selectedTopic.id) : []
   const topicActivity = new Map<string, number>()
   for (const post of discussions ?? []) if (post.topic_id) topicActivity.set(post.topic_id, (topicActivity.get(post.topic_id) ?? 0) + (post.community_comments?.length ?? 0))
-  const visibleResources = resources?.filter(item => activeTab === 'fotos' ? item.kind === 'foto' : item.kind !== 'foto') ?? []
   const translations = await loadClubTranslations(supabase, [event.id,...(discussions ?? []).flatMap(post => [post.id, ...(post.community_comments ?? []).map(comment => comment.id)]),...(resources ?? []).map(resource => resource.id),...authorIds])
-  if (!isMember) return <PublicEventLanding event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} phoneError={searchParams?.registration === 'phone'} clubStatus={searchParams?.club} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
+  if (!isMember) return <PublicEventLanding initialSection={searchParams?.tab} event={event as PublicEvent} translations={translations} user={user} registered={Boolean(searchParams?.registered)} registrationError={searchParams?.registration === 'error'} phoneError={searchParams?.registration === 'phone'} clubStatus={searchParams?.club} dateTbd={dateTbd} past={past} registrationCount={registrationCount} whatsappSummaries={whatsappSummaries} conversationTopics={conversationTopics} />
 
   const overview = <div className="space-y-5">
     <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{description:event.description,location_label:event.location_label}} enabled={translations.enabled} serverLocale={getClubLocale()} />
@@ -294,37 +263,11 @@ export default async function EventPage({ params, searchParams }: { params: { sl
     <p className="text-[10px] font-black uppercase tracking-[.14em] text-[#A94E38]">{t('Minha participação')}</p>
     <h2 className="mt-2 text-lg font-bold">{attendance?.response === 'confirmed' ? t('Presença confirmada') : t('Confirmar presença')}</h2>
     <p className="mt-2 text-xs leading-5 text-[#716B65]">{attendance?.response === 'confirmed' ? t('Revise seus dados ou avise se não puder participar.') : t('Confirme seus dados para participar do encontro e das conversas.')}</p>
-    <details className="mt-3"><summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold underline underline-offset-4">{attendance?.response === 'confirmed' ? t('Revisar participação') : t('Confirmar agora')}</summary><div className="mt-3"><BenchClient eventId={event.id} initial={attendance} member={{ name: member?.display_name || '', role: member?.current_role || '', email: user.email || '' }} /></div></details>
+    <details open className="mt-3"><summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold underline underline-offset-4">{attendance?.response === 'confirmed' ? t('Revisar participação') : t('Confirmar agora')}</summary><div className="mt-3"><BenchClient eventId={event.id} initial={attendance} member={{ name: member?.display_name || '', role: member?.current_role || '', email: user.email || '' }} /></div></details>
   </section> : null
-  return <main className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 lg:py-6">
-    <header className="mb-4 sm:mb-5">
-      <div className="flex min-h-11 flex-wrap items-center gap-3 text-xs">
-        <Link href="/community/calendar" className="inline-flex min-h-11 items-center font-semibold text-[#A94E38]">{t('← Eventos')}</Link>
-        <span className="text-[#817A73]">{past ? t('Evento realizado') : t('Próximo evento')}</span>
-        {eventAdmin ? <Link href={`/club/admin/events/${event.slug}`} className="ml-auto inline-flex min-h-11 items-center rounded-lg border border-[#CEC8BD] bg-white px-4 font-bold text-[#24231F]">Ver confirmados</Link> : null}
-      </div>
-      <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{title:event.title}} enabled={translations.enabled} serverLocale={getClubLocale()} titleAs="h1" titleClassName="text-2xl font-extrabold leading-tight tracking-[-.025em] text-[#252420] sm:text-3xl" />
-    </header>
-    <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-6">
-      <div className="min-w-0">
-        <details open={!past} className="mb-4 rounded-xl border border-[#CEC8BD] bg-white xl:hidden">
-          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 text-sm font-semibold [&::-webkit-details-marker]:hidden">{t('Sobre o encontro')}<ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0" /></summary>
-          <div className="border-t border-[#E6DED0] p-4">{overview}</div>
-        </details>
-        {attendanceCard ? <div className="mb-4 xl:hidden">{attendanceCard}</div> : null}
-        {isEventWhatsAppSummaryEnabled(event.slug) ? <div className="mb-4"><EventWhatsAppSummaryArchive archive={whatsappSummaries} eventSlug={event.slug} /></div> : null}
-        {isMember && <nav id="publicacoes" aria-label={t('Conteúdo do evento')} className="mb-4 flex scroll-mt-20 gap-1 border-b border-[#CEC8BD]">
-          {([{ key: 'fotos', label: t("Fotos") }, { key: 'documentos', label: t("Documentos") }, { key: 'discussoes', label: t("Conversas") }] as const).map(tab => <Link key={tab.key} href={`/community/events/${event.slug}?tab=${tab.key}#publicacoes`} aria-current={activeTab === tab.key ? 'page' : undefined} className={`inline-flex min-h-12 flex-1 items-center justify-center border-b-2 px-2 text-sm font-semibold sm:flex-none sm:px-5 ${activeTab === tab.key ? 'border-[#A94E38] text-[#A94E38]' : "border-transparent text-[#625E59] hover:text-[#24231F]"}`}>{t(tab.label)}</Link>)}
-        </nav>}
-      {isMember && !canContribute && activeTab !== 'discussoes' && past && <p className="mb-4 rounded-lg border border-[#CEC8BD] p-4 text-sm leading-6 text-[#625E59]">{t("As fotos e documentos são exclusivos de participantes confirmados e organizadores. Se você participou e não tem acesso, peça à organização para conferir sua inscrição.")}</p>}
-
-        {canContribute && activeTab !== 'discussoes' && <section aria-label={t('Publicações do evento')}>
-          <EventUpload key={activeTab} eventId={event.id} photos={activeTab === 'fotos'} />
-          <EventPublications translations={translations} resources={visibleResources} authors={authors ?? []} />
-        </section>}
-      {isMember && activeTab === 'discussoes' ? <div className="space-y-4">
-        {!canContribute ? <><EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} /><p className="rounded-xl border border-[#CEC8BD] bg-white p-5 text-sm leading-6 text-[#625E59]">Confirme sua participação no Bench para entrar nas conversas específicas do evento.</p></> : <div className="grid items-start gap-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
-        <EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} linked selectedTopicId={selectedTopic?.id} activity={topicActivity} />
+  const conversation = <div className="space-y-4">
+        {!canContribute ? <><EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} /><p className="rounded-xl border border-[#CEC8BD] bg-white p-5 text-sm leading-6 text-[#625E59]">Confirme sua participação no Bench para entrar nas conversas específicas do evento.</p></> : <div className="grid items-start gap-4 lg:grid-cols-[15rem_minmax(0,1fr)]">
+        <div className="hidden lg:block"><EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} linked selectedTopicId={selectedTopic?.id} activity={topicActivity} /></div><details open={!selectedTopic} className="rounded-lg border border-[#CEC8BD] lg:hidden"><summary className="min-h-11 cursor-pointer px-3 py-3 text-sm font-semibold">{selectedTopic ? `Tópico: ${selectedTopic.title}` : 'Escolher tópico'}</summary><EventConversationTopicDirectory topics={conversationTopics} eventSlug={event.slug} linked selectedTopicId={selectedTopic?.id} activity={topicActivity} /></details>
         {selectedTopic ? <section className="min-w-0 rounded-xl border border-[#CEC8BD] bg-white p-4 sm:p-6">
           <Link href={`/community/events/${event.slug}?tab=discussoes#publicacoes`} className="inline-flex min-h-11 items-center text-xs font-bold text-[#A94E38]">← Todos os tópicos</Link>
           <p className="text-[10px] font-black uppercase tracking-[.14em] text-[#A94E38]">Tópico em discussão</p>
@@ -344,13 +287,24 @@ export default async function EventPage({ params, searchParams }: { params: { sl
           </article>)}</div> : <p className="mt-5 rounded-lg bg-[#F5F1E8] p-4 text-sm">A conversa deste tópico será aberta pela organização.</p>}
         </section> : <section className="flex min-h-64 items-center justify-center rounded-xl border border-dashed border-[#CEC8BD] bg-white p-6 text-center"><div className="max-w-sm"><span className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-[#F5F1E8]"><MessageCircle className="h-5 w-5 text-[#A94E38]" /></span><h2 className="mt-4 text-lg font-bold">Escolha uma frente da conversa</h2><p className="mt-2 text-sm leading-6 text-[#625E59]">Abra um dos tópicos para ler as respostas e compartilhar sua experiência ou pergunta.</p></div></section>}
         </div>}
-      </div> : null}
-
       </div>
-      <aside aria-label={t('Sobre o encontro')} className="sticky top-20 hidden min-w-0 space-y-4 xl:block">
-        <section className="rounded-xl border border-[#CEC8BD] bg-white p-5"><h2 className="mb-4 text-sm font-semibold">{t('Sobre o encontro')}</h2>{overview}</section>
-        {attendanceCard}
-      </aside>
-    </div>
-  </main>
+  const publications = (photos: boolean) => canContribute ? <section aria-label={t('Publicações do evento')}>
+    <details className="rounded-lg border border-[#CEC8BD] bg-[#FAF7F1] px-4"><summary className="min-h-11 cursor-pointer py-3 text-sm font-semibold">{photos ? t('Compartilhar fotos') : t('Compartilhar documento')}</summary><div className="pb-4"><EventUpload eventId={event.id} photos={photos} /></div></details>
+    <EventPublications translations={translations} resources={(resources ?? []).filter(item => photos ? item.kind === 'foto' : item.kind !== 'foto')} authors={authors ?? []} />
+  </section> : <div className="mx-auto max-w-lg py-6 text-center"><h2 className="event-section-title">{t('Conteúdo para participantes')}</h2><p className="mt-3 text-sm leading-6 text-[#625E59]">{t('As fotos e documentos são exclusivos de participantes confirmados e organizadores. Se você participou e não tem acesso, peça à organização para conferir sua inscrição.')}</p>{attendanceCard ? <EventSectionButton section="participacao" className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-[#24231F] px-4 text-sm font-semibold text-white">{t('Confirmar presença')}</EventSectionButton> : null}</div>
+  return <EventWorkspace header={    <div>
+      <div className="flex min-h-11 flex-wrap items-center gap-3 text-xs">
+        <Link href="/community/calendar" className="inline-flex min-h-11 items-center font-semibold text-[#A94E38]">{t('← Eventos')}</Link>
+        <span className="text-[#817A73]">{past ? t('Evento realizado') : t('Próximo evento')}</span>
+        {eventAdmin ? <Link href={`/club/admin/events/${event.slug}`} className="ml-auto inline-flex min-h-11 items-center rounded-lg border border-[#CEC8BD] bg-white px-4 font-bold text-[#24231F]">Ver confirmados</Link> : null}
+      </div>
+      <TranslatedContent source={translations.sources.get(`event:${event.id}`)} original={{title:event.title}} enabled={translations.enabled} serverLocale={getClubLocale()} titleAs="h1" titleClassName="text-2xl font-extrabold leading-tight tracking-[-.025em] text-[#252420] sm:text-3xl" />
+    </div>} initialSection={initialSection} sections={[
+    { id: 'sobre', label: t('Sobre'), content: <div className="max-w-3xl"><h2 className="event-section-title mb-4">{t('Sobre o encontro')}</h2>{overview}</div> },
+    ...(isEventWhatsAppSummaryEnabled(event.slug) ? [{ id: 'resumos', label: t('Resumos'), content: <EventWhatsAppSummaryArchive archive={whatsappSummaries} eventSlug={event.slug} /> }] : []),
+    { id: 'discussoes', label: t('Conversas'), content: conversation },
+    { id: 'fotos', label: t('Fotos'), content: publications(true) },
+    { id: 'documentos', label: t('Documentos'), content: publications(false) },
+    ...(attendanceCard ? [{ id: 'participacao', label: t('Participação'), content: attendanceCard }] : []),
+  ]} />
 }

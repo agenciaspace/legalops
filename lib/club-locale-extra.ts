@@ -1,5 +1,7 @@
 // Reviewed static catalogs. Runtime UI labels do not call a model.
 export const spanish: Record<string, string> = {
+  'Sobre': 'Acerca de', 'Resumos': 'Resúmenes',
+  'Participe da conversa': 'Participa en la conversación', 'Conteúdo para participantes': 'Contenido para participantes',
   'Compartilhar': 'Compartir', 'Perfil público': 'Perfil público', 'Preferências': 'Preferencias', 'Mais assuntos': 'Más temas',
   'Nenhum encontro realizado.': 'Todavía no hay encuentros anteriores.',
   'Compartilhe uma pergunta ou experiência para começar.': 'Comparte una pregunta o experiencia para empezar una conversación.',
@@ -563,6 +565,8 @@ export const spanish: Record<string, string> = {
   "Español": "Español"
 }
 export const extraEnglish: Record<string, string> = {
+  'Sobre': 'About', 'Resumos': 'Summaries',
+  'Participe da conversa': 'Join the conversation', 'Conteúdo para participantes': 'Participant content',
   "Redefinir senha": "Reset password",
   "Entre na sua conta": "Sign in to your account",
   "Como entrar": "Sign-in method",

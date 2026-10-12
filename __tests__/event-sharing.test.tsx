@@ -1,5 +1,5 @@
 vi.mock('next/navigation',()=>({useRouter:()=>({refresh:vi.fn()})}))
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, fireEvent } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { clubReturnPath } from '@/lib/club-return-path'
 
@@ -30,13 +30,15 @@ vi.mock('@/lib/supabase-server', () => ({ createServerSupabaseClient: async () =
 }) }))
 import EventPage, { generateMetadata } from '@/app/(main)/community/events/[slug]/page'
 
-beforeEach(() => { state.user = null; state.member = null; state.tables = []; state.location = ''; state.registrationCount = 8; state.slug = 'bench-nubank'; state.fallback = false; state.summaryError = false })
+beforeEach(() => { window.history.replaceState({}, '', '/'); state.user = null; state.member = null; state.tables = []; state.location = ''; state.registrationCount = 8; state.slug = 'bench-nubank'; state.fallback = false; state.summaryError = false })
 afterEach(cleanup)
 
 it.each([false, true])('invites a nonmember to join without reading private materials (signed in: %s)', async signedIn => {
   if (signedIn) state.user = { id: 'inactive-member' }
   render(await EventPage({ params: { slug: 'bench-nubank' } }))
-  expect(screen.getByRole('heading', { name: 'Reserve sua vaga' })).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('tab', { name: 'Participar' }))
+  expect(screen.getByRole('heading', { name: 'Reserve sua vaga' })).toBeVisible()
+  fireEvent.click(screen.getByRole('tab', { name: 'Sobre' }))
   expect(screen.getByRole('link', { name: new RegExp(signedIn ? 'Completar meu cadastro' : 'Conhecer a comunidade') })).toHaveAttribute('href', '/club/entrar?next=%2Fcommunity%2Fevents%2Fbench-nubank')
   expect(state.tables).not.toContain('community_event_resources')
   expect(state.tables).not.toContain('community_posts')
@@ -54,14 +56,17 @@ it('keeps public registration open while the event date is still being confirmed
   render(await EventPage({ params: { slug: 'bench-nubank' } }))
   expect(screen.getByText('Data a confirmar')).toBeInTheDocument()
   expect(screen.getByText('A confirmar')).toBeInTheDocument()
-  expect(screen.getByRole('heading', { name: 'Reserve sua vaga' })).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('tab', { name: 'Participar' }))
+  expect(screen.getByRole('heading', { name: 'Reserve sua vaga' })).toBeVisible()
   expect(screen.getByRole('button', { name: /Quero participar/ })).toBeInTheDocument()
-  expect(screen.getByRole('heading', { name: 'Sobre o encontro' })).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('tab', { name: 'Sobre' }))
+  expect(screen.getByRole('heading', { name: 'Sobre o encontro' })).toBeVisible()
   expect(screen.getByRole('heading', { name: 'O que vamos discutir?' })).toBeInTheDocument()
 })
 
 it('keeps event registration independent and offers an explicit Club opt-in', async () => {
   render(await EventPage({ params: { slug: 'bench-nubank' } }))
+  fireEvent.click(screen.getByRole('tab', { name: 'Participar' }))
   expect(screen.getByText('A inscrição no evento é independente do Club.')).toBeInTheDocument()
   expect(screen.getByRole('checkbox', { name: /Também quero entrar no LegalOps Club/ })).not.toBeChecked()
   expect(screen.getByText(/acompanhar as conversas, materiais e próximos encontros/)).toBeInTheDocument()
@@ -69,6 +74,7 @@ it('keeps event registration independent and offers an explicit Club opt-in', as
 
 it('requires the same WhatsApp number used in the Bench group', async () => {
   render(await EventPage({ params: { slug: 'bench-nubank' } }))
+  fireEvent.click(screen.getByRole('tab', { name: 'Participar' }))
   expect(screen.getByRole('textbox', { name: 'WhatsApp com DDI e DDD' })).toBeRequired()
   expect(screen.getByText(/Informe o mesmo número que você usa no grupo do Bench/)).toBeInTheDocument()
 })
@@ -113,6 +119,7 @@ it('accepts event destinations and rejects external, management and encoded redi
 it.each([false, true])('keeps anonymous HTML free of summary content (fallback: %s)', async fallback => {
   state.slug = 'bench-netlex-2026'; state.fallback = fallback
   const { container } = render(await EventPage({ params: { slug: state.slug } }))
+  fireEvent.click(screen.getByRole('tab', { name: 'Resumos' }))
   expect(screen.getByRole('link', { name: /Entrar para ler os resumos/ })).toHaveAttribute('href', '/login?next=%2Fcommunity%2Fevents%2Fbench-netlex-2026')
   expect(container.innerHTML).not.toContain('Private group')
   expect(state.tables).not.toContain('community_event_whatsapp_summaries')
