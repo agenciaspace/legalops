@@ -9,6 +9,8 @@ export type OpenRouterMessageContent =
   | undefined
 
 interface OpenRouterChatResponse {
+  model?: string
+  usage?: {cost?:number;prompt_tokens?:number;completion_tokens?:number}
   choices?: Array<{
     message?: {
       content?: OpenRouterMessageContent
@@ -23,6 +25,7 @@ interface GenerateOpenRouterTextParams {
   maxTokens?: number
   temperature?: number
   timeoutMs?: number
+  onUsage?: (usage: {model:string|null;cost:number|null;inputTokens:number|null;outputTokens:number|null})=>Promise<void>
 }
 
 export function extractOpenRouterResponseText(content: OpenRouterMessageContent): string {
@@ -46,6 +49,7 @@ export async function generateOpenRouterText({
   maxTokens = 1024,
   temperature = 0,
   timeoutMs,
+  onUsage,
 }: GenerateOpenRouterTextParams): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY
   if (!apiKey) {
@@ -96,9 +100,16 @@ export async function generateOpenRouterText({
   const data = (await response.json()) as OpenRouterChatResponse
   const text = extractOpenRouterResponseText(data.choices?.[0]?.message?.content).trim()
 
+  if(onUsage) {
+    const amount=(value:unknown)=>typeof value==='number' && Number.isFinite(value) && value>=0 ? value : null
+    const tokens=(value:unknown)=>typeof value==='number' && Number.isSafeInteger(value) && value>=0 && value<=2147483647 ? value : null
+    await onUsage({model:typeof data.model==='string'?data.model:null,cost:amount(data.usage?.cost),inputTokens:tokens(data.usage?.prompt_tokens),outputTokens:tokens(data.usage?.completion_tokens)})
+  }
+
   if (!text) {
     throw new Error('OpenRouter response did not include text content')
   }
+
 
   return text
 }

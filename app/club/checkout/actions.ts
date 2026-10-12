@@ -16,9 +16,10 @@ async function buyer() {
 }
 export async function createProOrder() {
   const { user, admin } = await buyer()
-  const { data: offer } = await admin.from('club_pro_offer').select('price_cents,period_months,active').eq('id',true).single()
+  const { data: offer } = await admin.from('club_pro_offer').select('price_cents,period_months,active,payment_mode,payment_url,trial_days').eq('id',true).single()
   if (!isProOfferOpen(offer)) redirect('/club/checkout?error=unavailable')
-  const { error } = await admin.from('club_pro_orders').insert({ user_id:user.id, price_cents:offer.price_cents, period_months:offer.period_months })
+  const { error } = await admin.from('club_pro_orders').insert({ user_id:user.id, price_cents:offer.price_cents, period_months:offer.period_months,
+    ...(offer.payment_mode ? {payment_mode:offer.payment_mode,payment_url:offer.payment_url,trial_days:offer.trial_days??0} : {}) })
   if (error && error.code !== '23505') redirect('/club/checkout?error=order')
   revalidatePath('/club/checkout')
   redirect('/club/checkout')

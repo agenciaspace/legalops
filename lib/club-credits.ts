@@ -43,7 +43,12 @@ export async function generateCreditText(userId: string, reservation: CreditRese
     return generateMemberOpenAIText(key,{...prompt,systemPrompt:prompt.systemPrompt??''})
   }
   if (reservation.funding!=='club') throw new CreditError('CREDITS_UNAVAILABLE')
-  const text=await generateOpenRouterText(prompt)
+  const text=await generateOpenRouterText({...prompt,onUsage:async usage=>{
+    try {
+      const {error}=await createAdminClient().from('club_credit_transactions').update({provider_model:usage.model,provider_cost_usd:usage.cost,input_tokens:usage.inputTokens,output_tokens:usage.outputTokens}).eq('id',reservation.id).eq('user_id',userId).eq('funding','club')
+      if(error)console.error('[club/credits] usage metadata save failed')
+    } catch { console.error('[club/credits] usage metadata save failed') }
+  }})
   if(!text.trim())throw new CreditError('EMPTY_GENERATION')
   return text
 }

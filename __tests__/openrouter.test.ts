@@ -12,6 +12,22 @@ afterEach(() => {
 })
 
 describe('OpenRouter response helpers', () => {
+  it('reports provider cost and tokens without sending the accounting callback to the provider', async () => {
+    vi.stubEnv('OPENROUTER_API_KEY','test-key')
+    const usage=vi.fn(async()=>{})
+    const fetchMock=vi.fn().mockResolvedValue(Response.json({model:'provider/model',usage:{cost:0.002,prompt_tokens:1200,completion_tokens:400},choices:[{message:{content:'Result'}}]}))
+    vi.stubGlobal('fetch',fetchMock)
+    expect(await generateOpenRouterText({userPrompt:'Question',onUsage:usage})).toBe('Result')
+    expect(usage).toHaveBeenCalledWith({model:'provider/model',cost:0.002,inputTokens:1200,outputTokens:400})
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).not.toHaveProperty('onUsage')
+  })
+  it('keeps missing provider costs unknown instead of reporting zero',async()=>{
+    vi.stubEnv('OPENROUTER_API_KEY','test-key')
+    const usage=vi.fn(async()=>{})
+    vi.stubGlobal('fetch',vi.fn().mockResolvedValue(Response.json({usage:{cost:-1,prompt_tokens:1.5},choices:[{message:{content:'Result'}}]})))
+    await generateOpenRouterText({userPrompt:'Question',onUsage:usage})
+    expect(usage).toHaveBeenCalledWith({model:null,cost:null,inputTokens:null,outputTokens:null})
+  })
   it('extracts text from string and multipart content', () => {
     expect(extractOpenRouterResponseText('Resumo')).toBe('Resumo')
     expect(extractOpenRouterResponseText([

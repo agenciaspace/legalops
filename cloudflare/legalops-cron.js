@@ -5,10 +5,11 @@ export default {
       ? '/api/cron/community-summary'
       : '/api/cron/scrape'
 
-    ctx.waitUntil(fetch(`${env.APP_ORIGIN}${path}`, {
+    const paths = path === '/api/cron/scrape' ? [path, '/api/cron/club-pro-notices'] : [path]
+    ctx.waitUntil(Promise.all(paths.map(taskPath => fetch(`${env.APP_ORIGIN}${taskPath}`, {
       headers: {
         authorization: `Bearer ${env.CRON_SECRET}`,
       },
-    }))
+    }))))
   },
 }

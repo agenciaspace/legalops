@@ -32,7 +32,7 @@ Exemplos de direção do produto:
 
 A primeira versão do agente pessoal tem histórico privado, contexto e assuntos
 salvos, consulta às publicações do site, vagas verificadas do Work e referências
-do OpenCLM. Franquia inicial: 30 créditos por dia (reinício às 00h UTC), compartilhados entre as gerações Pro. Custos por ação, franquia e pacotes extras são configuráveis; ver `CLUB-CREDITS.md`. Leitura automática
+do OpenCLM. Franquia atual: 300 créditos por mês calendário (reinício no dia 1 às 00h UTC), compartilhados entre as gerações Pro. Custos por ação, franquia e pacotes extras são configuráveis; ver `CLUB-CREDITS.md`. Leitura automática
 do WhatsApp e aplicativo próprio continuam planejados; não fazem parte da oferta.
 
 Consultar vagas públicas no Work e acessar projetos open source do Dev não
@@ -100,3 +100,8 @@ administradores autenticados através de links temporários.
 
 Validação: testes Vitest de autorização, pedidos e agente; rollback SQL em
 `supabase/tests/club_pro.sql` verifica aprovação única, isolamento e cota diária.
+
+
+## Piloto aprovado em 12/10/2026
+
+Leon aprovou R$ 49 por mês e escolheu o link de assinatura do Mercado Pago com sete dias de teste. A equipe confere cada período no painel, envia o aviso de ativação e prepara lembretes de cobrança. O comprador autoriza a recorrência e cancela no Mercado Pago. Veja `CLUB-PAID-PILOT.md` para operação, atendimento e aquisição. Esta decisão substitui os trechos anteriores que aguardavam preço e tratavam a cobrança como PIX avulso.
