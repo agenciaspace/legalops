@@ -40,3 +40,30 @@ it('honors existing summary deep links and restores URL navigation', () => {
   fireEvent.popState(window)
   expect(screen.getByRole('textbox', { name: 'Nome' })).toBeVisible()
 })
+
+it('keeps the workspace height stable after document scrolling and cleans up viewport sizing', () => {
+  const originalViewport = window.visualViewport
+  const viewport = new EventTarget()
+  Object.assign(viewport, { height: 900, scale: 1 })
+  Object.defineProperty(window, 'visualViewport', { configurable: true, value: viewport })
+  const { container, unmount } = render(<EventWorkspace header={<h1>Encontro</h1>} sections={sections} />)
+  const workspace = container.querySelector<HTMLElement>('.event-workspace')!
+  const bounds = workspace.getBoundingClientRect.bind(workspace)
+  workspace.getBoundingClientRect = () => ({ ...bounds(), top: 65 - window.scrollY })
+  try {
+    fireEvent(window, new Event('resize'))
+    expect(workspace.style.getPropertyValue('--event-height')).toBe('835px')
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 120 })
+    fireEvent(window, new Event('resize'))
+    expect(workspace.style.getPropertyValue('--event-height')).toBe('835px')
+    Object.assign(viewport, { height: 800 })
+    viewport.dispatchEvent(new Event('resize'))
+    expect(workspace.style.getPropertyValue('--event-height')).toBe('735px')
+    expect(document.documentElement.style.getPropertyValue('--event-viewport-height')).toBe('800px')
+    unmount()
+    expect(document.documentElement.style.getPropertyValue('--event-viewport-height')).toBe('')
+  } finally {
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 })
+    Object.defineProperty(window, 'visualViewport', { configurable: true, value: originalViewport })
+  }
+})

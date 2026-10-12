@@ -1,3 +1,12 @@
+/* Safari's layout viewport can exceed the visible viewport when browser chrome
+   is expanded. Only the active content panel should own event-page scrolling. */
+html:has(.event-workspace), body:has(.event-workspace) {
+  height: var(--event-viewport-height, 100dvh);
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+body :where(div, main):has(.event-workspace) { min-height: 0; }
 .event-workspace {
   box-sizing: border-box;
   display: flex;
@@ -51,6 +60,7 @@ main:has(.event-workspace) > aside > div > div { padding-block: 0; }
   .event-workspace-tabs-many { grid-template-columns: repeat(var(--event-tabs), minmax(0, 1fr)); }
 }
 @media print {
+  html:has(.event-workspace), body:has(.event-workspace) { height: auto; overflow: visible; }
   .event-workspace { height: auto; overflow: visible; }
   .event-workspace-panel { overflow: visible; }
 }

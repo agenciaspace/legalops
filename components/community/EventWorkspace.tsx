@@ -44,8 +44,11 @@ export function EventWorkspace({ header, sections, initialSection = 'sobre' }: {
     const resize = () => {
       const viewport = window.visualViewport
       const bottomNav = document.querySelector('.club-bottom-nav')?.getBoundingClientRect().height || 0
-      const top = Math.max(0, element.getBoundingClientRect().top)
-      const height = (viewport?.height || window.innerHeight) - top - bottomNav
+      // Use document coordinates: a browser scroll must never grow the workspace.
+      const top = Math.max(0, element.getBoundingClientRect().top + window.scrollY)
+      const viewportHeight = viewport && viewport.scale === 1 ? viewport.height : window.innerHeight
+      document.documentElement.style.setProperty('--event-viewport-height', `${viewportHeight}px`)
+      const height = viewportHeight - top - bottomNav
       element.style.setProperty('--event-height', `${Math.max(160, height)}px`)
     }
     resize()
@@ -55,7 +58,7 @@ export function EventWorkspace({ header, sections, initialSection = 'sobre' }: {
     document.querySelectorAll('.club-content > aside, main > aside').forEach(notice => observer?.observe(notice))
     window.addEventListener('resize', resize)
     window.visualViewport?.addEventListener('resize', resize)
-    return () => { observer?.disconnect(); window.removeEventListener('resize', resize); window.visualViewport?.removeEventListener('resize', resize) }
+    return () => { document.documentElement.style.removeProperty('--event-viewport-height'); observer?.disconnect(); window.removeEventListener('resize', resize); window.visualViewport?.removeEventListener('resize', resize) }
   }, [])
 
   return <EventNavigation.Provider value={select}>
