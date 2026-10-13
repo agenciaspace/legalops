@@ -23,10 +23,12 @@ export function ClubHeader({
   active,
   locale = 'pt',
   product,
+  backLink,
 }: {
   active?: PublicArea
   locale?: PublicLocale
   product?: 'club' | 'work'
+  backLink?: { href: string; label: string }
 }) {
   const isWork = product === 'work' || active === 'jobs' || active === 'employers'
   const currentProduct = isWork ? 'work' : 'club'
@@ -52,8 +54,8 @@ export function ClubHeader({
           />
         </Link>
 
-        <nav className="flex min-w-0 items-center gap-2" aria-label={locale === 'pt' ? 'Ecossistema LegalOps' : 'LegalOps ecosystem'}>
-          {items.map(item => {
+        <nav className="flex min-w-0 items-center gap-2" aria-label={backLink ? 'Retorno' : locale === 'pt' ? 'Ecossistema LegalOps' : 'LegalOps ecosystem'}>
+          {backLink ? <Link href={backLink.href} className="brand-text-link min-w-0 text-right"><span aria-hidden="true">←</span>{backLink.label}</Link> : <>{items.map(item => {
             const selected = item.key === currentProduct
             return (
               <Link
@@ -71,7 +73,7 @@ export function ClubHeader({
             className="ml-2 inline-flex min-h-11 items-center text-sm font-medium hover:underline"
           >
             {copy.login} <span className="ml-2" aria-hidden="true">↗</span>
-          </Link>
+          </Link></>}
         </nav>
       </div>
     </header>

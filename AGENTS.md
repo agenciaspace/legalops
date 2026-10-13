@@ -22,6 +22,44 @@ The three domains are one brand ecosystem, not three independent codebases:
 Use `docs/BRAND-LANGUAGE.md` for shared naming, typography, color and copy
 rules. Keep all product names lowercase.
 
+## Guia de consistência visual para os agentes (2026-10-13)
+
+Antes de alterar uma tela do ecossistema, leia `docs/BRAND-LANGUAGE.md` e
+confira os componentes de `design/legalops.css`. Compare a tela com a
+Comunidade e o Perfil em produção. Use esses exemplos para conferir a
+aplicação do sistema, sem copiar estilos antigos de outras páginas.
+
+- Use `brand-page` e `brand-page-heading` nas telas internas. Eles definem
+  largura, espaçamento e títulos. Preserve o cabeçalho, o menu lateral e a
+  navegação móvel do Club por meio dos layouts existentes.
+- Use Quicksand nos títulos e Inter no corpo e nos controles. Reutilize
+  `--lo-heading-font` e `--lo-body-font`; evite definir uma fonte por página.
+- Use `brand-card`: superfície `--lo-surface` (`#FAF7F1`), borda
+  `--lo-border` e raio `--lo-radius` de 8 px. Evite substituir esses valores
+  por fundo branco, `rounded-xl`, `rounded-2xl` ou cápsulas decorativas.
+- Use `brand-action`, `brand-action secondary` e `brand-text-link` para
+  ações. Preserve foco visível, estados desabilitados e área de toque de
+  pelo menos 44 px. Use utilitários para disposição e espaçamento, sem
+  reconstruir a aparência desses componentes em cada tela.
+- Use as variáveis `--lo-*` para cores. Se precisar de uma variação reutilizável,
+  acrescente-a ao sistema compartilhado e confira o efeito nos consumidores.
+- Reutilize `BrandWordmark` e `ClubHeader` nas páginas públicas. No checkout,
+  use `ClubHeader` com `backLink` para reduzir a navegação e manter a marca.
+  Preserve o sistema visual mesmo fora do layout autenticado.
+- Preserve preço, cobrança, créditos, permissões e estados do pedido ao
+  ajustar o visual do Pro. Consulte `docs/CLUB-PAID-PILOT.md` para a operação.
+- Confira 320 e 390 px no celular, 768 px no tablet e desktop. Verifique
+  fonte, superfície, raio, alinhamento, foco, legibilidade e ausência de
+  rolagem horizontal. Confira as telas públicas e autenticadas afetadas.
+- Edite `design/legalops.css` como fonte dos estilos compartilhados. Use
+  `scripts/sync-design-system.mjs` para sincronizar o site estático; execute
+  `npm run design:check`, os testes pertinentes e o build antes de publicar.
+  Confira o domínio em produção após a publicação.
+
+Os agentes podem encontrar este guia pelo índice em
+`/Users/leon/OpenBot/Shared/AGENTS.md`. Atualize esta seção quando Leon aprovar
+uma mudança no sistema visual; mantenha o índice apontando para este arquivo.
+
 ## Club product model (2026-09-16)
 
 `docs/CLUB-MODEL.md` is the current product decision: open, free community
