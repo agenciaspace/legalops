@@ -5,6 +5,7 @@ const PUBLIC = 'https://legalops.dev';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === '/openintake' || url.pathname === '/openintake/') return Response.redirect(`${PUBLIC}/openclm/intake${url.search}`, 302);
     if (url.pathname === '/collaboration') {
       if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') return new Response('WebSocket required', {status:426});
       const headers = new Headers(request.headers);
@@ -25,6 +26,8 @@ export default {
     headers.delete('host');
     headers.set('X-OpenCLM-Proxy', 'legalops.dev');
     headers.set('X-Forwarded-Host', 'legalops.dev');
+    headers.set('X-OpenCLM-Client-IP', request.headers.get('CF-Connecting-IP') || '');
+    headers.set('X-OpenCLM-Proxy-Key', env.OPENCLM_PROXY_SECRET || '');
     // Do not forward unrelated cookies from other projects on the Dev domain.
     const session = (headers.get('cookie') || '').split(';').map(item => item.trim()).filter(item => item.startsWith('openclm_session='));
     if (session.length) headers.set('cookie', session.join('; ')); else headers.delete('cookie');
