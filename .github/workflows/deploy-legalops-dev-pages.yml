@@ -17,7 +17,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      CLOUDFLARE_ACCOUNT_ID: 3d40d7797b3fd6d1cd2644eefea9e907
+      CLOUDFLARE_ACCOUNT_ID: 11af24e25f54ef960225c86ab4a3df60
     steps:
       - uses: actions/checkout@v6
 
