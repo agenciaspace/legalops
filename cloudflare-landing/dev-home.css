@@ -13,6 +13,13 @@
   margin-block: 20px 24px;
 }
 
+.dev-tagline-english {
+  max-width: 940px;
+  margin-block: 0 24px;
+  color: var(--lo-muted);
+  font: 500 22px/1.5 var(--lo-heading-font);
+}
+
 .dev-home .dev-intro .brand-copy {
   max-width: 740px;
   margin-block: 0;
@@ -123,6 +130,10 @@
 
   .dev-home .dev-intro .brand-copy {
     font-size: 16px;
+  }
+
+  .dev-tagline-english {
+    font-size: 18px;
   }
 
   .dev-home .dev-projects {

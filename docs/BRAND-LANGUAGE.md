@@ -65,7 +65,12 @@ A primeira dobra deve mostrar vagas reais sempre que existirem.
 
 Promessa principal:
 
+> **Tecnologia jurídica de código aberto, feita por quem trabalha no jurídico.**
+>
 > **Open source Legal Tech, built by the people who run Legal.**
+
+Na home do Dev, apresentar a chamada em português como título principal e a
+versão em inglês logo abaixo, com `lang="en"`.
 
 O `legalops.dev` é a base open source do ecossistema. Não é principalmente um curso, um catálogo de ferramentas ou uma coleção de tutoriais. É onde problemas reais do jurídico viram produtos abertos que podem ser usados, adaptados, implantados e melhorados coletivamente.
 
@@ -329,7 +334,9 @@ Produto no hero: vagas reais verificadas recentemente.
 
 Micro-label: `legalops.dev / open source`
 
-Headline oficial: `Open source Legal Tech, built by the people who run Legal.`
+Headline em português: `Tecnologia jurídica de código aberto, feita por quem trabalha no jurídico.`
+
+Versão em inglês, logo abaixo: `Open source Legal Tech, built by the people who run Legal.`
 
 CTA primária: `explorar produtos`
 
