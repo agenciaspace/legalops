@@ -1,4 +1,4 @@
-commit=52a5046e6d1ff777b38acff5e7f36f21e4236cda
-outcome=success
-run_id=38419109011
-project=legalops-dev
+commit=4ac380527984cd476d54813cd84b5cc0cbba541f
+outcome=skipped
+run_id=38621779692
+project=
