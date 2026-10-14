@@ -1,0 +1,148 @@
+.dev-home .brand {
+  align-items: center;
+  min-height: 44px;
+}
+
+.dev-home .dev-intro {
+  padding-block: 80px 64px;
+  border-bottom: 1px solid var(--lo-border);
+}
+
+.dev-home .brand-headline {
+  max-width: 1000px;
+  margin-block: 20px 24px;
+}
+
+.dev-home .dev-intro .brand-copy {
+  max-width: 740px;
+  margin-block: 0;
+  font-size: 18px;
+}
+
+.dev-home .dev-projects {
+  padding-block: 56px 64px;
+  scroll-margin-top: 88px;
+}
+
+.dev-home .dev-projects .brand-section-title {
+  margin-block: 12px 32px;
+}
+
+.dev-project-list {
+  border-top: 1px solid var(--lo-border);
+}
+
+.dev-project {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.5fr) auto;
+  gap: 40px;
+  align-items: start;
+  padding-block: 32px;
+}
+
+.dev-project + .dev-project {
+  border-top: 1px solid var(--lo-border);
+}
+
+.dev-project-heading h3 {
+  margin-block: 10px 0;
+  font: 600 28px/1.2 var(--lo-heading-font);
+  letter-spacing: -.035em;
+}
+
+.dev-project-description p {
+  margin-block: 0;
+  color: var(--lo-muted);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.dev-project-description .dev-project-note {
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.dev-project-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.dev-home .footer-links {
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.dev-home .footer-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+@media (max-width: 1000px) {
+  .dev-project {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    gap: 24px 32px;
+  }
+
+  .dev-project-actions {
+    grid-column: 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dev-home .nav .nav-inner {
+    flex-wrap: wrap !important;
+    height: auto;
+    padding-block: 16px 8px;
+    gap: 8px;
+  }
+
+  .dev-home .nav-links {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .dev-home .nav .nav-links a {
+    display: inline-flex;
+    font-size: 12px;
+  }
+
+  .dev-home .dev-intro {
+    padding-block: 44px 40px;
+  }
+
+  .dev-home .brand-headline {
+    font-size: clamp(34px, 8.5vw, 44px);
+  }
+
+  .dev-home .dev-intro .brand-copy {
+    font-size: 16px;
+  }
+
+  .dev-home .dev-projects {
+    padding-block: 40px;
+    scroll-margin-top: 132px;
+  }
+
+  .dev-project {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding-block: 28px;
+  }
+
+  .dev-project-actions {
+    grid-column: auto;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dev-project-actions .brand-text-link {
+    justify-content: center;
+  }
+}

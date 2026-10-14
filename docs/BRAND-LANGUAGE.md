@@ -209,7 +209,12 @@ Evitar:
 
 ## 6. Template obrigatório das landings
 
-As três homes públicas devem seguir a mesma arquitetura.
+Club e Work seguem a arquitetura abaixo. A home do Dev usa a composição
+simplificada aprovada em 14/10/2026: somente duas seções no conteúdo principal.
+A primeira explica quem somos e como participar; a segunda reúne OpenCLM,
+OpenIntake e os playbooks da comunidade, com descrição curta e acesso direto.
+Header e footer mantêm a navegação do ecossistema. Não acrescentar seções
+separadas de princípios, fluxo, Bench, playbooks ou CTA à home do Dev.
 
 ### 1. Header do ecossistema
 
