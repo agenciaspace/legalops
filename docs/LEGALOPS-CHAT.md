@@ -20,6 +20,9 @@ The landing links to `https://legalops.club/chat/workspace`, keeping auth on the
 existing verified domain while the newly registered hostname is connected.
 At implementation time `legalops.chat` still used the registrar's nameservers
 and parking IPs. Do not claim the custom domain is live until HTTPS is verified.
+`Connect legalops.chat domain` is a manual GitHub workflow that uses the existing
+deployment credential to prepare the zone and attach only the two Chat hosts.
+It prints assigned nameservers without retrieving production secrets locally.
 
 ## Data and permissions
 
