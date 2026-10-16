@@ -62,7 +62,7 @@ jobs:
       - name: Install browser engines
         run: npx playwright install --with-deps chromium webkit firefox
 
-      - name: Verify event layouts and registration across browsers
+      - name: Verify event and News flows across browsers
         run: npm run test:events:browser
 
       - name: Build OpenNext worker
@@ -112,6 +112,9 @@ jobs:
           done
           icon=$(curl -fsS --retry 5 --retry-delay 2 "https://legalops.club/icon.svg?brandcheck=${GITHUB_RUN_ID}")
           printf '%s' "$icon" | grep -q '<svg'
+          news=$(curl -fsS --retry 5 --retry-delay 2 "https://legalops.club/news?newscheck=${GITHUB_RUN_ID}")
+          printf '%s' "$news" | grep -q 'aria-label="legalops.news"'
+          printf '%s' "$news" | grep -q 'Harvey e Legora'
 
       - name: Record deploy status
         if: always()
