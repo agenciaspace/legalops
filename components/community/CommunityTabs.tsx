@@ -7,6 +7,7 @@ import {
   FileText,
   MessageCircle,
   MessageSquareText,
+  Newspaper,
   PanelLeftClose,
   PanelLeftOpen,
   Users,
@@ -20,6 +21,7 @@ const mobileItems = [
   { href: '/community', label: 'Comunidade', icon: MessageCircle },
   { href: '/community/calendar', label: 'Eventos', icon: CalendarDays },
   { href: '/community/tools', label: 'Recursos', icon: Wrench },
+  { href: '/community/news', label: 'Notícias', icon: Newspaper },
 ]
 
 const forumKeys = [
@@ -47,6 +49,7 @@ export function CommunityTabs() {
     ['/community', t('Comunidade'), MessageCircle],
     ['/community/calendar', t('Eventos'), CalendarDays],
     ['/community/tools', t('Recursos'), Wrench],
+    ['/community/news', t('Notícias'), Newspaper],
     ['/community/members', t('Membros'), Users],
     ['/community/summaries', t('Resumos do WhatsApp'), FileText],
   ] as const
@@ -70,7 +73,7 @@ export function CommunityTabs() {
         <p hidden={collapsed} className="mt-7 border-t border-[#CEC8BD] px-3 pt-5 text-xs leading-5 text-[#625E59]">legalops.club<br />{t('Comunidade')}</p>
       </div>
     </aside>
-    <nav aria-label={t('Áreas do Club')} className="club-bottom-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-[#CEC8BD] bg-[#F5F1E8] px-2 pt-1 lg:hidden">
+    <nav aria-label={t('Áreas do Club')} className="club-bottom-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[#CEC8BD] bg-[#F5F1E8] px-2 pt-1 lg:hidden">
       {mobileItems.map(item => {
         const active = item.href === '/community' ? path === item.href : path.startsWith(item.href) || (item.href === '/community/calendar' && path.startsWith('/community/events/'))
         return <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} className={`flex min-h-14 items-center justify-center gap-2 rounded-lg text-xs font-medium sm:text-sm ${active ? 'bg-[#EDE5D8] text-[#A24D36]' : 'text-[#625E59]'}`}>{t(item.label)}</Link>

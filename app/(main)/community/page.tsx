@@ -1,4 +1,6 @@
 import { TranslatedContent } from '@/components/community/TranslatedContent'
+import { Suspense } from 'react'
+import { ClubNewsDigest } from '@/components/news/ClubNewsDigest'
 import { loadClubTranslations } from '@/lib/club-translations'
 import { getClubLocale, getClubTranslator, getClubTimezone } from '@/lib/club-locale-server'
 import Link from 'next/link'
@@ -40,6 +42,7 @@ export default async function CommunityPage({searchParams}:{searchParams?:{space
  const next=new URLSearchParams({count:String(take+3)});if(search)next.set('q',search);if(selectedSpace)next.set('space',selectedSpace)
  return <div className="brand-page community-feed relative">
   <header className="brand-page-heading"><div><h1>{t("Comunidade")}</h1><p>{t("Compartilhe uma pergunta ou experiência para começar.")}</p></div></header>
+  {hasCommunityAccess && user ? <Suspense fallback={null}><ClubNewsDigest userId={user.id}/></Suspense> : null}
   {hasCommunityAccess ? <details id="new-post" className="community-publish mb-6">
    <summary className="brand-action cursor-pointer list-none"><span aria-hidden="true">+</span>{t("Compartilhar")}</summary>
    <form action={createCommunityPost} className="brand-card mt-4 space-y-4 p-5">

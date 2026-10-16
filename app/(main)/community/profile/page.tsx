@@ -4,6 +4,7 @@ import { creditCopy } from '@/lib/club-credit-copy'
 import { MemberApiKey } from '@/components/community/MemberApiKey'
 import { verificationState, verificationMissing } from '@/lib/member-verification'
 import { ClubRegionPreferences } from '@/components/community/ClubRegionPreferences'
+import { NewsPreferencesForm } from '@/components/news/NewsPreferencesForm'
 import { getClubTranslator, getClubLocale } from '@/lib/club-locale-server'
 import { ProfileContactCode } from '@/components/community/ProfileContactCode'
 import { ProfilePhoto } from '@/components/community/ProfilePhoto'
@@ -93,6 +94,7 @@ export default async function CommunityProfilePage({ searchParams }: { searchPar
         <details className="mt-3 max-w-sm"><summary className="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-[#CEC8BD] bg-white px-4 text-sm font-semibold">{t("Meu QR code de contato")}</summary>{user && <div className="mt-3"><ProfileContactCode userId={user.id} own /></div>}</details>
         <p className="mt-1 text-xs text-[#77746E]">{t("Apresente seu contexto à comunidade. Os campos de carreira são opcionais e podem apoiar os recursos personalizados do Pro.")}</p>
       </div></header>
+      <details className="my-5"><summary className="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-[#CEC8BD] px-4 text-sm font-semibold">{t('Preferências de notícias')}</summary><NewsPreferencesForm/></details>
 
       {searchParams?.saved ? (
         <div className="mt-5 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-[11px] font-bold text-emerald-800">

@@ -4,11 +4,22 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { hasActiveClubAccess } from '@/lib/community'
 import { hasClubProAccess, isClubProPath } from '@/lib/club-membership'
 import { getPublicEventFallback } from '@/lib/public-events'
+import { newsPublicPath } from '@/lib/news-routing'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim()
   const hostname = (forwardedHost || request.headers.get('host') || '').split(':')[0]
+  const isNewsDomain = hostname === 'legalops.news' || hostname === 'www.legalops.news'
+  const newsPath = newsPublicPath(pathname, isNewsDomain)
+  if (newsPath || pathname === '/api/news/subscribe') {
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-club-locale', 'pt-BR')
+    requestHeaders.set('x-club-timezone', 'America/Sao_Paulo')
+    return newsPath && newsPath !== pathname
+      ? NextResponse.rewrite(new URL(`${newsPath}${request.nextUrl.search}`, request.url), { request: { headers: requestHeaders } })
+      : NextResponse.next({ request: { headers: requestHeaders } })
+  }
   const isClubDomain = hostname === 'legalops.club'
     || hostname === 'www.legalops.club'
     || hostname === 'legalops.legalops.club'
