@@ -78,6 +78,7 @@ export function makeSources(
       offset < doc.content.length;
       offset += 1400, index++
     ) {
+      if (index > 0 && offset + 300 >= doc.content.length) break;
       const text = doc.content.slice(offset, offset + 1700);
       const comparable = text
         .toLowerCase()
@@ -111,8 +112,8 @@ export function makeSources(
   }
   return {
     sources: selected.map(
-      ({ id, document_id, name, kind, text, position }) => ({
-        id,
+      ({ document_id, name, kind, text, position }, index) => ({
+        id: `S${index + 1}`,
         document_id,
         name,
         kind,
@@ -164,10 +165,14 @@ export function parseAgentOutput(
     )
       throw new Error("invalid_output");
     const citations = f.citations.map(
-      (c: { source_id: string; quote: string }) => {
+      (c: { source_id: string; quote?: string }) => {
+        if (!c || typeof c.source_id !== "string") throw new Error("invalid_citation");
         const source = sources.find((s) => s.id === c.source_id);
+        if (!source) throw new Error("invalid_citation");
+        // The model selects a source; the server supplies its exact stored text.
+        // Legacy outputs with an explicit quote still require literal verification.
+        if (c.quote === undefined) return { source_id: source.id, quote: source.text };
         if (
-          !source ||
           typeof c.quote !== "string" ||
           normalizedText(c.quote).length < 12 ||
           c.quote.length > 700 ||

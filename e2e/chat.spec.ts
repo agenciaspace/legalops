@@ -287,7 +287,7 @@ test('organization → files → real coordinated analysis → human decision �
     await page.getByRole('checkbox',{name:/Autorizei o uso destes documentos/}).check()
     await page.getByRole('button',{name:'Analisar novamente com a equipe',exact:true}).click()
     await expect(page.getByRole('heading',{name:'Sua revisão encerra esta etapa.'})).toBeVisible({timeout:240_000})
-    await page.getByLabel('Decisão',{exact:true}).selectOption('changes_requested')
+    await page.locator('select[name="outcome"]').selectOption('changes_requested')
     await page.getByLabel('Decisão, correção ou orientação').fill('Preparar a versão final para uma nova revisão humana, após confirmar a data de início.')
     await page.getByRole('button',{name:'Registrar decisão',exact:true}).click()
     await expect(page.getByRole('heading',{name:'Ajustes solicitados.',exact:true})).toBeVisible()

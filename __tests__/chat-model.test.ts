@@ -69,6 +69,18 @@ describe("Chat grounding and context selection", () => {
       "invalid_citation",
     );
   });
+  it("builds canonical citations from known passage IDs without model-generated quotes", () => {
+    const { sources } = makeSources(docs, "renovação");
+    expect(sources[0].id).toBe("S1");
+    const response = {
+      summary: "A minuta contém disposição de renovação.",
+      findings: [{ title: "Renovação", detail: "Confira a cláusula.", severity: "attention", citations: [{ source_id: sources[0].id }] }],
+      next_actions: [], missing_information: [],
+    };
+    expect(parseAgentOutput(JSON.stringify(response), sources).findings[0].citations[0]).toEqual({ source_id: sources[0].id, quote: sources[0].text });
+    response.findings[0].citations[0].source_id = "S999";
+    expect(() => parseAgentOutput(JSON.stringify(response), sources)).toThrow("invalid_citation");
+  });
   it("rejects malformed, oversized or falsely cited model outputs", () => {
     const { sources } = makeSources(docs, "renovação");
     for (const value of [

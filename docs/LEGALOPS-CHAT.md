@@ -67,9 +67,10 @@ selection; completed analyses preserve their source snapshots in history.
 Retrieval ranks overlapping 1,700-character passages using request terms and
 includes at least one passage from every selected document. At most 20 passages
 enter the run. Coverage is displayed explicitly; this is not an exhaustive
-contract review. Citations must identify an included passage and contain a
-literal quote checked by server code. Unsupported source IDs and invented
-quotes invalidate the step. Uncited suggestions are visibly identified.
+contract review. The model selects included passage IDs (`S1`, `S2`, etc.);
+the server builds citations from the exact saved passage text. Unsupported IDs
+invalidate the step. Legacy model-supplied quotes still require literal
+verification. Uncited suggestions are visibly identified.
 
 ## Durable execution and learning
 
