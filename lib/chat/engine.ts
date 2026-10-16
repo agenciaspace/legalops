@@ -27,6 +27,7 @@ export async function processChatStep(runId?: string) {
   const step = claims?.[0]
   if (!step) return { processed: false }
   let usage: Record<string, unknown> = {}
+  let phase = 'load_run'
   try {
     const { data: run, error: runError } = await admin
       .from('chat_runs')
@@ -35,6 +36,7 @@ export async function processChatStep(runId?: string) {
       .single()
     if (runError || !run) throw new Error('run_unavailable')
     let context = run.context as ChatContext | null
+    phase = 'context'
     if (!context) {
       const [docs, matter, workspace, memories, agents, messages, decisions] =
         await Promise.all([
@@ -126,6 +128,7 @@ export async function processChatStep(runId?: string) {
         context = existing.data.context as ChatContext
       }
     }
+    phase = 'history'
     const previous = await admin
       .from('chat_steps')
       .select('agent_key,output')
@@ -134,6 +137,7 @@ export async function processChatStep(runId?: string) {
       .order('ordinal')
     if (previous.error) throw new Error('previous_steps_unavailable')
     const agent = CHAT_AGENTS.find((a) => a.key === step.agent_key)!
+    phase = 'model'
     const raw = await generateOpenRouterText({
       model: process.env.CHAT_MODEL || 'openai/gpt-4.1-mini',
       temperature: 0,
@@ -158,7 +162,9 @@ Retorne SOMENTE JSON: {"summary":"...","findings":[{"title":"...","detail":"..."
         previous_specialists: previous.data,
       }),
     })
+    phase = 'validation'
     const output = parseAgentOutput(raw, context.sources)
+    phase = 'save_output'
     const finished = await admin.rpc('chat_finish_step', {
       step_id: step.id,
       token: step.lease_token,
@@ -168,18 +174,66 @@ Retorne SOMENTE JSON: {"summary":"...","findings":[{"title":"...","detail":"..."
     })
     if (finished.error) throw new Error('save_failed')
     return { processed: true, applied: finished.data === true }
-  } catch {
+  } catch (error) {
+    const failureCode = chatFailureCode(error)
+    console.error('[chat] step failed', {
+      stepId: step.id,
+      agent: step.agent_key,
+      attempt: step.attempts,
+      phase,
+      code: failureCode,
+    })
     // Provider bodies and private document content never enter logs or browser errors.
     const result = await admin.rpc('chat_finish_step', {
       step_id: step.id,
       token: step.lease_token,
       result: null,
-      failure:
-        'Não foi possível validar esta análise. A etapa será tentada novamente, até três tentativas.',
+      failure: chatStepFailureMessage(failureCode, step.attempts),
       usage_data: usage,
     })
     if (result.error)
       console.error('[chat] could not release step lease', step.id)
     return { processed: true, retrying: step.attempts < 3 }
   }
+}
+
+export function chatFailureCode(error: unknown): string {
+  const message = error instanceof Error ? error.message : ''
+  if (
+    [
+      'invalid_citation',
+      'invalid_output',
+      'queue_unavailable',
+      'run_unavailable',
+      'sources_unavailable',
+      'context_save_failed',
+      'previous_steps_unavailable',
+      'save_failed',
+    ].includes(message)
+  )
+    return message
+  const provider = /^OpenRouter request failed with (\d{3}):/.exec(message)
+  if (provider) return `provider_${provider[1]}`
+  if (message === 'OpenRouter response did not include text content')
+    return 'provider_empty_response'
+  if (message === 'OPENROUTER_API_KEY is not configured')
+    return 'provider_not_configured'
+  if (error instanceof SyntaxError) return 'invalid_json'
+  if (
+    error instanceof Error &&
+    ['TimeoutError', 'AbortError'].includes(error.name)
+  )
+    return 'provider_timeout'
+  return 'unexpected_error'
+}
+export function chatStepFailureMessage(code: string, attempt: number): string {
+  const detail =
+    code === 'invalid_citation'
+      ? 'Uma citação não conferiu com o documento.'
+      : code === 'invalid_json' || code === 'invalid_output'
+        ? 'A resposta veio em um formato que não conseguimos validar.'
+        : code.startsWith('provider_')
+          ? 'O serviço de análise não respondeu como esperado.'
+          : 'Não conseguimos concluir esta etapa.'
+  return `${detail} ${attempt < 3 ? 'Vamos tentar novamente.' : 'As três tentativas terminaram. Você pode iniciar uma nova análise.'}`
 }

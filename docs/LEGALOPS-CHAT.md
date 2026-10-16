@@ -23,6 +23,11 @@ and parking IPs. Do not claim the custom domain is live until HTTPS is verified.
 `Connect legalops.chat domain` is a manual GitHub workflow that uses the existing
 deployment credential to prepare the zone and attach only the two Chat hosts.
 It prints assigned nameservers without retrieving production secrets locally.
+The first run could read zones but received HTTP 403 creating this one:
+`com.cloudflare.api.account.zone.create` is not granted to the deployment token.
+An account administrator must add `legalops.chat` to the Cloudflare account;
+then rerun the workflow to attach the hostnames. The current public fallback
+does not depend on this external setup.
 
 ## Data and permissions
 

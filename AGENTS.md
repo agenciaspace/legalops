@@ -15,12 +15,13 @@ configuration.
 | `legalops.news` | Editorial news and newsletter | Shared Next application; host-aware public `/news` routes |
 | `legalops.chat` | Organization agent teams for contract review | Shared Next application; public `/chat`, private `/chat/workspace` |
 
-The three domains are one brand ecosystem, not three independent codebases:
+These domains share one brand ecosystem and application:
 
 - `club` is community and connection.
 - `work` is opportunities and career.
 - `dev` is practical building, systems and experiments.
 - `news` is sourced editorial coverage; the same published articles appear in the Club.
+- `chat` is an organization workspace with coordinated agents and human review.
 
 For News, read `docs/LEGALOPS-NEWS.md`. `/community/news` is part of free Club
 membership. Profile preferences control the opt-in digest on `/community`;
