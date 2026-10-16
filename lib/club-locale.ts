@@ -20,6 +20,7 @@ export function normalizeClubTimezone(value?: string | null) {
 }
 
 const english: Record<string, string> = {
+  'Notícias': 'News', 'Preferências de notícias': 'News preferences',
   'Compartilhar': 'Share', 'Perfil público': 'Public profile', 'Preferências': 'Preferences', 'Mais assuntos': 'More topics',
   'Nenhum encontro realizado.': 'No past meetings.',
   'Compartilhe uma pergunta ou experiência para começar.': 'Share a question or experience to start a conversation.',

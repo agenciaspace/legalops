@@ -1,5 +1,6 @@
 // Reviewed static catalogs. Runtime UI labels do not call a model.
 export const spanish: Record<string, string> = {
+  'Notícias': 'Noticias', 'Preferências de notícias': 'Preferencias de noticias',
   "Etapas da inscrição": "Pasos de inscripción",
   "Contato": "Contacto",
   "Perfil profissional": "Perfil profesional",

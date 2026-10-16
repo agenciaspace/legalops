@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { DEFAULT_NEWS_PREFERENCES, NEWS_AUDIENCES, NEWS_TOPICS, type NewsAudience, type NewsTopic, type NewsPreferences } from '@/lib/news'
 
 export function NewsPreferencesForm() {
+  const router = useRouter()
   const [preferences, setPreferences] = useState<NewsPreferences>(DEFAULT_NEWS_PREFERENCES)
   const [loading, setLoading] = useState(true)
   const [loadFailed, setLoadFailed] = useState(false)
@@ -27,6 +29,7 @@ export function NewsPreferencesForm() {
       const result = await response.json()
       if (!response.ok) throw new Error(result.error)
       setPreferences(result.preferences); setMessage(preferences.enabled ? 'Preferências salvas. As notícias aparecerão no seu feed do Club.' : 'Preferências salvas. O recebimento no feed está desativado.')
+      router.refresh()
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Tente novamente.') }
     finally { setBusy(false) }
   }}>

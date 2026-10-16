@@ -7,6 +7,7 @@ vi.mock('@/app/(main)/community/actions',()=>({updateCommunityProfile:vi.fn()}))
 vi.mock('@/components/community/ProfilePhoto',()=>({ProfilePhoto:()=>null}))
 vi.mock('@/components/community/ProfileContactCode',()=>({ProfileContactCode:()=>null}))
 vi.mock('@/components/community/ClubRegionPreferences',()=>({ClubRegionPreferences:()=>null}))
+vi.mock('@/components/news/NewsPreferencesForm',()=>({NewsPreferencesForm:()=>null}))
 import ProfilePage from '@/app/(main)/community/profile/page'
 beforeEach(()=>{cleanup();mocks.status='verified';mocks.profile.avatar_path='owner/11111111-1111-4111-8111-111111111111.jpg'})
 it('shows automatic completion without a manual review action',async()=>{

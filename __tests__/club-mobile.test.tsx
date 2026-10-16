@@ -9,10 +9,11 @@ import BenchClient from '@/app/(main)/community/bench/BenchClient'
 import {ClubPwa} from '@/components/community/ClubPwa'
 afterEach(cleanup)
 beforeEach(()=>{vi.clearAllMocks();state.path='/community/calendar';state.search=new URLSearchParams()})
-it('keeps Community, Events and Resources in the primary navigation',()=>{
+it('keeps Community, Events, Resources and News in the primary navigation',()=>{
  render(<CommunityTabs />)
  const nav=within(screen.getByRole('navigation',{name:'Áreas do Club'}))
- expect(nav.getAllByRole('link')).toHaveLength(3)
+ expect(nav.getAllByRole('link')).toHaveLength(4)
+ expect(nav.getByRole('link',{name:'Notícias'})).toHaveAttribute('href','/community/news')
  expect(nav.getByRole('link',{name:'Recursos'})).toHaveAttribute('href','/community/tools')
  expect(nav.getByRole('link',{name:'Comunidade'})).toHaveAttribute('href','/community')
  expect(nav.getByRole('link',{name:'Eventos'})).toHaveAttribute('aria-current','page')
