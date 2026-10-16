@@ -132,3 +132,26 @@ preview uses `.next-chat-dev` to avoid colliding with the production build.
 Publish through the repository's existing GitHub → Cloudflare deployment.
 No external email, signature, calendar, litigation feed or CLM connector is
 implemented by this pilot. The landing describes these limits explicitly.
+
+### Acceptance record — 2026-10-16
+
+- 643 unit/component tests, design synchronization, Bend proofs and the
+  Cloudflare build passed. Browser auth configuration was checked in the
+  generated JavaScript.
+- The database role/isolation suite passed against the connected database in a
+  rollback-only transaction. Chat-specific database advisors had no findings.
+- The real-provider browser story passed on HTTPS with synthetic data: two
+  analyses, eight specialist steps, each completed on its first attempt. All
+  36 saved citations matched their exact saved passages. The second analysis
+  included the approved guidance and the additional matter message. Both human
+  completion and changes-requested outcomes were verified.
+- Invitation acceptance exposed shared base documents while hiding the owner's
+  private matter and contract. Landing and workspace fit 320/390/768/1440 px.
+  Final public browser checks passed after fixing early interaction before
+  demo hydration. Actual PDF and DOCX imports were also checked on the Worker.
+- Synthetic users, workspaces and originals were removed; no orphaned Chat
+  originals remained. Confirmation-email delivery was not part of this test.
+
+The public pilot is available at `https://legalops.club/chat`. The custom
+`legalops.chat` domain still requires creation of its Cloudflare zone and DNS
+delegation; the available deployment token cannot create that zone.
