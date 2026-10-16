@@ -30,6 +30,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: legalops-production
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -124,6 +128,8 @@ jobs:
       - name: Record deploy status
         if: always()
         run: |
+          deploy_status_file=$(mktemp)
+          trap 'rm -f "$deploy_status_file"' EXIT
           printf 'commit=%s\nbuild=%s\napp_deploy=%s\ncron_deploy=%s\ninbound_deploy=%s\npublic_smoke=%s\nrun_id=%s\n' \
             "$GITHUB_SHA" \
             "${{ steps.build.outcome }}" \
@@ -132,14 +138,17 @@ jobs:
             "${{ steps.deploy_inbound.outcome }}" \
             "${{ steps.smoke.outcome }}" \
             "$GITHUB_RUN_ID" \
-            > .github/cloudflare-deploy-status.txt
+            > "$deploy_status_file"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .github/cloudflare-deploy-status.txt
-          git diff --cached --quiet || git commit -m 'chore: record Cloudflare deploy status [skip ci]'
           for attempt in 1 2 3; do
-            git pull --rebase origin main
-            if git push; then exit 0; fi
+            git fetch origin main
+            git switch -C deploy-status origin/main
+            cp "$deploy_status_file" .github/cloudflare-deploy-status.txt
+            git add .github/cloudflare-deploy-status.txt
+            git diff --cached --quiet && exit 0
+            git commit -m 'chore: record Cloudflare deploy status [skip ci]'
+            if git push origin HEAD:main; then exit 0; fi
             sleep 2
           done
           exit 1
