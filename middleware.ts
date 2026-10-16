@@ -10,6 +10,12 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim()
   const hostname = (forwardedHost || request.headers.get('host') || '').split(':')[0]
+  const isChatDomain = hostname === 'legalops.chat' || hostname === 'www.legalops.chat'
+  if (pathname === '/chat' || (isChatDomain && pathname === '/')) {
+    return isChatDomain && pathname === '/'
+      ? NextResponse.rewrite(new URL('/chat', request.url))
+      : NextResponse.next({ request })
+  }
   const isNewsDomain = hostname === 'legalops.news' || hostname === 'www.legalops.news'
   const newsPath = newsPublicPath(pathname, isNewsDomain)
   if (newsPath || pathname === '/api/news/subscribe') {
@@ -67,7 +73,7 @@ export async function middleware(request: NextRequest) {
   if (pathname === '/api/bench/contributions' || pathname === '/api/contract-map' || pathname === '/api/playbook') return NextResponse.next({ request })
 
   let supabaseResponse = NextResponse.next({ request })
-  const publicPaths = new Set(['/', '/club', '/club/about', '/club/checkout', '/cadastro', '/login', '/set-password', '/auth/confirm'])
+  const publicPaths = new Set(['/', '/club', '/club/about', '/club/checkout', '/cadastro', '/login', '/set-password', '/auth/confirm', '/chat/entrar'])
   const isPublicEventPage = pathname.startsWith('/community/events/') && pathname.split('/').length === 4
   const isContactPage = /^\/contact\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\/(qr|vcard))?$/i.test(pathname)
   const isPublicPage = publicPaths.has(pathname)
@@ -150,7 +156,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     if (!isPublicPage) {
-      const loginUrl = new URL('/login', request.url)
+      const loginUrl = new URL(pathname.startsWith('/chat/') ? '/chat/entrar' : '/login', request.url)
       loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`)
       return withSession(NextResponse.redirect(loginUrl))
     }
@@ -158,11 +164,11 @@ export async function middleware(request: NextRequest) {
   }
 
   // Authenticated user on login → redirect to app
-  if (pathname === '/login' || pathname === '/cadastro') {
+  if (pathname === '/login' || pathname === '/cadastro' || pathname === '/chat/entrar') {
     const requestedPath = request.nextUrl.searchParams.get('next')
     const destination = requestedPath?.startsWith('/') && !requestedPath.startsWith('//') && !requestedPath.includes('\\')
       ? requestedPath
-      : isClubDomain || pathname === '/cadastro' ? '/club/entrar' : '/dashboard'
+      : pathname === '/chat/entrar' ? '/chat/workspace' : isClubDomain || pathname === '/cadastro' ? '/club/entrar' : '/dashboard'
     return withSession(NextResponse.redirect(new URL(destination, request.url)))
   }
 
@@ -208,6 +214,7 @@ export async function middleware(request: NextRequest) {
     pathname !== '/onboard' &&
     !pathname.startsWith('/club/') &&
     !pathname.startsWith('/community') &&
+    !pathname.startsWith('/chat/') &&
     !pathname.startsWith('/api/') &&
     !isPublicPage
   ) {

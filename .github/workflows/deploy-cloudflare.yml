@@ -112,6 +112,11 @@ jobs:
           done
           icon=$(curl -fsS --retry 5 --retry-delay 2 "https://legalops.club/icon.svg?brandcheck=${GITHUB_RUN_ID}")
           printf '%s' "$icon" | grep -q '<svg'
+          chat_body=$(curl -fsSL --retry 5 --retry-delay 2 "https://legalops.club/chat?brandcheck=${GITHUB_RUN_ID}")
+          grep -q 'uma equipe de agentes' <<< "$chat_body"
+          grep -q 'aria-label="legalops.chat"' <<< "$chat_body"
+          chat_status=$(curl -sS --retry 3 -o /dev/null -w '%{http_code}' 'https://legalops.club/api/chat/workspaces')
+          test "$chat_status" = '401'
           news=$(curl -fsS --retry 5 --retry-delay 2 "https://legalops.club/news?newscheck=${GITHUB_RUN_ID}")
           printf '%s' "$news" | grep -q 'aria-label="legalops.news"'
           printf '%s' "$news" | grep -q 'id="news-content"'

@@ -1,52 +1,55 @@
-import Link from 'next/link'
-import { BrandWordmark } from '@/components/BrandLogo'
+import Link from "next/link";
+import { BrandWordmark } from "@/components/BrandLogo";
 
-type PublicArea = 'communities' | 'jobs' | 'employers' | 'about'
-type PublicLocale = 'pt' | 'en'
+type PublicArea = "communities" | "jobs" | "employers" | "about";
+type PublicLocale = "pt" | "en";
 
 const labels = {
   pt: {
-    club: 'comunidade',
-    work: 'vagas',
-    dev: 'open source',
-    login: 'Entrar',
+    club: "comunidade",
+    work: "vagas",
+    dev: "open source",
+    login: "Entrar",
   },
   en: {
-    club: 'community',
-    work: 'jobs',
-    dev: 'open source',
-    login: 'Sign in',
+    club: "community",
+    work: "jobs",
+    dev: "open source",
+    login: "Sign in",
   },
-} as const
+} as const;
 
 export function ClubHeader({
   active,
-  locale = 'pt',
+  locale = "pt",
   product,
   backLink,
+  navigation,
 }: {
-  active?: PublicArea
-  locale?: PublicLocale
-  product?: 'club' | 'work'
-  backLink?: { href: string; label: string }
+  active?: PublicArea;
+  locale?: PublicLocale;
+  product?: "club" | "work" | "chat";
+  backLink?: { href: string; label: string };
+  navigation?: { href: string; label: string; action?: boolean }[];
 }) {
-  const isWork = product === 'work' || active === 'jobs' || active === 'employers'
-  const currentProduct = isWork ? 'work' : 'club'
-  const copy = labels[locale]
+  const isWork =
+    product === "work" || active === "jobs" || active === "employers";
+  const currentProduct = product === "chat" ? "chat" : isWork ? "work" : "club";
+  const copy = labels[locale];
 
   const items = [
-    { key: 'club', label: copy.club, href: 'https://legalops.club' },
-    { key: 'work', label: copy.work, href: 'https://legalops.work' },
-    { key: 'dev', label: copy.dev, href: 'https://legalops.dev' },
-  ] as const
+    { key: "club", label: copy.club, href: "https://legalops.club" },
+    { key: "work", label: copy.work, href: "https://legalops.work" },
+    { key: "dev", label: copy.dev, href: "https://legalops.dev" },
+  ] as const;
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#CEC8BD] bg-[#F5F1E8]">
       <div className="brand-container flex min-h-[72px] items-center justify-between gap-4">
         <Link
-          href={isWork ? '/' : '/club'}
+          href={product === "chat" ? "/chat" : isWork ? "/" : "/club"}
           className="min-w-0 shrink-0"
-          aria-label={isWork ? 'legalops.work' : 'legalops.club'}
+          aria-label={`legalops.${currentProduct}`}
         >
           <BrandWordmark
             suffix={currentProduct}
@@ -54,28 +57,69 @@ export function ClubHeader({
           />
         </Link>
 
-        <nav className="flex min-w-0 items-center gap-2" aria-label={backLink ? 'Retorno' : locale === 'pt' ? 'Ecossistema LegalOps' : 'LegalOps ecosystem'}>
-          {backLink ? <Link href={backLink.href} className="brand-text-link min-w-0 text-right"><span aria-hidden="true">←</span>{backLink.label}</Link> : <>{items.map(item => {
-            const selected = item.key === currentProduct
-            return (
+        <nav
+          className="flex min-w-0 items-center gap-2"
+          aria-label={
+            backLink
+              ? "Retorno"
+              : locale === "pt"
+                ? "Ecossistema LegalOps"
+                : "LegalOps ecosystem"
+          }
+        >
+          {backLink ? (
+            <Link
+              href={backLink.href}
+              className="brand-text-link min-w-0 text-right"
+            >
+              <span aria-hidden="true">←</span>
+              {backLink.label}
+            </Link>
+          ) : navigation ? (
+            <>
+              {navigation.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={
+                    item.action
+                      ? "brand-action ml-2"
+                      : "hidden min-h-11 items-center px-3 text-xs sm:inline-flex"
+                  }
+                >
+                  {item.label}
+                  {item.action && <span aria-hidden="true">↗</span>}
+                </Link>
+              ))}
+            </>
+          ) : (
+            <>
+              {items.map((item) => {
+                const selected = item.key === currentProduct;
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    aria-current={selected ? "page" : undefined}
+                    className={`hidden min-h-11 items-center border-b-2 px-3 text-xs font-medium transition sm:inline-flex ${selected ? "border-[#E88A6A] text-[#111111]" : "border-transparent text-[#716B65] hover:border-[#CEC8BD] hover:text-[#111111]"}`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
               <Link
-                key={item.key}
-                href={item.href}
-                aria-current={selected ? 'page' : undefined}
-                className={`hidden min-h-11 items-center border-b-2 px-3 text-xs font-medium transition sm:inline-flex ${selected ? 'border-[#E88A6A] text-[#111111]' : 'border-transparent text-[#716B65] hover:border-[#CEC8BD] hover:text-[#111111]'}`}
+                href={isWork ? "/login" : "/login?next=/community"}
+                className="ml-2 inline-flex min-h-11 items-center text-sm font-medium hover:underline"
               >
-                {item.label}
+                {copy.login}{" "}
+                <span className="ml-2" aria-hidden="true">
+                  ↗
+                </span>
               </Link>
-            )
-          })}
-          <Link
-            href={isWork ? '/login' : '/login?next=/community'}
-            className="ml-2 inline-flex min-h-11 items-center text-sm font-medium hover:underline"
-          >
-            {copy.login} <span className="ml-2" aria-hidden="true">↗</span>
-          </Link></>}
+            </>
+          )}
         </nav>
       </div>
     </header>
-  )
+  );
 }

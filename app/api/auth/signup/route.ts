@@ -4,10 +4,12 @@ import { createClient } from '@supabase/supabase-js'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { clubReturnPath } from '@/lib/club-return-path'
 import { sendSignupConfirmationEmail } from '@/lib/welcome-email'
+import { chatReturnPath } from '@/lib/chat/model'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function safeReturnPath(value: unknown) {
+  if (chatReturnPath(value)) return chatReturnPath(value)!
   if (value === '/club/entrar') return value
   if (typeof value !== 'string' || !value.startsWith('/club/entrar?')) return '/club/entrar'
 

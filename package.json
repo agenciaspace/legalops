@@ -33,6 +33,7 @@
     "@tiptap/pm": "3.31.3",
     "@tiptap/react": "3.31.3",
     "@tiptap/starter-kit": "3.31.3",
+    "fflate": "0.8.3",
     "lucide-react": "^0.468.0",
     "next": "^14.2.35",
     "postal-mime": "^3.0.0",
@@ -42,6 +43,7 @@
     "react-markdown": "10.1.0",
     "remark-gfm": "4.0.1",
     "turbo": "^2.10.11",
+    "unpdf": "1.9.0",
     "yjs": "13.6.32"
   },
   "devDependencies": {

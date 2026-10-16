@@ -13,6 +13,7 @@ configuration.
 | `legalops.club` | Free professional community, personal-agent Pro, events and job alerts | Same `legalops-app` Worker; host-aware `/` rewrites to `/club` |
 | `legalops.dev` | Technical content, builds and guides | Static Cloudflare Pages-style site from `cloudflare-landing/` |
 | `legalops.news` | Editorial news and newsletter | Shared Next application; host-aware public `/news` routes |
+| `legalops.chat` | Organization agent teams for contract review | Shared Next application; public `/chat`, private `/chat/workspace` |
 
 The three domains are one brand ecosystem, not three independent codebases:
 
@@ -31,6 +32,12 @@ does not mean the reader confirmed or received an email.
 
 Use `docs/BRAND-LANGUAGE.md` for shared naming, typography, color and copy
 rules. Keep all product names lowercase.
+
+For Chat, read `docs/LEGALOPS-CHAT.md`. Chat has organization and matter
+permissions independent of Club admission and Pro. Preserve private matters,
+service-only mutations, checked source quotes and the human decision boundary.
+The specialized agents belong to the Chat workspace; do not add them to the
+Club personal-agent interface. Never describe passage retrieval as full review.
 
 ## Guia de consistência visual para os agentes (2026-10-13)
 

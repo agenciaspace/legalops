@@ -13,6 +13,19 @@ vi.mock('@supabase/ssr', () => ({ createServerClient: (_url: string, _key: strin
 import { middleware } from '../middleware'
 const request = (path: string, cookie?: string) => middleware(new NextRequest(`https://legalops.club${path}`, { headers: { host: 'legalops.club', ...(cookie ? { cookie } : {}) } }))
 beforeEach(() => { state.user = null; state.member = {}; state.authReads = 0; state.profileReads = 0; state.refresh = false })
+it('serves the public Chat landing independently of Auth and rewrites its own domain',async()=>{
+ expect((await request('/chat')).status).toBe(200)
+ const root=await middleware(new NextRequest('https://legalops.chat/',{headers:{host:'legalops.chat'}}))
+ expect(root.headers.get('x-middleware-rewrite')).toBe('https://legalops.chat/chat')
+ expect(state.authReads).toBe(0)
+})
+it('requires Chat login while keeping organization access independent of Club and career onboarding',async()=>{
+ expect((await request('/chat/workspace')).headers.get('location')).toBe('https://legalops.club/chat/entrar?next=%2Fchat%2Fworkspace')
+ state.user={id:'new-chat-user'};state.member={club_access_status:'inactive',club_pro_status:'inactive'}
+ expect((await request('/chat/workspace')).status).toBe(200)
+ expect((await request('/api/chat/workspaces')).status).toBe(200)
+ expect((await request('/chat/entrar')).headers.get('location')).toBe('https://legalops.club/chat/workspace')
+})
 it('keeps key management authenticated while allowing owners to remove credentials after Club expiry',async()=>{
   expect((await request('/api/club/api-key')).status).toBe(401)
   state.user={id:'expired'};state.member={club_access_status:'inactive'}

@@ -22,3 +22,4 @@ dist/*.aab
 
 playwright-report/
 test-results/
+.next-chat-dev/
