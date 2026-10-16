@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { chatResponseFormat, makeSources } from '@/lib/chat/model'
 import {
   extractOpenRouterResponseText,
   generateOpenRouterText,
@@ -12,6 +13,21 @@ afterEach(() => {
 })
 
 describe('OpenRouter response helpers', () => {
+  it('requires providers to constrain Chat citations to the supplied document passages', async () => {
+    vi.stubEnv('OPENROUTER_API_KEY', 'test-key')
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({choices:[{message:{content:'Result'}}]}))
+    vi.stubGlobal('fetch', fetchMock)
+    const {sources} = makeSources([{id:'doc-1',name:'Model',kind:'model',content:'A renovação dependerá de acordo escrito.'}], 'renovação')
+    await generateOpenRouterText({userPrompt:'Question', responseFormat:chatResponseFormat(sources)})
+    const request = JSON.parse(fetchMock.mock.calls[0][1].body)
+    expect(request.provider).toEqual({data_collection:'deny',zdr:true,require_parameters:true})
+    expect(request.response_format.json_schema.strict).toBe(true)
+    const citation = request.response_format.json_schema.schema.properties.findings.items.properties.citations.items
+    expect(citation.additionalProperties).toBe(false)
+    expect(citation.required).toEqual(['source_id'])
+    expect(citation.properties.source_id.enum).toEqual(['S1'])
+    expect(citation.properties).not.toHaveProperty('quote')
+  })
   it('reports provider cost and tokens without sending the accounting callback to the provider', async () => {
     vi.stubEnv('OPENROUTER_API_KEY','test-key')
     const usage=vi.fn(async()=>{})

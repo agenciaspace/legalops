@@ -25,6 +25,7 @@ interface GenerateOpenRouterTextParams {
   maxTokens?: number
   temperature?: number
   timeoutMs?: number
+  responseFormat?: { type: 'json_schema'; json_schema: { name: string; strict: true; schema: Record<string, unknown> } }
   onUsage?: (usage: {model:string|null;cost:number|null;inputTokens:number|null;outputTokens:number|null})=>Promise<void>
 }
 
@@ -49,6 +50,7 @@ export async function generateOpenRouterText({
   maxTokens = 1024,
   temperature = 0,
   timeoutMs,
+  responseFormat,
   onUsage,
 }: GenerateOpenRouterTextParams): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY
@@ -71,7 +73,9 @@ export async function generateOpenRouterText({
       provider: {
         data_collection: 'deny',
         zdr: true,
+        ...(responseFormat ? { require_parameters: true } : {}),
       },
+      ...(responseFormat ? { response_format: responseFormat } : {}),
       messages: [
         ...(systemPrompt
           ? [

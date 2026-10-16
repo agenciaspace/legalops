@@ -58,6 +58,44 @@ export const STATUS_LABELS: Record<string, string> = {
 export function normalizedText(value: string) {
   return value.replace(/\s+/g, " ").trim();
 }
+export function chatResponseFormat(sources: ChatSource[]) {
+  const string = { type: "string", maxLength: 1500 };
+  const list = { type: "array", items: string, maxItems: 6 };
+  return {
+    type: "json_schema" as const,
+    json_schema: {
+      name: "chat_agent_output",
+      strict: true as const,
+      schema: {
+        type: "object", additionalProperties: false,
+        required: ["summary", "findings", "next_actions", "missing_information"],
+        properties: {
+          summary: { type: "string", minLength: 5, maxLength: 4000 },
+          findings: {
+            type: "array", maxItems: 6,
+            items: {
+              type: "object", additionalProperties: false,
+              required: ["title", "detail", "severity", "citations"],
+              properties: {
+                title: { type: "string", maxLength: 200 },
+                detail: { type: "string", maxLength: 3000 },
+                severity: { type: "string", enum: ["attention", "info"] },
+                citations: {
+                  type: "array", maxItems: 6,
+                  items: {
+                    type: "object", additionalProperties: false, required: ["source_id"],
+                    properties: { source_id: { type: "string", enum: sources.map(s => s.id) } },
+                  },
+                },
+              },
+            },
+          },
+          next_actions: list, missing_information: list,
+        },
+      },
+    },
+  };
+}
 export function makeSources(
   documents: { id: string; name: string; kind: string; content: string }[],
   query: string,
@@ -166,9 +204,9 @@ export function parseAgentOutput(
       throw new Error("invalid_output");
     const citations = f.citations.map(
       (c: { source_id: string; quote?: string }) => {
-        if (!c || typeof c.source_id !== "string") throw new Error("invalid_citation");
+        if (!c || typeof c.source_id !== "string") throw new Error("invalid_citation_shape");
         const source = sources.find((s) => s.id === c.source_id);
-        if (!source) throw new Error("invalid_citation");
+        if (!source) throw new Error("invalid_citation_source");
         // The model selects a source; the server supplies its exact stored text.
         // Legacy outputs with an explicit quote still require literal verification.
         if (c.quote === undefined) return { source_id: source.id, quote: source.text };
@@ -178,7 +216,7 @@ export function parseAgentOutput(
           c.quote.length > 700 ||
           !normalizedText(source.text).includes(normalizedText(c.quote))
         )
-          throw new Error("invalid_citation");
+          throw new Error("invalid_citation_quote");
         return { source_id: c.source_id, quote: c.quote };
       },
     );

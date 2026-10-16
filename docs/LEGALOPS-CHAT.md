@@ -71,6 +71,10 @@ contract review. The model selects included passage IDs (`S1`, `S2`, etc.);
 the server builds citations from the exact saved passage text. Unsupported IDs
 invalidate the step. Legacy model-supplied quotes still require literal
 verification. Uncited suggestions are visibly identified.
+Requests use strict structured output with the selected source IDs as an enum
+and require a provider that supports those parameters. Human updates, decisions
+and memories remain attributed declarations, without documentary source IDs.
+See [OpenRouter structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs).
 
 ## Durable execution and learning
 
