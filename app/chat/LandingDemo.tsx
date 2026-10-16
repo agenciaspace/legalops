@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CHAT_AGENTS } from "@/lib/chat/model";
 import { ArrowRight, FileText } from "lucide-react";
 const examples = [
@@ -38,6 +38,8 @@ const examples = [
   },
 ];
 export default function LandingDemo() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
   const [selected, setSelected] = useState(0);
   const current = examples[selected];
   return (
@@ -57,6 +59,7 @@ export default function LandingDemo() {
           {CHAT_AGENTS.map((a, i) => (
             <button
               type="button"
+              disabled={!ready}
               key={a.key}
               role="tab"
               id={`demo-tab-${a.key}`}
