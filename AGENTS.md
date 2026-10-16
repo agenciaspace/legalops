@@ -12,12 +12,22 @@ configuration.
 | `legalops.work` | Jobs, career profile, application pipeline, employer intake | Next.js App Router on Cloudflare Workers via OpenNext |
 | `legalops.club` | Free professional community, personal-agent Pro, events and job alerts | Same `legalops-app` Worker; host-aware `/` rewrites to `/club` |
 | `legalops.dev` | Technical content, builds and guides | Static Cloudflare Pages-style site from `cloudflare-landing/` |
+| `legalops.news` | Editorial news and newsletter | Shared Next application; host-aware public `/news` routes |
 
 The three domains are one brand ecosystem, not three independent codebases:
 
 - `club` is community and connection.
 - `work` is opportunities and career.
 - `dev` is practical building, systems and experiments.
+- `news` is sourced editorial coverage; the same published articles appear in the Club.
+
+For News, read `docs/LEGALOPS-NEWS.md`. `/community/news` is part of free Club
+membership. Profile preferences control the opt-in digest on `/community`;
+newsletter consent is separate. `/community/news/manage` and `/api/news/admin`
+require the existing administrator email allowlist. Daily discovery only creates
+private candidates; publishing is an editorial action. Email signups remain
+private and pending until beehiiv is configured, and provider acknowledgement
+does not mean the reader confirmed or received an email.
 
 Use `docs/BRAND-LANGUAGE.md` for shared naming, typography, color and copy
 rules. Keep all product names lowercase.

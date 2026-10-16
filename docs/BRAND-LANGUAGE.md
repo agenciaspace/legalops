@@ -1,20 +1,21 @@
 # LegalOps — brand & landing system
 
-Este arquivo define a linguagem compartilhada entre `legalops.club`, `legalops.work` e `legalops.dev`.
+Este arquivo define a linguagem compartilhada entre `legalops.club`, `legalops.work`, `legalops.dev` e `legalops.news`.
 
 A regra principal é simples:
 
 - `legalops.club` = **comunidade**
 - `legalops.work` = **vagas**
 - `legalops.dev` = **open source Legal Tech / construir junto**
+- `legalops.news` = **notícias e contexto sobre o trabalho jurídico**
 
-Os três produtos devem parecer partes do mesmo ecossistema. Cada domínio tem uma função clara e não deve tentar vender a função dos outros dois.
+Os quatro produtos devem parecer partes do mesmo ecossistema. Cada domínio tem uma função clara.
 
 ## 1. Arquitetura do ecossistema
 
 Toda landing pública deve tornar esta relação visível no primeiro viewport ou imediatamente depois dele:
 
-`club / comunidade` · `work / vagas` · `dev / open source`
+`club / comunidade` · `work / vagas` · `dev / open source` · `news / notícias`
 
 A navegação entre os domínios deve parecer uma troca de área dentro do mesmo produto-mãe, não uma visita a outra empresa.
 
@@ -43,6 +44,18 @@ O cadastro na comunidade é aberto a perfis compatíveis, com LinkedIn e context
 profissional. Pro é a camada paga do agente pessoal e das integrações com Work,
 Dev e outros serviços. Não vender o simples pertencimento à comunidade como Pro.
 Ver `docs/CLUB-MODEL.md` para a premissa de produto atual.
+
+### News
+
+Promessa: **o que está mudando no trabalho jurídico.**
+
+Cobertura de tecnologia, operações e negócios para escritórios, departamentos
+jurídicos e prestadores de serviços. Cada matéria identifica fontes, data do fato,
+o que foi anunciado e a análise de impacto por público. Não apresentar promessas
+de fornecedores como resultados testados. O News informa e convida a continuar a
+conversa no Club; as notícias publicadas ficam disponíveis nas duas superfícies.
+Usar os mesmos tokens e wordmark com sufixo `news`, com composição editorial.
+Assinatura por email e recebimento no feed do Club são escolhas independentes.
 
 ### Work
 

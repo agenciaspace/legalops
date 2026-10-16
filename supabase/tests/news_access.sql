@@ -29,10 +29,27 @@ do $$ begin
  update public.news_preferences set enabled=false where user_id=auth.uid();
  if not found then raise exception 'Owner cannot disable preference'; end if;
  if has_table_privilege(current_user,'public.news_email_signups','select') then raise exception 'Members can read email list'; end if;
+end $$;
+reset role;
+-- Keep the reassignment target valid but without a conflicting preference key,
+-- so only RLS (rather than uniqueness or an FK) can reject the reassignment.
+delete from public.news_preferences where user_id=current_setting('news_test.other')::uuid;
+set local role authenticated;
+do $$ begin
  begin
   update public.news_preferences set user_id=current_setting('news_test.other')::uuid where user_id=auth.uid();
   raise exception 'Owner can reassign preferences';
- exception when insufficient_privilege then null; when unique_violation then null;
+ exception when insufficient_privilege then null;
+ end;
+end $$;
+reset role;
+update public.community_members set club_access_status='inactive' where user_id=current_setting('news_test.owner')::uuid;
+set local role authenticated;
+do $$ begin
+ begin
+  update public.news_preferences set enabled=true where user_id=auth.uid();
+  raise exception 'Inactive member can enable delivery';
+ exception when insufficient_privilege then null;
  end;
 end $$;
 reset role;
