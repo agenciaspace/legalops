@@ -114,7 +114,7 @@ jobs:
           printf '%s' "$icon" | grep -q '<svg'
           news=$(curl -fsS --retry 5 --retry-delay 2 "https://legalops.club/news?newscheck=${GITHUB_RUN_ID}")
           printf '%s' "$news" | grep -q 'aria-label="legalops.news"'
-          printf '%s' "$news" | grep -q 'Harvey e Legora'
+          printf '%s' "$news" | grep -q 'id="news-content"'
 
       - name: Record deploy status
         if: always()
