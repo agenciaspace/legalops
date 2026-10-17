@@ -90,3 +90,10 @@ proposals for artwork only; no WhatsApp names or pictures were changed.
 Archivo Black font. Browser checks covered 320/390/768/1440 widths, filtering,
 shape toggle, dialog keyboard dismissal and absence of page errors. Contact
 sheet inspected for legibility and safe circular cropping.
+
+### Text-only companion
+
+`/grupos/texto/` presents the same 14 marks using only typography and the shared
+palette. It preserves the symbol-based version and provides a switch between
+the two galleries. `build-text-group-previews.cjs` renders the independent PNG,
+SVG and contact-sheet assets. No WhatsApp group metadata or images are modified.
