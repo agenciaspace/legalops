@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { generateOpenRouterText } from '@/lib/openrouter'
+import { generateWhatsAppText, isLocalGeneration, LocalGenerationRequired } from '@/lib/whatsapp-generation'
 import { DAY_MS, parseWhatsAppDigest, validateWhatsAppInput, whatsAppDigestPrompt, WHATSAPP_SUMMARY_MODEL } from '@/lib/whatsapp-summary'
 import { BENCH_WHATSAPP_SOURCES, BENCH_WHATSAPP_SYNC_MODEL, benchSchedulePrompt, extractExplicitBenchSchedule, parseBenchScheduleDecision, validateBenchSyncInput } from '@/lib/bench-whatsapp-sync'
 import { EVENT_WHATSAPP_SUMMARY_MODEL, eventWhatsAppDigestPrompt, parseEventWhatsAppDigest, validateEventWhatsAppInput } from '@/lib/event-whatsapp-summary'
@@ -15,6 +15,11 @@ export async function POST(request: Request) {
   if (text.length > 300000) return reply({ error: 'Payload too large' }, 413)
   let raw
   try { raw = JSON.parse(text) } catch { return reply({ error: 'Invalid JSON' }, 400) }
+  if (raw?.local_generation !== undefined && !isLocalGeneration(raw.local_generation)) return reply({ error: 'Invalid local generation' }, 400)
+  const generate = (input: Parameters<typeof generateWhatsAppText>[0]) => generateWhatsAppText(input, raw?.local_generation)
+  const localFallback = (error: unknown) => error instanceof LocalGenerationRequired
+    ? reply({ error: 'Summary provider credit unavailable', local_fallback: error.request }, 503)
+    : null
   const db = createAdminClient()
   if (raw?.action === 'pull-event-comments') {
     const { data: pending, error } = await db
@@ -53,7 +58,7 @@ export async function POST(request: Request) {
     const source = BENCH_WHATSAPP_SOURCES[input.groupId]
     try {
       const explicitDecision = extractExplicitBenchSchedule(input.messages, source.timeZone)
-      const decision = explicitDecision ?? parseBenchScheduleDecision(await generateOpenRouterText({
+      const decision = explicitDecision ?? parseBenchScheduleDecision(await generate({
           systemPrompt: 'Você extrai decisões de agenda de forma conservadora. Nunca trate uma sugestão como confirmação.',
           userPrompt: benchSchedulePrompt(input.messages, new Date(), source.timeZone),
           model: BENCH_WHATSAPP_SYNC_MODEL,
@@ -113,7 +118,9 @@ export async function POST(request: Request) {
         starts_at: decision.startsAt,
         calendar_synced: calendar.ok,
       })
-    } catch {
+    } catch (error) {
+      const fallback = localFallback(error)
+      if (fallback) return fallback
       console.error('[bench-whatsapp-sync] Schedule extraction or update failed')
       return reply({ error: 'Bench schedule sync will retry' }, 503)
     }
@@ -150,7 +157,7 @@ export async function POST(request: Request) {
       if (existing && !eventInput.preview) { await status('published'); return reply({ ok: true, summary: existing, reused: true }) }
       if (!eventInput.messages.length) { await status('empty'); return reply({ ok: true, empty: true }) }
       await status('generating')
-      const generated = await generateOpenRouterText({
+      const generated = await generate({
         systemPrompt: 'Você edita uma síntese factual e anônima para participantes de um evento profissional. Nunca exponha nomes, empresas ou dados de contato.',
         userPrompt: eventWhatsAppDigestPrompt(eventInput.messages, event.title),
         model: EVENT_WHATSAPP_SUMMARY_MODEL,
@@ -162,7 +169,7 @@ export async function POST(request: Request) {
       if (!digest) throw new Error('Invalid generated event summary')
       if (!digest.publish) { await status('empty'); return reply({ ok: true, empty: true, reason: 'no-substantive-content' }) }
       const { publish: _publish, ...content } = digest
-      const record = { ...content, event_id: event.id, period_start: eventInput.start, period_end: eventInput.end, source_message_count: eventInput.messages.length, source_participant_count: new Set(eventInput.messages.map(item => item.author)).size, omitted_media_count: eventInput.omitted, model: EVENT_WHATSAPP_SUMMARY_MODEL }
+      const record = { ...content, event_id: event.id, period_start: eventInput.start, period_end: eventInput.end, source_message_count: eventInput.messages.length, source_participant_count: new Set(eventInput.messages.map(item => item.author)).size, omitted_media_count: eventInput.omitted, model: raw.local_generation?.model ?? EVENT_WHATSAPP_SUMMARY_MODEL }
       if (eventInput.preview) return reply({ ok: true, preview: true, summary: record })
       const { data: saved, error } = await db.from('community_event_whatsapp_summaries').upsert(record, { onConflict: 'event_id,period_end', ignoreDuplicates: true }).select('*').maybeSingle()
       if (error) throw new Error('Event summary insert failed')
@@ -170,8 +177,10 @@ export async function POST(request: Request) {
       if (!committed) throw new Error('Event summary lookup failed')
       await status('published')
       return reply({ ok: true, summary: committed })
-    } catch {
+    } catch (error) {
       await status('error').catch(() => {})
+      const fallback = localFallback(error)
+      if (fallback) return fallback
       console.error('[event-whatsapp-summary] Generation or persistence failed; scheduled retry required')
       return reply({ error: 'Resumo em preparação. Uma nova tentativa será feita.' }, 503)
     }
@@ -194,12 +203,12 @@ export async function POST(request: Request) {
     if (existing && !input.preview) { await status('published'); return reply({ok:true,summary:existing,reused:true}) }
     if (!input.messages.length) { await status('empty'); return reply({ok:true,empty:true}) }
     await status('generating')
-    const generated = await generateOpenRouterText({systemPrompt:'Você edita um briefing factual e específico para profissionais de Legal Operations. Use apenas as fontes fornecidas, elimine conversa social sem informação e escreva em português do Brasil.',userPrompt:whatsAppDigestPrompt(input.messages),model:WHATSAPP_SUMMARY_MODEL,maxTokens:1800,temperature:0,timeoutMs:45000})
+    const generated = await generate({systemPrompt:'Você edita um briefing factual e específico para profissionais de Legal Operations. Use apenas as fontes fornecidas, elimine conversa social sem informação e escreva em português do Brasil.',userPrompt:whatsAppDigestPrompt(input.messages),model:WHATSAPP_SUMMARY_MODEL,maxTokens:1800,temperature:0,timeoutMs:45000})
     const digest = parseWhatsAppDigest(generated)
     if (!digest) throw new Error('Invalid generated summary')
     if (!digest.publish) { await status('empty'); return reply({ok:true,empty:true,reason:'no-substantive-content'}) }
     const { publish: _publish, ...content } = digest
-    const record = {...content,period_start:input.start,period_end:input.end,source_message_count:input.messages.length,source_participant_count:new Set(input.messages.map(item=>item.author)).size,omitted_media_count:input.omitted,model:WHATSAPP_SUMMARY_MODEL}
+    const record = {...content,period_start:input.start,period_end:input.end,source_message_count:input.messages.length,source_participant_count:new Set(input.messages.map(item=>item.author)).size,omitted_media_count:input.omitted,model:raw.local_generation?.model ?? WHATSAPP_SUMMARY_MODEL}
     if (input.preview) return reply({ok:true,preview:true,summary:record})
     const { data: saved, error } = await db.from('club_whatsapp_summaries').upsert(record,{onConflict:'period_end',ignoreDuplicates:true}).select('*').maybeSingle()
     if (error) throw new Error('Summary insert failed')
@@ -207,8 +216,10 @@ export async function POST(request: Request) {
     if (!committed) throw new Error('Summary lookup failed')
     await status('published')
     return reply({ok:true,summary:committed})
-  } catch {
+  } catch (error) {
     await status('error').catch(()=>{})
+    const fallback = localFallback(error)
+    if (fallback) return fallback
     console.error('[whatsapp-summary] Generation or persistence failed; scheduled retry required')
     return reply({error:'Resumo em preparação. Uma nova tentativa será feita.'},503)
   }
