@@ -1,0 +1,114 @@
+[
+  {
+    "slug": "comunidade",
+    "title": "Comunidade",
+    "original": "legalops.club",
+    "category": "Principal",
+    "icon": "club",
+    "tone": "base"
+  },
+  {
+    "slug": "avisos",
+    "title": "Avisos",
+    "original": "legalops.club · grupo de avisos",
+    "category": "Conversas",
+    "icon": "announce",
+    "tone": "coral"
+  },
+  {
+    "slug": "conversa",
+    "title": "Conversa",
+    "original": "legalops.club · conversa",
+    "category": "Conversas",
+    "icon": "chat",
+    "tone": "base"
+  },
+  {
+    "slug": "bench-enter",
+    "title": "Bench Enter",
+    "original": "Bench Enter",
+    "category": "Bench",
+    "icon": "compare",
+    "tone": "dark"
+  },
+  {
+    "slug": "bench-netlex",
+    "title": "Bench Netlex",
+    "original": "Bench Netlex",
+    "category": "Bench",
+    "icon": "compare",
+    "tone": "dark"
+  },
+  {
+    "slug": "cafe",
+    "title": "Café",
+    "original": "legalops.club - coffe club",
+    "category": "Interesses",
+    "icon": "coffee",
+    "tone": "base"
+  },
+  {
+    "slug": "corrida",
+    "title": "Corrida",
+    "original": "legalops.club - corrreeeeeeeeee",
+    "category": "Interesses",
+    "icon": "run",
+    "tone": "coral"
+  },
+  {
+    "slug": "podcast",
+    "title": "Podcast",
+    "original": "legalops.club - podcast",
+    "category": "Interesses",
+    "icon": "mic",
+    "tone": "dark"
+  },
+  {
+    "slug": "vinho",
+    "title": "Vinho",
+    "original": "legalops.club - wine club",
+    "category": "Interesses",
+    "icon": "wine",
+    "tone": "base"
+  },
+  {
+    "slug": "sao-paulo",
+    "title": "São Paulo",
+    "original": "legalops.club - São Paulo",
+    "category": "Locais",
+    "icon": "SP",
+    "tone": "base"
+  },
+  {
+    "slug": "curitiba",
+    "title": "Curitiba",
+    "original": "legalops.club · Curitiba",
+    "category": "Locais",
+    "icon": "CWB",
+    "tone": "base"
+  },
+  {
+    "slug": "fortaleza",
+    "title": "Fortaleza",
+    "original": "legalops.club · Fortaleza",
+    "category": "Locais",
+    "icon": "FOR",
+    "tone": "base"
+  },
+  {
+    "slug": "goiania",
+    "title": "Goiânia",
+    "original": "legalops.club · Goiânia",
+    "category": "Locais",
+    "icon": "GYN",
+    "tone": "base"
+  },
+  {
+    "slug": "usa",
+    "title": "USA",
+    "original": "legalops.club - usa",
+    "category": "Locais",
+    "icon": "USA",
+    "tone": "base"
+  }
+]

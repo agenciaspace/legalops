@@ -74,3 +74,19 @@ The preview is publicly reachable by its workers.dev URL and excluded from index
 
 Buildless: deploy `site/` directly. The optional Python scripts regenerate shells
 and original SVG assets. They do not fetch remote content or production data.
+
+## WhatsApp group logo previews — 2026-10-17
+
+`/grupos/` contains 14 native-vector previews: the community mark and the 13
+linked groups confirmed through a read-only refresh of the connected WhatsApp
+instance. The original Conexões mark is preserved across variants. Group member
+information, chat IDs, invite links and messages are not included in the preview.
+
+The gallery supports category filters, circular/square previews, enlarged views,
+individual PNG/SVG downloads, a contact sheet and a ZIP. Short display names are
+proposals for artwork only; no WhatsApp names or pictures were changed.
+
+`node build-group-previews.cjs` renders 1080×1080 PNGs from SVGs with the shared
+Archivo Black font. Browser checks covered 320/390/768/1440 widths, filtering,
+shape toggle, dialog keyboard dismissal and absence of page errors. Contact
+sheet inspected for legibility and safe circular cropping.
