@@ -7,11 +7,10 @@ Production host routes and the shared brand components are not modified.
 ## Proposed direction
 
 - **Club / Conexões (recommended):** Manrope headings (500), wordmark (700/500), Inter UI.
-  White and graphite with electric blue accents. A new interlocking symbol,
+  Traditional cream (#F5F1E8), coral (#E88A6A) and ink (#111111), verified against the production brand definitions. A new interlocking symbol,
   spacious layout and a question/reply/resource composition explain the community.
   The same design language extends to the feed, profiles, events and brand guide.
-  Coral and Olive are optional color variants. V5 preferences use a new local key,
-  so earlier saved colors do not mask the new proposal.
+  Club palette is fixed to the traditional colors; earlier saved color choices are ignored.
 - **News / Sinal Editorial:** paper, ink and acid green, oversized masthead,
   compact editorial columns, monospace metadata and official launch imagery composed into editorial covers.
   Real stock photography from Pexels and Unsplash provides context when appropriate.
@@ -29,8 +28,8 @@ Production host routes and the shared brand components are not modified.
    local-only composer and canned agent examples. Demo state lasts one page session.
 3. `/news/`: editorial home, combined category/search and article navigation.
 4. `/news/leitura/?id=0`: full article layout, original content and source links.
-5. `/brand/`: three Club palettes, wordmark, typography, social applications,
-   downloads and News identity. Theme/palette preferences persist locally.
+5. `/brand/`: traditional Club palette, wordmark, typography, social applications,
+   downloads and News identity. Theme preference persists locally.
 
 News fixtures reproduce the four existing public legalops.news articles dated
 2026-10-16, captured 2026-10-17. Source URLs are retained in articles.json and
@@ -60,7 +59,7 @@ PLAYWRIGHT_PATH=/absolute/path/to/playwright node brand-preview/qa/verify.cjs
 ```
 
 38 browser checks: five routes at 320/390/768/1440 px, image loading and horizontal
-overflow, palettes/theme, tabs/keyboard, FAQ, combined filtering, saved posts,
+overflow, palette/theme, tabs/keyboard, FAQ, combined filtering, saved posts,
 thread dialog, local composer, agent demo, people/events, article sources and downloads.
 No browser JS/console errors in the accepted run. Also checked JavaScript syntax,
 Wrangler dry run and repository-required Bend proofs.
