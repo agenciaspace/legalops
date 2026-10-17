@@ -6,7 +6,7 @@ Production host routes and the shared brand components are not modified.
 
 ## Proposed direction
 
-- **Club / Coral Club (recommended):** Archivo Black wordmark and poster-scale headings, Inter UI,
+- **Club / Coral Club (recommended):** Space Grotesk wordmark/hero (700), supporting headings (600), Inter UI,
   full coral hero, paper and ink. Community-first messaging, contextual
   product examples and a modular dot motif. Cobalt and Olive are selectable alternatives.
 - **News / Sinal Editorial:** paper, ink and acid green, oversized masthead,
@@ -46,7 +46,7 @@ PHOTO-CREDITS.md and linked from each article. People and scenes are contextual,
 not depicted as the companies or events being reported. Club pixel motifs remain
 original vector compositions. Font files are
 self-hosted; OFL licenses are included. Wordmark/social SVG exports retain editable
-text and require Archivo Black for the intended rendering. Export design colors
+text and require Space Grotesk for the intended rendering. Export design colors
 and typography as JSON from the identity page.
 
 ## Development and validation
