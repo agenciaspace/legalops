@@ -1,0 +1,33 @@
+name: Deploy branding preview
+on:
+  push:
+    branches: [design/club-brand-preview]
+    paths:
+      - 'brand-preview/**'
+      - '.github/workflows/deploy-brand-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: legalops-brand-preview
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify JavaScript syntax and article fixtures
+        run: |
+          node --check brand-preview/site/assets/app.js
+          python3 -m json.tool brand-preview/site/assets/articles.json > /dev/null
+      - name: Deploy isolated static preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 3d40d7797b3fd6d1cd2644eefea9e907
+        run: npx --yes wrangler@4.124.0 deploy --config brand-preview/wrangler.jsonc

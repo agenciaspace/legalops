@@ -1,0 +1,12 @@
+{
+  "name": "legalops-club-brand-preview",
+  "account_id": "3d40d7797b3fd6d1cd2644eefea9e907",
+  "compatibility_date": "2026-10-17",
+  "workers_dev": true,
+  "preview_urls": true,
+  "assets": {
+    "directory": "./site",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}

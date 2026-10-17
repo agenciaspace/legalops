@@ -1,0 +1,282 @@
+[
+  {
+    "url": "https://legalops.news/noticias/harvey-legora-intake-entrada-demandas-juridicas",
+    "blocks": [
+      {
+        "type": "heading",
+        "text": "O que mudou"
+      },
+      {
+        "type": "paragraph",
+        "text": "Harvey e Legora apresentam produtos de intake para departamentos jurídicos: uma forma de receber solicitações, reunir contexto e encaminhar trabalho. A Harvey descreve captura por canais do negócio e distribuição entre agentes aprovados e profissionais. A Legora anunciou seu Intake em 13 de outubro, inicialmente no Slack."
+      },
+      {
+        "type": "paragraph",
+        "text": "O comunicado de lançamento da Legora trata Teams, email e MCP como expansão planejada. Sua página de produto já apresenta esses canais na descrição geral. Essa diferença precisa ser confirmada na contratação: aparecer em uma página comercial não estabelece que toda integração esteja disponível para qualquer cliente."
+      },
+      {
+        "type": "heading",
+        "text": "A disputa pela entrada do trabalho"
+      },
+      {
+        "type": "paragraph",
+        "text": "Nossa leitura é que a entrada da demanda passa a ser uma decisão de operação. Ali se identifica a necessidade, se reúne informação e se define quem fará o trabalho. A escolha dessa camada pode influenciar a divisão entre equipe interna, agentes e assessoria externa."
+      },
+      {
+        "type": "heading",
+        "text": "O que verificar antes de comprar"
+      },
+      {
+        "type": "paragraph",
+        "text": "Um piloto deve usar solicitações reais e medir completude das informações, tempo de resposta e retrabalho. É preciso identificar quais respostas exigem revisão, quem assume cada demanda e como as exceções chegam à pessoa responsável."
+      },
+      {
+        "type": "paragraph",
+        "text": "Para o Brasil, esta apuração não confirmou preço, disponibilidade contratual, qualidade em português ou cobertura de direito brasileiro. Esses pontos devem entrar na avaliação do fornecedor. As capacidades descritas são anúncios das empresas, sem teste independente do legalops.news."
+      },
+      {
+        "type": "heading",
+        "text": "A LEITURA PARA O SEU TRABALHO"
+      },
+      {
+        "type": "heading",
+        "text": "Escritórios"
+      },
+      {
+        "type": "paragraph",
+        "text": "Se o cliente encaminhar uma demanda já organizada e com trabalho preliminar, o escritório precisará esclarecer o valor da revisão, do julgamento e da entrega. Vale discutir escopo e critérios de qualidade antes de adaptar a cobrança."
+      },
+      {
+        "type": "heading",
+        "text": "Departamentos jurídicos"
+      },
+      {
+        "type": "paragraph",
+        "text": "Compare a nova camada com seu intake atual. O piloto precisa mostrar quem decide, quem revisa e como a demanda chega ao responsável, além de medir o tempo até uma resposta utilizável."
+      },
+      {
+        "type": "heading",
+        "text": "Prestadores de serviços"
+      },
+      {
+        "type": "paragraph",
+        "text": "Há uma hipótese de demanda por organização do conhecimento, desenho de regras, integração e manutenção dos fluxos. A oportunidade deve ser validada com o cliente e com os limites de configuração de cada plataforma."
+      }
+    ],
+    "sources": [
+      {
+        "text": "Harvey — página oficial do Intake ↗",
+        "url": "https://www.harvey.ai/platform/intake"
+      },
+      {
+        "text": "Legora — comunicado de lançamento, 13/10/2026 ↗",
+        "url": "https://legora.com/newsroom/legora-launches-intake-an-agentic-front-door-for-in-house-legal-teams"
+      },
+      {
+        "text": "Legora — página oficial do Intake ↗",
+        "url": "https://legora.com/product/intake"
+      }
+    ]
+  },
+  {
+    "url": "https://legalops.news/noticias/legora-sirion-integracao-clm-contexto-contratual",
+    "blocks": [
+      {
+        "type": "heading",
+        "text": "O anúncio"
+      },
+      {
+        "type": "paragraph",
+        "text": "Em 14 de outubro, Legora e Sirion anunciaram uma integração entre suas plataformas. A proposta inclui uso de informações contratuais do Sirion na Legora e pesquisa jurídica da Legora dentro do Sirion. Segundo o comunicado, o Sirion permanece como repositório de referência dos contratos e suas permissões devem acompanhar o acesso aos dados."
+      },
+      {
+        "type": "paragraph",
+        "text": "A disponibilidade é gradual: o anúncio prevê início com clientes beta selecionados, sem estabelecer acesso geral imediato."
+      },
+      {
+        "type": "heading",
+        "text": "O contexto para a operação"
+      },
+      {
+        "type": "paragraph",
+        "text": "A integração propõe aproximar o conteúdo dos contratos e o ambiente onde o profissional analisa uma questão. Nossa leitura é que o comprador deve avaliar essa ligação como parte da arquitetura de informação do jurídico."
+      },
+      {
+        "type": "heading",
+        "text": "O que acompanhar"
+      },
+      {
+        "type": "paragraph",
+        "text": "O piloto precisa mostrar quais documentos são recuperados, se as permissões são respeitadas e como o usuário confere a versão e a origem de uma resposta. Disponibilidade para clientes brasileiros, preço e suporte devem ser confirmados com os fornecedores. O legalops.news não testou a integração."
+      },
+      {
+        "type": "heading",
+        "text": "A LEITURA PARA O SEU TRABALHO"
+      },
+      {
+        "type": "heading",
+        "text": "Departamentos jurídicos"
+      },
+      {
+        "type": "paragraph",
+        "text": "Inclua permissões, versões, rastreabilidade e custo total nos critérios do piloto. Uma resposta precisa permitir localizar o contrato e conferir o contexto utilizado."
+      },
+      {
+        "type": "heading",
+        "text": "Prestadores de serviços"
+      },
+      {
+        "type": "paragraph",
+        "text": "Mapeamento de documentos, qualidade dos metadados e testes de acesso podem integrar o projeto de implantação. Confirme as interfaces disponíveis antes de oferecer uma integração própria."
+      },
+      {
+        "type": "heading",
+        "text": "Escritórios"
+      },
+      {
+        "type": "paragraph",
+        "text": "Ao receber contexto contratual do cliente, esclareça quais documentos estão atuais e quais posições foram aprovadas. O acesso à informação não substitui a definição do escopo da assessoria."
+      }
+    ],
+    "sources": [
+      {
+        "text": "Legora e Sirion — anúncio oficial de 14/10/2026 ↗",
+        "url": "https://legora.com/newsroom/legora-and-sirion-partner-to-bring-agentic-legal-ai-and-enterprise-contract-intelligence-together-in-one-connected-experience"
+      }
+    ]
+  },
+  {
+    "url": "https://legalops.news/noticias/legora-laurel-horas-trabalho-ia",
+    "blocks": [
+      {
+        "type": "heading",
+        "text": "O que foi anunciado"
+      },
+      {
+        "type": "paragraph",
+        "text": "Legora e Laurel anunciaram, em 13 de outubro, uma parceria para capturar tempo de trabalho realizado na Legora. A primeira etapa prevê apontamentos vinculados ao cliente e ao assunto, com descrição para revisão pelo advogado. As empresas também planejam desenvolver formas de medir o valor do uso de IA, numa segunda etapa."
+      },
+      {
+        "type": "paragraph",
+        "text": "O comunicado informa que detalhes de disponibilidade serão enviados aos clientes durante a implantação. Não apresenta um indicador de retorno já validado."
+      },
+      {
+        "type": "heading",
+        "text": "A decisão que vem junto"
+      },
+      {
+        "type": "paragraph",
+        "text": "Para um escritório, registrar uma atividade e definir como cobrá-la são decisões distintas. Nossa leitura é que o projeto precisa envolver a gestão financeira e os responsáveis pelos acordos com clientes."
+      },
+      {
+        "type": "heading",
+        "text": "O que acompanhar"
+      },
+      {
+        "type": "paragraph",
+        "text": "Antes de automatizar apontamentos, vale definir como o profissional revisa a descrição, corrige o vínculo ao assunto e identifica o trabalho efetivamente realizado. A qualidade da entrega também precisa entrar na avaliação do investimento. O legalops.news não testou a integração."
+      },
+      {
+        "type": "heading",
+        "text": "A LEITURA PARA O SEU TRABALHO"
+      },
+      {
+        "type": "heading",
+        "text": "Escritórios"
+      },
+      {
+        "type": "paragraph",
+        "text": "Defina a política de apontamento do trabalho assistido por IA e compare seus registros com os acordos de honorários. A revisão deve acontecer antes do faturamento."
+      },
+      {
+        "type": "heading",
+        "text": "Prestadores de serviços"
+      },
+      {
+        "type": "paragraph",
+        "text": "Projetos podem exigir configuração por cliente e assunto e reconciliação com os sistemas financeiros. Valide a disponibilidade técnica e as responsabilidades de manutenção."
+      },
+      {
+        "type": "heading",
+        "text": "Departamentos jurídicos"
+      },
+      {
+        "type": "paragraph",
+        "text": "Converse com seus escritórios sobre como o uso de IA será descrito, medido e refletido nos acordos comerciais. Indicadores de prazo e qualidade ajudam a contextualizar as horas."
+      }
+    ],
+    "sources": [
+      {
+        "text": "Legora e Laurel — anúncio oficial de 13/10/2026 ↗",
+        "url": "https://legora.com/newsroom/legora-and-laurel-partner-to-capture-the-time-lawyers-spend-in-legora-as-they-work"
+      }
+    ]
+  },
+  {
+    "url": "https://legalops.news/noticias/cloc-2026-demanda-orcamento-governanca-contexto",
+    "blocks": [
+      {
+        "type": "heading",
+        "text": "Uma referência para ler os anúncios atuais"
+      },
+      {
+        "type": "paragraph",
+        "text": "Divulgado em 2 de março, o State of the Industry Report 2026 da CLOC se baseia no Harbor Law Department Survey de 2025. No comunicado público, 32% dos departamentos participantes esperavam aumentar o quadro de advogados e 37% previam elevar gastos com escritórios externos. A CLOC também informa que 85% tinham recursos ou supervisão dedicados a IA."
+      },
+      {
+        "type": "paragraph",
+        "text": "Esses são resultados da pesquisa, não uma medida de todo o mercado brasileiro. Esta matéria recupera esse contexto e não apresenta o relatório como um lançamento de outubro."
+      },
+      {
+        "type": "heading",
+        "text": "Como usar no planejamento"
+      },
+      {
+        "type": "paragraph",
+        "text": "Nossa leitura é que decisões sobre ferramentas devem começar pela distribuição do trabalho: volume de pedidos, capacidade, tempo de entrega e critérios de encaminhamento. Um dado externo ajuda a formular perguntas; a decisão depende das informações da própria operação."
+      },
+      {
+        "type": "heading",
+        "text": "Uma pergunta para a equipe"
+      },
+      {
+        "type": "paragraph",
+        "text": "Que parte da fila exige mais capacidade e que parte precisa de um processo melhor definido? Essa distinção pode orientar um piloto e o critério de sucesso. A cobertura utiliza o comunicado público, sem acesso ao relatório integral restrito a membros."
+      },
+      {
+        "type": "heading",
+        "text": "A LEITURA PARA O SEU TRABALHO"
+      },
+      {
+        "type": "heading",
+        "text": "Departamentos jurídicos"
+      },
+      {
+        "type": "paragraph",
+        "text": "Use a pesquisa como referência para formular hipóteses. Meça a própria demanda e capacidade antes de estabelecer metas ou justificar uma contratação."
+      },
+      {
+        "type": "heading",
+        "text": "Escritórios"
+      },
+      {
+        "type": "paragraph",
+        "text": "Converse com o cliente sobre orçamento, escopo e previsibilidade. O dado de uma amostra internacional não deve ser apresentado como previsão da receita do seu escritório."
+      },
+      {
+        "type": "heading",
+        "text": "Prestadores de serviços"
+      },
+      {
+        "type": "paragraph",
+        "text": "Propostas ganham clareza quando ligam a entrega a uma restrição observada no cliente. Defina uma linha de base e uma forma de avaliar o resultado."
+      }
+    ],
+    "sources": [
+      {
+        "text": "CLOC — comunicado público do State of the Industry 2026 ↗",
+        "url": "https://cloc.org/newsdesk/cloc-releases-2026-state-of-the-industry-report-rising-legal-demand-outpaces-budget-and-staffing-growth-forcing-operational-shift/"
+      }
+    ]
+  }
+]
