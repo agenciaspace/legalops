@@ -372,3 +372,13 @@ Produto no hero: preview de um produto/repositório real, com status, código, d
 - Dev está vendendo open source Legal Tech e construção colaborativa?
 - O Dev diferencia claramente o que existe do que está em roadmap?
 - A página ainda funciona e comunica bem sem animação e sem efeitos?
+
+### legalops.news: editorial personality (2026-10-16)
+
+News uses a publication masthead, fine rules, dated metadata, search and topic
+filters, and cards with original geometric editorial covers. Keep the shared
+cream/coral/ink palette and Quicksand/Inter typography. The presentation should
+feel like a publication with its own reading rhythm rather than a Club landing.
+The the news archive is a structural reference for discoverable publications;
+do not copy its yellow palette, photos, wordmark or edition names. Do not invent
+editions, cadence or audience counts. Use the real published article dates.

@@ -13,7 +13,7 @@ configuration.
 | `legalops.club` | Free professional community, personal-agent Pro, events and job alerts | Same `legalops-app` Worker; host-aware `/` rewrites to `/club` |
 | `legalops.dev` | Technical content, builds and guides | Static Cloudflare Pages-style site from `cloudflare-landing/` |
 | `legalops.news` | Editorial news and newsletter | Shared Next application; host-aware public `/news` routes |
-| `legalops.chat` | Organization agent teams for contract review | Shared Next application; public `/chat`, private `/chat/workspace` |
+| `legalops.chat` | Organization agent teams for contract review | Dedicated frontend repo `agenciaspace/legalops.chat`, Worker `legalops-chat`; APIs remain here through a service binding |
 
 These domains share one brand ecosystem and application:
 
@@ -23,7 +23,10 @@ These domains share one brand ecosystem and application:
 - `news` is sourced editorial coverage; the same published articles appear in the Club.
 - `chat` is an organization workspace with coordinated agents and human review.
 
-For News, read `docs/LEGALOPS-NEWS.md`. `/community/news` is part of free Club
+For News, read `docs/LEGALOPS-NEWS.md`. Its public identity uses an editorial
+masthead and illustrated archive while retaining the shared palette and fonts.
+The service-only WhatsApp publication outbox stays disabled until its specific
+instance and announcement group are configured. `/community/news` is part of free Club
 membership. Profile preferences control the opt-in digest on `/community`;
 newsletter consent is separate. `/community/news/manage` and `/api/news/admin`
 require the existing administrator email allowlist. Daily discovery only creates

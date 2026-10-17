@@ -79,3 +79,52 @@ Run `npm test`, `npm run build:cloudflare`, `npm run test:bend` and the rollback
 ownership, draft/future invisibility, private newsletter records, cron auth, and
 mobile widths. Email delivery is not verified until a beehiiv publication is
 connected and a consenting test subscriber completes confirmation.
+
+## Editorial identity — 2026-10-16
+
+The public site has its own newspaper-style masthead, issue-date line,
+searchable publication archive, topic filters and original geometric cover art.
+The reference was the card-based archive at
+https://thenewscc.beehiiv.com/archive?tags=AT+NIGHT; neither its yellow palette,
+its photographs nor its publication branding were copied. News retains the
+LegalOps cream/coral/ink palette, Quicksand/Inter and the shared wordmark.
+Public article reads, source links, editorial permissions, Club integration and
+newsletter consent retain their existing behavior. Existing articles remain
+articles; no fictitious newsletter editions or subscriber counts were added.
+
+The custom `legalops.news` and `www.legalops.news` hosts are attached to
+`legalops-app`. HTTPS, homepage, article navigation and audience sections were
+verified against the new Cloudflare DNS. During the transfer this VPS retained
+old registrar DNS in its resolver; checking the authoritative Cloudflare IP with
+normal TLS verification resolved that diagnostic mismatch.
+
+## WhatsApp announcement publication outbox
+
+Publishing a new article atomically adds one row to the private
+`news_whatsapp_deliveries` outbox. Existing stories were not backfilled. Drafts
+are never sent; edits and republishing do not create a second automatic attempt.
+The existing minute cron calls `/api/cron/news-whatsapp` and claims at most two
+public, due articles using `FOR UPDATE SKIP LOCKED`.
+
+This connection stays disabled until these **specific instance** settings exist:
+
+- `NEWS_WHATSAPP_ENABLED=true`
+- `NEWS_WHATSAPP_INSTANCE_URL` (HTTPS URL for that instance)
+- `NEWS_WHATSAPP_INSTANCE_TOKEN` (instance token, never account/admin token)
+- `NEWS_WHATSAPP_GROUP_ID` (the legalops.news announcement group JID)
+
+There is no fallback to another instance, Club group, phone number or recipient.
+No instance is created, disconnected, logged out or restarted. Only public title,
+summary and canonical article URL are sent to the configured announcement group.
+Uazapi `/send/text` uses `track_source=legalops.news` and the outbox ID as
+`track_id`; tracking fields are not a provider idempotency guarantee.
+
+A provider receipt means **accepted**, not confirmed delivery/read. Timeout,
+server failure, missing receipt or an interrupted `sending` row require manual
+reconciliation using the tracking ID before any resend. They are never
+reclaimed automatically, avoiding duplicate announcements after ambiguous sends.
+`failed` rows also require an explicit operator retry after fixing the cause.
+No real group, instance credentials or outbound messages were used in this change.
+
+Run `supabase/tests/news_whatsapp.sql` as a rollback-only check of grants,
+publication queuing, edit/republish deduplication and non-reclaimable attempts.

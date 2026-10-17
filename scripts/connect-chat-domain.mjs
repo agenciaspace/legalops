@@ -1,7 +1,7 @@
 // Run with the existing deployment identity. Never print or persist its token.
 const accountId = '3d40d7797b3fd6d1cd2644eefea9e907'
 const domain = 'legalops.chat'
-const service = 'legalops-app'
+const service = 'legalops-chat'
 const token = process.env.CLOUDFLARE_API_TOKEN
 if (!token) throw new Error('Cloudflare deployment identity is not configured.')
 

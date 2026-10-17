@@ -37,3 +37,18 @@ test('private News routes require a Club session', async ({ page, request }) => 
   expect((await request.get('/api/news/admin')).status()).toBe(401)
   expect((await request.get('/api/club/news/preferences')).status()).toBe(401)
 })
+
+
+test('News archive searches published stories and has a clear empty result', async ({ page }) => {
+  await page.goto('/news')
+  const title = await page.locator('.news-publication h3').first().innerText()
+  const term = title.split(/\s+/).find(word => word.length > 3)!
+  await page.getByLabel('Buscar notícias', { exact: true }).fill(term)
+  await page.getByRole('button', { name: 'Buscar', exact: true }).click()
+  await expect(page).toHaveURL(new RegExp(`q=${encodeURIComponent(term)}`))
+  await expect(page.locator('.news-publication').first()).toBeVisible()
+  await page.getByLabel('Buscar notícias', { exact: true }).fill('zz_no_news_fixture_8a84')
+  await page.getByRole('button', { name: 'Buscar', exact: true }).click()
+  await expect(page.getByText('Nenhuma notícia encontrada para esta seleção.', { exact: false })).toBeVisible()
+  await expect(page.locator('.news-publication')).toHaveCount(0)
+})

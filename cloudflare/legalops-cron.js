@@ -7,7 +7,7 @@ export default {
       : '/api/cron/scrape'
 
     const paths = path === '/api/cron/scrape' ? [path, '/api/cron/club-pro-notices']
-      : event.cron === '* * * * *' ? [path, '/api/cron/chat'] : [path]
+      : event.cron === '* * * * *' ? [path, '/api/cron/chat', '/api/cron/news-whatsapp'] : [path]
     ctx.waitUntil(Promise.all(paths.map(taskPath => fetch(`${env.APP_ORIGIN}${taskPath}`, {
       headers: {
         authorization: `Bearer ${env.CRON_SECRET}`,
