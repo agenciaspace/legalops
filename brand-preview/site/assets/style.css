@@ -9,3 +9,56 @@
 
 /* Real stock photography, with source attribution on the reading page. */
 .news-cover{height:auto;aspect-ratio:8/5;object-fit:cover}.article-photo{margin:35px 0}.article-photo .news-cover{margin:0 0 10px}.article-photo figcaption{font-size:11px;color:var(--muted);line-height:1.6}.article-photo figcaption a{text-decoration:underline;text-underline-offset:3px}.step-title{font-weight:600}
+
+/* Club v3: poster-scale typography and solid color planes. */
+:root{--title:'Archivo Black',sans-serif;--radius:3px}
+h1,h2,h3,h4{font-weight:400;letter-spacing:-.055em}
+.brand,.brand em{font-weight:400;letter-spacing:-.07em}
+.brand{font-size:27px}
+.btn,.icon-btn{border-radius:2px}
+.site-header{border-bottom:2px solid var(--ink)}
+.hero-bold{width:100%;max-width:none;padding:64px max(40px,calc((100vw - 1240px)/2)) 68px;background:var(--accent);color:var(--onaccent);grid-template-columns:1.3fr 1fr;gap:36px;align-items:center;border-bottom:3px solid #20211f}
+.hero-bold h1{font-size:clamp(58px,7.3vw,105px);line-height:.94;letter-spacing:-.065em;text-transform:uppercase;margin:24px 0 28px;max-width:none}
+.hero-bold h1 .colored{display:inline-block;background:#20211f;color:var(--accent);padding:0 .12em .1em;margin-top:.07em;transform:rotate(-2deg)}
+.hero-bold .eyebrow,.hero-bold .hero-note{color:#20211f}
+.hero-bold .hero-copy>p{color:#30322b;font-size:16px;max-width:440px}
+.hero-bold .hero-actions>.btn:first-child{background:#20211f;color:#fff;border-color:#20211f;box-shadow:4px 4px 0 #ffffffa8;font-size:13px}
+.hero-bold .hero-actions>.btn.text{color:#20211f}
+.hero-bold .hero-art{background:#20211f;border-radius:0;height:530px;overflow:hidden;color:var(--accent);padding:25px;border:2px solid #20211f;box-shadow:9px 9px 0 #20211f33}
+.hero-bold .product-window{border-radius:3px;border:2px solid #20211f;transform:rotate(-4deg);box-shadow:8px 8px 0 var(--accent);color:var(--ink)}
+.hero-bold .pixel-orbit{width:400px;height:400px;right:-110px;bottom:-140px;opacity:.65}
+.hero-bold .floating-reply{border:2px solid var(--accent);border-radius:0;left:14px;right:14px;bottom:47px;background:#20211f}
+.hero-bold .art-label,.hero-bold .art-edition{font-weight:700;font-size:9px}
+.hero-bold .window-top{padding-inline:12px;gap:8px}
+.hero-bold .window-top>span:not(.brand){font-size:9px}
+.status-ticker{width:100%;padding:22px max(40px,calc((100vw - 1240px)/2));background:#20211f;color:#f8f7f4;border:0}
+.status-ticker .eyebrow{color:var(--accent)}
+.principle{border-top:4px solid var(--ink)}
+.principle .num{font-weight:700;margin-bottom:28px}
+.principle h3{font-size:28px}
+.dark-section{background:#20211f;border-block:10px solid var(--accent)}
+.dark-section h2{font-size:clamp(36px,4vw,58px)}
+.event-feature,.event-art,.agent-card,.demo-panel,.closing,.social-tile,.logo-spec{border-radius:0}
+.event-art span{font-weight:400;font-size:80px;letter-spacing:-6px}
+.closing{background:var(--accent);color:#20211f;border:3px solid #20211f;box-shadow:8px 8px 0 var(--ink)}
+.closing p,.closing .eyebrow{color:#30322b}
+.closing .btn{background:#20211f;color:white}
+.closing h2{font-size:clamp(35px,4.4vw,64px)}
+.social-tile{background:var(--accent);border:2px solid var(--ink)}
+.social-tile h3{text-transform:uppercase;font-size:clamp(30px,3.6vw,52px);line-height:1}
+.social-tile.dark{background:#20211f;color:var(--accent)}
+.logo-spec .brand{letter-spacing:-.07em}
+.app-title{border-bottom:4px solid var(--ink);padding-bottom:18px}
+.app-title h1{font-size:32px}
+.post-card{border-radius:2px;border-top:3px solid var(--ink)}
+.post-card h3{font-family:'Space Grotesk',sans-serif;font-weight:700}
+.news-page,.news-spec{--title:'Space Grotesk',sans-serif}
+.news-page h1,.news-page h2,.news-page h3,.news-page h4{font-weight:700}
+.news-page .btn{border-radius:3px}
+.type-spec:first-child .type-sample{font-family:'Archivo Black',sans-serif;font-weight:400;line-height:1.04}
+@media(max-width:1100px){.hero-bold{grid-template-columns:1.15fr 1fr;gap:24px;padding-inline:30px}.hero-bold h1{font-size:7.4vw}.hero-bold .hero-art{padding:18px}.hero-bold .window-top>span:not(.brand){display:none}.event-art span{font-size:64px}}
+@media(max-width:900px){.hero-bold{grid-template-columns:1fr;padding:48px 30px}.hero-bold h1{font-size:clamp(62px,11vw,94px)}.hero-bold .hero-copy{max-width:700px}.hero-bold .hero-art{height:460px;max-width:600px;width:100%;justify-self:center}.hero-bold .product-window{max-width:450px}.status-ticker{padding-inline:30px}.hero-bold .window-top>span:not(.brand){display:block}}
+@media(max-width:600px){.hero-bold{padding:34px 20px 38px;gap:36px}.hero-bold h1{font-size:11.5vw;line-height:1;margin:20px 0}.hero-bold .hero-copy>p{font-size:14px}.hero-bold .hero-art{height:430px;padding:20px}.hero-bold .hero-actions{gap:14px}.hero-bold .hero-actions .btn{font-size:11px;gap:10px}.hero-bold .hero-note{font-size:10px}.status-ticker{padding:20px;gap:16px}.principle h3{font-size:27px}.event-art span{font-size:65px}.app-title h1{font-size:27px}.brand-intro h1{font-size:clamp(32px,8.5vw,48px)}.type-spec:first-child .type-sample{font-size:34px}.social-tile h3{font-size:32px}.logo-spec .brand{font-size:clamp(27px,8vw,44px)}.closing{box-shadow:5px 5px 0 var(--ink)}}
+.type-spec:nth-child(2) .type-sample{font-family:Inter,sans-serif;font-weight:600;letter-spacing:-.04em}
+@media(max-width:600px){.header-inner>.brand,.header-inner>a>.brand{font-size:22px}.header-inner{gap:8px}.header-actions{gap:4px}.ecosystem{grid-template-columns:repeat(2,minmax(0,1fr))}.eco-item{min-width:0}.eco-item .brand{font-size:17px;letter-spacing:-.07em}.hero-bold .window-top .brand{font-size:17px}.hero-bold .window-top>span:not(.brand){display:none}}
+@media(min-width:601px) and (max-width:900px){.brand-spec{grid-template-columns:1fr}.type-spec{min-width:0}.type-spec .type-sample{font-size:35px}.type-spec:first-child .type-sample{font-size:35px}}
