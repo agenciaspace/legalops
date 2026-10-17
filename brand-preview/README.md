@@ -6,9 +6,12 @@ Production host routes and the shared brand components are not modified.
 
 ## Proposed direction
 
-- **Club / Coral Club (recommended):** Space Grotesk wordmark/hero (700), supporting headings (600), Inter UI,
-  full coral hero, paper and ink. Community-first messaging, contextual
-  product examples and a modular dot motif. Cobalt and Olive are selectable alternatives.
+- **Club / Conexões (recommended):** Manrope headings (500), wordmark (700/500), Inter UI.
+  White and graphite with electric blue accents. A new interlocking symbol,
+  spacious layout and a question/reply/resource composition explain the community.
+  The same design language extends to the feed, profiles, events and brand guide.
+  Coral and Olive are optional color variants. V5 preferences use a new local key,
+  so earlier saved colors do not mask the new proposal.
 - **News / Sinal Editorial:** paper, ink and acid green, oversized masthead,
   compact editorial columns, monospace metadata and official launch imagery composed into editorial covers.
   Real stock photography from Pexels and Unsplash provides context when appropriate.
@@ -43,10 +46,9 @@ composition based on Harvey and Legora source images. Original source assets are
 linked next to the credits. It is not a performance benchmark. Other articles use
 licensed contextual stock photographs. Credits and source URLs are recorded in
 PHOTO-CREDITS.md and linked from each article. People and scenes are contextual,
-not depicted as the companies or events being reported. Club pixel motifs remain
-original vector compositions. Font files are
+not depicted as the companies or events being reported. The Club symbol and connection motifs are original native vector compositions. Font files are
 self-hosted; OFL licenses are included. Wordmark/social SVG exports retain editable
-text and require Space Grotesk for the intended rendering. Export design colors
+text and require Manrope for the intended rendering. Export design colors
 and typography as JSON from the identity page.
 
 ## Development and validation
