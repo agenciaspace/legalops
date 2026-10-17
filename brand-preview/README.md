@@ -6,7 +6,7 @@ Production host routes and the shared brand components are not modified.
 
 ## Proposed direction
 
-- **Club / Conexões (recommended):** Manrope headings (500), wordmark (700/500), Inter UI.
+- **Club / Conexões (recommended):** Archivo Black headings and wordmark (native weight 400), Inter UI.
   Traditional cream (#F5F1E8), coral (#E88A6A) and ink (#111111), verified against the production brand definitions. A new interlocking symbol,
   spacious layout and a question/reply/resource composition explain the community.
   The same design language extends to the feed, profiles, events and brand guide.
@@ -47,7 +47,7 @@ licensed contextual stock photographs. Credits and source URLs are recorded in
 PHOTO-CREDITS.md and linked from each article. People and scenes are contextual,
 not depicted as the companies or events being reported. The Club symbol and connection motifs are original native vector compositions. Font files are
 self-hosted; OFL licenses are included. Wordmark/social SVG exports retain editable
-text and require Manrope for the intended rendering. Export design colors
+text and require Archivo Black for the intended rendering. Export design colors
 and typography as JSON from the identity page.
 
 ## Development and validation
