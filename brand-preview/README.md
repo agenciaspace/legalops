@@ -11,6 +11,7 @@ Production host routes and the shared brand components are not modified.
   large editorial masthead, three-column opening, discussion and agenda sidebar explain the community. Square surfaces and ruled dividers connect its visual language to News.
   The same design language extends to the feed, profiles, events and brand guide.
   Club palette is fixed to the traditional colors; earlier saved color choices are ignored.
+  Copy uses plain Portuguese: requests instead of intake, contract management instead of CLM, and guides instead of playbooks. Product names remain where useful, with context.
 - **News / Sinal Editorial:** paper, ink and acid green, oversized masthead,
   compact editorial columns, monospace metadata and official launch imagery composed into editorial covers.
   Real stock photography from Pexels and Unsplash provides context when appropriate.
