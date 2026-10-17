@@ -128,3 +128,20 @@ No real group, instance credentials or outbound messages were used in this chang
 
 Run `supabase/tests/news_whatsapp.sql` as a rollback-only check of grants,
 publication queuing, edit/republish deduplication and non-reclaimable attempts.
+
+### Verified production release — 2026-10-16
+
+- Application commit `a03d409`; GitHub Actions
+  https://github.com/agenciaspace/legalops/actions/runs/38990577363 passed:
+  652 unit/component checks, Bend proofs, 21 browser scenarios, OpenNext build,
+  exact-version application deployment and cron deployment.
+- Production `legalops.news` and `www.legalops.news` returned HTTPS 200 with the
+  new editorial UI. Home, sourced article navigation, search and audience
+  sections passed; 320/390/768/1440 px had no page overflow or browser errors.
+  The cream background remained `rgb(245, 241, 232)`.
+- The real database outbox suite passed in a rolled-back transaction. No test
+  articles or outbox rows remained. Anonymous cron access returned 401.
+- WhatsApp remains unconfigured/disabled. No real messages were sent. To enable,
+  obtain the announcement-group invitation/JID and URL/ID/token for its specific
+  Uazapi instance, verify that instance can post there, then set only the named
+  News settings. Account/admin credentials are neither needed nor accepted.
