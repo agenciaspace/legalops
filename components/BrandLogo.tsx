@@ -20,9 +20,9 @@ interface BrandLogoProps {
 
 const BRAND_INK = '#111111'
 const BRAND_CORAL = '#E88A6A'
-const BRAND_WORDMARK_FONT = 'var(--font-quicksand), Quicksand, ui-rounded, sans-serif'
-const BRAND_WORDMARK_WEIGHT = 600
-const BRAND_WORDMARK_TRACKING = '-0.055em'
+const BRAND_WORDMARK_FONT = 'var(--lo-brand-font), sans-serif'
+const BRAND_WORDMARK_WEIGHT = 400
+const BRAND_WORDMARK_TRACKING = '-0.065em'
 
 // Legacy symbol kept only for backwards compatibility with internal screens.
 // Public brand surfaces should use BrandWordmark instead.
@@ -56,7 +56,7 @@ export function BrandWordmark({
       aria-label={`legalops.${suffix}`}
     >
       <span>legalops</span>
-      <span className={accentClassName ?? 'text-[#E88A6A]'}>.</span>
+      <span className={accentClassName} style={{ color: inverse ? '#F5F1E8' : BRAND_INK, background: 'linear-gradient(transparent 45%, #E88A6A 45%)', paddingInline: '.025em' }}>.</span>
       <span>{suffix}</span>
     </span>
   )

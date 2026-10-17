@@ -10,7 +10,7 @@ import {
   MapPin,
   Search,
 } from 'lucide-react'
-import { ClubHeader } from '@/components/ClubHeader'
+import { ProductMasthead } from '@/components/ProductMasthead'
 import { BrandWordmark } from '@/components/BrandLogo'
 import { CompanyLogo } from '@/components/CompanyLogo'
 import { LegalOpsEcosystem } from '@/components/LegalOpsEcosystem'
@@ -56,14 +56,14 @@ const content = {
   pt: {
     eyebrow: 'LEGALOPS.WORK / VAGAS',
     title: 'encontre sua próxima oportunidade no jurídico.',
-    subtitle: 'Vagas verificadas em Legal Ops, Legal Tech, contratos, CLM, dados, operações e gestão jurídica, com informação suficiente para decidir onde vale aplicar.',
+    subtitle: 'Encontre vagas em operações jurídicas, contratos, tecnologia e gestão. Confira as informações e escolha onde vale se candidatar.',
     heroPrimary: 'Ver vagas',
     heroSecondary: 'Publicar uma vaga',
     recent: 'vagas verificadas recentemente',
     employerPrompt: 'Seu jurídico ou escritório está contratando?',
     employerLink: 'Publicar uma vaga',
     searchLabel: 'Buscar vagas jurídicas e de Legal Ops',
-    searchPlaceholder: 'Legal Ops, CLM, contratos, legal tech, empresa...',
+    searchPlaceholder: 'Cargo, contratos, tecnologia, empresa...',
     filters: {
       all: 'Todas',
       remote: 'Remotas',
@@ -200,7 +200,7 @@ export function LandingPageClient({
       lang={locale === 'pt' ? 'pt-BR' : 'en'}
       className="brand-surface min-h-screen selection:bg-[#E88A6A] selection:text-[#111111]"
     >
-      <ClubHeader active="jobs" locale={locale} product="work" />
+      <ProductMasthead product="work" label={locale === 'pt' ? 'CARREIRA & OPORTUNIDADES NO JURÍDICO' : 'LEGAL CAREERS & OPPORTUNITIES'} description={locale === 'pt' ? 'Seu próximo passo começa com uma boa oportunidade.' : 'Your next step starts with the right opportunity.'} communityLabel={locale === 'pt' ? 'Comunidade' : 'Community'} navigation={[{ href: '#vagas', label: locale === 'pt' ? 'Vagas' : 'Jobs' }, { href: '/for-employers', label: locale === 'pt' ? 'Para empresas' : 'For employers' }, { href: 'https://legalops.news', label: 'News' }, { href: 'https://legalops.dev', label: locale === 'pt' ? 'Ferramentas' : 'Tools' }]} action={{ href: '/login', label: locale === 'pt' ? 'Entrar' : 'Sign in' }} />
 
       <main>
         <section className="border-b border-[#CEC8BD]">
@@ -380,7 +380,7 @@ export function LandingPageClient({
           />
           <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label="Links do LegalOps Work">
             <Link href="https://legalops.club" className="hover:text-[#111111]">club / {locale === 'pt' ? 'comunidade' : 'community'}</Link>
-            <Link href="https://legalops.dev" className="hover:text-[#111111]">dev / open source</Link>
+            <Link href="https://legalops.dev" className="hover:text-[#111111]">dev / ferramentas</Link>
             <Link href="/for-employers" className="hover:text-[#111111]">{copy.employers}</Link>
             <Link href="/manifesto" className="hover:text-[#111111]">{copy.manifesto}</Link>
           </nav>

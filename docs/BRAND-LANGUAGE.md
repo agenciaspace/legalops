@@ -1,5 +1,20 @@
 # LegalOps — brand & landing system
 
+## Direção aprovada — 2026-10-17
+
+Leon aprovou a linha editorial do Club e pediu sua continuidade em todos os produtos.
+Esta direção substitui as referências anteriores a Quicksand e cartões arredondados.
+
+- Paleta: creme `#F5F1E8`, coral `#E88A6A`, preto `#111111`.
+- Marca: Archivo Black; títulos: Space Grotesk 700; corpo e controles: Inter.
+- Cabeçalhos amplos nas páginas iniciais, divisórias finas, blocos retos e boa leitura no celular.
+- Textos claros: pedidos, gestão de contratos, guias, ferramentas e assistentes. Explique siglas quando necessárias; preserve nomes de produtos e fatos das fontes.
+- Funções: Club aproxima pessoas; News informa; Work reúne oportunidades; Dev oferece ferramentas; Chat reúne assistentes. Nunca anuncie como pronta uma função em preparação.
+
+As cores e fontes são compartilhadas. A organização de cada página deve respeitar sua função.
+Não trocar a redação original de matérias, vagas ou publicações de membros por ajustes de marca.
+
+
 Este arquivo define a linguagem compartilhada entre `legalops.club`, `legalops.work`, `legalops.dev` e `legalops.news`.
 
 A regra principal é simples:

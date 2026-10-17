@@ -1,3 +1,5 @@
+@font-face{font-family:'LegalOps Brand';src:url('/brand/fonts/archivo-black.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:'LegalOps Heading';src:url('/brand/fonts/space-grotesk-bold.ttf') format('truetype');font-style:normal;font-weight:700;font-display:swap}
 :root {
   --lo-cream: #F5F1E8;
   --lo-surface: #FAF7F1;
@@ -121,3 +123,18 @@ body { font-family: var(--lo-body-font); }
 }
 @media (max-width: 359px) { .brand-headline { font-size: 38px; } .brand-container { width: calc(100% - 32px); } .brand-page { padding-inline: 16px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto !important; } }
+
+/* Shared editorial identity, approved 2026-10-17. */
+:root{--font-quicksand:'LegalOps Heading';--lo-brand-font:'LegalOps Brand',sans-serif;--lo-heading-font:'LegalOps Heading',sans-serif;--lo-radius:2px}
+.brand-headline,.brand-section-title,.brand-principles h3,.brand-event-row h3{font-weight:700}
+.brand-kicker{font-family:monospace;font-weight:400;letter-spacing:.06em}
+.product-masthead{background:var(--lo-cream);color:var(--lo-ink)}
+.product-masthead-top{display:flex;justify-content:space-between;align-items:center;gap:18px;border-bottom:1px solid var(--lo-ink);padding:14px 0;font:10px/1.5 monospace;text-transform:uppercase;letter-spacing:.04em}
+.product-masthead-name{display:flex;justify-content:space-between;align-items:end;gap:30px;padding:22px 0 26px}
+.product-masthead-name>a{font-size:clamp(48px,8.8vw,120px);line-height:1;text-decoration:none;white-space:nowrap}
+.product-masthead-name p{max-width:190px;font-size:12px;line-height:1.6;color:var(--lo-muted);margin-bottom:6px}
+.product-masthead-nav{display:flex;justify-content:space-between;align-items:center;gap:20px;border-top:3px solid var(--lo-ink);border-bottom:1px solid var(--lo-ink);padding:6px 0}
+.product-masthead-nav nav{display:flex;flex-wrap:wrap;gap:26px;font:11px/1.5 monospace;text-transform:uppercase}
+.product-masthead-nav nav a{display:inline-flex;align-items:center;min-height:44px;text-decoration:none}
+.product-masthead-nav>.brand-action{font:11px/1.5 monospace;background:var(--lo-coral);color:var(--lo-ink);border-color:var(--lo-coral);white-space:nowrap}
+@media(max-width:760px){.product-masthead-top{font-size:8px}.product-masthead-name{padding:22px 0}.product-masthead-name>a{font-size:clamp(39px,10.9vw,80px)}.product-masthead-name p{display:none}.product-masthead-nav{align-items:start;flex-wrap:wrap;gap:0}.product-masthead-nav nav{justify-content:space-between;width:100%;gap:10px;font-size:10px}.product-masthead-nav>.brand-action{margin:5px 0 8px;min-height:44px}.product-masthead .brand-container{width:calc(100% - 36px)}}

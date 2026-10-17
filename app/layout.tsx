@@ -1,7 +1,7 @@
 import { ClubLanguageProvider } from '@/components/community/ClubLanguage'
 import { getClubLocale } from '@/lib/club-locale-server'
 import type { Metadata, Viewport } from 'next'
-import { Inter, Quicksand } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import './globals.css'
 
 const inter = Inter({
@@ -10,11 +10,6 @@ const inter = Inter({
   display: 'swap',
 })
 
-const quicksand = Quicksand({
-  subsets: ['latin'],
-  variable: '--font-quicksand',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   title: 'LegalOps',
@@ -25,7 +20,7 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1, view
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={getClubLocale()} className={`${inter.variable} ${quicksand.variable}`}>
+    <html lang={getClubLocale()} className={`${inter.variable}`}>
       <body className="brand-surface antialiased selection:bg-[#E88A6A] selection:text-[#111111]">
         <ClubLanguageProvider initialLocale={getClubLocale()}>{children}</ClubLanguageProvider>
       </body>

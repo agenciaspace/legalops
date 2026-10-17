@@ -147,3 +147,8 @@
   .news-newsletter { padding: 28px 20px; margin-top: 12px; }.news-newsletter h2 { font-size: 32px; }.news-email-row { flex-direction: column; }.news-email-row input { flex: auto; }
   .news-footer { flex-direction: column; }.news-footer-links { gap: 0 18px; }.news-article { padding-top: 10px; }.news-standfirst { font-size: 16px; }.news-impact { padding: 20px; }.news-club-article { padding: 16px; }
 }
+
+/* Shared editorial typography. */
+.news-site :is(h1,h2,h3){font-weight:700}.news-nameplate{justify-content:flex-start}.news-site .news-wordmark{font-size:clamp(42px,8.7vw,115px)}.news-site :is(.news-kicker,.news-masthead-top,.news-edition,.news-nav){font-family:monospace;font-weight:400}.news-site .news-nameplate{padding-block:22px 26px}
+
+.news-cover.news-photo{padding:0;background:var(--lo-sand)}.news-photo img{width:100%;height:100%;object-fit:cover;display:block}.news-article-photo{margin:28px 0}.news-article-photo img{width:100%;height:auto;display:block;border:1px solid var(--lo-border)}.news-article-photo figcaption{font-size:11px;line-height:1.7;color:var(--lo-muted);margin-top:10px}.news-article-photo figcaption a{text-decoration:underline;margin-right:8px}

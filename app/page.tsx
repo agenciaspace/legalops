@@ -6,13 +6,13 @@ import { CourseLandingPage } from '@/components/CourseLandingPage'
 const workMetadata: Metadata = {
   title: 'LegalOps Work | Vagas em Legal Ops, Legal Tech e operações jurídicas',
   description:
-    'Encontre oportunidades verificadas em Legal Ops, Legal Tech, contratos, CLM, dados, inovação e gestão jurídica em departamentos jurídicos, escritórios e empresas de tecnologia.',
+    'Encontre vagas em operações jurídicas, contratos, tecnologia e gestão para dar seu próximo passo profissional.',
 }
 
 const devMetadata: Metadata = {
-  title: 'legalops.dev — open source Legal Tech',
+  title: 'legalops.dev — ferramentas para o trabalho jurídico',
   description:
-    'Open source Legal Tech, built by the people who run Legal. Produtos jurídicos abertos para usar, adaptar e construir em comunidade.',
+    'Ferramentas e guias abertos para usar, adaptar e construir com a comunidade jurídica.',
 }
 
 export const revalidate = 60

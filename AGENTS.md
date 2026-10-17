@@ -53,10 +53,10 @@ aplicação do sistema, sem copiar estilos antigos de outras páginas.
 - Use `brand-page` e `brand-page-heading` nas telas internas. Eles definem
   largura, espaçamento e títulos. Preserve o cabeçalho, o menu lateral e a
   navegação móvel do Club por meio dos layouts existentes.
-- Use Quicksand nos títulos e Inter no corpo e nos controles. Reutilize
+- Use Space Grotesk 700 nos títulos, Archivo Black na marca e Inter no corpo e nos controles. Reutilize
   `--lo-heading-font` e `--lo-body-font`; evite definir uma fonte por página.
 - Use `brand-card`: superfície `--lo-surface` (`#FAF7F1`), borda
-  `--lo-border` e raio `--lo-radius` de 8 px. Evite substituir esses valores
+  `--lo-border` e raio `--lo-radius` de 2 px. Evite substituir esses valores
   por fundo branco, `rounded-xl`, `rounded-2xl` ou cápsulas decorativas.
 - Use `brand-action`, `brand-action secondary` e `brand-text-link` para
   ações. Preserve foco visível, estados desabilitados e área de toque de

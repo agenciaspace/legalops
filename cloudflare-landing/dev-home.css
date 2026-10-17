@@ -157,3 +157,5 @@
     justify-content: center;
   }
 }
+
+.dev-wordmark{font-family:var(--lo-brand-font);font-weight:400;letter-spacing:-.065em}.dev-wordmark>span{background:linear-gradient(transparent 45%,var(--lo-coral) 45%);padding-inline:.025em}.dev-home .dev-intro{padding-block:48px}.dev-home .dev-project-heading h3{font-weight:700}.dev-home .brand-headline{max-width:900px}.dev-home .dev-projects{border-top:3px solid var(--lo-ink)}

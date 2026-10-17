@@ -1,3 +1,4 @@
+import { newsImages } from '@/lib/news-images'
 import type { NewsTopic } from '@/lib/news'
 
 const coverNames: Record<NewsTopic, string> = {
@@ -9,6 +10,8 @@ const coverNames: Record<NewsTopic, string> = {
 }
 
 export function NewsCover({ topic, seed = '', large = false }: { topic: NewsTopic; seed?: string; large?: boolean }) {
+  const photo = newsImages[seed]
+  if (photo) return <div className={`news-cover news-photo${large ? ' news-cover-large' : ''}`}><img src={photo.src} alt={photo.alt} width={800} height={500} loading={large ? 'eager' : 'lazy'} /></div>
   const variant = Array.from(seed).reduce((sum, character) => sum + character.charCodeAt(0), 0) % 4
   return <div className={`news-cover news-cover-${variant}${large ? ' news-cover-large' : ''}`} aria-hidden="true">
     <span className="news-cover-caption">{coverNames[topic]}</span>
