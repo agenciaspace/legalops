@@ -6,9 +6,9 @@ Production host routes and the shared brand components are not modified.
 
 ## Proposed direction
 
-- **Club / Conexões (recommended):** Archivo Black headings and wordmark (native weight 400), Inter UI.
+- **Club / Edição Club:** News-inspired editorial grid, Space Grotesk 700 headings, Archivo Black wordmark (native weight 400), Inter UI and monospace labels.
   Traditional cream (#F5F1E8), coral (#E88A6A) and ink (#111111), verified against the production brand definitions. A new interlocking symbol,
-  spacious layout and a question/reply/resource composition explain the community.
+  large editorial masthead, three-column opening, discussion and agenda sidebar explain the community. Square surfaces and ruled dividers connect its visual language to News.
   The same design language extends to the feed, profiles, events and brand guide.
   Club palette is fixed to the traditional colors; earlier saved color choices are ignored.
 - **News / Sinal Editorial:** paper, ink and acid green, oversized masthead,
@@ -47,7 +47,7 @@ licensed contextual stock photographs. Credits and source URLs are recorded in
 PHOTO-CREDITS.md and linked from each article. People and scenes are contextual,
 not depicted as the companies or events being reported. The Club symbol and connection motifs are original native vector compositions. Font files are
 self-hosted; OFL licenses are included. Wordmark/social SVG exports retain editable
-text and require Archivo Black for the intended rendering. Export design colors
+text and require Archivo Black and Space Grotesk for the intended rendering. Export design colors
 and typography as JSON from the identity page.
 
 ## Development and validation
