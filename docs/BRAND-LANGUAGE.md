@@ -15,22 +15,23 @@ As cores e fontes são compartilhadas. A organização de cada página deve resp
 Não trocar a redação original de matérias, vagas ou publicações de membros por ajustes de marca.
 
 
-Este arquivo define a linguagem compartilhada entre `legalops.club`, `legalops.work`, `legalops.dev` e `legalops.news`.
+Este arquivo define a linguagem compartilhada entre `legalops.club`, `legalops.work`, `legalops.dev`, `legalops.news` e `legalops.chat`.
 
 A regra principal é simples:
 
 - `legalops.club` = **comunidade**
 - `legalops.work` = **vagas**
-- `legalops.dev` = **open source Legal Tech / construir junto**
+- `legalops.dev` = **ferramentas abertas / construir junto**
 - `legalops.news` = **notícias e contexto sobre o trabalho jurídico**
+- `legalops.chat` = **assistentes para o trabalho jurídico**
 
-Os quatro produtos devem parecer partes do mesmo ecossistema. Cada domínio tem uma função clara.
+Os cinco produtos devem parecer partes do mesmo ecossistema. Cada domínio tem uma função clara.
 
 ## 1. Arquitetura do ecossistema
 
 Toda landing pública deve tornar esta relação visível no primeiro viewport ou imediatamente depois dele:
 
-`club / comunidade` · `work / vagas` · `dev / open source` · `news / notícias`
+`club / comunidade` · `work / vagas` · `dev / ferramentas` · `news / notícias` · `chat / assistentes`
 
 A navegação entre os domínios deve parecer uma troca de área dentro do mesmo produto-mãe, não uma visita a outra empresa.
 
@@ -93,12 +94,10 @@ A primeira dobra deve mostrar vagas reais sempre que existirem.
 
 Promessa principal:
 
-> **Tecnologia jurídica de código aberto, feita por quem trabalha no jurídico.**
->
-> **Open source Legal Tech, built by the people who run Legal.**
+> **Ferramentas abertas, feitas por quem trabalha no jurídico.**
 
-Na home do Dev, apresentar a chamada em português como título principal e a
-versão em inglês logo abaixo, com `lang="en"`.
+Nas páginas em português, usar a chamada em português. Reservar a versão
+“Open tools, made by people who work in legal.” às páginas em inglês.
 
 O `legalops.dev` é a base open source do ecossistema. Não é principalmente um curso, um catálogo de ferramentas ou uma coleção de tutoriais. É onde problemas reais do jurídico viram produtos abertos que podem ser usados, adaptados, implantados e melhorados coletivamente.
 
@@ -126,6 +125,12 @@ Aprender continua sendo uma consequência importante de participar, mas não dev
 Evitar abrir com jargão de implementação, como `instrumentar um fluxo`, `orquestrar uma jornada` ou perguntas que pressupõem que o visitante já sabe qual arquitetura quer construir.
 
 Evitar também apresentar produtos futuros como se já estivessem disponíveis. Diferenciar claramente `disponível`, `em construção`, `proposto` e `roadmap`.
+
+### Chat
+
+Promessa: reunir assistentes para ajudar no trabalho jurídico em uma conversa.
+Mostrar exemplos concretos de pedidos e respostas. Explicar integrações pelo que
+permitem fazer e informar com clareza o que já está disponível.
 
 ## 2. Como Club e Dev se conectam
 
@@ -186,9 +191,9 @@ O coral é pontuação visual. Não deve dominar grandes áreas da interface.
 
 ### Tipografia
 
-- Quicksand: wordmark e títulos editoriais.
+- Archivo Black: marca. Space Grotesk 700: títulos editoriais.
 - Inter: corpo, navegação, filtros, dados e UI.
-- Headlines: tracking negativo, frases curtas, normalmente em minúsculas, exceto quando a tagline oficial do Dev for usada exatamente como definida.
+- Headlines: tracking negativo, frases curtas, normalmente em minúsculas, preservando nomes próprios.
 - Micro-labels: 9–11 px, uppercase, tracking amplo.
 
 ### Espaçamento
@@ -206,7 +211,7 @@ Use uma escala previsível:
 ### Bordas e raio
 
 - borda padrão: `1px solid #CEC8BD`;
-- raio padrão: 8–10 px;
+- raio padrão: 0–2 px;
 - use 12 px apenas em superfícies de produto que realmente precisem;
 - evite `rounded-full` fora de controles muito pequenos;
 - evite raios de 20–34 px em cards comuns;
@@ -277,7 +282,7 @@ Não repetir o logo em um card de hero.
 
 ### 3. Faixa do ecossistema
 
-Depois do hero, mostrar os três produtos com domínio, função e uma linha de explicação.
+Depois do hero, mostrar os cinco produtos com domínio, função e uma linha de explicação.
 
 O produto atual recebe uma linha coral no topo.
 
@@ -360,11 +365,11 @@ Produto no hero: vagas reais verificadas recentemente.
 
 ### Dev
 
-Micro-label: `legalops.dev / open source`
+Micro-label: `legalops.dev / ferramentas`
 
-Headline em português: `Tecnologia jurídica de código aberto, feita por quem trabalha no jurídico.`
+Headline em português: `Ferramentas abertas, feitas por quem trabalha no jurídico.`
 
-Versão em inglês, logo abaixo: `Open source Legal Tech, built by the people who run Legal.`
+Versão em inglês apenas em páginas nesse idioma: `Open tools, made by people who work in legal.`
 
 CTA primária: `explorar produtos`
 
@@ -375,24 +380,25 @@ Produto no hero: preview de um produto/repositório real, com status, código, d
 ## 9. Checklist antes de publicar
 
 - A função do domínio está óbvia em até 5 segundos?
-- Os outros dois produtos aparecem como partes do mesmo ecossistema?
+- Os outros quatro produtos aparecem como partes do mesmo ecossistema?
 - O hero mostra produto ou uma demonstração útil, em vez de decoração?
 - A CTA descreve uma ação real?
-- O layout usa radius de 8–10 px em vez de grandes pills/cards arredondados?
+- O layout usa raio de 0–2 px em vez de grandes pills/cards arredondados?
 - Há alguma sombra, círculo, grid ou badge que pode ser removido?
 - O coral está sendo usado como acento, não como preenchimento dominante?
 - Há termos técnicos antes de o benefício estar claro?
 - Club está vendendo comunidade?
 - Work está vendendo vagas?
-- Dev está vendendo open source Legal Tech e construção colaborativa?
+- Dev explica ferramentas abertas e construção colaborativa em linguagem simples?
 - O Dev diferencia claramente o que existe do que está em roadmap?
 - A página ainda funciona e comunica bem sem animação e sem efeitos?
 
 ### legalops.news: editorial personality (2026-10-16)
 
 News uses a publication masthead, fine rules, dated metadata, search and topic
-filters, and cards with original geometric editorial covers. Keep the shared
-cream/coral/ink palette and Quicksand/Inter typography. The presentation should
+filters, and cards using official launch imagery first and contextual stock
+photography when appropriate, with credits and clear attribution. Keep the shared
+cream/coral/ink palette, Archivo Black wordmarks, Space Grotesk headings and Inter body text. The presentation should
 feel like a publication with its own reading rhythm rather than a Club landing.
 The the news archive is a structural reference for discoverable publications;
 do not copy its yellow palette, photos, wordmark or edition names. Do not invent
