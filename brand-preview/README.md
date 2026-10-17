@@ -6,11 +6,11 @@ Production host routes and the shared brand components are not modified.
 
 ## Proposed direction
 
-- **Club / Coral Club (recommended):** a firmer Space Grotesk wordmark, Inter UI,
+- **Club / Coral Club (recommended):** a bold Space Grotesk wordmark (700/600), bold headings, Inter UI,
   warm paper, coral and dark green-black. Community-first messaging, contextual
   product examples and a modular dot motif. Cobalt and Olive are selectable alternatives.
 - **News / Sinal Editorial:** paper, ink and acid green, oversized masthead,
-  compact editorial columns, monospace metadata and original document collages.
+  compact editorial columns, monospace metadata and real stock photography from Pexels and Unsplash.
   It retains the family name and typography with a distinct editorial voice.
 - References: https://agentes.chat and https://www.404media.co/.
   The supplied agentes.agentes.chat did not resolve. No reference logos, code,
@@ -37,7 +37,10 @@ explain preparation status and link to the existing interest form; they collect 
 
 ## Assets
 
-SVG collages and pixel motif are original vector compositions. Font files are
+News uses licensed stock photographs; credits and source URLs are recorded in
+PHOTO-CREDITS.md and linked from each article. People and scenes are contextual,
+not depicted as the companies or events being reported. Club pixel motifs remain
+original vector compositions. Font files are
 self-hosted; OFL licenses are included. Wordmark/social SVG exports retain editable
 text and require Space Grotesk for the intended rendering. Export design colors
 and typography as JSON from the identity page.
