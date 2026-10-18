@@ -1,56 +1,73 @@
-'use client'
-
-import { useState } from 'react'
+import { ClubHeader } from '@/components/ClubHeader'
+import { isProOfferOpen, proPrice, PRO_INCLUDED_CREDITS, PRO_SUPPORT_EMAIL, type ProOffer } from '@/lib/club-pro'
 import './club-editorial.css'
 
-export type ClubHomeEvent = { id: string; slug: string; title: string; description: string; dateLabel: string }
-const Arrow = () => <span aria-hidden="true">↗</span>
-const Wordmark = ({ suffix = 'club' }: { suffix?: string }) => <span className="brand" aria-label={`legalops.${suffix}`}><span className="brand-name">legalops<b>.</b><em>{suffix}</em></span></span>
-const steps = [
-  ['Comece pela sua dúvida.', 'Conte seu contexto para receber contribuições que façam sentido.', 'Uma dúvida com contexto', 'Como organizar os pedidos de contratos?', 'Os pedidos chegam por vários canais e faltam informações. Como vocês lidam com isso?'],
-  ['Conheça outra perspectiva.', 'Compare experiências, referências e formas de trabalhar.', 'Uma referência de quem faz', 'Outra experiência entra na conversa.', 'Começamos pelas perguntas que se repetiam. Depois, testamos um formulário com o time.'],
-  ['Leve a troca adiante.', 'Salve uma referência, encontre seus pares e participe.', 'Um próximo passo possível', 'Da troca para a prática.', 'Conheça o OpenIntake, compare com o processo do seu time e continue a conversa com a comunidade.'],
-]
-const resources = [
-  ['Guia de contratos', 'Referências construídas com a comunidade.', 'https://legalops.dev/playbook/'],
-  ['Organize a gestão de contratos', 'Um passo a passo para escolher ou trocar de ferramenta.', 'https://legalops.dev/mapa-contratos/'],
-  ['Ferramentas abertas', 'Recursos para usar, adaptar e construir junto.', 'https://legalops.dev'],
-]
-const faq = [
-  ['Quem pode participar?', 'Quem trabalha, estuda ou desenvolve soluções para o jurídico: departamentos, escritórios, consultoria, tecnologia e pesquisa.'],
-  ['Como eu entro na comunidade?', 'Crie sua conta, confirme o email e complete seu perfil com foto, LinkedIn pessoal, atuação, contexto profissional, cidade e interesses.'],
-  ['O que encontro na comunidade gratuita?', 'Conversas, encontros, contato com outros membros e referências para o trabalho.'],
-  ['O que faz parte do Pro?', 'Um agente pessoal com histórico privado, preferências salvas e consulta a discussões, vagas e materiais de apoio. A leitura automática do WhatsApp e um aplicativo próprio estão em preparação.'],
+const benefits = [
+  ['01', 'Encontre oportunidades.', 'Consulte vagas do Work e compare os requisitos com a sua experiência.'],
+  ['02', 'Prepare sua candidatura.', 'Crie versões do currículo e da carta de apresentação para a vaga que você escolheu.'],
+  ['03', 'Chegue mais preparado.', 'Pratique respostas para entrevistas e organize os próximos passos com seu assistente.'],
 ]
 
-export default function ClubEditorialHome({ events }: { events: ClubHomeEvent[] }) {
-  const [dark, setDark] = useState(false)
-  const [step, setStep] = useState(0)
-  const featured = events[0]
-  return <div className="club-editorial" data-edition="club" data-palette="coral" data-mode={dark ? 'dark' : 'light'}>
-    <header className="site-header editorial-header"><div className="wrap">
-      <div className="club-topline"><span>LEGAL OPS, TECNOLOGIA &amp; PESSOAS</span><a href="https://legalops.news">LEIA O NEWS <Arrow /></a></div>
-      <div className="club-masthead"><a href="/" className="club-wordmark" aria-label="legalops.club">legalops<span>.</span>club</a><p>O jurídico avança<br />quando a gente troca.</p></div>
-      <div className="club-nav-row"><nav className="main-nav" aria-label="Navegação do Club"><a href="#comunidade">O club</a><a href="/community">Conversas</a><a href="#encontros">Encontros</a><a href="#pro">Club Pro</a></nav><div className="header-actions"><button className="icon-btn" onClick={() => setDark(!dark)} aria-label="Alternar tema claro e escuro">◐</button><a className="btn text small" href="/login?next=/community">Entrar</a><a className="btn small" href="/cadastro">Criar meu perfil <Arrow /></a></div></div>
-    </div></header>
-    <main id="main">
-      <section className="wrap modern-hero">
-        <div className="modern-hero-copy"><div className="hero-kicker"><span />EM COMUNIDADE / LEGAL OPS</div><h1>O jurídico <br />se move<br /><span>junto.</span></h1><p>Gente que entende seu contexto. Conversas que abrem caminhos. Um lugar para construir o que vem depois no trabalho jurídico.</p><div className="hero-actions"><a className="btn accent" href="/cadastro">Criar meu perfil gratuito <Arrow /></a><a className="btn text" href="#comunidade">Conheça o club ↓</a></div><div className="modern-hero-note"><p>Seu repertório encontra o de outras pessoas.<br /><strong>Comunidade gratuita. Trocas com contexto.</strong></p></div></div>
-        <div className="conversation-scene"><div className="scene-label"><span>EM DISCUSSÃO</span><span>01 / CONVERSAS</span></div><div className="scene-question"><div className="scene-person"><span className="avatar">MC</span><div><strong>Marina Costa</strong><span>Legal Ops · perfil ilustrativo</span></div><span className="scene-step">01</span></div><h2>Como vocês recebem os pedidos de contratos?</h2><p>Quero entender o que funciona na prática antes de escolher uma ferramenta.</p><div className="scene-tags"><span>Contratos</span><span>Processos</span></div></div><div className="scene-answer"><div className="scene-person"><span className="avatar green">RT</span><div><strong>Rafa Torres</strong><span>Operações jurídicas · exemplo</span></div><span className="scene-step">02</span></div><p>A gente começou pelo fluxo, não pela ferramenta. Posso compartilhar as perguntas que usamos.</p></div><a className="scene-resource" href="https://legalops.dev/openintake"><span className="resource-icon"><Arrow /></span><span><small>03 / UM PRÓXIMO PASSO</small><strong>Receba pedidos com o OpenIntake</strong></span><span className="scene-resource-arrow"><Arrow /></span></a><p className="scene-caption">Exemplo de conversa com pessoas fictícias. Ferramenta do LegalOps.</p></div>
-        <aside className="club-radar"><div className="eyebrow">NA AGENDA</div><div className="radar-feature"><span>{featured ? featured.dateLabel : 'ENCONTROS DA COMUNIDADE'}</span><h2>{featured?.title ?? 'A conversa continua.'}</h2><p>{featured?.description ?? 'Acompanhe a agenda e as conversas dos encontros anteriores.'}</p><a className="brand-text-link" href={featured ? `/community/events/${featured.slug}` : '/community'}>{featured ? 'Conhecer o encontro →' : 'Conhecer os fóruns →'}</a></div><div className="eyebrow">PARA LEVAR AO TRABALHO</div><a className="radar-link" href="https://legalops.dev/playbook/">Guia de contratos <Arrow /></a><a className="radar-link" href="https://legalops.dev/openintake">OpenIntake <Arrow /></a><a className="radar-link" href="https://legalops.work">Oportunidades <Arrow /></a><a className="radar-news" href="https://legalops.news"><span className="eyebrow">LEGALOPS.NEWS</span><strong>O que está mudando no trabalho jurídico?</strong><span>ACOMPANHE A LEITURA <Arrow /></span></a></aside>
+export default function ClubEditorialHome({ offer }: { offer: ProOffer | null }) {
+  const open = isProOfferOpen(offer)
+  const recurring = open && offer.payment_mode === 'mercadopago_subscription'
+  const period = open && offer.period_months === 12 ? '/12 meses' : '/mês'
+  const cta = recurring ? `Testar o Pro por ${offer.trial_days} dias` : 'Assinar o Club Pro'
+  const checkout = '/club/checkout'
+  const support = `mailto:${PRO_SUPPORT_EMAIL}?subject=Club%20Pro`
+  const faq = [
+    ['Como funciona a contratação?', recurring
+      ? `Crie sua conta, confirme o email e complete seu perfil. No checkout, assine pelo Mercado Pago e envie a confirmação. O teste de ${offer.trial_days} dias começa no Mercado Pago; conferimos a assinatura e liberamos seu acesso em até um dia útil. Depois do teste, a cobrança é mensal até você cancelar.`
+      : open ? 'Crie sua conta, confirme o email e complete seu perfil. No checkout, faça o PIX e envie o comprovante. Conferimos o pagamento e liberamos seu acesso em até um dia útil. A renovação é manual.'
+        : `As novas assinaturas estão em preparação. Fale com ${PRO_SUPPORT_EMAIL} para conhecer o plano.`],
+    ['O que posso fazer com os créditos?', `Você recebe ${PRO_INCLUDED_CREDITS} créditos por mês calendário. Uma pergunta usa 1 crédito; uma carta de apresentação, 3; um currículo personalizado ou preparação de entrevista, 5. O saldo é compartilhado entre o assistente e os recursos de carreira. Os créditos incluídos não acumulam.`],
+    ['Posso cancelar?', recurring
+      ? 'Sim. Cancele a assinatura na sua conta do Mercado Pago para interromper as próximas cobranças. Você mantém o período já liberado. Pode solicitar reembolso integral nos sete dias após a ativação; seus demais direitos de consumidor são preservados.'
+      : 'No pagamento por PIX, você escolhe quando renovar e mantém o período já liberado. Pode solicitar reembolso integral nos sete dias após a ativação; seus demais direitos de consumidor são preservados.'],
+    ['A comunidade está incluída?', 'Sim. Conversas, encontros e contato com outros profissionais fazem parte da comunidade gratuita. O Pro acrescenta o assistente privado e os recursos de carreira. Você mantém sua participação na comunidade se encerrar o Pro.'],
+  ]
+
+  return <div className="club-editorial">
+    <a className="pro-skip" href="#main">Ir para o conteúdo</a>
+    <div className="pro-masthead"><ClubHeader product="club" navigation={[
+      { href: '#beneficios', label: 'O que você recebe' },
+      { href: '#duvidas', label: 'Dúvidas' },
+      { href: '/login?next=/community', label: 'Entrar', action: true },
+    ]} /></div>
+    <main id="main" className="pro-wrap">
+      <section className="pro-hero" aria-labelledby="pro-heading">
+        <div className="pro-intro">
+          <p className="pro-kicker">LEGALOPS.CLUB / PRO</p>
+          <h1 id="pro-heading">Da vaga à entrevista,<br /><span>com mais preparo.</span></h1>
+          <p className="pro-lead">Encontre oportunidades, prepare sua candidatura e pratique entrevistas com um assistente que considera seu contexto profissional.</p>
+          <p className="pro-reassurance">Histórico privado. Preferências salvas. Respostas com fontes.</p>
+        </div>
+        <aside className="pro-offer brand-card" id="pro" aria-labelledby="offer-heading">
+          <div className="pro-offer-top"><h2 id="offer-heading">Club Pro</h2>{recurring && <span>{offer.trial_days} dias de teste grátis</span>}</div>
+          {open ? <>
+            <p className="pro-price"><strong>{proPrice(offer.price_cents)}</strong><span>{period}</span></p>
+            <p className="pro-billing">{recurring ? `Após os ${offer.trial_days} dias de teste. Cobrança mensal pelo Mercado Pago até você cancelar.` : 'Pagamento por PIX. Você escolhe quando renovar.'}</p>
+          </> : <p className="pro-unavailable">Estamos preparando as novas assinaturas.</p>}
+          <ul className="pro-included">
+            <li>Assistente com seu contexto e histórico privado.</li>
+            <li>Currículo, carta e preparação para entrevistas.</li>
+            <li><strong>{PRO_INCLUDED_CREDITS} créditos por mês</strong> para usar esses recursos.</li>
+            <li>Até 20 minutos de ajuda na primeira tarefa.</li>
+          </ul>
+          <a className="pro-cta brand-action" href={open ? checkout : support}>{open ? cta : 'Falar sobre o Pro'} <span aria-hidden="true">↗</span></a>
+          {open && <p className="pro-activation">Acesso liberado em até um dia útil após a conferência da sua confirmação.</p>}
+        </aside>
       </section>
-      <div className="wrap modern-topics"><span>Seu contexto tem lugar aqui.</span><div><span>Legal Ops</span><span>Contratos</span><span>Tecnologia</span><span>Carreira</span></div></div>
-      <section className="wrap section" id="comunidade"><div className="section-head"><div><span className="eyebrow accent">Seu contexto encontra companhia</span><h2>O que você sabe<br />encontra o que vem depois.</h2></div><p>A dúvida do seu time pode ser o aprendizado de alguém. É daí que a conversa começa.</p></div><div className="three-col">{[
-        ['01 / TROCAR', 'Pergunte a quem faz.', 'Leve uma dúvida real. Conte o que funcionou. Compare caminhos com outras pessoas do jurídico.'],
-        ['02 / SE CONECTAR', 'Encontre seus pares.', 'Conheça pessoas por experiência e atuação. Continue a troca nos encontros da comunidade.'],
-        ['03 / LEVAR PARA O TRABALHO', 'Saia com uma referência.', 'Encontre guias, exemplos e ferramentas para colocar uma ideia em prática.'],
-      ].map(([number,title,text])=><article className="principle" key={number}><span className="num">{number}</span><h3>{title}</h3><p>{text}</p></article>)}</div></section>
-      <section className="dark-section section"><div className="wrap demo-layout"><div><span className="eyebrow">Do “alguém já fez?” ao “vou tentar”.</span><h2>Uma pergunta.<br />Outras possibilidades.</h2><div className="steps" role="tablist" aria-label="Como usar o club">{steps.map(([title,text],i)=><button key={title} className={`step ${step===i?'active':''}`} role="tab" id={`step-${i}`} aria-controls="step-panel" aria-selected={step===i} onClick={()=>setStep(i)} onKeyDown={event=>{if(['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();const next=(i+(event.key==='ArrowRight'?1:2))%3;setStep(next);document.getElementById(`step-${next}`)?.focus()}}}><span className="step-title"><span>0{i+1}</span>{title}</span><p>{text}</p></button>)}</div></div><div className="demo-panel" id="step-panel" role="tabpanel" aria-labelledby={`step-${step}`}><span className="demo-tag">EXEMPLO ILUSTRATIVO</span><span className="eyebrow">{steps[step][2]}</span><h3>{steps[step][3]}</h3><p>{steps[step][4]}</p><a className="btn" href="/community">Conhecer a comunidade <Arrow /></a></div></div></section>
-      <section className="wrap section" id="encontros"><div className="section-head"><div><span className="eyebrow accent">Gente, repertório e prática</span><h2>Conexões que continuam<br />fora da tela.</h2></div><a href="/community/calendar" className="btn outline">Explorar encontros <Arrow /></a></div><div className="split"><div>{events.length ? events.map(event=><article className="event-feature home-event" key={event.id}><div className="event-body"><span className="eyebrow accent">{event.dateLabel}</span><h3>{event.title}</h3><p>{event.description}</p><a className="btn outline" href={`/community/events/${event.slug}`}>Ver encontro <Arrow /></a></div></article>) : <article className="event-feature"><div className="event-art"><span>vamos<br />conversar.</span></div><div className="event-body"><h3>Encontre quem também faz.</h3><p>Acompanhe a agenda e as conversas dos encontros anteriores.</p><a href="/community/calendar" className="btn outline">Ver a agenda <Arrow /></a></div></article>}</div><div className="resources">{resources.map(([title,text,href])=><a className="resource-row" key={href} href={href}><div><h3>{title}</h3><p>{text}</p></div><span className="arrow"><Arrow /></span></a>)}</div></div></section>
-      <section className="wrap section pro-section" id="pro"><div className="split"><div className="pro-copy"><span className="eyebrow accent">Club Pro / seu agente pessoal</span><h2>Seu contexto.<br />Um novo ponto de partida.</h2><p>Retome suas conversas, consulte referências e prepare sua próxima oportunidade com um agente que considera seu contexto.</p><ul className="pro-points"><li>Histórico privado e preferências salvas.</li><li>Conversas do Club, vagas do Work e contratos no OpenCLM.</li><li>Apoio à preparação de candidaturas e entrevistas.</li><li>300 créditos por mês para usar o agente e os recursos de carreira.</li></ul><a className="btn" href="/club/checkout">Conhecer o Pro <Arrow /></a></div><div className="agent-card"><div className="agent-card-header"><span className="agent-glyph">↳</span><div><strong>seu agente</strong><p><small>Club Pro · exemplo de conversa</small></p></div></div><div className="bubble">Quero organizar os pedidos do meu time. Por onde começo?</div><div className="agent-response"><strong>Vamos começar pelo que chega hoje.</strong><p>Liste os pedidos mais comuns, quem envia e quais informações faltam. Teste um formulário simples com o time e ajuste a partir dos primeiros pedidos.</p><a className="source-link" href="https://legalops.dev/openintake">Conhecer o OpenIntake <Arrow /></a></div><p className="scene-caption">Resposta de exemplo. A leitura automática do WhatsApp e um aplicativo próprio estão em preparação.</p></div></div></section>
-      <div className="wrap ecosystem">{[['club','Comunidade','/community'],['news','Notícias','https://legalops.news'],['work','Oportunidades','https://legalops.work'],['dev','Ferramentas','https://legalops.dev'],['chat','Assistentes','https://legalops.chat']].map(([suffix,label,href])=><a className="eco-item" href={href} key={suffix}><Wordmark suffix={suffix}/><p>{label}</p><small>Conhecer <Arrow /></small></a>)}</div>
-      <section className="wrap section faq"><div className="split"><div><span className="eyebrow">Antes de entrar</span><h2>Boas perguntas<br />abrem conversas.</h2></div><div>{faq.map(([question,answer])=><details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></div></section>
-      <section className="wrap closing"><div className="closing-content"><span className="eyebrow">Sua próxima conversa começa aqui</span><h2>O jurídico é melhor<br />em boa companhia.</h2><p>Crie seu perfil, encontre seus pares e entre na conversa.</p><a className="btn accent" href="/cadastro">Criar meu perfil gratuito <Arrow /></a></div></section>
-    </main><footer className="site-footer"><div className="wrap footer-inner"><a href="/"><Wordmark /></a><p>Pessoas, ideias e próximos passos para o trabalho jurídico.</p><div className="footer-links"><a href="https://legalops.news">News <Arrow /></a><a href="/club/about">Sobre o Club <Arrow /></a></div></div></footer>
+      <section className="pro-benefits" id="beneficios" aria-label="O que você recebe">
+        {benefits.map(([number, title, text]) => <article key={number}><span className="pro-number">{number}</span><h2>{title}</h2><p>{text}</p></article>)}
+      </section>
+      <section className="pro-faq" id="duvidas" aria-labelledby="faq-heading">
+        <div><p className="pro-kicker">ANTES DE COMEÇAR</p><h2 id="faq-heading">Suas dúvidas,<br />respondidas.</h2><p>Precisa de ajuda para decidir?<br /><a href={support}>Fale com a gente <span aria-hidden="true">↗</span></a></p></div>
+        <div>{faq.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div>
+      </section>
+      <section className="pro-closing" aria-label="Começar no Pro"><div><h2>Seu próximo passo merece preparo.</h2><p>{open ? 'Comece com uma vaga e uma tarefa real.' : 'Conheça o plano e tire suas dúvidas com a gente.'}</p></div><a className="pro-cta brand-action" href={open ? checkout : support}>{open ? cta : 'Falar sobre o Pro'} <span aria-hidden="true">↗</span></a></section>
+    </main>
+    <footer className="pro-footer pro-wrap"><div><a href="/club/about">Sobre o Club</a><a href="/cadastro">Entrar na comunidade gratuita</a><a href="/community/calendar">Encontros</a></div><a href={`mailto:${PRO_SUPPORT_EMAIL}`}>{PRO_SUPPORT_EMAIL}</a></footer>
+    {open && <div className="pro-mobile-bar"><div><strong>{proPrice(offer.price_cents)}<small>{period}</small></strong><span>{recurring ? `${offer.trial_days} dias de teste` : 'Club Pro'}</span></div><a className="pro-cta brand-action" href={checkout}>{recurring ? 'Testar o Pro' : 'Assinar Pro'} <span aria-hidden="true">↗</span></a></div>}
   </div>
 }
