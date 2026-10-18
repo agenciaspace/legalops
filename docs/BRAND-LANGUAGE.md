@@ -13,11 +13,12 @@ Esta direção substitui as referências anteriores a Quicksand e cartões arred
 
 As cores e fontes são compartilhadas. A organização de cada página deve respeitar sua função.
 
-Em 18/10/2026, Leon pediu a simplificação da landing do Club para a contratação
-do Pro. Nessa página, priorize a oferta vigente, os benefícios disponíveis e o
-checkout. A comunidade gratuita continua acessível; a vitrine do ecossistema
-e a agenda deixam de competir com a ação principal. Consulte
-`docs/CLUB-EDITORIAL-HOME.md` e `docs/CLUB-PAID-PILOT.md`.
+Em 18/10/2026, Leon pediu simplificação com incentivo à contratação do Pro e,
+na revisão, reforçou que a landing precisa focar mais na comunidade. Priorize
+as trocas, as conexões e os encontros; apresente o Pro depois, com benefícios
+concretos e oferta vigente. O cadastro da comunidade permanece gratuito.
+Consulte `docs/CLUB-EDITORIAL-HOME.md` e `docs/CLUB-PAID-PILOT.md`.
+
 Não trocar a redação original de matérias, vagas ou publicações de membros por ajustes de marca.
 
 

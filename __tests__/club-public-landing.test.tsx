@@ -58,3 +58,14 @@ it('preserves annual PIX pricing without advertising a recurring trial', async (
   expect(screen.getByText(/A renovação é manual/)).toBeInTheDocument()
   expect(screen.queryByText(/teste grátis/)).not.toBeInTheDocument()
 })
+
+it('leads with free community participation and introduces Pro afterwards', async () => {
+  render(await ClubLandingPage())
+  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('O jurídico avançaquando a gente troca.')
+  for (const link of screen.getAllByRole('link', { name: /Participar da comunidade|Participar do Club/ })) expect(link).toHaveAttribute('href', '/cadastro')
+  expect(screen.getByRole('link', { name: /Conhecer o Pro/ })).toHaveAttribute('href', '#pro')
+  expect(screen.getByText(/A participação na comunidade é gratuita/)).toBeInTheDocument()
+  const community = screen.getByRole('region', { name: 'Na comunidade' })
+  const pro = screen.getByRole('region', { name: /Da troca ao seu/ })
+  expect(community.compareDocumentPosition(pro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+})

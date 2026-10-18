@@ -5,9 +5,9 @@ import type { ProOffer } from '@/lib/club-pro'
 import ClubEditorialHome from './ClubEditorialHome'
 
 export const metadata: Metadata = {
-  title: 'Club Pro | prepare seu próximo passo no jurídico',
-  description: 'Encontre oportunidades, prepare sua candidatura e pratique entrevistas com o Club Pro. Conheça o plano e as condições para começar.',
-  openGraph: { title: 'Club Pro | da vaga à entrevista, com mais preparo', description: 'Assistente privado, recursos de carreira e apoio na primeira tarefa. Conheça o Club Pro.', url: 'https://legalops.club', siteName: 'legalops.club', type: 'website' },
+  title: 'legalops.club | comunidade para o trabalho jurídico',
+  description: 'Troque experiências, conheça profissionais e participe das conversas e encontros do legalops.club. Conheça também o Club Pro.',
+  openGraph: { title: 'legalops.club | o jurídico avança quando a gente troca', description: 'Uma comunidade para trocar experiências e conversar sobre os desafios reais do trabalho jurídico.', url: 'https://legalops.club', siteName: 'legalops.club', type: 'website' },
 }
 export const dynamic = 'force-dynamic'
 
