@@ -1,4 +1,29 @@
-.news-site { --news-line: var(--lo-border); background: var(--lo-cream); color: var(--lo-ink); min-height: 100vh; font-family: var(--lo-body-font); }
+/* Public News palette follows 404 Media; typography stays in the shared system. */
+.news-site {
+  --lo-cream: #000000;
+  --lo-surface: #111111;
+  --lo-ink: #FAFAFA;
+  --lo-text: #E5E5E5;
+  --lo-muted: #D2D2D2;
+  --lo-sand: #1A1A1A;
+  --lo-border: #2A2A2A;
+  --lo-accent: #91FC4E;
+  --lo-terracotta: #91FC4E;
+  --lo-coral: #91FC4E;
+  --news-line: var(--lo-border);
+  background: var(--lo-cream);
+  color: var(--lo-ink);
+  color-scheme: dark;
+  min-height: 100vh;
+  font-family: var(--lo-body-font);
+}
+.news-site ::selection { background: var(--lo-coral); color: var(--lo-cream); }
+/* BrandWordmark supplies inline brand colors; override only the News punctuation. */
+.news-site [aria-label="legalops.news"] > span:nth-child(2) {
+  color: var(--lo-cream) !important;
+  background: linear-gradient(transparent 45%, var(--lo-coral) 45%) !important;
+}
+
 .news-wrap { max-width: 1180px; margin: auto; padding-inline: 32px; }
 .news-site :focus-visible { outline: 2px solid var(--lo-accent); outline-offset: 4px; }
 .news-site :where(h1,h2,h3,p) { overflow-wrap: anywhere; }
@@ -152,3 +177,17 @@
 .news-site :is(h1,h2,h3){font-weight:700}.news-nameplate{justify-content:flex-start}.news-site .news-wordmark{font-size:clamp(42px,8.7vw,115px)}.news-site :is(.news-kicker,.news-masthead-top,.news-edition,.news-nav){font-family:monospace;font-weight:400}.news-site .news-nameplate{padding-block:22px 26px}
 
 .news-cover.news-photo{padding:0;background:var(--lo-sand)}.news-photo img{width:100%;height:100%;object-fit:cover;display:block}.news-article-photo{margin:28px 0}.news-article-photo img{width:100%;height:auto;display:block;border:1px solid var(--lo-border)}.news-article-photo figcaption{font-size:11px;line-height:1.7;color:var(--lo-muted);margin-top:10px}.news-article-photo figcaption a{text-decoration:underline;margin-right:8px}
+
+/* Keep inverse panels and filled controls legible in the public dark palette. */
+.news-site .news-utility { background: var(--lo-cream); color: var(--lo-ink); }
+.news-site .news-newsletter { background: var(--lo-surface); color: var(--lo-ink); border: 1px solid var(--lo-border); }
+.news-site .news-newsletter>div>p:last-child,
+.news-site .news-signup legend span,
+.news-site .news-form-note { color: var(--lo-muted); }
+.news-site .news-newsletter>div>p:last-child a,
+.news-site .news-form-success { color: var(--lo-ink); }
+.news-site .news-email-row input { background: var(--lo-cream); border: 1px solid var(--lo-border); }
+.news-site .news-email-row button,
+.news-site .news-topics [aria-current=page] { color: var(--lo-cream); }
+.news-site .news-cover:not(.news-photo) { color: var(--lo-cream); }
+.news-site .news-cover:is(.news-cover-1, .news-cover-3) { color: var(--lo-ink); }

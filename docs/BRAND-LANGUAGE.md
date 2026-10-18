@@ -11,7 +11,10 @@ Esta direção substitui as referências anteriores a Quicksand e cartões arred
 - Textos claros: pedidos, gestão de contratos, guias, ferramentas e assistentes. Explique siglas quando necessárias; preserve nomes de produtos e fatos das fontes.
 - Funções: Club aproxima pessoas; News informa; Work reúne oportunidades; Dev oferece ferramentas; Chat reúne assistentes. Nunca anuncie como pronta uma função em preparação.
 
-As cores e fontes são compartilhadas. A organização de cada página deve respeitar sua função.
+As fontes são compartilhadas. A organização de cada página deve respeitar sua função.
+Exceção aprovada em 18/10/2026: o News público usa a paleta escura do 404 Media
+(fundo preto, texto claro e verde-lima `#91FC4E`), mantendo a tipografia atual.
+Aplique as cores somente em `.news-site`; os demais produtos mantêm creme/coral/preto.
 
 Em 18/10/2026, Leon pediu simplificação com incentivo à contratação do Pro e,
 na revisão, reforçou que a landing precisa focar mais na comunidade. Priorize
@@ -404,8 +407,8 @@ Produto no hero: preview de um produto/repositório real, com status, código, d
 
 News uses a publication masthead, fine rules, dated metadata, search and topic
 filters, and cards using official launch imagery first and contextual stock
-photography when appropriate, with credits and clear attribution. Keep the shared
-cream/coral/ink palette, Archivo Black wordmarks, Space Grotesk headings and Inter body text. The presentation should
+photography when appropriate, with credits and clear attribution. Keep Archivo Black wordmarks, Space Grotesk headings and Inter body text.
+The public News palette follows the 18/10/2026 exception above. The presentation should
 feel like a publication with its own reading rhythm rather than a Club landing.
 The the news archive is a structural reference for discoverable publications;
 do not copy its yellow palette, photos, wordmark or edition names. Do not invent

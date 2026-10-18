@@ -24,7 +24,10 @@ These domains share one brand ecosystem and application:
 - `chat` is an organization workspace with coordinated agents and human review.
 
 For News, read `docs/LEGALOPS-NEWS.md`. Its public identity uses an editorial
-masthead and illustrated archive while retaining the shared palette and fonts.
+masthead and illustrated archive. As approved on 2026-10-18, public News uses
+the 404 Media dark palette (black, off-white, lime #91FC4E) scoped to
+`.news-site`, while retaining the existing shared fonts. Other products keep
+the cream/coral/ink palette.
 The service-only WhatsApp publication outbox stays disabled until its specific
 instance and announcement group are configured. `/community/news` is part of free Club
 membership. Profile preferences control the opt-in digest on `/community`;

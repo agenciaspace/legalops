@@ -145,3 +145,13 @@ publication queuing, edit/republish deduplication and non-reclaimable attempts.
   obtain the announcement-group invitation/JID and URL/ID/token for its specific
   Uazapi instance, verify that instance can post there, then set only the named
   News settings. Account/admin credentials are neither needed nor accepted.
+
+## Public palette — 2026-10-18
+
+At Leon's request, public News follows the current dark 404 Media palette:
+black `#000000`, off-white `#FAFAFA`, lime `#91FC4E`, and neutral dark surfaces.
+Reference: https://www.404media.co/ (computed browser colors, 2026-10-18).
+Keep the existing Archivo Black wordmark, Space Grotesk headings, Inter body,
+and monospace metadata. Color overrides are scoped to `.news-site`; the Club
+reader and other LegalOps products retain their shared palette. Search, filters,
+articles, sources and newsletter behavior remain unchanged.
