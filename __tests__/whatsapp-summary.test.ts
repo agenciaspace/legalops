@@ -22,6 +22,14 @@ describe('community WhatsApp summary',()=>{
   expect(latestSummarySlot(now).toISOString()).toBe('2026-09-18T21:00:00.000Z')
   expect(validateWhatsAppInput(payload,now)).not.toBeNull()
  })
+ it('rejects local generation without the automation secret and validates its envelope', async () => {
+  const local={model:'claude-cli/sonnet',text:'{"publish":false}'}
+  const request=(authorization:string,local_generation:unknown)=>new Request('https://test/api/cron/whatsapp-summary',{method:'POST',headers:{authorization},body:JSON.stringify({...payload,local_generation})})
+  expect((await POST(request('',local))).status).toBe(401)
+  process.env.WHATSAPP_SUMMARY_INGEST_SECRET='expected'
+  expect((await POST(request('Bearer expected',{model:'unknown',text:'{}'}))).status).toBe(400)
+  expect(createAdminClient).not.toHaveBeenCalled()
+ })
  it('recovers an existing historical event edition without moving the live schedule backwards', async () => {
   vi.useFakeTimers(); vi.setSystemTime(new Date('2026-10-11T18:00:00Z'))
   process.env.WHATSAPP_SUMMARY_INGEST_SECRET='expected'

@@ -8,6 +8,9 @@ import os
 from pathlib import Path
 import re
 import sqlite3
+import subprocess
+import tempfile
+import urllib.error
 import urllib.request
 
 UTC = dt.timezone.utc
@@ -55,11 +58,49 @@ def read_env(path):
             result[key.strip()] = value.strip().strip('"').strip("'")
     return result
 
+def generate_locally(request):
+    if not isinstance(request, dict) or not isinstance(request.get('system'), str) or not isinstance(request.get('prompt'), str):
+        raise ValueError('Invalid local generation request')
+    if len(request['prompt']) > 300000 or len(request['system']) > 5000:
+        raise ValueError('Local generation request exceeds supported length')
+    # Reuse the installed Claude subscription strictly as a text generator.
+    # No tools, MCP servers, hooks, project settings or persisted conversations.
+    with tempfile.TemporaryDirectory(prefix='legalops-summary-') as cwd:
+        result = subprocess.run([
+            '/root/.local/bin/claude', '-p', '--model', 'sonnet', '--output-format', 'json',
+            '--tools', '', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}',
+            '--setting-sources', '', '--settings', '{"disableAllHooks":true}',
+            '--no-session-persistence', '--disable-slash-commands',
+            '--system-prompt', request['system'],
+        ], input=request['prompt'], text=True, capture_output=True, cwd=cwd, timeout=60)
+    if result.returncode:
+        raise RuntimeError('Local generation failed')
+    output = json.loads(result.stdout)
+    text = output.get('result')
+    if output.get('is_error') or not isinstance(text, str) or not text.strip() or len(text) > 12000:
+        raise RuntimeError('Invalid local generation output')
+    return {'model': 'claude-cli/sonnet', 'text': text}
+
 def post(url, body, headers):
     data = json.dumps(body, ensure_ascii=False).encode()
     req = urllib.request.Request(url, data=data, headers={'Content-Type':'application/json','User-Agent':'Mozilla/5.0 LegalOpsSummary/1.0', **headers})
-    with urllib.request.urlopen(req, timeout=75) as response:
-        return json.load(response)
+    try:
+        with urllib.request.urlopen(req, timeout=75) as response:
+            return json.load(response)
+    except urllib.error.HTTPError as error:
+        if error.code != 503 or not url.endswith('/api/cron/whatsapp-summary') or 'local_generation' in body:
+            raise
+        try:
+            failure = json.loads(error.read())
+        except (ValueError, UnicodeError):
+            raise error
+        if not isinstance(failure, dict) or not failure.get('local_fallback'):
+            raise error
+        generated = generate_locally(failure['local_fallback'])
+        # The server revalidates source, dates and generated JSON before persistence.
+        result = post(url, {**body, 'local_generation': generated}, headers)
+        print('Local generation completed; server validation accepted', flush=True)
+        return result
 
 def collect(db, end, group=GROUP, prefix=PREFIX):
     rows = db.execute('''select wm_id,ts,sender_jid,sender_name,from_me,text,msg_id from messages
