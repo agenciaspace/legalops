@@ -30,6 +30,11 @@ export async function middleware(request: NextRequest) {
     || hostname === 'www.legalops.club'
     || hostname === 'legalops.legalops.club'
 
+  if (pathname === '/demo') {
+    const local = process.env.NODE_ENV !== 'production' && ['localhost', '127.0.0.1'].includes(hostname)
+    return isClubDomain || local ? NextResponse.next({ request }) : new NextResponse(null, { status: 404 })
+  }
+
   // Keep legalops.work as the job platform while legalops.club gets its own home.
   // x-forwarded-host is honored so the Cloudflare Club proxy keeps the correct product context.
   const isClubRoot = isClubDomain && pathname === '/'
